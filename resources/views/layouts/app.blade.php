@@ -107,9 +107,9 @@
         @stack('sidebar-quick-actions')
     </nav>
 
-    <div class="flex min-h-0 flex-1 flex-col">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col">
         {{-- ── Top bar ─────────────────────────────────────────────────── --}}
-        <header class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-sand bg-white px-3 sm:px-4">
+        <header class="sticky top-0 z-30 flex h-16 min-w-0 shrink-0 items-center gap-3 border-b border-sand bg-white px-3 sm:px-4">
             <button type="button"
                     class="-ml-1 rounded p-2 text-charcoal/70 hover:bg-sand md:hidden"
                     :aria-expanded="nav ? 'true' : 'false'"
@@ -139,7 +139,7 @@
 
             {{-- Disabled on purpose, and it says so. A search box that quietly
                  swallows every query is worse than no search box at all. --}}
-            <div class="mx-auto hidden w-full max-w-sm md:block">
+            <div class="mx-auto hidden w-full min-w-0 max-w-sm lg:block">
                 <label for="opes-search" class="sr-only">{{ __('opes.shell.search') }}</label>
                 <div class="relative">
                     <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal/40"
@@ -171,14 +171,14 @@
                 {{-- No real notification/mail counts exist yet, so these are
                      icons WITHOUT a fabricated badge (09-ui / this task's
                      brief: never invent an unread count). --}}
-                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand sm:inline-flex">
+                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand lg:inline-flex">
                     <span class="sr-only">Notifications</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 8a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/>
                         <path stroke-linecap="round" d="M9.5 20a2.5 2.5 0 005 0"/>
                     </svg>
                 </button>
-                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand sm:inline-flex">
+                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand lg:inline-flex">
                     <span class="sr-only">Mail</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <rect x="3" y="5" width="18" height="14" rx="2"/>
@@ -194,11 +194,11 @@
                         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-chrome text-xs font-semibold uppercase text-white">
                             {{ mb_substr((string) ($shellUser->name ?? '?'), 0, 1) }}
                         </span>
-                        <span class="hidden flex-col items-start leading-tight sm:flex">
+                        <span class="hidden flex-col items-start leading-tight lg:flex">
                             <span class="max-w-32 truncate text-sm font-medium text-charcoal">{{ $shellUser->name ?? '' }}</span>
                             <span class="max-w-32 truncate text-xs text-charcoal/50">{{ $shellRoleLabel }}</span>
                         </span>
-                        <svg class="hidden h-3.5 w-3.5 text-charcoal/40 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <svg class="hidden h-3.5 w-3.5 text-charcoal/40 lg:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
                         </svg>
                     </button>
@@ -241,7 +241,7 @@
                      so the gear is an inert control that says so - same
                      convention as a disabled sidebar item, never a dead link. --}}
                 <span title="{{ __('opes.nav.nav_disabled_title') }}" aria-disabled="true"
-                      class="hidden cursor-not-allowed rounded-full p-2 text-charcoal/40 sm:inline-flex">
+                      class="hidden cursor-not-allowed rounded-full p-2 text-charcoal/40 lg:inline-flex">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <circle cx="12" cy="12" r="3"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>
