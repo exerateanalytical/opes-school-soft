@@ -16,6 +16,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $name
  * @property string $email
  * @property string $status
+ * @property string|null $password
+ * @property \Illuminate\Support\Carbon|null $must_change_password_at
  */
 class User extends Authenticatable
 {
