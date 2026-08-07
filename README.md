@@ -11,12 +11,21 @@ domain-driven, with a responsive Livewire frontend in the same codebase.
 
 Phase 0A — foundation and kernel. Complete.
 Phase 0B — identity, audit, settings and i18n. Complete.
+Phase 0C — backup, restore drill and health. Complete.
 
-Delivered: modular skeleton, `opes:preflight`, the `Money` / `Rate` / `Score` /
-`BusinessDate` value objects, users with 20 seeded roles and granular
-permissions, a hash-chained and anchored audit log with nightly verification,
-a break-glass recovery credential, a typed settings registry with lockable
-engine-behaviour settings, and bilingual EN/FR strings.
+Delivered in 0C: `mysqldump` backups with checksums and a manifest, checksum
+verification, health-first GFS pruning that never removes the last good copy,
+an automated restore drill that proves a backup is restorable, eleven health
+checks with plain-language remedies, `/up`, and a supervised schedule.
 
-Next: Phase 0C — installer, TLS, backup and verified restore drill, health
-page, log rotation.
+**Deferred to 0C-b, which needs a UI shell to exist first:** the installer,
+local TLS, and the Blade health page. `08-operations` §1.2–1.5 remain
+unimplemented and are required before a school can install this.
+
+**Known gap:** backups written by this phase are **not encrypted**.
+`08-operations` §3.5 requires encryption with an escrowed key, which depends on
+the `APP_KEY` custody procedure that ships with the installer. Acceptable on a
+development machine; **must be closed before any real school data exists.**
+
+Next: a thin end-to-end slice — login, an application shell, and one record
+created and listed — so the architecture is proven through every layer.
