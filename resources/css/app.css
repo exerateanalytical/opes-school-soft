@@ -6,4 +6,23 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* docs/specs/00-core.md section 8. Red and yellow are ACCENTS only - never
+       large fills, never adjacent as blocks. Red keeps one meaning (money owed,
+       destructive, error) so it never loses urgency. */
+    --color-chrome: #0B4A36;
+    --color-chrome-light: #11614A;
+    --color-primary: #0B7A4B;
+    --color-heritage-red: #CE1126;
+    --color-heritage-yellow: #FCD116;
+    --color-ivory: #FBFAF6;
+    --color-sand: #F2EEE2;
+    --color-charcoal: #26211A;
+}
+
+/* Visible focus on every control. 09-ui section 10 requires full keyboard
+   operation - a marks grid used for hours is unusable without it. */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
