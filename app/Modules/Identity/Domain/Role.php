@@ -70,9 +70,13 @@ enum Role: string
             self::Principal => [
                 Permission::UserView, Permission::AuditView,
                 Permission::SettingView, Permission::FeeView, Permission::LedgerView,
+                Permission::AcademicsView,
             ],
 
-            self::VicePrincipal => [Permission::UserView, Permission::SettingView],
+            self::VicePrincipal => [
+                Permission::UserView, Permission::SettingView,
+                Permission::AcademicsView, Permission::AcademicsManage,
+            ],
 
             self::Bursar => [Permission::FeeView, Permission::FeeCollect],
 
@@ -81,8 +85,13 @@ enum Role: string
                 Permission::FeeVoid,
             ],
 
-            self::Registrar, self::HrOfficer, self::PayrollOfficer,
-            self::ExamsOfficer, self::ClassMaster, self::Teacher,
+            // 00-core 9.1: these roles read the academic structure (year,
+            // classes, subjects) but do not shape it - that is the Censeur's
+            // job (Vice-Principal, above).
+            self::Registrar, self::ExamsOfficer,
+            self::ClassMaster, self::Teacher => [Permission::AcademicsView],
+
+            self::HrOfficer, self::PayrollOfficer,
             self::DisciplineMaster, self::Librarian, self::StoreKeeper,
             self::Nurse, self::WelfareOfficer, self::FrontDesk => [],
 

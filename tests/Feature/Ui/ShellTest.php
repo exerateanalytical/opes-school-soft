@@ -47,6 +47,39 @@ it('hides a nav item the user has no permission for', function () {
     actingAs(shellUser(Role::Bursar))->get('/dashboard')->assertDontSee('href="/users"', false);
 });
 
+it('shows the academic links to a role with academics.view', function () {
+    $html = (string) actingAs(shellUser(Role::Teacher))->get('/dashboard')->getContent();
+
+    expect($html)->toContain('href="/classes"');
+    expect($html)->toContain('href="/subjects"');
+    // A Teacher holds academics.view but not academics.manage, and the
+    // settings route is gated on manage - so no link that would answer 403.
+    expect($html)->not->toContain('href="/academics/settings"');
+});
+
+it('shows the academic settings link to a role with academics.manage', function () {
+    expect((string) actingAs(shellUser())->get('/dashboard')->getContent())
+        ->toContain('href="/academics/settings"');
+});
+
+it('hides the academic links from a role without academics.view', function () {
+    $html = (string) actingAs(shellUser(Role::Bursar))->get('/dashboard')->getContent();
+
+    expect($html)->not->toContain('href="/classes"');
+    expect($html)->not->toContain('href="/subjects"');
+    expect($html)->not->toContain('href="/academics/settings"');
+});
+
+it('blocks the academic routes as well as hiding the links', function () {
+    // The `can:` middleware refuses before the Livewire component renders.
+    actingAs(shellUser(Role::Bursar))->get('/classes')->assertForbidden();
+    actingAs(shellUser(Role::Bursar))->get('/subjects')->assertForbidden();
+    actingAs(shellUser(Role::Teacher))->get('/academics/settings')->assertForbidden();
+})->skip(
+    fn (): bool => ! class_exists('App\Modules\Academics\Livewire\ClassGroups\Index'),
+    'The Academics Livewire components are not built yet, so routes/web.php has not registered these routes.',
+);
+
 it('blocks the route as well as hiding the link', function () {
     // 00-core 6.2: authorisation lives in the route and the Action. Hiding a
     // menu item is presentation and must never be mistaken for a control.

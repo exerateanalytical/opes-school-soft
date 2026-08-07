@@ -68,6 +68,27 @@ it('gives portal roles no operational permission at all', function () {
     }
 });
 
+it('scopes the academic permissions per the 00-core 9.1 matrix', function () {
+    // The Censeur (Vice-Principal) shapes the academic structure; the roles
+    // that read it - Principal, Registrar, Exams Officer, Class Master,
+    // Teacher - view without managing.
+    $censeur = userWithRole(Role::VicePrincipal);
+    expect($censeur->can(Permission::AcademicsManage->value))->toBeTrue();
+    expect($censeur->can(Permission::AcademicsView->value))->toBeTrue();
+
+    foreach ([Role::Principal, Role::Registrar, Role::ExamsOfficer, Role::ClassMaster, Role::Teacher] as $role) {
+        $user = userWithRole($role);
+
+        expect($user->can(Permission::AcademicsView->value))->toBeTrue("{$role->value} should view academics");
+        expect($user->can(Permission::AcademicsManage->value))->toBeFalse("{$role->value} should not manage academics");
+    }
+
+    // A role outside the matrix holds neither.
+    $bursar = userWithRole(Role::Bursar);
+    expect($bursar->can(Permission::AcademicsView->value))->toBeFalse();
+    expect($bursar->can(Permission::AcademicsManage->value))->toBeFalse();
+});
+
 it('supports granting a single permission on top of a role baseline', function () {
     $user = userWithRole(Role::Bursar);
 

@@ -29,8 +29,13 @@ final class Navigation
             ['key' => 'students', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'guardians', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'staff', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'classes', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'subjects', 'route' => null, 'permission' => null, 'enabled' => false],
+            // Gated on manage, not view: the route behind it is
+            // `can:academics.manage`, and this file's contract is that the nav
+            // and the route agree by construction. A Teacher with only
+            // `academics.view` must not be shown a link that answers 403.
+            ['key' => 'academics', 'route' => '/academics/settings', 'permission' => Permission::AcademicsManage, 'enabled' => true],
+            ['key' => 'classes', 'route' => '/classes', 'permission' => Permission::AcademicsView, 'enabled' => true],
+            ['key' => 'subjects', 'route' => '/subjects', 'permission' => Permission::AcademicsView, 'enabled' => true],
             ['key' => 'timetable', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'attendance', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'examinations', 'route' => null, 'permission' => null, 'enabled' => false],

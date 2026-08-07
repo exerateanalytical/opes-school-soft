@@ -31,6 +31,9 @@ enum Permission: string
     case SettingEdit = 'setting.edit';
     case SettingEditEngine = 'setting.edit_engine';
 
+    case AcademicsView = 'academics.view';
+    case AcademicsManage = 'academics.manage';
+
     case FeeView = 'fee.view';
     case FeeCollect = 'fee.collect';
     case FeeVoid = 'fee.void';
