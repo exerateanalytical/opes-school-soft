@@ -125,10 +125,12 @@ return new class extends Migration
                 'withdrawn',
             ])->default('draft');
 
-            // Draft resume (6.2): `current_step` is where the operator was
-            // when they last left, `completed_step` is the high-water mark of
-            // steps that have passed validation. They differ whenever the
-            // operator walks Back, which 11.4 requires never to lose data.
+            // Draft resume (6.2): `current_step` is the step the operator is
+            // looking at, `completed_step` the high-water mark of steps that
+            // have passed validation. They are normally one apart, and are
+            // separate columns because walking Back moves the first and must
+            // never move the second - 11.4 requires Back never to lose data,
+            // and losing progress is losing data.
             $table->unsignedTinyInteger('current_step')->default(1);
             $table->unsignedTinyInteger('completed_step')->default(0);
 

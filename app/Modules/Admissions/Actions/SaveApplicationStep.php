@@ -62,7 +62,13 @@ final class SaveApplicationStep
             $isNew = $application === null;
 
             $attributes = $this->columnsFor($step, $validated);
-            $attributes['current_step'] = $step->value;
+
+            // The step the operator is now LOOKING AT, which is the one after
+            // the one they just passed - not the one they just passed. 6.2
+            // says a power cut loses at most one step; storing the completed
+            // step instead would make every reload replay the last step the
+            // operator had already finished.
+            $attributes['current_step'] = ($step->next() ?? $step)->value;
 
             if ($isNew) {
                 $attributes['status'] = ApplicationStatus::Draft;
