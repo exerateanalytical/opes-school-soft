@@ -76,3 +76,22 @@ it('records a failure rather than throwing when the dump binary is missing', fun
     expect($backup->status())->toBe(BackupStatus::Failed);
     expect($backup->failure_detail)->not->toBeNull();
 });
+
+it('falls back to a real directory when the env key is present but empty', function () {
+    // env('X', $default) returns "" - NOT the default - when the key exists
+    // with no value, which is exactly what .env.example prescribes. Caught the
+    // hard way: a real backup landed at C:\opes-full-....sql, the filesystem
+    // root, outside any rotation or backup target.
+    expect(config('opes.backup.path'))->not->toBe('');
+    expect(config('opes.mysql.dump_binary'))->not->toBe('');
+    expect(config('opes.mysql.client_binary'))->not->toBe('');
+});
+
+it('never writes a backup to the filesystem root', function () {
+    config(['opes.backup.path' => backupDir()]);
+
+    $backup = app(CreateBackup::class)->handle();
+
+    expect(dirname($backup->path))->not->toBe(DIRECTORY_SEPARATOR);
+    expect(dirname($backup->path))->not->toMatch('/^[A-Za-z]:\\?$/');
+});

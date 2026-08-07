@@ -9,16 +9,30 @@ return [
      * the installer will set these per machine (08-operations 1.2).
      */
     'mysql' => [
-        'dump_binary' => env('OPES_MYSQLDUMP', 'mysqldump'),
-        'client_binary' => env('OPES_MYSQL_CLIENT', 'mysql'),
+        // `?:` for the same reason as the backup path below: an empty-but-present
+        // env key would otherwise resolve to "" and the process would fail with
+        // an opaque "command not found" instead of falling back to PATH.
+        'dump_binary' => env('OPES_MYSQLDUMP') ?: 'mysqldump',
+        'client_binary' => env('OPES_MYSQL_CLIENT') ?: 'mysql',
     ],
 
     'backup' => [
         // Primary target. The second physical target is configured per school;
         // the health check goes AMBER when only one target is configured,
         // because a backup on the same disk as the database is not a backup.
-        'path' => env('OPES_BACKUP_PATH', storage_path('opes-backups')),
-        'second_target' => env('OPES_BACKUP_SECOND_TARGET'),
+        /*
+         * `?:` not env()'s second argument. A key that EXISTS but is empty -
+         * `OPES_BACKUP_PATH=` in .env, which is exactly what .env.example
+         * prescribes - makes env() return "" rather than the default, so the
+         * default never applies. Verified the hard way: a real backup landed at
+         * C:\opes-full-....sql, the filesystem root, outside any rotation or
+         * backup target. Same reasoning for every path-like key below.
+         */
+        'path' => env('OPES_BACKUP_PATH') ?: storage_path('opes-backups'),
+
+        // Empty genuinely means "not configured" here, and the health check
+        // reports amber for it, so a null is the correct resting state.
+        'second_target' => env('OPES_BACKUP_SECOND_TARGET') ?: null,
 
         // GFS retention (08-operations 3.3).
         'keep_daily' => (int) env('OPES_KEEP_DAILY', 7),
