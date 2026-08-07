@@ -8,6 +8,7 @@ use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Models\AuditLog;
 use App\Modules\Identity\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
@@ -102,3 +103,29 @@ it('refuses to update an existing entry', function () {
 it('refuses to delete an entry', function () {
     writeEntry()->delete();
 })->throws(RuntimeException::class, 'append-only');
+
+// Artisan::call rather than $this->artisan(): inside a Pest closure PHPStan
+// resolves $this to Pest\PendingCalls\TestCall, which has no artisan() method,
+// and level 8 rejects it. The facade is typed, so the assertion is the same
+// one - exit code plus output - without a suppression.
+it('exits zero when the chain is intact', function () {
+    writeEntry();
+    writeEntry();
+
+    $exitCode = Artisan::call('opes:audit:verify');
+
+    expect($exitCode)->toBe(0);
+    expect(Artisan::output())->toContain('intact');
+});
+
+it('exits non-zero and names the broken row when the chain is broken', function () {
+    writeEntry();
+    $target = writeEntry();
+
+    DB::table('audit_logs')->where('id', $target->id)->update(['module' => 'Forged']);
+
+    $exitCode = Artisan::call('opes:audit:verify');
+
+    expect($exitCode)->not->toBe(0);
+    expect(Artisan::output())->toContain((string) $target->id);
+});
