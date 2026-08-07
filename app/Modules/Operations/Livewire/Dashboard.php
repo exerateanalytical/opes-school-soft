@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Operations\Livewire;
+
+use App\Modules\Identity\Actions\CountActiveUsers;
+use App\Modules\Identity\Actions\CountConfiguredRoles;
+use App\Modules\Identity\Domain\Permission;
+use App\Modules\Operations\Actions\CollectHealth;
+use App\Modules\Operations\Domain\HealthCheckResult;
+use App\Modules\Operations\Domain\HealthStatus;
+use App\Modules\Operations\Models\Backup;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+
+/**
+ * The landing screen, docs/specs/09-ui.md section 3.
+ *
+ * Only tiles whose data actually exists are shown. The rest of section 3
+ * describes enrolment, attendance and fee tiles that have no source yet, and a
+ * tile reading 0 because its module is unbuilt is a lie the operator cannot
+ * detect (09-ui 3.3). They arrive with their modules.
+ */
+#[Layout('layouts.app')]
+final class Dashboard extends Component
+{
+    /**
+     * Which permission a health alert requires before it is worth showing.
+     *
+     * An alert nobody in the room can act on is noise, and noise is how a
+     * dashboard trains its readers to ignore it. Keys absent from this map are
+     * shown to EVERYONE on purpose: a check that fails in a way we did not
+     * anticipate - including CollectHealth's own `check.error` fallback - must
+     * surface rather than be silently swallowed by a missing entry.
+     *
+     * @var array<string, Permission>
+     */
+    private const ALERT_PERMISSIONS = [
+        'backup.recency' => Permission::BackupRun,
+        'backup.second_target' => Permission::SettingEdit,
+        'drill.recency' => Permission::BackupRestore,
+        'disk.free' => Permission::BackupRun,
+        'migrations.pending' => Permission::BackupRun,
+        'mysql.durability' => Permission::SettingEdit,
+        'queue.heartbeat' => Permission::SettingEdit,
+        'queue.failed_jobs' => Permission::SettingEdit,
+        'audit.chain' => Permission::AuditView,
+    ];
+
+    /**
+     * @return list<HealthCheckResult>
+     */
+    private function alerts(CollectHealth $health): array
+    {
+        return array_values(array_filter(
+            $health->handle(),
+            function (HealthCheckResult $result): bool {
+                if ($result->status === HealthStatus::Ok) {
+                    return false;
+                }
+
+                $required = self::ALERT_PERMISSIONS[$result->key] ?? null;
+
+                return $required === null || Gate::allows($required->value);
+            },
+        ));
+    }
+
+    /**
+     * Age of the newest healthy backup, or null when there has never been one.
+     *
+     * Null is NOT zero. "No backup has ever completed" is the single most
+     * important fact this screen can carry, and rendering it as 0 would bury it
+     * (09-ui 3.3).
+     */
+    private function lastBackupAge(): ?string
+    {
+        $backup = Backup::query()
+            ->healthy()
+            ->whereNotNull('completed_at')
+            ->orderByDesc('completed_at')
+            ->first();
+
+        return $backup?->completed_at?->diffForHumans();
+    }
+
+    /**
+     * @return list<array{key: string, label: string, route: string|null}>
+     */
+    private function quickActions(): array
+    {
+        $actions = [
+            ['key' => 'add_user', 'permission' => Permission::UserManage, 'route' => '/users'],
+            ['key' => 'take_backup', 'permission' => Permission::BackupRun, 'route' => null],
+            ['key' => 'check_health', 'permission' => null, 'route' => '/up'],
+        ];
+
+        $visible = [];
+
+        foreach ($actions as $action) {
+            $permission = $action['permission'];
+
+            if ($permission instanceof Permission && ! Gate::allows($permission->value)) {
+                continue;
+            }
+
+            $visible[] = [
+                'key' => $action['key'],
+                'label' => (string) __('opes.dashboard.action_'.$action['key']),
+                'route' => $action['route'],
+            ];
+        }
+
+        return $visible;
+    }
+
+    public function render(
+        CollectHealth $health,
+        CountActiveUsers $countUsers,
+        CountConfiguredRoles $countRoles,
+    ): mixed {
+        return view('livewire.dashboard', [
+            'activeUsers' => $countUsers->handle(),
+            'roleCount' => $countRoles->handle(),
+            'healthSummary' => $health->summary(),
+            'lastBackupAge' => $this->lastBackupAge(),
+            'alerts' => $this->alerts($health),
+            'quickActions' => $this->quickActions(),
+            'canViewUsers' => Gate::allows(Permission::UserView->value),
+        ]);
+    }
+}

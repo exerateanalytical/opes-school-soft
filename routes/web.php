@@ -2,6 +2,7 @@
 
 use App\Modules\Identity\Livewire\Auth\Login;
 use App\Modules\Operations\Http\HealthController;
+use App\Modules\Operations\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,18 +22,7 @@ Route::post('/logout', function () {
 })->middleware('auth')->name('logout');
 
 Route::middleware('auth')->group(function (): void {
-    /*
-     * The dashboard's own component arrives in Phase 0D task 4. Until then this
-     * renders the real shell, so the post-login redirect target resolves and
-     * layouts/app.blade.php is exercised by a request rather than only by
-     * Livewire::test(), which never renders a layout.
-     */
-    Route::get('/dashboard', function () {
-        return view('shell.placeholder', [
-            'heading' => __('opes.nav.dashboard'),
-            'body' => __('opes.nav.nav_disabled_title'),
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     /*
      * The operator's UI language, not the school's document language - see
