@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Actions;
 
+use App\Modules\Identity\Models\AuditChainAnchor;
 use App\Modules\Identity\Models\AuditLog;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -64,6 +65,59 @@ final class VerifyAuditChain
                 return true;
             });
 
-        return new AuditChainResult($checked, $broken, $reason);
+        if ($broken !== null) {
+            return new AuditChainResult($checked, $broken, $reason);
+        }
+
+        return $this->verifyAgainstAnchor($checked, $expectedPrevious);
+    }
+
+    /**
+     * Compare the walked tail against the recorded anchor.
+     *
+     * A genesis-anchored chain alone cannot detect TRUNCATION: delete the newest
+     * rows and the remainder is still a valid chain, so verification reports
+     * "intact". That was confirmed empirically. Since the newest entries are
+     * exactly the ones recording an intruder's actions, this is the deletion
+     * that matters most, and the anchor is what makes it evident.
+     */
+    private function verifyAgainstAnchor(int $checked, string $walkedHead): AuditChainResult
+    {
+        $anchor = AuditChainAnchor::query()->find(AuditChainAnchor::SINGLETON_ID);
+
+        if ($anchor === null) {
+            // No anchor and no entries is a legitimately empty log.
+            if ($checked === 0) {
+                return new AuditChainResult(0, null, null);
+            }
+
+            return new AuditChainResult(
+                $checked,
+                0,
+                'the chain anchor is missing, so the head of the chain cannot be trusted',
+            );
+        }
+
+        if ($anchor->entry_count !== $checked) {
+            return new AuditChainResult(
+                $checked,
+                $anchor->last_entry_id,
+                sprintf(
+                    'the anchor expects %d entries but %d are present (entries were deleted from the end)',
+                    $anchor->entry_count,
+                    $checked,
+                ),
+            );
+        }
+
+        if ($checked > 0 && $anchor->last_row_hash !== $walkedHead) {
+            return new AuditChainResult(
+                $checked,
+                $anchor->last_entry_id,
+                'the head of the chain does not match the anchor (the most recent entry was altered or replaced)',
+            );
+        }
+
+        return new AuditChainResult($checked, null, null);
     }
 }

@@ -129,3 +129,47 @@ it('exits non-zero and names the broken row when the chain is broken', function 
     expect($exitCode)->not->toBe(0);
     expect(Artisan::output())->toContain((string) $target->id);
 });
+
+it('detects truncation of the newest entries, which a genesis-only chain cannot', function () {
+    // The attack that matters: an intruder deletes the entries recording their
+    // own actions, which are by definition the most recent ones. Without an
+    // anchor the remaining rows still form a valid chain from genesis and
+    // verification reports "intact" — confirmed empirically before the anchor
+    // was added.
+    writeEntry();
+    writeEntry();
+    $newest = writeEntry();
+
+    DB::table('audit_logs')->where('id', $newest->id)->delete();
+
+    $result = app(VerifyAuditChain::class)->handle();
+
+    expect($result->isIntact())->toBeFalse();
+    expect($result->reason)->toContain('deleted from the end');
+});
+
+it('detects the anchor being removed', function () {
+    writeEntry();
+
+    DB::table('audit_chain_anchors')->delete();
+
+    expect(app(VerifyAuditChain::class)->handle()->isIntact())->toBeFalse();
+});
+
+it('treats a genuinely empty log as intact', function () {
+    $result = app(VerifyAuditChain::class)->handle();
+
+    expect($result->isIntact())->toBeTrue();
+    expect($result->checked)->toBe(0);
+});
+
+it('keeps the anchor in step with every write', function () {
+    writeEntry();
+    writeEntry();
+    $third = writeEntry();
+
+    $anchor = DB::table('audit_chain_anchors')->first();
+
+    expect($anchor?->entry_count)->toBe(3);
+    expect($anchor?->last_row_hash)->toBe($third->row_hash);
+});

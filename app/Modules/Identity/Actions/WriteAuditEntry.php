@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Identity\Actions;
 
 use App\Modules\Identity\Domain\AuditAction;
+use App\Modules\Identity\Models\AuditChainAnchor;
 use App\Modules\Identity\Models\AuditLog;
 use App\Modules\Identity\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +60,21 @@ final class WriteAuditEntry
             $entry->created_at = now();
             $entry->row_hash = $entry->computeRowHash();
             $entry->save();
+
+            // Advance the anchor in the SAME transaction. Without this, deleting
+            // the newest rows leaves a chain that still verifies from genesis -
+            // confirmed empirically before the anchor existed. The anchor makes
+            // tail truncation evident by forcing an attacker to alter two places
+            // consistently, and gives the backup job a value to export off-box.
+            AuditChainAnchor::query()->updateOrCreate(
+                ['id' => AuditChainAnchor::SINGLETON_ID],
+                [
+                    'last_row_hash' => $entry->row_hash,
+                    'entry_count' => DB::table('audit_logs')->count(),
+                    'last_entry_id' => (int) $entry->getKey(),
+                    'updated_at' => now(),
+                ],
+            );
 
             return $entry;
         });

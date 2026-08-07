@@ -431,6 +431,10 @@ Every certificate points at a verification target, so one must exist. **LAN depl
 
 `AuditLog` — actor, `actor_name_at_time`, action, module, `auditable_type/id`, before/after (encrypted where the field is), IP, user agent, timestamp. **Append-only, and enforced**: hash-chained (`prev_hash`, `row_hash`), verified nightly, exported as a signed archive per period. "Immutable by convention" satisfies no auditor.
 
+**A genesis-anchored chain is not enough, and this was proven empirically rather than assumed.** A chain anchored only at its start detects tampering and mid-chain deletion, but **not truncation of the tail** — delete the newest rows and the remainder is still a valid chain, so verification reports "intact". That is the deletion that matters most, because the newest entries are exactly the ones recording an intruder's actions. `AuditChainAnchor` is therefore a single row holding the expected head hash, entry count and last entry id, advanced inside the same transaction as every write, and checked by `VerifyAuditChain`.
+
+The anchor does not make the log tamper-**proof** — someone with database access can update it too. It makes truncation tamper-**evident**, forcing an attacker to alter two places consistently, and it gives the backup job (`08-operations`) a small value to export off-box for external comparison. Hashing covers a **recursively key-sorted decode** of the payload, not the stored bytes: MySQL renormalises `json` columns on write (reordering keys, respacing, unescaping), so a byte-level hash cannot survive a round trip.
+
 Partitioned/archived by year — at ~400 000 rows/year it becomes the largest table in the system. Retention: 3 years hot, then compressed archive. Indexed for the real query ("who changed this mark"), and paginated in the viewer.
 
 `DocumentPrintLog` — every certificate, report card, receipt, payslip, ID card: who, when, which subject, **which snapshot version**, and whether it is a **duplicate** (reprints are watermarked `DUPLICATA`; two identical originals for one payment is a control failure).
