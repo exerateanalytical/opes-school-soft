@@ -7,7 +7,8 @@ namespace App\Modules\Operations\Actions;
 use App\Modules\Operations\Domain\BackupKind;
 use App\Modules\Operations\Domain\BackupStatus;
 use App\Modules\Operations\Models\Backup;
-use Illuminate\Support\Facades\DB;
+use App\Modules\Operations\Support\IsolatedConnection;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -96,29 +97,44 @@ final class CreateBackup
      * restored database is arithmetically the same one - which is the property
      * an accounting system actually needs (08-operations 3.6).
      *
+     * Computed on an ISOLATED connection, not the application's. mysqldump
+     * connects as its own client and sees only committed data; a manifest read
+     * on the application's connection would also see that connection's
+     * uncommitted writes, and would then describe rows the dump does not
+     * contain. The manifest has to describe the FILE, not the caller's view of
+     * the database, or the restore drill checks it against the wrong baseline.
+     *
      * @return array<string, mixed>
      */
     private function manifest(): array
     {
-        $tables = [];
+        $connection = IsolatedConnection::resolve('opes_manifest');
 
-        foreach (DB::select('SHOW TABLES') as $row) {
-            $values = (array) $row;
-            $name = (string) reset($values);
-            $tables[$name] = (int) DB::table($name)->count();
+        try {
+            $tables = [];
+
+            foreach ($connection->select('SHOW TABLES') as $row) {
+                // reset() takes a reference, so the cast must land in a
+                // variable first.
+                $values = (array) $row;
+                $name = (string) reset($values);
+                $tables[$name] = (int) $connection->table($name)->count();
+            }
+
+            return [
+                'schema_version' => $this->schemaVersion($connection),
+                'tables' => $tables,
+                'ledger_fingerprint' => $this->ledgerFingerprint($connection),
+                'taken_at' => now()->toIso8601String(),
+            ];
+        } finally {
+            IsolatedConnection::release('opes_manifest');
         }
-
-        return [
-            'schema_version' => $this->schemaVersion(),
-            'tables' => $tables,
-            'ledger_fingerprint' => $this->ledgerFingerprint(),
-            'taken_at' => now()->toIso8601String(),
-        ];
     }
 
-    private function schemaVersion(): string
+    private function schemaVersion(Connection $connection): string
     {
-        $last = DB::table('migrations')->orderByDesc('id')->first();
+        $last = $connection->table('migrations')->orderByDesc('id')->first();
 
         return (string) ($last->migration ?? 'none');
     }
@@ -128,9 +144,9 @@ final class CreateBackup
      * include the accounting ledger's per-account debit/credit totals, which
      * do not exist yet.
      */
-    private function ledgerFingerprint(): string
+    private function ledgerFingerprint(Connection $connection): string
     {
-        $anchor = DB::table('audit_chain_anchors')->find(1);
+        $anchor = $connection->table('audit_chain_anchors')->find(1);
 
         return hash('sha256', json_encode([
             'audit_head' => $anchor->last_row_hash ?? null,
