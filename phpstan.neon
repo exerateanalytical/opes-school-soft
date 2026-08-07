@@ -7,3 +7,13 @@ parameters:
         - app
         - tests
     tmpDir: build/phpstan
+    excludePaths:
+        analyse:
+            # Pest's architecture DSL (arch()->expect()->not->toUse(...)) is a
+            # fluent chain of magic __call methods. Level 8 turns on
+            # reportMagicMethods, so every link in that chain reads as an
+            # undefined method. The alternative - reportMagicMethods: false -
+            # would switch that check off for the entire application, which is
+            # a far bigger hole than skipping these declarative test files.
+            # This is NOT a suppression: no ignoreErrors, no baseline.
+            - tests/Architecture

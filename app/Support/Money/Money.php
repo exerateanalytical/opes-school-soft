@@ -149,9 +149,15 @@ final readonly class Money implements JsonSerializable, Stringable
     public function format(bool $withCurrency = true): string
     {
         $sign = $this->amount < 0 ? '-' : '';
-        $digits = number_format((float) abs($this->amount), 0, ',', "\u{202F}");
+        // Grouped from the integer directly - no (float) cast, which the
+        // numeric-policy architecture test forbids in money code. Chunked from
+        // the right by reversing the DIGITS only; reversing the joined string
+        // would mangle the multibyte U+202F separator.
+        $digits = (string) abs($this->amount);
+        $chunks = array_reverse(array_map(strrev(...), str_split(strrev($digits), 3)));
+        $grouped = implode("\u{202F}", $chunks);
 
-        return $sign.$digits.($withCurrency ? ' FCFA' : '');
+        return $sign.$grouped.($withCurrency ? ' FCFA' : '');
     }
 
     public function __toString(): string

@@ -15,6 +15,11 @@ use Illuminate\Support\Carbon;
  * now()->toDateString() in UTC returns YESTERDAY - which would file a payment
  * taken at 00:30 into the previous day's cash book
  * (docs/specs/00-core.md 7.5).
+ *
+ * Deliberately framework-AWARE: it depends on Illuminate\Support\Carbon by
+ * design, so it is intentionally excluded from the framework-agnostic
+ * expectations in tests/Architecture/DomainPurityTest.php. That omission is
+ * not an oversight - do not "fix" it by adding this namespace there.
  */
 final class BusinessDate
 {
