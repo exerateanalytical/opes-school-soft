@@ -82,19 +82,13 @@ foreach ($modules as $module) {
         $others,
     );
 
-    // User is the one deliberate exception, and it is narrow. Every module
-    // that writes an audit entry must name the actor who caused it, because
-    // WriteAuditEntry - Identity's published Action, which is the sanctioned
-    // door - takes a User. Forbidding the type outright would not enforce the
-    // boundary, it would only make attribution impossible, and 00-core 14
-    // requires every audited action to carry an actor.
-    //
-    // This carves out exactly one class. AuditLog, RecoveryCredential and
-    // every Model of every other module remain forbidden, so the rule keeps
-    // its teeth: you may identify a user, you may not read another module's
-    // data behind its Actions.
+    // No exceptions. Attribution used to need one - WriteAuditEntry took an
+    // Identity\Models\User, so any module writing an audit entry had to import
+    // it - but the actor now crosses the boundary as App\Support\Audit\Actor,
+    // a shared-kernel value object. 00-core 14 (every audited action names an
+    // actor) and 6.2 (never another module's Models) both hold, so the rule is
+    // absolute again.
     arch("{$module} does not reach into another module's Models")
         ->expect("App\\Modules\\{$module}")
-        ->not->toUse($forbidden)
-        ->ignoring('App\Modules\Identity\Models\User');
+        ->not->toUse($forbidden);
 }

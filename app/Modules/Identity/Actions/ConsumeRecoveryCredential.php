@@ -54,7 +54,7 @@ final class ConsumeRecoveryCredential
                 module: 'Identity',
                 auditableType: User::class,
                 auditableId: (int) $admin->getKey(),
-                actor: $admin,
+                actor: $admin->toAuditActor(),
             );
 
             return $admin;

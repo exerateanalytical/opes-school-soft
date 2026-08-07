@@ -9,13 +9,16 @@ use App\Modules\SchoolProfile\Actions\WriteSetting;
 use App\Modules\SchoolProfile\Domain\SettingClass;
 use App\Modules\SchoolProfile\Domain\SettingType;
 use App\Modules\SchoolProfile\Models\Setting;
+use App\Support\Audit\Actor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function settingsActor(): User
+function settingsActor(): Actor
 {
-    return User::factory()->create();
+    // Identity owns the User -> Actor conversion; SchoolProfile only ever sees
+    // the shared-kernel value object (00-core 6.2).
+    return User::factory()->create()->toAuditActor();
 }
 
 function defineSetting(string $key, SettingType $type, SettingClass $class, mixed $default, ?string $rule = null): Setting

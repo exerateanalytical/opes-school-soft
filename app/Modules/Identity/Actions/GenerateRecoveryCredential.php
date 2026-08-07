@@ -43,7 +43,7 @@ final class GenerateRecoveryCredential
             $this->audit->handle(
                 action: AuditAction::RecoveryGenerated,
                 module: 'Identity',
-                actor: $generatedBy,
+                actor: $generatedBy->toAuditActor(),
             );
         });
 

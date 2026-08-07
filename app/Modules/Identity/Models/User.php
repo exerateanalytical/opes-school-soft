@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Models;
 
+use App\Support\Audit\Actor;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -56,5 +57,14 @@ class User extends Authenticatable
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    /**
+     * Identity owns the conversion, so no other module needs to know about
+     * this class in order to attribute an audit entry (00-core 6.2).
+     */
+    public function toAuditActor(): Actor
+    {
+        return new Actor((int) $this->getKey(), $this->name);
     }
 }

@@ -7,7 +7,7 @@ namespace App\Modules\Identity\Actions;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Models\AuditChainAnchor;
 use App\Modules\Identity\Models\AuditLog;
-use App\Modules\Identity\Models\User;
+use App\Support\Audit\Actor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 
@@ -31,7 +31,7 @@ final class WriteAuditEntry
         ?int $auditableId = null,
         ?array $before = null,
         ?array $after = null,
-        ?User $actor = null,
+        ?Actor $actor = null,
     ): AuditLog {
         return DB::transaction(function () use (
             $action, $module, $auditableType, $auditableId, $before, $after, $actor
@@ -46,7 +46,7 @@ final class WriteAuditEntry
                 'module' => $module,
                 'auditable_type' => $auditableType,
                 'auditable_id' => $auditableId,
-                'actor_id' => $actor?->getKey(),
+                'actor_id' => $actor?->id,
                 // `->` not `?->`: inside ?? the null case is already handled,
                 // and PHPStan level 8 rejects the redundant nullsafe.
                 'actor_name_at_time' => $actor->name ?? 'system',

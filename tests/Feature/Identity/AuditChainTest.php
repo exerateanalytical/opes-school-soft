@@ -7,13 +7,14 @@ use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Models\AuditLog;
 use App\Modules\Identity\Models\User;
+use App\Support\Audit\Actor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
-function writeEntry(?User $actor = null, string $action = 'updated'): AuditLog
+function writeEntry(?Actor $actor = null, string $action = 'updated'): AuditLog
 {
     return app(WriteAuditEntry::class)->handle(
         action: AuditAction::from($action),
@@ -79,7 +80,7 @@ it('detects a deleted row', function () {
 it('records the actor name at the time so the entry survives a rename', function () {
     $user = User::factory()->create(['name' => 'Original Name']);
 
-    $entry = writeEntry($user);
+    $entry = writeEntry($user->toAuditActor());
     expect($entry->actor_name_at_time)->toBe('Original Name');
 
     $user->update(['name' => 'Changed Name']);

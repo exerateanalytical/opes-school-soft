@@ -6,8 +6,8 @@ namespace App\Modules\SchoolProfile\Actions;
 
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
-use App\Modules\Identity\Models\User;
 use App\Modules\SchoolProfile\Models\Setting;
+use App\Support\Audit\Actor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -22,7 +22,7 @@ final class WriteSetting
     public function handle(
         string $key,
         mixed $value,
-        User $actor,
+        Actor $actor,
         string $scope = 'global',
         ?int $scopeId = null,
     ): Setting {
@@ -53,7 +53,7 @@ final class WriteSetting
             $previous = $setting->typedValue();
 
             $setting->value = json_encode($value, JSON_THROW_ON_ERROR);
-            $setting->updated_by = $actor->getKey();
+            $setting->updated_by = $actor->id;
             $setting->save();
 
             Cache::forget(ReadSetting::cacheKey($key, $scope, $scopeId));
