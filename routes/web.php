@@ -38,17 +38,16 @@ Route::middleware('auth')->group(function (): void {
     })->name('locale.set');
 
     /*
-     * STUB. Phase 0D task 6 builds User Management. The gate is real from the
-     * first day on purpose: the sidebar hides this link from a user without
-     * `user.view`, and hiding a link is presentation, never a control
+     * User Management, docs/specs/09-ui.md section 8.10. The gate is real from
+     * the first day on purpose: the sidebar hides this link from a user
+     * without `user.view`, and hiding a link is presentation, never a control
      * (00-core 6.2). The route has to refuse on its own.
      */
-    Route::get('/users', function () {
-        return view('shell.placeholder', [
-            'heading' => __('opes.nav.users'),
-            'body' => __('opes.nav.nav_disabled_title'),
-        ]);
-    })->middleware('can:user.view')->name('users.index');
+    Route::get('/users', \App\Modules\Identity\Livewire\Users\Index::class)
+        ->middleware('can:user.view')->name('users.index');
+
+    Route::get('/users/create', \App\Modules\Identity\Livewire\Users\Form::class)
+        ->middleware('can:user.manage')->name('users.create');
 });
 
 /*
