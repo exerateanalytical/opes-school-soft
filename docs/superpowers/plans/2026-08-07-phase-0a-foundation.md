@@ -6,7 +6,9 @@
 
 **Architecture:** A modular monolith. Business logic lives in framework-agnostic `Domain/` and `Actions/` directories under `app/Modules/<Module>/`; HTTP controllers and Livewire components are thin adapters over the same Actions. Module boundaries are enforced by Pest architecture tests, not convention. All money is `BIGINT SIGNED` whole FCFA handled through a `Money` value object; all rates are integer basis points; floats are forbidden in both and the ban is machine-checked.
 
-**Tech Stack:** PHP 8.3.30 (Laragon), Laravel 12, MySQL 8.4.3 (Laragon), Composer, Pest 3, PHPStan level 8, `spatie/laravel-permission` (Phase 0B), Tailwind + Livewire 3 (Phase 0C).
+**Tech Stack:** PHP 8.3.30 (Laragon), **Laravel 13.24.0**, MySQL 8.4.3 (Laragon), Composer, **Pest 4**, PHPStan level 8 via Larastan 3, `spatie/laravel-permission` (Phase 0B), Tailwind + Livewire (Phase 0C).
+
+> **Deviation from `00-core` §4, resolved.** The spec drafted "Laravel 12". `composer create-project laravel/laravel` now installs **13.24.0**, and the full dev toolchain (Pest 4.7.8, Larastan 3.10, pest-plugin-arch 4.0.2) resolves on it with no conflicts and no security advisories. A greenfield build starting on the previous major buys nothing and costs a support window, which matters for a product sold to schools that update rarely. `00-core` §4 has been updated to Laravel 13.
 
 **Specs implemented:** `docs/specs/00-core.md` §4 (fixed decisions), §5 (naming), §6 (architecture), §7 (numeric policy). Everything else in Phase 0 is covered by plans 0B–0D (see §Scope below).
 
@@ -126,7 +128,7 @@ cd C:\laragon\www\opeschool
 php artisan --version
 ```
 
-Expected: `Laravel Framework 12.x.x`
+Expected: `Laravel Framework 13.x.x`
 
 - [ ] **Step 4: Pin the PHP requirement**
 

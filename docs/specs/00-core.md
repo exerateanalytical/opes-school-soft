@@ -70,7 +70,7 @@ Detail in `08-operations`.
 
 | Concern | Decision |
 |---|---|
-| Runtime | PHP 8.3+, Laravel 12 |
+| Runtime | PHP 8.3+, **Laravel 13** (13.24.0 at bootstrap). v1 and the first draft of this document said Laravel 12; the installer now defaults to 13 and the whole dev toolchain resolves cleanly on it, so a greenfield build starts on the current major |
 | Database | **MySQL 8.0.x only. MariaDB explicitly unsupported** (the required collations are MySQL-exclusive) |
 | Charset | `utf8mb4`. `utf8mb4_0900_ai_ci` for human names; **`utf8mb4_0900_as_cs` for all code/identifier columns** (account codes, matricules, subject codes, tag numbers) — accent- and case-insensitive collation on an identifier causes false duplicate rejections |
 | Frontend | Livewire 3 + Alpine.js + Tailwind, Blade |
