@@ -308,6 +308,10 @@ return [
         'students.finalise_matricule' => 'Rendre définitif un matricule',
         'guardians.manage' => 'Gérer les parents et tuteurs',
         'admissions.manage' => 'Gérer les admissions',
+        'marks.enter' => 'Saisir les notes',
+        'marks.validate' => 'Valider les notes',
+        'assessment.configure' => 'Configurer le système d\'évaluation',
+        'reports.publish' => 'Publier les bulletins',
         'fee.view' => 'Consulter les frais',
         'fee.collect' => 'Encaisser les paiements',
         'fee.void' => 'Annuler les paiements',
@@ -316,6 +320,23 @@ return [
         'backup.run' => 'Lancer une sauvegarde',
         'backup.restore' => 'Restaurer une sauvegarde',
         'licence.manage' => 'Gérer la licence',
+    ],
+    // Familles de systèmes d'évaluation, 01-assessment 3.2.
+    'framework_family' => [
+        'A' => 'Secondaire francophone MINESEC',
+        'B' => 'Secondaire anglophone MINESEC',
+        'C' => 'Technique / écoles normales',
+        'D' => 'Primaire francophone MINEDUB',
+        'E' => 'Primaire anglophone MINEDUB',
+        'F' => 'Maternelle MINEDUB',
+    ],
+    // Natures des épreuves, 01-assessment 5.3.
+    'component_kind' => [
+        'continuous_assessment' => 'Contrôle continu',
+        'examination' => 'Composition',
+        'practical' => 'Travaux pratiques',
+        'oral' => 'Oral',
+        'other' => 'Autre',
     ],
     // Écran Paramètres académiques, Phase 1 (frontend images/accademic setting.png).
     'academics' => [
@@ -854,6 +875,111 @@ return [
             'reason_required' => 'Indiquez le motif du refus.',
             'dob_in_future' => 'La date de naissance ne peut pas être dans le futur.',
             'class_group_required' => "Choisissez la classe que rejoint l'élève.",
+        ],
+    ],
+
+    /*
+     * Saisie des notes (01-assessment 17) et Examens (16). Ajouté à la FIN du
+     * fichier pour qu'une section modifiée en parallèle plus haut n'entre
+     * jamais en collision avec celle-ci.
+     */
+    'assessment_screen' => [
+        'title' => 'Saisie des notes',
+        'breadcrumb_dashboard' => 'Tableau de bord',
+        'breadcrumb_marks' => 'Saisie des notes',
+
+        'choose' => 'Choisir...',
+        'choose_scope' => 'Choisissez une classe, une matière, une période et une épreuve pour ouvrir la grille.',
+        'empty_grid' => "Aucun élève de cette classe n'a de ligne de note pour cette matière, cette période et cette épreuve.",
+
+        'scope_class_group' => 'Classe',
+        'scope_allocation' => 'Matière',
+        'scope_period' => 'Période',
+        'scope_component' => 'Épreuve',
+
+        'col_matricule' => 'Matricule',
+        'col_student' => 'Élève',
+        'col_score' => 'Note',
+        'col_state' => 'Situation',
+        'col_reason' => 'Motif',
+        'col_workflow' => 'Étape',
+
+        'state_scored' => 'Notée',
+        'state_short_scored' => 'Note',
+        'state_pending' => 'Non saisie',
+        'state_absent_unjustified' => 'Absence non justifiée',
+        'state_absent_justified' => 'Absence justifiée',
+        'state_exempt' => 'Dispensé',
+
+        'workflow_draft' => 'Brouillon',
+        'workflow_submitted' => 'Transmise',
+        'workflow_validated' => 'Validée',
+
+        'kpi_entered' => 'Saisies',
+        'kpi_pending' => 'Restant à saisir',
+        'kpi_class_mean' => 'Moyenne de la classe',
+        'kpi_out_of_range' => 'Hors barème',
+
+        'keyboard_legend' => 'Clavier :',
+        'keyboard_move' => "passer d'un élève à l'autre",
+        'out_of_range' => 'hors barème',
+        'reason_placeholder' => 'Motif (obligatoire)',
+
+        'footer_entered' => 'saisies',
+        'footer_pending' => 'en attente',
+        'footer_mean' => 'Moyenne de la classe :',
+        'footer_out_of_range' => 'hors barème',
+        'footer_unsaved' => 'non enregistrées',
+
+        'save' => 'Enregistrer les notes',
+        'submit' => 'Transmettre pour validation',
+        'submit_confirm' => "Transmettre ces notes au chef de département ? Vous ne pourrez plus les modifier tant qu'elles ne vous auront pas été retournées.",
+        'submitted' => ':submitted note(s) transmise(s) pour validation ; :pending restent non saisies.',
+        'saved_count' => '{0} Rien à enregistrer.|{1} Une note enregistrée.|[2,*] :count notes enregistrées.',
+        'nothing_changed' => "Rien n'a changé depuis le dernier enregistrement.",
+
+        'conflict_heading' => "{1} Une note a été modifiée par quelqu'un d'autre.|[2,*] :count notes ont été modifiées par quelqu'un d'autre.",
+        'conflict_explainer' => "Rien de ce que vous avez saisi n'a été écrasé. Votre valeur est toujours dans la grille : enregistrez à nouveau pour la conserver, ou saisissez la leur pour l'accepter.",
+        'conflict_set_to' => 'a saisi',
+
+        'errors' => [
+            'no_scope' => "Choisissez une classe, une matière et une période avant d'enregistrer.",
+            'bad_payload' => "La grille a envoyé une ligne sans note ni version ; rien n'a été enregistré.",
+            'bad_state' => "Situation de note inconnue « :state » ; rien n'a été enregistré.",
+        ],
+    ],
+
+    'exams_screen' => [
+        'title' => 'Examens',
+        'breadcrumb_dashboard' => 'Tableau de bord',
+        'breadcrumb_exams' => 'Examens',
+
+        'col_subject' => 'Matière',
+        'col_class' => 'Classe',
+        'col_date' => 'Date',
+        'col_time' => 'Heure',
+        'col_duration' => 'Durée',
+        'col_room' => 'Salle',
+        'col_invigilators' => 'Surveillants',
+        'col_seats' => 'Places',
+        'col_status' => 'Statut',
+
+        'status_planned' => 'Prévu',
+        'status_scheduled' => 'Programmé',
+        'status_in_progress' => 'En cours',
+        'status_marked' => 'Corrigé',
+        'status_cancelled' => 'Annulé',
+
+        'role_chief' => 'Surveillant principal',
+        'role_assistant' => 'Surveillant adjoint',
+
+        'minutes' => ':count min',
+        'no_room' => 'Aucune salle définie',
+        'no_seating' => 'Plan de salle non établi',
+
+        'errors' => [
+            'invigilator_overlap' => "Ce membre du personnel surveille déjà une épreuve qui se chevauche ; une personne ne peut pas être dans deux salles à la fois.",
+            'over_capacity' => 'Il y a plus de candidats que de places dans la ou les salles choisies.',
         ],
     ],
 ];

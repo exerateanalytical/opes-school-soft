@@ -51,6 +51,19 @@ enum Permission: string
     case GuardiansManage = 'guardians.manage';
     case AdmissionsManage = 'admissions.manage';
 
+    // Assessment, 00-core 9.1 / 01-assessment 7.4. Entry and validation are
+    // separate rights because the MINESEC flow is two-person by design: the
+    // teacher enters, someone else validates. `reports.publish` is separate
+    // again - publication is the irreversible step that puts a bulletin in a
+    // guardian's hands (01-assessment 13.2).
+    //
+    // Two segments only, like every case above: these values double as
+    // translation keys and Laravel reads a dot as a nested-array step.
+    case MarksEnter = 'marks.enter';
+    case MarksValidate = 'marks.validate';
+    case AssessmentConfigure = 'assessment.configure';
+    case ReportsPublish = 'reports.publish';
+
     case FeeView = 'fee.view';
     case FeeCollect = 'fee.collect';
     case FeeVoid = 'fee.void';

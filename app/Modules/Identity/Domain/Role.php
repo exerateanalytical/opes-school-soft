@@ -67,16 +67,25 @@ enum Role: string
                 ),
             ),
 
+            // The Proviseur signs the bulletin, so publication is his; he does
+            // not enter or validate marks himself.
             self::Principal => [
                 Permission::UserView, Permission::AuditView,
                 Permission::SettingView, Permission::FeeView, Permission::LedgerView,
                 Permission::AcademicsView, Permission::StudentsView,
+                Permission::ReportsPublish,
             ],
 
+            // The Censeur shapes the academic structure, so he also shapes the
+            // assessment framework that hangs off it - but deliberately NOT
+            // marks.enter: 01-assessment 7.2's flow is two-person, and an
+            // approver who can also author is one person, not two.
             self::VicePrincipal => [
                 Permission::UserView, Permission::SettingView,
                 Permission::AcademicsView, Permission::AcademicsManage,
                 Permission::StudentsView,
+                Permission::MarksValidate, Permission::AssessmentConfigure,
+                Permission::ReportsPublish,
             ],
 
             // The bursar reads the student roll to collect against it, but
@@ -101,12 +110,34 @@ enum Role: string
                 Permission::GuardiansManage, Permission::AdmissionsManage,
             ],
 
-            // 00-core 9.1: these roles read the academic structure (year,
+            // 00-core 9.1: these three read the academic structure (year,
             // classes, subjects) and the roll, but do not shape either - that
-            // is the Censeur's job (Vice-Principal, above).
-            self::ExamsOfficer,
-            self::ClassMaster, self::Teacher => [
+            // is the Censeur's job (Vice-Principal, above). They differ only in
+            // how far up the marks chain they sit.
+            //
+            // A Teacher holding marks.enter is NOT a licence to enter any
+            // mark: 01-assessment 7.5 scopes entry to the allocations they are
+            // assigned or delegated, and T22 asserts the deny-by-default. The
+            // permission is the outer gate, not the whole check.
+            self::Teacher => [
                 Permission::AcademicsView, Permission::StudentsView,
+                Permission::MarksEnter,
+            ],
+
+            // The Professeur Principal enters marks for his own subject and
+            // validates his class's grid before it goes up.
+            self::ClassMaster => [
+                Permission::AcademicsView, Permission::StudentsView,
+                Permission::MarksEnter, Permission::MarksValidate,
+            ],
+
+            // The exams office runs the assessment cycle end to end: it
+            // configures frameworks, fills gaps in entry, validates and
+            // publishes.
+            self::ExamsOfficer => [
+                Permission::AcademicsView, Permission::StudentsView,
+                Permission::MarksEnter, Permission::MarksValidate,
+                Permission::AssessmentConfigure, Permission::ReportsPublish,
             ],
 
             self::HrOfficer, self::PayrollOfficer,
