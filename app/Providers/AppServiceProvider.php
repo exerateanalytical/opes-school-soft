@@ -3,9 +3,14 @@
 namespace App\Providers;
 
 use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
+use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
+use App\Modules\Guardians\Livewire\Guardians\Show as GuardiansShow;
+use App\Modules\Guardians\Livewire\Students\GuardiansPanel as StudentGuardiansPanel;
 use App\Modules\Identity\Livewire\Users\Index as UsersIndex;
+use App\Modules\Students\Livewire\Students\Index as StudentsIndex;
+use App\Modules\Students\Livewire\Students\Show as StudentsShow;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -40,5 +45,24 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('academics.settings', AcademicSettings::class);
         Livewire::component('subjects.index', SubjectsIndex::class);
         Livewire::component('classes.index', ClassGroupsIndex::class);
+
+        // Admissions, docs/specs/07-students.md 6.2. `Wizard` does not end in
+        // ".index", so the default resolver would handle it - the explicit
+        // name is registered anyway for the same reason as the Academics
+        // screens above: every routed component in this application resolves
+        // through one mechanism, so a future rename cannot quietly change how
+        // one of them is found.
+        Livewire::component('admissions.wizard', AdmissionsWizard::class);
+
+        // People (07-students 11). `students.index` needs the explicit name
+        // for the ".index"-stripping reason above; the other two routed
+        // components are named for symmetry, and the panel because it is
+        // mounted by TAG (<livewire:students.guardians-panel/>) from a
+        // Students-module view that must never name a Guardians class -
+        // tests/Architecture/ModuleBoundaryTest.php.
+        Livewire::component('students.index', StudentsIndex::class);
+        Livewire::component('students.show', StudentsShow::class);
+        Livewire::component('guardians.show', GuardiansShow::class);
+        Livewire::component('students.guardians-panel', StudentGuardiansPanel::class);
     }
 }
