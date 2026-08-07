@@ -236,9 +236,9 @@
             @endif
 
             @if ($showPerPage)
-                <label class="flex items-center gap-2">
+                <label for="list-screen-per-page" class="flex items-center gap-2">
                     <span class="whitespace-nowrap">{{ __('opes.ui.per_page') }}</span>
-                    <select wire:model.live="{{ $perPageProperty }}"
+                    <select id="list-screen-per-page" wire:model.live="{{ $perPageProperty }}"
                             class="rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal">
                         @foreach ($perPageOptions as $option)
                             <option value="{{ $option }}"
