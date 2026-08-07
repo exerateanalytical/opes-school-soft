@@ -34,148 +34,243 @@
     @livewireStyles
 </head>
 <body class="min-h-screen bg-ivory font-sans text-charcoal antialiased">
-{{-- The top bar and the sidebar are ONE surface in chrome green, meeting at the
-     corner (00-core 8.2). The drawer state lives on the wrapper so the hamburger
-     in the bar can drive the sidebar beside it. --}}
-<div class="flex min-h-screen flex-col" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+{{-- The top bar is white; the sidebar is dark chrome-green running the full
+     viewport height beside it (00-core 8.2 - one continuous chrome surface,
+     just no longer painted the same colour top-to-bottom). The drawer state
+     lives on the wrapper so the hamburger in the bar can drive the sidebar. --}}
+<div class="flex min-h-screen flex-col md:flex-row" x-data="{ nav: false }" @keydown.escape.window="nav = false">
 
-    {{-- ── Top bar ─────────────────────────────────────────────────────── --}}
-    <header class="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 bg-chrome px-3 sm:px-4">
-        <button type="button"
-                class="-ml-1 rounded p-2 text-white/90 hover:bg-chrome-light md:hidden"
-                :aria-expanded="nav ? 'true' : 'false'"
-                aria-controls="opes-sidebar"
-                x-on:click="nav = ! nav">
-            <span class="sr-only">{{ __('opes.shell.open_menu') }}</span>
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 aria-hidden="true">
-                <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
+    {{-- ── Sidebar ─────────────────────────────────────────────────────── --}}
+    <div x-show="nav" x-cloak class="fixed inset-0 z-20 bg-charcoal/50 md:hidden"
+         x-on:click="nav = false" aria-hidden="true"></div>
 
-        <a href="/dashboard" class="flex items-center gap-2 shrink-0">
-            <svg class="h-6 w-6 shrink-0 text-heritage-yellow" viewBox="0 0 24 24" fill="currentColor"
-                 aria-hidden="true">
-                <path d="M12 2.2l2.72 6.6 7.13.53-5.44 4.6 1.7 6.94L12 17.1l-6.11 3.77 1.7-6.94-5.44-4.6 7.13-.53L12 2.2z"/>
+    <nav id="opes-sidebar" aria-label="{{ __('opes.shell.primary_navigation') }}"
+         class="fixed inset-y-0 left-0 z-20 hidden w-60 shrink-0 flex-col overflow-y-auto bg-chrome pb-4 md:static md:z-auto md:flex"
+         :class="{ 'hidden': ! nav, 'flex': nav }">
+
+        {{-- Crest. No real school artwork exists yet, so this is a deliberate
+             placeholder built from the existing tokens - a gold monogram badge,
+             not a broken <img>. --}}
+        <a href="/dashboard" class="flex flex-col items-center gap-1 px-4 pt-6 pb-4 text-center">
+            <svg class="h-16 w-16" viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="30" fill="none" stroke="var(--color-heritage-yellow)" stroke-width="2"/>
+                <circle cx="32" cy="32" r="25" fill="var(--color-chrome-light)"/>
+                <text x="32" y="40" text-anchor="middle" font-size="26" font-weight="700"
+                      fill="var(--color-heritage-yellow)" font-family="serif">H</text>
             </svg>
-            <span class="text-lg font-semibold text-white">{{ __('opes.shell.brand') }}</span>
-            <span class="hidden text-xs font-medium tracking-[0.35em] text-white/80 sm:inline">{{ __('opes.shell.brand_suffix') }}</span>
+            <span class="text-sm font-semibold leading-tight text-white">{{ __('opes.shell.brand') }} {{ __('opes.shell.brand_suffix') }}</span>
         </a>
 
-        {{-- Disabled on purpose, and it says so. A search box that quietly
-             swallows every query is worse than no search box at all. --}}
-        <div class="mx-auto hidden w-full max-w-sm md:block">
-            <label for="opes-search" class="sr-only">{{ __('opes.shell.search') }}</label>
-            <input id="opes-search" type="search" disabled
-                   placeholder="{{ __('opes.shell.search') }}"
-                   title="{{ __('opes.shell.search_disabled') }}"
-                   aria-disabled="true"
-                   class="w-full cursor-not-allowed rounded border border-white/20 bg-chrome-light/60 px-3 py-1.5 text-sm text-white/60 placeholder:text-white/50">
-        </div>
+        <ul class="space-y-0.5 px-2 py-2">
+            @foreach ($navItems as $item)
+                @php
+                    $label = __('opes.nav.'.$item['key']);
+                    $isActive = $item['enabled'] && $item['route'] === $currentPath;
+                @endphp
+                <li>
+                    @if ($item['enabled'] && is_string($item['route']))
+                        <a href="{{ $item['route'] }}"
+                           @if ($isActive) aria-current="page" @endif
+                           class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
+                               ? 'bg-chrome-light font-semibold text-white'
+                               : 'text-white/85 hover:bg-chrome-light/60 hover:text-white' }}">
+                            <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
+                            {{ $label }}
+                        </a>
+                    @else
+                        <span aria-disabled="true"
+                              title="{{ __('opes.nav.nav_disabled_title') }}"
+                              class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/35">
+                            <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
+                            {{ $label }}
+                        </span>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
 
-        <div class="ml-auto flex items-center gap-2 sm:gap-3">
-            {{-- EN / FR. Two plain form buttons rather than a select: no
-                 JavaScript, and it works on the cheap Android handsets that
-                 make up most of the field fleet. --}}
-            <div class="flex items-center rounded border border-white/20" role="group"
-                 aria-label="{{ __('opes.shell.language') }}">
-                @foreach (['en' => 'EN', 'fr' => 'FR'] as $code => $short)
-                    <form method="POST" action="/locale">
-                        @csrf
-                        <input type="hidden" name="locale" value="{{ $code }}">
-                        <button type="submit"
-                                title="{{ $code === 'en' ? __('opes.shell.switch_to_english') : __('opes.shell.switch_to_french') }}"
-                                @if (app()->getLocale() === $code) aria-current="true" @endif
-                                class="px-2 py-1 text-xs font-semibold {{ app()->getLocale() === $code ? 'bg-heritage-yellow text-charcoal' : 'text-white/80 hover:bg-chrome-light' }}">
-                            {{ $short }}
-                        </button>
-                    </form>
-                @endforeach
+        {{-- Per-screen QUICK ACTIONS box. Each screen @push()es its own list
+             into this stack; a screen that pushes nothing simply renders no
+             box, rather than a stale or generic one. --}}
+        @stack('sidebar-quick-actions')
+    </nav>
+
+    <div class="flex min-h-0 flex-1 flex-col">
+        {{-- ── Top bar ─────────────────────────────────────────────────── --}}
+        <header class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-sand bg-white px-3 sm:px-4">
+            <button type="button"
+                    class="-ml-1 rounded p-2 text-charcoal/70 hover:bg-sand md:hidden"
+                    :aria-expanded="nav ? 'true' : 'false'"
+                    aria-controls="opes-sidebar"
+                    x-on:click="nav = ! nav">
+                <span class="sr-only">{{ __('opes.shell.open_menu') }}</span>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     aria-hidden="true">
+                    <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+
+            <button type="button"
+                    class="hidden rounded p-2 text-charcoal/70 hover:bg-sand md:inline-flex"
+                    x-on:click="nav = ! nav">
+                <span class="sr-only">{{ __('opes.shell.open_menu') }}</span>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     aria-hidden="true">
+                    <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+
+            <div class="flex shrink-0 flex-col leading-tight">
+                <span class="font-serif text-lg font-bold tracking-tight text-chrome">{{ __('opes.shell.brand') }} {{ __('opes.shell.brand_suffix') }}</span>
+                <span class="hidden text-[11px] text-charcoal/50 sm:block">School Management System</span>
             </div>
 
-            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                <button type="button"
-                        class="flex items-center gap-2 rounded px-2 py-1 text-sm text-white hover:bg-chrome-light"
-                        :aria-expanded="open ? 'true' : 'false'"
-                        x-on:click="open = ! open">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase">
-                        {{ mb_substr((string) ($shellUser->name ?? '?'), 0, 1) }}
-                    </span>
-                    <span class="hidden max-w-40 truncate sm:inline">{{ $shellUser->name ?? '' }}</span>
-                </button>
-
-                <div x-show="open" x-cloak x-transition.opacity
-                     class="absolute right-0 z-40 mt-1 w-56 rounded border border-sand bg-white py-1 shadow-lg">
-                    <p class="px-3 py-2 text-xs text-charcoal/60">
-                        {{ __('opes.shell.signed_in_as') }}
-                        <span class="block truncate text-sm font-medium text-charcoal">{{ $shellUser->name ?? '' }}</span>
-                    </p>
-                    <form method="POST" action="/logout">
-                        @csrf
-                        <button type="submit"
-                                class="w-full px-3 py-2 text-left text-sm text-charcoal hover:bg-sand">
-                            {{ __('opes.shell.sign_out') }}
-                        </button>
-                    </form>
+            {{-- Disabled on purpose, and it says so. A search box that quietly
+                 swallows every query is worse than no search box at all. --}}
+            <div class="mx-auto hidden w-full max-w-sm md:block">
+                <label for="opes-search" class="sr-only">{{ __('opes.shell.search') }}</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal/40"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+                    </svg>
+                    <input id="opes-search" type="search" disabled
+                           placeholder="{{ __('opes.shell.search') }}"
+                           title="{{ __('opes.shell.search_disabled') }}"
+                           aria-disabled="true"
+                           class="w-full cursor-not-allowed rounded-full border border-sand bg-sand/40 py-1.5 pl-9 pr-3 text-sm text-charcoal/50 placeholder:text-charcoal/40">
                 </div>
             </div>
-        </div>
-    </header>
 
-    <div class="flex min-h-0 flex-1">
-        {{-- ── Sidebar ─────────────────────────────────────────────────── --}}
-        <div x-show="nav" x-cloak class="fixed inset-0 z-20 bg-charcoal/50 md:hidden"
-             x-on:click="nav = false" aria-hidden="true"></div>
+            <div class="ml-auto flex items-center gap-2 sm:gap-3">
+                {{-- Real server date/time, not a mockup placeholder. --}}
+                <div class="hidden items-center gap-2 text-charcoal/70 lg:flex">
+                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path stroke-linecap="round" d="M3 10h18M8 3v4M16 3v4"/>
+                    </svg>
+                    <span class="text-xs leading-tight">
+                        <span class="block font-medium text-charcoal">{{ now()->translatedFormat('d F Y') }}</span>
+                        <span class="block text-charcoal/50">{{ now()->translatedFormat('l') }}</span>
+                    </span>
+                </div>
 
-        <nav id="opes-sidebar" aria-label="{{ __('opes.shell.primary_navigation') }}"
-             class="fixed inset-y-0 left-0 z-20 hidden w-60 shrink-0 overflow-y-auto bg-chrome pt-14 pb-4 md:static md:z-auto md:block md:pt-4"
-             :class="{ 'hidden': ! nav }">
-            <ul class="space-y-0.5 py-2">
-                @foreach ($navItems as $item)
-                    @php
-                        $label = __('opes.nav.'.$item['key']);
-                        $isActive = $item['enabled'] && $item['route'] === $currentPath;
-                    @endphp
-                    <li>
-                        @if ($item['enabled'] && is_string($item['route']))
-                            <a href="{{ $item['route'] }}"
-                               @if ($isActive) aria-current="page" @endif
-                               class="flex items-center border-l-4 px-3 py-2 text-sm {{ $isActive
-                                   ? 'border-heritage-yellow bg-chrome-light font-semibold text-white'
-                                   : 'border-transparent text-white/85 hover:bg-chrome-light hover:text-white' }}">
-                                {{ $label }}
-                            </a>
-                        @else
-                            <span aria-disabled="true"
-                                  title="{{ __('opes.nav.nav_disabled_title') }}"
-                                  class="flex cursor-not-allowed items-center border-l-4 border-transparent px-3 py-2 text-sm text-white/40">
-                                {{ $label }}
-                            </span>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
-        </nav>
+                {{-- No real notification/mail counts exist yet, so these are
+                     icons WITHOUT a fabricated badge (09-ui / this task's
+                     brief: never invent an unread count). --}}
+                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand sm:inline-flex">
+                    <span class="sr-only">Notifications</span>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 8a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/>
+                        <path stroke-linecap="round" d="M9.5 20a2.5 2.5 0 005 0"/>
+                    </svg>
+                </button>
+                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand sm:inline-flex">
+                    <span class="sr-only">Mail</span>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
+                    </svg>
+                </button>
+
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <button type="button"
+                            class="flex items-center gap-2 rounded px-1 py-1 text-sm text-charcoal hover:bg-sand"
+                            :aria-expanded="open ? 'true' : 'false'"
+                            x-on:click="open = ! open">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-chrome text-xs font-semibold uppercase text-white">
+                            {{ mb_substr((string) ($shellUser->name ?? '?'), 0, 1) }}
+                        </span>
+                        <span class="hidden flex-col items-start leading-tight sm:flex">
+                            <span class="max-w-32 truncate text-sm font-medium text-charcoal">{{ $shellUser->name ?? '' }}</span>
+                            <span class="max-w-32 truncate text-xs text-charcoal/50">{{ $shellRoleLabel }}</span>
+                        </span>
+                        <svg class="hidden h-3.5 w-3.5 text-charcoal/40 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-cloak x-transition.opacity
+                         class="absolute right-0 z-40 mt-1 w-56 rounded border border-sand bg-white py-1 shadow-lg">
+                        <p class="px-3 py-2 text-xs text-charcoal/60">
+                            {{ __('opes.shell.signed_in_as') }}
+                            <span class="block truncate text-sm font-medium text-charcoal">{{ $shellUser->name ?? '' }}</span>
+                        </p>
+                        {{-- EN / FR. Two plain form buttons rather than a select: no
+                             JavaScript, and it works on the cheap Android handsets that
+                             make up most of the field fleet. --}}
+                        <div class="flex items-center gap-1 border-t border-sand px-3 py-2" role="group"
+                             aria-label="{{ __('opes.shell.language') }}">
+                            @foreach (['en' => 'EN', 'fr' => 'FR'] as $code => $short)
+                                <form method="POST" action="/locale">
+                                    @csrf
+                                    <input type="hidden" name="locale" value="{{ $code }}">
+                                    <button type="submit"
+                                            title="{{ $code === 'en' ? __('opes.shell.switch_to_english') : __('opes.shell.switch_to_french') }}"
+                                            @if (app()->getLocale() === $code) aria-current="true" @endif
+                                            class="rounded px-2 py-1 text-xs font-semibold {{ app()->getLocale() === $code ? 'bg-heritage-yellow text-charcoal' : 'text-charcoal/60 hover:bg-sand' }}">
+                                        {{ $short }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                        <form method="POST" action="/logout">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full px-3 py-2 text-left text-sm text-charcoal hover:bg-sand">
+                                {{ __('opes.shell.sign_out') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Settings has no route yet (Navigation marks it disabled),
+                     so the gear is an inert control that says so - same
+                     convention as a disabled sidebar item, never a dead link. --}}
+                <span title="{{ __('opes.nav.nav_disabled_title') }}" aria-disabled="true"
+                      class="hidden cursor-not-allowed rounded-full p-2 text-charcoal/40 sm:inline-flex">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </span>
+            </div>
+        </header>
 
         {{-- ── Main ────────────────────────────────────────────────────── --}}
         <main class="min-w-0 flex-1 overflow-x-hidden bg-ivory px-4 py-6 sm:px-6">
             {{ $slot }}
         </main>
-    </div>
 
-    {{-- ── Status strip ────────────────────────────────────────────────── --}}
-    <footer class="shrink-0 border-t border-sand bg-sand/70 px-4 py-1.5 text-xs text-charcoal/70"
-            aria-label="{{ __('opes.shell.status_strip') }}">
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span>{{ __('opes.shell.user') }}: {{ $shellUser->name ?? '' }}</span>
-            <span aria-hidden="true">|</span>
-            <span>{{ __('opes.shell.role') }}: {{ $shellRoleLabel }}</span>
-            <span aria-hidden="true">|</span>
-            <span>v{{ $appVersion }}</span>
-            <span aria-hidden="true">|</span>
-            <span>{{ __('opes.shell.connected') }}</span>
-        </div>
-    </footer>
+        {{-- ── Status strip ────────────────────────────────────────────── --}}
+        <footer class="shrink-0 bg-chrome px-4 py-1.5 text-xs text-white/80"
+                aria-label="{{ __('opes.shell.status_strip') }}">
+            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span>{{ __('opes.shell.user') }}: {{ $shellUser->name ?? '' }}</span>
+                    <span aria-hidden="true">|</span>
+                    <span>{{ __('opes.shell.role') }}: {{ $shellRoleLabel }}</span>
+                    <span aria-hidden="true">|</span>
+                    {{-- No academic-session concept exists yet, so this is an
+                         honest em-dash rather than an invented school year. --}}
+                    <span>Session: —</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span>V {{ $appVersion }}</span>
+                    <span aria-hidden="true">|</span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="h-1.5 w-1.5 rounded-full bg-heritage-yellow" aria-hidden="true"></span>
+                        {{ __('opes.shell.connected') }}
+                    </span>
+                    <svg class="h-3.5 w-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                        <path stroke-linecap="round" d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+                    </svg>
+                </div>
+            </div>
+        </footer>
+    </div>
 </div>
 
 @livewireScripts

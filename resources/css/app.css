@@ -18,6 +18,15 @@
     --color-ivory: #FBFAF6;
     --color-sand: #F2EEE2;
     --color-charcoal: #26211A;
+
+    /* Mockup-sampled accents for role pills and KPI icon-circles ONLY (page
+       chrome - header/sidebar/large fills - stays within the 8 core tokens
+       above; these are the "legitimate colour-coding" carve-out noted in
+       docs/specs/00-core.md section 8 for badges, not a relaxation of it). */
+    --color-badge-blue: #2563EB;   /* "Administrator" role pill; "Active Users" / "Total Invoices" icon circle */
+    --color-badge-purple: #7C3AED; /* "Super Admin" role pill; "Teachers" / "Total Payments" icon circle */
+    --color-badge-orange: #F97316; /* "Administrators" KPI icon circle; "Librarian" role pill */
+    --color-badge-teal: #0D9488;   /* "Students" / "Collection Rate" KPI icon circle; "Accountant" role pill */
 }
 
 /* Alpine hides these until it has booted. Without it the user menu and the
