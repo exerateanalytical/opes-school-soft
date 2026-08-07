@@ -110,8 +110,21 @@ final readonly class Rate implements JsonSerializable, Stringable
      */
     public function toPercentString(): string
     {
-        $whole = intdiv($this->basisPoints, 1_000);
-        $fraction = intdiv($this->basisPoints % 1_000, 10);
+        // Round to the nearest hundredth of a percent BEFORE splitting, rather
+        // than truncating the remainder. Truncation printed a pass rate of
+        // 66.667% as "66.66", which reads as a rate the school did not achieve
+        // and does not match the same figure rounded anywhere else.
+        //
+        // Rounding the whole value first (not just the fraction) is what makes
+        // the carry work: 66.999% becomes 67.00, where rounding the fraction
+        // alone would produce the nonsense "66.100".
+        //
+        // The constructor rejects negatives, so half-up needs no away-from-zero
+        // branch here.
+        $rounded = intdiv($this->basisPoints + 5, 10) * 10;
+
+        $whole = intdiv($rounded, 1_000);
+        $fraction = intdiv($rounded % 1_000, 10);
 
         return sprintf('%d.%02d', $whole, $fraction);
     }
