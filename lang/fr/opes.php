@@ -84,6 +84,20 @@ return [
         'status_ok' => 'OK',
         'status_amber' => 'À surveiller',
         'status_red' => 'Action requise',
+        // Le contrat d'écran de liste (09-ui 4). Chaque écran de module compose
+        // x-list-screen : ces chaînes se lisent sur une vingtaine d'écrans.
+        'breadcrumb' => 'Fil d\'Ariane',
+        'filters' => 'Filtres',
+        'filter' => 'Filtrer',
+        'reset' => 'Réinitialiser',
+        'showing' => 'Affichage de :first à :last sur :total',
+        'per_page' => 'Par page',
+        'pagination' => 'Pagination',
+        'previous' => 'Précédent',
+        'next' => 'Suivant',
+        'go_to_page' => 'Aller à la page :page',
+        'no_results' => 'Aucun résultat ne correspond à ces filtres.',
+        'all' => 'Tous',
     ],
     'roles' => [
         'super_admin' => 'Super Administrateur',

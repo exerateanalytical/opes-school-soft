@@ -82,6 +82,20 @@ return [
         'status_ok' => 'OK',
         'status_amber' => 'Attention',
         'status_red' => 'Action needed',
+        // The list-screen contract (09-ui 4). Every module screen composes
+        // x-list-screen, so these strings are read on roughly twenty screens.
+        'breadcrumb' => 'Breadcrumb',
+        'filters' => 'Filters',
+        'filter' => 'Filter',
+        'reset' => 'Reset',
+        'showing' => 'Showing :first to :last of :total',
+        'per_page' => 'Per page',
+        'pagination' => 'Pagination',
+        'previous' => 'Previous',
+        'next' => 'Next',
+        'go_to_page' => 'Go to page :page',
+        'no_results' => 'Nothing matches these filters.',
+        'all' => 'All',
     ],
     'roles' => [
         'super_admin' => 'Super Administrator',
