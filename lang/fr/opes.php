@@ -7,6 +7,19 @@ declare(strict_types=1);
 // confirmed against a real school's organigram before the pilot.
 
 return [
+    'auth' => [
+        // Un SEUL message pour tous les cas d'échec - adresse inconnue, mot de
+        // passe erroné, compte suspendu. Préciser la cause permettrait
+        // d'énumérer les comptes existants.
+        'failed' => 'Ces identifiants ne correspondent à aucun compte.',
+        'throttled' => 'Trop de tentatives. Réessayez dans :seconds secondes.',
+        'email' => 'Adresse e-mail',
+        'password' => 'Mot de passe',
+        'remember' => 'Rester connecté',
+        'sign_in' => 'Se connecter',
+        'forgot' => 'Mot de passe oublié ?',
+        'forgot_help' => 'Demandez à un administrateur de réinitialiser votre mot de passe. Ce système n\'envoie pas d\'e-mails de mot de passe.',
+    ],
     'roles' => [
         'super_admin' => 'Super Administrateur',
         'administrator' => 'Administrateur',

@@ -3,6 +3,21 @@
 declare(strict_types=1);
 
 return [
+    'auth' => [
+        // ONE message for every failure mode - unknown email, wrong password,
+        // suspended account. Naming the cause would let an attacker enumerate
+        // which addresses are real accounts.
+        'failed' => 'Those credentials do not match our records.',
+        'throttled' => 'Too many attempts. Try again in :seconds seconds.',
+        'email' => 'Email address',
+        'password' => 'Password',
+        'remember' => 'Keep me signed in',
+        'sign_in' => 'Sign in',
+        'forgot' => 'Forgotten your password?',
+        // 00-core 9.3: most Cameroonian schools have no SMTP server, so there
+        // is deliberately no self-service email reset. A human resets it.
+        'forgot_help' => 'Ask an administrator to reset your password. This system does not send password emails.',
+    ],
     'roles' => [
         'super_admin' => 'Super Administrator',
         'administrator' => 'Administrator',

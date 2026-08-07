@@ -22,7 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Modules/Operations/Console',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Stated rather than inferred. Laravel's `guest` middleware falls back
+        // to whichever of `dashboard` or `home` happens to be registered, which
+        // makes the destination of an already-signed-in visitor an accident of
+        // route naming. OPES has exactly one landing screen; name it.
+        $middleware->redirectUsersTo('/dashboard');
+        $middleware->redirectGuestsTo('/login');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
