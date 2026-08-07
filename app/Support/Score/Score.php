@@ -93,8 +93,18 @@ final readonly class Score implements JsonSerializable, Stringable
         return new self($this->thousandths + $other->thousandths);
     }
 
+    /**
+     * A Score is non-negative by construction, so a negative factor or divisor
+     * would produce a value neither constructor would accept — and a negative
+     * mark corrupts averages, banding and rank silently rather than loudly.
+     * Both are rejected rather than allowed in through the arithmetic door.
+     */
     public function times(int $factor): self
     {
+        if ($factor < 0) {
+            throw ScoreException::negative();
+        }
+
         return new self($this->thousandths * $factor);
     }
 
@@ -102,6 +112,10 @@ final readonly class Score implements JsonSerializable, Stringable
     {
         if ($divisor === 0) {
             throw ScoreException::divisionByZero();
+        }
+
+        if ($divisor < 0) {
+            throw ScoreException::negative();
         }
 
         return new self(self::divideHalfUp($this->thousandths, $divisor));
@@ -170,6 +184,15 @@ final readonly class Score implements JsonSerializable, Stringable
         return $this->toString();
     }
 
+    /**
+     * Half-up division for NON-NEGATIVE numerators only.
+     *
+     * Scores are non-negative by construction and every caller here enforces a
+     * positive divisor, so this is correct as used. It is deliberately private:
+     * with a signed numerator it would round toward zero rather than half-up,
+     * so it must not be promoted to a general-purpose helper without revisiting
+     * the rounding rule.
+     */
     private static function divideHalfUp(int $numerator, int $divisor): int
     {
         return intdiv($numerator + intdiv($divisor, 2), $divisor);

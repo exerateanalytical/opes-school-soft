@@ -67,3 +67,10 @@ it('never returns a float from applyTo', function () {
 it('stringifies with a percent sign', function () {
     expect((string) Rate::ofPercent('19.25'))->toBe('19.25%');
 });
+
+it('raises a RateException rather than a TypeError when the product overflows', function () {
+    // Unreachable at FCFA scale, but the contract should not have a hole:
+    // PHP promotes integer overflow to float, which Money::of() would reject
+    // with a raw TypeError instead of the documented exception.
+    Rate::ofPercent('50')->applyTo(Money::of(PHP_INT_MAX));
+})->throws(RateException::class, 'overflow');

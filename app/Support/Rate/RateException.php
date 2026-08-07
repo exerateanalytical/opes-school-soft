@@ -25,4 +25,9 @@ final class RateException extends RuntimeException
     {
         return new self("Rate percentage \"{$percent}\" is not a valid decimal number.");
     }
+
+    public static function overflow(): self
+    {
+        return new self('Rate application overflow: amount times rate exceeds BIGINT SIGNED range.');
+    }
 }

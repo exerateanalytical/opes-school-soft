@@ -77,6 +77,15 @@ final readonly class Rate implements JsonSerializable, Stringable
         $sign = $money->amount() < 0 ? -1 : 1;
         $absolute = abs($money->amount());
 
+        // Same guard as Money's allocator: check the operands before
+        // multiplying, because PHP promotes integer overflow to float at
+        // runtime while the static type stays int. Without this the promotion
+        // surfaces as a raw TypeError from Money::of() rather than a
+        // RateException, leaving a hole in the contract Money deliberately closed.
+        if ($this->basisPoints > 0 && $absolute > intdiv(PHP_INT_MAX, $this->basisPoints)) {
+            throw RateException::overflow();
+        }
+
         $numerator = $absolute * $this->basisPoints;
         $rounded = intdiv($numerator + intdiv(self::SCALE, 2), self::SCALE);
 

@@ -92,3 +92,14 @@ it('compares and stringifies', function () {
     expect((string) Score::of('13.5'))->toBe('13.500');
     expect(Score::zero()->toString())->toBe('0.000');
 });
+
+it('rejects a negative multiplier rather than producing a negative score', function () {
+    // A Score is non-negative by construction; times(-1) would smuggle in a
+    // value neither constructor accepts, and a negative mark corrupts
+    // averages, banding and rank silently.
+    Score::of('14')->times(-1);
+})->throws(ScoreException::class, 'negative');
+
+it('rejects a negative divisor', function () {
+    Score::of('14')->dividedBy(-2);
+})->throws(ScoreException::class, 'negative');
