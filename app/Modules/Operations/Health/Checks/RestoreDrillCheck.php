@@ -26,11 +26,10 @@ final class RestoreDrillCheck implements HealthCheck
         if ($latest === null || $latest->completed_at === null) {
             return new HealthCheckResult(
                 key: 'drill.recency',
-                label: 'Restore drill',
+                label: (string) __('opes.health.restore_drill.label'),
                 status: HealthStatus::Red,
-                detail: 'No backup has ever been restored successfully, so no backup is '
-                    .'yet known to work.',
-                remedy: 'Run: php artisan opes:backup:drill',
+                detail: (string) __('opes.health.restore_drill.never_detail'),
+                remedy: (string) __('opes.health.restore_drill.run_remedy'),
             );
         }
 
@@ -38,36 +37,36 @@ final class RestoreDrillCheck implements HealthCheck
         $red = (int) config('opes.health.drill_red_days');
         $amber = (int) config('opes.health.drill_amber_days');
         $age = match (true) {
-            $days < 1 => 'today',
-            $days === 1 => '1 day ago',
-            default => "{$days} days ago",
+            $days < 1 => (string) __('opes.health.restore_drill.age_today'),
+            $days === 1 => (string) __('opes.health.restore_drill.age_one_day'),
+            default => (string) __('opes.health.restore_drill.age_days', ['days' => $days]),
         };
 
         if ($days >= $red) {
             return new HealthCheckResult(
                 key: 'drill.recency',
-                label: 'Restore drill',
+                label: (string) __('opes.health.restore_drill.label'),
                 status: HealthStatus::Red,
-                detail: "The last successful restore drill was {$age}.",
-                remedy: 'Run: php artisan opes:backup:drill',
+                detail: (string) __('opes.health.restore_drill.red_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.restore_drill.run_remedy'),
             );
         }
 
         if ($days >= $amber) {
             return new HealthCheckResult(
                 key: 'drill.recency',
-                label: 'Restore drill',
+                label: (string) __('opes.health.restore_drill.label'),
                 status: HealthStatus::Amber,
-                detail: "The last successful restore drill was {$age}, and one is due.",
-                remedy: 'Run: php artisan opes:backup:drill',
+                detail: (string) __('opes.health.restore_drill.amber_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.restore_drill.run_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'drill.recency',
-            label: 'Restore drill',
+            label: (string) __('opes.health.restore_drill.label'),
             status: HealthStatus::Ok,
-            detail: "A backup was restored and checked {$age}.",
+            detail: (string) __('opes.health.restore_drill.ok_detail', ['age' => $age]),
             remedy: '',
         );
     }

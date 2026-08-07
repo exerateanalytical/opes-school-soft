@@ -22,22 +22,19 @@ final class AuditChainCheck implements HealthCheck
         if ($result->isIntact()) {
             return new HealthCheckResult(
                 key: 'audit.chain',
-                label: 'Audit log',
+                label: (string) __('opes.health.audit_chain.label'),
                 status: HealthStatus::Ok,
-                detail: "Intact, {$result->checked} entries verified.",
+                detail: (string) __('opes.health.audit_chain.ok_detail', ['count' => $result->checked]),
                 remedy: '',
             );
         }
 
         return new HealthCheckResult(
             key: 'audit.chain',
-            label: 'Audit log',
+            label: (string) __('opes.health.audit_chain.label'),
             status: HealthStatus::Red,
-            detail: 'The audit log has been changed outside the application: '
-                .(string) $result->reason,
-            remedy: 'Do not clear this yourself. The record of who did what has been '
-                .'altered, which means someone had direct access to the database. Tell the '
-                .'head of school today, keep the current backups, and contact support.',
+            detail: (string) __('opes.health.audit_chain.red_detail', ['reason' => (string) $result->reason]),
+            remedy: (string) __('opes.health.audit_chain.red_remedy'),
         );
     }
 }

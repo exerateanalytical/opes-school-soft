@@ -29,33 +29,28 @@ final class MysqlDurabilityCheck implements HealthCheck
         $problems = [];
 
         if ($flush !== '1') {
-            $problems[] = "innodb_flush_log_at_trx_commit is {$flush}, not 1";
+            $problems[] = (string) __('opes.health.mysql_durability.problem_flush', ['value' => $flush]);
         }
 
         if ($binlog !== '1') {
-            $problems[] = "sync_binlog is {$binlog}, not 1";
+            $problems[] = (string) __('opes.health.mysql_durability.problem_binlog', ['value' => $binlog]);
         }
 
         if ($problems !== []) {
             return new HealthCheckResult(
                 key: 'mysql.durability',
-                label: 'Power-cut safety',
+                label: (string) __('opes.health.mysql_durability.label'),
                 status: HealthStatus::Amber,
-                detail: 'The database is not set to write every confirmed transaction '
-                    .'straight to disk ('.implode('; ', $problems).').',
-                remedy: 'Ask whoever installed the system to set '
-                    .'innodb_flush_log_at_trx_commit = 1 and sync_binlog = 1 in the MySQL '
-                    .'configuration and restart the service. Until then, a power cut can '
-                    .'erase a payment that was already receipted, and the parent will have '
-                    .'the paper and you will not have the record.',
+                detail: (string) __('opes.health.mysql_durability.amber_detail', ['problems' => implode('; ', $problems)]),
+                remedy: (string) __('opes.health.mysql_durability.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'mysql.durability',
-            label: 'Power-cut safety',
+            label: (string) __('opes.health.mysql_durability.label'),
             status: HealthStatus::Ok,
-            detail: 'Every confirmed transaction is written straight to disk.',
+            detail: (string) __('opes.health.mysql_durability.ok_detail'),
             remedy: '',
         );
     }

@@ -23,37 +23,34 @@ final class FailedJobsCheck implements HealthCheck
         $amber = (int) config('opes.health.failed_jobs_amber');
 
         $detail = $count === 1
-            ? 'One background task has failed and was not retried.'
-            : "{$count} background tasks have failed and were not retried.";
+            ? (string) __('opes.health.failed_jobs.detail_one')
+            : (string) __('opes.health.failed_jobs.detail_many', ['count' => $count]);
 
         if ($count >= $red) {
             return new HealthCheckResult(
                 key: 'queue.failed_jobs',
-                label: 'Failed tasks',
+                label: (string) __('opes.health.failed_jobs.label'),
                 status: HealthStatus::Red,
                 detail: $detail,
-                remedy: 'Something is failing repeatedly rather than once. Send the '
-                    .'diagnostics bundle to support before clearing the list, then run: '
-                    .'php artisan queue:retry all',
+                remedy: (string) __('opes.health.failed_jobs.red_remedy'),
             );
         }
 
         if ($count >= $amber) {
             return new HealthCheckResult(
                 key: 'queue.failed_jobs',
-                label: 'Failed tasks',
+                label: (string) __('opes.health.failed_jobs.label'),
                 status: HealthStatus::Amber,
                 detail: $detail,
-                remedy: 'Run: php artisan queue:retry all. If the same task fails again, '
-                    .'send the diagnostics bundle to support rather than retrying a third time.',
+                remedy: (string) __('opes.health.failed_jobs.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'queue.failed_jobs',
-            label: 'Failed tasks',
+            label: (string) __('opes.health.failed_jobs.label'),
             status: HealthStatus::Ok,
-            detail: 'No failed background tasks.',
+            detail: (string) __('opes.health.failed_jobs.ok_detail'),
             remedy: '',
         );
     }

@@ -23,11 +23,10 @@ final class BackupRecencyCheck implements HealthCheck
         if ($latest === null || $latest->completed_at === null) {
             return new HealthCheckResult(
                 key: 'backup.recency',
-                label: 'Last backup',
+                label: (string) __('opes.health.backup_recency.label'),
                 status: HealthStatus::Red,
-                detail: 'No backup has ever completed successfully.',
-                remedy: 'Run: php artisan opes:backup:run. Until that succeeds, a disk '
-                    .'failure this afternoon would lose every record the school has.',
+                detail: (string) __('opes.health.backup_recency.never_detail'),
+                remedy: (string) __('opes.health.backup_recency.never_remedy'),
             );
         }
 
@@ -39,31 +38,28 @@ final class BackupRecencyCheck implements HealthCheck
         if ($hours >= $red) {
             return new HealthCheckResult(
                 key: 'backup.recency',
-                label: 'Last backup',
+                label: (string) __('opes.health.backup_recency.label'),
                 status: HealthStatus::Red,
-                detail: "The last good backup finished {$age} ago.",
-                remedy: 'Run: php artisan opes:backup:run. Then check that the nightly '
-                    .'schedule is still running, because it should have taken this backup '
-                    .'for you and did not.',
+                detail: (string) __('opes.health.backup_recency.red_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.backup_recency.red_remedy'),
             );
         }
 
         if ($hours >= $amber) {
             return new HealthCheckResult(
                 key: 'backup.recency',
-                label: 'Last backup',
+                label: (string) __('opes.health.backup_recency.label'),
                 status: HealthStatus::Amber,
-                detail: "The last good backup finished {$age} ago, which is later than expected.",
-                remedy: 'Run: php artisan opes:backup:run to bring it up to date, and tell '
-                    .'whoever installed the system that last night\'s automatic backup was late.',
+                detail: (string) __('opes.health.backup_recency.amber_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.backup_recency.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'backup.recency',
-            label: 'Last backup',
+            label: (string) __('opes.health.backup_recency.label'),
             status: HealthStatus::Ok,
-            detail: "Completed {$age} ago and verified.",
+            detail: (string) __('opes.health.backup_recency.ok_detail', ['age' => $age]),
             remedy: '',
         );
     }
@@ -71,15 +67,17 @@ final class BackupRecencyCheck implements HealthCheck
     private function humanise(int $hours): string
     {
         if ($hours < 1) {
-            return 'less than an hour';
+            return (string) __('opes.health.backup_recency.age_less_than_hour');
         }
 
         if ($hours < 48) {
-            return $hours === 1 ? '1 hour' : "{$hours} hours";
+            return $hours === 1
+                ? (string) __('opes.health.backup_recency.age_hour')
+                : (string) __('opes.health.backup_recency.age_hours', ['hours' => $hours]);
         }
 
         $days = intdiv($hours, 24);
 
-        return "{$days} days";
+        return (string) __('opes.health.backup_recency.age_days', ['days' => $days]);
     }
 }

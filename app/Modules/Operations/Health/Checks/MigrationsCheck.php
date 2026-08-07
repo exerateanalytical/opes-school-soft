@@ -29,10 +29,10 @@ final class MigrationsCheck implements HealthCheck
         if (! $this->migrator->repositoryExists()) {
             return new HealthCheckResult(
                 key: 'migrations.pending',
-                label: 'Database upgrades',
+                label: (string) __('opes.health.migrations.label'),
                 status: HealthStatus::Red,
-                detail: 'The database has never been prepared for this software.',
-                remedy: 'Run: php artisan migrate --force',
+                detail: (string) __('opes.health.migrations.never_prepared_detail'),
+                remedy: (string) __('opes.health.migrations.never_prepared_remedy'),
             );
         }
 
@@ -45,22 +45,20 @@ final class MigrationsCheck implements HealthCheck
         if ($count > 0) {
             return new HealthCheckResult(
                 key: 'migrations.pending',
-                label: 'Database upgrades',
+                label: (string) __('opes.health.migrations.label'),
                 status: HealthStatus::Red,
                 detail: $count === 1
-                    ? 'One database upgrade has not been applied yet.'
-                    : "{$count} database upgrades have not been applied yet.",
-                remedy: 'Take a backup first (php artisan opes:backup:run), then run: '
-                    .'php artisan migrate --force. Until this is done the software and the '
-                    .'database disagree about the shape of your records.',
+                    ? (string) __('opes.health.migrations.pending_detail_one')
+                    : (string) __('opes.health.migrations.pending_detail_many', ['count' => $count]),
+                remedy: (string) __('opes.health.migrations.pending_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'migrations.pending',
-            label: 'Database upgrades',
+            label: (string) __('opes.health.migrations.label'),
             status: HealthStatus::Ok,
-            detail: 'All '.count($files).' upgrades applied.',
+            detail: (string) __('opes.health.migrations.ok_detail', ['count' => count($files)]),
             remedy: '',
         );
     }

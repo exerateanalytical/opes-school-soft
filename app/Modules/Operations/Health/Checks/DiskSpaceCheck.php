@@ -40,35 +40,31 @@ final class DiskSpaceCheck implements HealthCheck
         $red = (int) config('opes.health.disk_red_percent');
         $amber = (int) config('opes.health.disk_amber_percent');
 
-        $detail = "The backup drive is {$usedPercent}% full, with {$freeGb} GB free.";
+        $detail = (string) __('opes.health.disk_space.detail', ['percent' => $usedPercent, 'free' => $freeGb]);
 
         if ($usedPercent >= $red) {
             return new HealthCheckResult(
                 key: 'disk.free',
-                label: 'Disk space',
+                label: (string) __('opes.health.disk_space.label'),
                 status: HealthStatus::Red,
                 detail: $detail,
-                remedy: 'The drive is nearly full, so tonight\'s backup will probably fail. '
-                    .'Copy the oldest backup files onto the USB drive and then run: '
-                    .'php artisan opes:backup:prune',
+                remedy: (string) __('opes.health.disk_space.red_remedy'),
             );
         }
 
         if ($usedPercent >= $amber) {
             return new HealthCheckResult(
                 key: 'disk.free',
-                label: 'Disk space',
+                label: (string) __('opes.health.disk_space.label'),
                 status: HealthStatus::Amber,
                 detail: $detail,
-                remedy: 'Free some space this week. Run: php artisan opes:backup:prune, and '
-                    .'move anything else large off the drive. A full drive stops backups '
-                    .'without stopping the school, so nobody notices.',
+                remedy: (string) __('opes.health.disk_space.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'disk.free',
-            label: 'Disk space',
+            label: (string) __('opes.health.disk_space.label'),
             status: HealthStatus::Ok,
             detail: $detail,
             remedy: '',

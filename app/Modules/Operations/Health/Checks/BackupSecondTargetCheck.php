@@ -23,19 +23,18 @@ final class BackupSecondTargetCheck implements HealthCheck
         if (! $configured) {
             return new HealthCheckResult(
                 key: 'backup.second_target',
-                label: 'Backup target',
+                label: (string) __('opes.health.backup_second_target.label'),
                 status: HealthStatus::Amber,
-                detail: 'Backups are written to one location only.',
-                remedy: 'Set a second backup target, such as a USB drive rotated weekly. '
-                    .'A backup on the same disk as the database is lost with the disk.',
+                detail: (string) __('opes.health.backup_second_target.amber_detail'),
+                remedy: (string) __('opes.health.backup_second_target.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'backup.second_target',
-            label: 'Backup target',
+            label: (string) __('opes.health.backup_second_target.label'),
             status: HealthStatus::Ok,
-            detail: 'A second backup location is configured.',
+            detail: (string) __('opes.health.backup_second_target.ok_detail'),
             remedy: '',
         );
     }

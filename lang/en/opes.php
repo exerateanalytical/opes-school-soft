@@ -148,6 +148,131 @@ return [
         'guardian' => 'Guardian',
         'staff_portal' => 'Staff',
     ],
+    // Operational health checks, app/Modules/Operations/Health/Checks/*. These
+    // strings land on an authenticated dashboard AND (detail/label only, never
+    // remedy) on the unauthenticated /up endpoint, so translate but do not add
+    // anything sensitive.
+    'health' => [
+        'app_version' => [
+            'label' => 'Software version',
+            'detail' => 'OPES SCHOOL :version, running in the :environment environment.',
+        ],
+        'database' => [
+            'label' => 'Database',
+            'ok_detail' => 'Reachable, :tables tables.',
+            'red_detail' => 'The database did not answer: :reason',
+            'red_remedy' => 'The database service is not running or has stopped accepting '
+                .'connections. Ask whoever installed the system to restart the MySQL '
+                .'service, then reload this page. Do not take any payments until it is back.',
+        ],
+        'migrations' => [
+            'label' => 'Database upgrades',
+            'never_prepared_detail' => 'The database has never been prepared for this software.',
+            'never_prepared_remedy' => 'Run: php artisan migrate --force',
+            'pending_detail_one' => 'One database upgrade has not been applied yet.',
+            'pending_detail_many' => ':count database upgrades have not been applied yet.',
+            'pending_remedy' => 'Take a backup first (php artisan opes:backup:run), then run: '
+                .'php artisan migrate --force. Until this is done the software and the '
+                .'database disagree about the shape of your records.',
+            'ok_detail' => 'All :count upgrades applied.',
+        ],
+        'mysql_durability' => [
+            'label' => 'Power-cut safety',
+            'problem_flush' => 'innodb_flush_log_at_trx_commit is :value, not 1',
+            'problem_binlog' => 'sync_binlog is :value, not 1',
+            'amber_detail' => 'The database is not set to write every confirmed transaction '
+                .'straight to disk (:problems).',
+            'amber_remedy' => 'Ask whoever installed the system to set '
+                .'innodb_flush_log_at_trx_commit = 1 and sync_binlog = 1 in the MySQL '
+                .'configuration and restart the service. Until then, a power cut can '
+                .'erase a payment that was already receipted, and the parent will have '
+                .'the paper and you will not have the record.',
+            'ok_detail' => 'Every confirmed transaction is written straight to disk.',
+        ],
+        'backup_recency' => [
+            'label' => 'Last backup',
+            'never_detail' => 'No backup has ever completed successfully.',
+            'never_remedy' => 'Run: php artisan opes:backup:run. Until that succeeds, a disk '
+                .'failure this afternoon would lose every record the school has.',
+            'red_detail' => 'The last good backup finished :age ago.',
+            'red_remedy' => 'Run: php artisan opes:backup:run. Then check that the nightly '
+                .'schedule is still running, because it should have taken this backup '
+                .'for you and did not.',
+            'amber_detail' => 'The last good backup finished :age ago, which is later than expected.',
+            'amber_remedy' => 'Run: php artisan opes:backup:run to bring it up to date, and tell '
+                .'whoever installed the system that last night\'s automatic backup was late.',
+            'ok_detail' => 'Completed :age ago and verified.',
+            'age_less_than_hour' => 'less than an hour',
+            'age_hour' => '1 hour',
+            'age_hours' => ':hours hours',
+            'age_days' => ':days days',
+        ],
+        'backup_second_target' => [
+            'label' => 'Backup target',
+            'amber_detail' => 'Backups are written to one location only.',
+            'amber_remedy' => 'Set a second backup target, such as a USB drive rotated weekly. '
+                .'A backup on the same disk as the database is lost with the disk.',
+            'ok_detail' => 'A second backup location is configured.',
+        ],
+        'restore_drill' => [
+            'label' => 'Restore drill',
+            'never_detail' => 'No backup has ever been restored successfully, so no backup is '
+                .'yet known to work.',
+            'run_remedy' => 'Run: php artisan opes:backup:drill',
+            'red_detail' => 'The last successful restore drill was :age.',
+            'amber_detail' => 'The last successful restore drill was :age, and one is due.',
+            'ok_detail' => 'A backup was restored and checked :age.',
+            'age_today' => 'today',
+            'age_one_day' => '1 day ago',
+            'age_days' => ':days days ago',
+        ],
+        'audit_chain' => [
+            'label' => 'Audit log',
+            'ok_detail' => 'Intact, :count entries verified.',
+            'red_detail' => 'The audit log has been changed outside the application: :reason',
+            'red_remedy' => 'Do not clear this yourself. The record of who did what has been '
+                .'altered, which means someone had direct access to the database. Tell the '
+                .'head of school today, keep the current backups, and contact support.',
+        ],
+        'disk_space' => [
+            'label' => 'Disk space',
+            'detail' => 'The backup drive is :percent% full, with :free GB free.',
+            'red_remedy' => 'The drive is nearly full, so tonight\'s backup will probably fail. '
+                .'Copy the oldest backup files onto the USB drive and then run: '
+                .'php artisan opes:backup:prune',
+            'amber_remedy' => 'Free some space this week. Run: php artisan opes:backup:prune, and '
+                .'move anything else large off the drive. A full drive stops backups '
+                .'without stopping the school, so nobody notices.',
+        ],
+        'queue_heartbeat' => [
+            'label' => 'Background tasks',
+            'never_detail' => 'The background task runner has never reported in.',
+            'never_remedy' => 'Nothing scheduled is running, which includes the nightly backup. '
+                .'Ask whoever installed the system to start the OPES scheduler service '
+                .'(php artisan schedule:work). Take a backup by hand today: '
+                .'php artisan opes:backup:run',
+            'red_detail' => 'The background task runner last reported in :age ago.',
+            'red_remedy' => 'The scheduler has stopped. Ask whoever installed the system to '
+                .'restart it, then take a backup by hand today: php artisan opes:backup:run',
+            'amber_detail' => 'The background task runner last reported in :age ago, which is late.',
+            'amber_remedy' => 'Reload this page in ten minutes. If it has not cleared, the '
+                .'scheduler needs restarting - and the nightly backup depends on it.',
+            'ok_detail' => 'Running; last reported in :age ago.',
+            'age_minute' => 'a minute',
+            'age_minutes' => ':minutes minutes',
+        ],
+        'failed_jobs' => [
+            'label' => 'Failed tasks',
+            'detail_one' => 'One background task has failed and was not retried.',
+            'detail_many' => ':count background tasks have failed and were not retried.',
+            'red_remedy' => 'Something is failing repeatedly rather than once. Send the '
+                .'diagnostics bundle to support before clearing the list, then run: '
+                .'php artisan queue:retry all',
+            'amber_remedy' => 'Run: php artisan queue:retry all. If the same task fails again, '
+                .'send the diagnostics bundle to support rather than retrying a third time.',
+            'ok_detail' => 'No failed background tasks.',
+        ],
+    ],
     'permissions' => [
         'user.view' => 'View users',
         'user.manage' => 'Manage users',

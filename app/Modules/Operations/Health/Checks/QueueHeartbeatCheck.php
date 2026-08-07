@@ -32,46 +32,43 @@ final class QueueHeartbeatCheck implements HealthCheck
         if ($beat === null) {
             return new HealthCheckResult(
                 key: 'queue.heartbeat',
-                label: 'Background tasks',
+                label: (string) __('opes.health.queue_heartbeat.label'),
                 status: HealthStatus::Red,
-                detail: 'The background task runner has never reported in.',
-                remedy: 'Nothing scheduled is running, which includes the nightly backup. '
-                    .'Ask whoever installed the system to start the OPES scheduler service '
-                    .'(php artisan schedule:work). Take a backup by hand today: '
-                    .'php artisan opes:backup:run',
+                detail: (string) __('opes.health.queue_heartbeat.never_detail'),
+                remedy: (string) __('opes.health.queue_heartbeat.never_remedy'),
             );
         }
 
         $minutes = (int) $beat->diffInMinutes(now());
-        $age = $minutes <= 1 ? 'a minute' : "{$minutes} minutes";
+        $age = $minutes <= 1
+            ? (string) __('opes.health.queue_heartbeat.age_minute')
+            : (string) __('opes.health.queue_heartbeat.age_minutes', ['minutes' => $minutes]);
 
         if ($minutes >= $red) {
             return new HealthCheckResult(
                 key: 'queue.heartbeat',
-                label: 'Background tasks',
+                label: (string) __('opes.health.queue_heartbeat.label'),
                 status: HealthStatus::Red,
-                detail: "The background task runner last reported in {$age} ago.",
-                remedy: 'The scheduler has stopped. Ask whoever installed the system to '
-                    .'restart it, then take a backup by hand today: php artisan opes:backup:run',
+                detail: (string) __('opes.health.queue_heartbeat.red_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.queue_heartbeat.red_remedy'),
             );
         }
 
         if ($minutes >= $amber) {
             return new HealthCheckResult(
                 key: 'queue.heartbeat',
-                label: 'Background tasks',
+                label: (string) __('opes.health.queue_heartbeat.label'),
                 status: HealthStatus::Amber,
-                detail: "The background task runner last reported in {$age} ago, which is late.",
-                remedy: 'Reload this page in ten minutes. If it has not cleared, the '
-                    .'scheduler needs restarting - and the nightly backup depends on it.',
+                detail: (string) __('opes.health.queue_heartbeat.amber_detail', ['age' => $age]),
+                remedy: (string) __('opes.health.queue_heartbeat.amber_remedy'),
             );
         }
 
         return new HealthCheckResult(
             key: 'queue.heartbeat',
-            label: 'Background tasks',
+            label: (string) __('opes.health.queue_heartbeat.label'),
             status: HealthStatus::Ok,
-            detail: "Running; last reported in {$age} ago.",
+            detail: (string) __('opes.health.queue_heartbeat.ok_detail', ['age' => $age]),
             remedy: '',
         );
     }

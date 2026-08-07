@@ -29,20 +29,18 @@ final class DatabaseCheck implements HealthCheck
 
             return new HealthCheckResult(
                 key: 'database.reachable',
-                label: 'Database',
+                label: (string) __('opes.health.database.label'),
                 status: HealthStatus::Ok,
-                detail: "Reachable, {$tables} tables.",
+                detail: (string) __('opes.health.database.ok_detail', ['tables' => $tables]),
                 remedy: '',
             );
         } catch (Throwable $e) {
             return new HealthCheckResult(
                 key: 'database.reachable',
-                label: 'Database',
+                label: (string) __('opes.health.database.label'),
                 status: HealthStatus::Red,
-                detail: 'The database did not answer: '.$this->plain($e),
-                remedy: 'The database service is not running or has stopped accepting '
-                    .'connections. Ask whoever installed the system to restart the MySQL '
-                    .'service, then reload this page. Do not take any payments until it is back.',
+                detail: (string) __('opes.health.database.red_detail', ['reason' => $this->plain($e)]),
+                remedy: (string) __('opes.health.database.red_remedy'),
             );
         }
     }

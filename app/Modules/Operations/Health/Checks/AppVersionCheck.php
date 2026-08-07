@@ -27,9 +27,9 @@ final class AppVersionCheck implements HealthCheck
 
         return new HealthCheckResult(
             key: 'app.version',
-            label: 'Software version',
+            label: (string) __('opes.health.app_version.label'),
             status: HealthStatus::Ok,
-            detail: sprintf('OPES SCHOOL %s, running in the %s environment.', $version, $environment),
+            detail: (string) __('opes.health.app_version.detail', ['version' => $version, 'environment' => $environment]),
             remedy: '',
         );
     }
