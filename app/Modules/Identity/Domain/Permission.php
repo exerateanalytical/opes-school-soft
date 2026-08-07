@@ -34,6 +34,23 @@ enum Permission: string
     case AcademicsView = 'academics.view';
     case AcademicsManage = 'academics.manage';
 
+    case StudentsView = 'students.view';
+    case StudentsManage = 'students.manage';
+
+    // Deliberately separate from students.manage (07-students 6.4): finalising
+    // a matricule is irreversible, so the right to do it is granted on its own.
+    //
+    // 07-students spells this `students.matricule.finalise`. The value here is
+    // two-segment because every permission in this enum is `module.action` and
+    // a test enforces it - not house style for its own sake: these values are
+    // also translation keys, and Laravel reads a dot as a nested-array step,
+    // which already broke label() once. The right the spec describes is
+    // unchanged; only the spelling is.
+    case StudentsMatriculeFinalise = 'students.finalise_matricule';
+
+    case GuardiansManage = 'guardians.manage';
+    case AdmissionsManage = 'admissions.manage';
+
     case FeeView = 'fee.view';
     case FeeCollect = 'fee.collect';
     case FeeVoid = 'fee.void';

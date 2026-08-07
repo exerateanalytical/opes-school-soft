@@ -70,26 +70,44 @@ enum Role: string
             self::Principal => [
                 Permission::UserView, Permission::AuditView,
                 Permission::SettingView, Permission::FeeView, Permission::LedgerView,
-                Permission::AcademicsView,
+                Permission::AcademicsView, Permission::StudentsView,
             ],
 
             self::VicePrincipal => [
                 Permission::UserView, Permission::SettingView,
                 Permission::AcademicsView, Permission::AcademicsManage,
+                Permission::StudentsView,
             ],
 
-            self::Bursar => [Permission::FeeView, Permission::FeeCollect],
+            // The bursar reads the student roll to collect against it, but
+            // never edits it - 07-students 7.5 keeps money and identity apart.
+            self::Bursar => [
+                Permission::FeeView, Permission::FeeCollect, Permission::StudentsView,
+            ],
 
             self::Accountant => [
                 Permission::FeeView, Permission::LedgerView, Permission::LedgerPost,
                 Permission::FeeVoid,
             ],
 
+            // 00-core 9.1: the registrar owns the student record end to end -
+            // admissions, enrolment, guardians. Finalising a matricule is
+            // granted here and almost nowhere else (07-students 6.4): it is
+            // irreversible, so it stays with the office that owns the roll.
+            self::Registrar => [
+                Permission::AcademicsView,
+                Permission::StudentsView, Permission::StudentsManage,
+                Permission::StudentsMatriculeFinalise,
+                Permission::GuardiansManage, Permission::AdmissionsManage,
+            ],
+
             // 00-core 9.1: these roles read the academic structure (year,
-            // classes, subjects) but do not shape it - that is the Censeur's
-            // job (Vice-Principal, above).
-            self::Registrar, self::ExamsOfficer,
-            self::ClassMaster, self::Teacher => [Permission::AcademicsView],
+            // classes, subjects) and the roll, but do not shape either - that
+            // is the Censeur's job (Vice-Principal, above).
+            self::ExamsOfficer,
+            self::ClassMaster, self::Teacher => [
+                Permission::AcademicsView, Permission::StudentsView,
+            ],
 
             self::HrOfficer, self::PayrollOfficer,
             self::DisciplineMaster, self::Librarian, self::StoreKeeper,
