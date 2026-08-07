@@ -151,15 +151,30 @@ it('rejects a role that is not in the enum', function () {
         ->assertHasErrors('role');
 });
 
-it('forbids a user without the manage permission', function () {
-    actingAs(userAs(Role::Bursar));
+it('rejects an unprivileged actor even if the form component were bypassed entirely', function () {
+    // Defense in depth: CreateUser carries its own authorization check,
+    // independent of the Livewire component's mount()/save() checks. This is
+    // what actually protects the system if a future caller invokes the
+    // Action directly - a queued job, an API endpoint, a console command.
+    //
+    // This replaces an earlier version of this test that chained ->set() and
+    // ->call('save') onto a component after asserting mount() already 403s.
+    // That chain is structurally invalid in Livewire 4: when mount() throws,
+    // the initial render has no wire:snapshot for a later request to attach
+    // to, and every ->set() call after it fails with "Invalid Livewire
+    // snapshot structure" - a framework limitation, not a security gap. The
+    // sibling test below already proves mount() alone blocks access; this
+    // test proves the Action underneath does too.
+    $bursar = userAs(Role::Bursar);
 
-    Livewire::test(Form::class)
-        ->set('name', 'Someone')->set('email', 'someone@school.test')
-        ->set('role', Role::Teacher->value)->set('password', 'Str0ng-Passw0rd')
-        ->call('save')
-        ->assertForbidden();
-});
+    app(\App\Modules\Identity\Actions\CreateUser::class)->handle(
+        name: 'Someone',
+        email: 'someone@school.test',
+        role: Role::Teacher,
+        plainPassword: 'Str0ng-Passw0rd',
+        actor: $bursar,
+    );
+})->throws(\Illuminate\Auth\Access\AuthorizationException::class);
 
 it('forbids reaching the form component directly without permission', function () {
     // A component can be reached without going through its route, so mount()
