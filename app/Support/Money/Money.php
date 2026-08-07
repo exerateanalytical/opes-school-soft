@@ -65,14 +65,20 @@ final readonly class Money implements JsonSerializable, Stringable
         return new self(self::guard($this->amount * $factor));
     }
 
+    /**
+     * Guarded like the arithmetic methods: at PHP_INT_MIN both -$n and abs($n)
+     * promote to float, and an unguarded promotion would surface as a raw
+     * TypeError instead of the MoneyException this class contracts to throw.
+     * Unreachable at FCFA scale, but the contract should not have a hole in it.
+     */
     public function negated(): self
     {
-        return new self(-$this->amount);
+        return new self(self::guard(-$this->amount));
     }
 
     public function absolute(): self
     {
-        return new self(abs($this->amount));
+        return new self(self::guard(abs($this->amount)));
     }
 
     public function isZero(): bool

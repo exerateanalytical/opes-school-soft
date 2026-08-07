@@ -47,6 +47,16 @@ final class Allocator
         $allocated = 0;
 
         foreach ($ratios as $index => $ratio) {
+            // Check the operands before multiplying rather than the product
+            // after. PHP promotes integer overflow to float silently, but the
+            // static type of $absolute * $ratio is still int, so a post-hoc
+            // is_float() is provably dead code to the analyser while still
+            // being reachable at runtime. Comparing against PHP_INT_MAX / $ratio
+            // is the standard idiom and keeps both views honest.
+            if ($ratio > 0 && $absolute > intdiv(PHP_INT_MAX, $ratio)) {
+                throw MoneyException::overflow();
+            }
+
             $numerator = $absolute * $ratio;
             $share = intdiv($numerator, $ratioTotal);
 
