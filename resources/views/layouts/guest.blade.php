@@ -9,22 +9,30 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-ivory font-sans text-charcoal antialiased">
+<body class="min-h-screen bg-sand font-sans text-charcoal antialiased">
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
         <main class="w-full max-w-md">
-            <div class="overflow-hidden rounded-lg border border-sand bg-white shadow-sm">
-                {{-- Chrome-green band. Red and yellow stay accents: the star is
-                     the only heritage-yellow mark on the page. --}}
-                <div class="flex items-center gap-3 bg-chrome px-6 py-5">
-                    <svg class="h-7 w-7 shrink-0 text-heritage-yellow" viewBox="0 0 24 24" fill="currentColor"
-                         aria-hidden="true">
-                        <path d="M12 2.2l2.72 6.6 7.13.53-5.44 4.6 1.7 6.94L12 17.1l-6.11 3.77 1.7-6.94-5.44-4.6 7.13-.53L12 2.2z"/>
+            <div class="overflow-hidden rounded-lg border border-sand bg-white shadow-lg shadow-charcoal/5">
+                {{-- Chrome-green band with a shield/crest mark, echoing the
+                     sidebar wordmark treatment. Red and yellow stay accents:
+                     the crest's gold rim is the only heritage-yellow mark on
+                     the page. --}}
+                <div class="flex flex-col items-center gap-3 bg-chrome px-6 py-8">
+                    <svg class="h-12 w-12 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2.5l7.5 2.7v5.3c0 4.8-3.15 8.9-7.5 10.3-4.35-1.4-7.5-5.5-7.5-10.3V5.2L12 2.5z"
+                              fill="none" stroke="var(--color-heritage-yellow)" stroke-width="1.1"/>
+                        <path d="M12 5.3l5 1.8v3.5c0 3.35-2.15 6.15-5 7.15-2.85-1-5-3.8-5-7.15V7.1l5-1.8z"
+                              fill="var(--color-chrome-light)"/>
+                        <path d="M12 8.1l1.15 2.35 2.55.28-1.9 1.75.55 2.52L12 13.7l-2.35 1.3.55-2.52-1.9-1.75 2.55-.28L12 8.1z"
+                              fill="var(--color-heritage-yellow)"/>
                     </svg>
-                    <span class="text-lg font-semibold text-white">OPES</span>
-                    <span class="text-sm font-medium tracking-[0.35em] text-white/80">SCHOOL</span>
+                    <div class="flex flex-col items-center leading-tight">
+                        <span class="text-lg font-semibold text-white">OPES</span>
+                        <span class="text-xs font-medium tracking-[0.35em] text-white/80">SCHOOL</span>
+                    </div>
                 </div>
 
-                <div class="px-6 py-7">
+                <div class="px-8 py-8">
                     {{ $slot }}
                 </div>
             </div>

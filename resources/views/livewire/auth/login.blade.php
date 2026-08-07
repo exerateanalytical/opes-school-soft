@@ -1,5 +1,5 @@
 <div>
-    <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.auth.sign_in') }}</h1>
+    <h1 class="text-center text-xl font-semibold text-charcoal">{{ __('opes.auth.sign_in') }}</h1>
 
     {{-- The error sits ABOVE the form so a screen reader meets it before the
          fields, and so it is visible without scrolling on a small screen. --}}
@@ -45,8 +45,8 @@
         </div>
 
         <button type="submit"
-                class="w-full rounded bg-primary px-4 py-2.5 text-sm font-semibold text-white
-                       hover:bg-chrome-light">
+                class="w-full rounded border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white
+                       hover:bg-primary/90">
             {{ __('opes.auth.sign_in') }}
         </button>
     </form>
