@@ -25,8 +25,12 @@ final class Navigation
     {
         return [
             ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true],
-            ['key' => 'admissions', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'students', 'route' => null, 'permission' => null, 'enabled' => false],
+            ['key' => 'admissions', 'route' => '/admissions', 'permission' => Permission::AdmissionsManage, 'enabled' => true],
+            ['key' => 'students', 'route' => '/students', 'permission' => Permission::StudentsView, 'enabled' => true],
+            // Guardians are reachable only through a student's record for now:
+            // there is a `guardians.show` route but no guardian list. Pointing
+            // a nav item at a detail route with no id would be a link to
+            // nothing, so this stays disabled until the list screen exists.
             ['key' => 'guardians', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'staff', 'route' => null, 'permission' => null, 'enabled' => false],
             // Gated on manage, not view: the route behind it is

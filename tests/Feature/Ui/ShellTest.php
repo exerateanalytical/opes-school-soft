@@ -80,6 +80,46 @@ it('blocks the academic routes as well as hiding the links', function () {
     'The Academics Livewire components are not built yet, so routes/web.php has not registered these routes.',
 );
 
+it('shows the students link to a role with students.view', function () {
+    // A Teacher reads the roll but does not run admissions, and the
+    // admissions route is gated on admissions.manage - so no link that would
+    // answer 403.
+    $html = (string) actingAs(shellUser(Role::Teacher))->get('/dashboard')->getContent();
+
+    expect($html)->toContain('href="/students"');
+    expect($html)->not->toContain('href="/admissions"');
+});
+
+it('shows the admissions link to a role with admissions.manage', function () {
+    $html = (string) actingAs(shellUser(Role::Registrar))->get('/dashboard')->getContent();
+
+    expect($html)->toContain('href="/admissions"');
+    expect($html)->toContain('href="/students"');
+});
+
+it('hides the people links from a role without students.view', function () {
+    $html = (string) actingAs(shellUser(Role::Librarian))->get('/dashboard')->getContent();
+
+    expect($html)->not->toContain('href="/students"');
+    expect($html)->not->toContain('href="/admissions"');
+});
+
+it('never links guardians from the sidebar while there is no guardian list', function () {
+    // `guardians.show` needs an id; a sidebar entry pointing at it would be a
+    // link to nothing. Disabled is the honest rendering.
+    $html = (string) actingAs(shellUser())->get('/dashboard')->getContent();
+
+    expect($html)->not->toContain('href="/guardians');
+});
+
+it('blocks the people routes as well as hiding the links', function () {
+    actingAs(shellUser(Role::Librarian))->get('/students')->assertForbidden();
+    actingAs(shellUser(Role::Teacher))->get('/admissions')->assertForbidden();
+})->skip(
+    fn (): bool => ! class_exists('App\Modules\Students\Livewire\Students\Index'),
+    'The Students/Admissions Livewire components are not built yet, so routes/web.php has not registered these routes.',
+);
+
 it('blocks the route as well as hiding the link', function () {
     // 00-core 6.2: authorisation lives in the route and the Action. Hiding a
     // menu item is presentation and must never be mistaken for a control.
@@ -91,7 +131,10 @@ it('marks unbuilt nav items as disabled rather than hiding or faking them', func
     // admits what is not built yet.
     $html = (string) actingAs(shellUser())->get('/dashboard')->getContent();
 
-    expect($html)->toContain('Students');
+    // Guardians is built but has no list screen; Library is not built at all.
+    // Both render as inert, labelled entries rather than dead links.
+    expect($html)->toContain('Guardians');
+    expect($html)->toContain('Library');
     expect($html)->toContain('aria-disabled="true"');
 });
 
