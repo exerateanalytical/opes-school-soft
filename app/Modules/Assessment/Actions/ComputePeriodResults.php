@@ -7,6 +7,7 @@ namespace App\Modules\Assessment\Actions;
 use App\Modules\Assessment\Domain\Gpa;
 use App\Modules\Assessment\Domain\GradingPipeline;
 use App\Modules\Assessment\Domain\PassRule;
+use App\Modules\Assessment\Domain\Rounding;
 use App\Modules\Assessment\Domain\SubjectResult;
 use App\Modules\Assessment\Models\AssessmentFramework;
 use App\Modules\Assessment\Models\GradeBand;
@@ -387,16 +388,36 @@ final class ComputePeriodResults
                     $query->orWhere('class_level_id', (int) $classLevelId);
                 }
             })
-            // Narrower first, then by interval, so the first containing band is
-            // also the most specific one.
-            ->orderByRaw('class_level_id IS NULL')
             ->orderBy('min_score')
             ->get()
             ->all();
 
-        $topIndex = count($bands) - 1;
+        // The two ladders are searched SEPARATELY rather than concatenated.
+        // 3.3's coverage invariant holds per (framework, purpose, scale_basis,
+        // class_level) tuple, so each ladder has its own closed top band -
+        // merging them would leave the framework-wide ladder's top band
+        // half-open and a perfect score would band nowhere.
+        $specific = array_values(array_filter(
+            $bands,
+            static fn (GradeBand $band): bool => $band->class_level_id !== null,
+        ));
 
-        foreach ($bands as $index => $band) {
+        $general = array_values(array_filter(
+            $bands,
+            static fn (GradeBand $band): bool => $band->class_level_id === null,
+        ));
+
+        return $this->firstContaining($specific, $score) ?? $this->firstContaining($general, $score);
+    }
+
+    /**
+     * @param  list<GradeBand>  $ladder  ordered by min_score
+     */
+    private function firstContaining(array $ladder, Score $score): ?GradeBand
+    {
+        $topIndex = count($ladder) - 1;
+
+        foreach ($ladder as $index => $band) {
             if ($band->contains($score, $index === $topIndex)) {
                 return $band;
             }
@@ -426,7 +447,15 @@ final class ComputePeriodResults
                 continue;
             }
 
-            $band = $this->bandFor($framework, $subject->score, $enrollmentId);
+            // Banded on the ROUNDED subject score, for 3.3's reason: 11.995
+            // rounds to 12.00 before banding, so the point a subject earns
+            // always agrees with the number printed beside it on the card. The
+            // rounding function is Domain\Rounding's; there is not a second one.
+            $band = $this->bandFor(
+                $framework,
+                Rounding::halfUp($subject->score, $precision),
+                $enrollmentId,
+            );
             $point = $band?->grade_point;
 
             $pairs[] = [

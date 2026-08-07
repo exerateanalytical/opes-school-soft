@@ -132,6 +132,17 @@ final class ComputeClassStatistics
                 continue;
             }
 
+            if ((int) $allocationId === ClassStatistic::GENERAL) {
+                // 0 is the sentinel meaning "the general average". A subject
+                // allocation keyed 0 would silently merge a subject's marks
+                // into the class moyenne's sample and change the printed class
+                // mean, so it is rejected rather than absorbed.
+                throw ValidationException::withMessages([
+                    'subject_allocation_id' => 'Subject allocation 0 collides with the '
+                        .'sentinel that means "the general average".',
+                ]);
+            }
+
             $this->collect(
                 $samples,
                 $result->class_group_id,
