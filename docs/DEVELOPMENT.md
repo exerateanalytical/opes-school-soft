@@ -68,3 +68,34 @@ link in the chain reads as an undefined method. The alternative, setting
 `reportMagicMethods: false`, would disable the check for the whole application.
 This is a path scope, not an `ignoreErrors` entry and not a baseline; the rule
 above stands unchanged.
+
+## Identity, audit and settings
+
+- **Roles and permissions are enums**, not strings: `App\Modules\Identity\Domain\Role`
+  and `Permission`. A typo is an analysis error, not a silent access denial.
+  Later phases ADD permission cases; they must never rename existing ones,
+  because seeds and granted permissions reference the values.
+- **Audit rows have exactly one writer**, `WriteAuditEntry`. It serialises on
+  the tail of the chain under a row lock — two concurrent writers reading the
+  same predecessor would fork the chain and make verification meaningless. An
+  architecture test enforces the single-writer rule.
+- **The audit log is hash-chained AND anchored.** A genesis-only chain cannot
+  detect truncation: delete the newest rows and the remainder still verifies.
+  `AuditChainAnchor` records the expected head, so tail deletion is evident.
+  `opes:audit:verify` runs nightly and detects tampering, mid-chain deletion
+  and truncation. If it fails, the table was modified outside the application.
+- **Attribution crosses module boundaries as `Support\Audit\Actor`**, never as
+  an `Identity\Models\User`. Passing the model would force every module to
+  import another module's Model, which §6.2 forbids while §14 requires the
+  attribution.
+- **Never log a credential.** Passwords and recovery codes must not appear in
+  `before`/`after`. Tests assert this explicitly.
+- **Settings have three classes.** Engine-behaviour settings are lockable:
+  once a period using them is published, they cannot change, because doing so
+  would retroactively alter numbers already printed and handed to parents.
+- **Password reset is admin-driven.** Most Cameroonian schools have no SMTP
+  server, so no admin recovery path may depend on email.
+- **Permission labels are looked up as a group, not by dotted key.** Permission
+  values contain a dot (`user.view`), which the translator would otherwise read
+  as nested-array segments; `Permission::label()` fetches `opes.permissions`
+  and indexes the flat key directly.
