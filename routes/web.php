@@ -54,27 +54,15 @@ Route::middleware('auth')->group(function (): void {
      * sidebar hides these from a user without `academics.view`, but hiding is
      * presentation - the route refuses on its own. Settings is gated harder
      * (`academics.manage`) because it shapes the structure the rest read.
-     *
-     * The class_exists guards are temporary scaffolding: Laravel validates an
-     * invokable route action at registration time, so naming a component that
-     * is still being built would stop the whole application from booting.
-     * Once the Academics Livewire components exist the guards are always true
-     * and should be removed in favour of plain ::class references.
      */
-    if (class_exists('App\Modules\Academics\Livewire\Settings\AcademicSettings')) {
-        Route::get('/academics/settings', 'App\Modules\Academics\Livewire\Settings\AcademicSettings')
-            ->middleware('can:academics.manage')->name('academics.settings');
-    }
+    Route::get('/academics/settings', \App\Modules\Academics\Livewire\Settings\AcademicSettings::class)
+        ->middleware('can:academics.manage')->name('academics.settings');
 
-    if (class_exists('App\Modules\Academics\Livewire\ClassGroups\Index')) {
-        Route::get('/classes', 'App\Modules\Academics\Livewire\ClassGroups\Index')
-            ->middleware('can:academics.view')->name('classes.index');
-    }
+    Route::get('/classes', \App\Modules\Academics\Livewire\ClassGroups\Index::class)
+        ->middleware('can:academics.view')->name('classes.index');
 
-    if (class_exists('App\Modules\Academics\Livewire\Subjects\Index')) {
-        Route::get('/subjects', 'App\Modules\Academics\Livewire\Subjects\Index')
-            ->middleware('can:academics.view')->name('subjects.index');
-    }
+    Route::get('/subjects', \App\Modules\Academics\Livewire\Subjects\Index::class)
+        ->middleware('can:academics.view')->name('subjects.index');
 });
 
 /*
