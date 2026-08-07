@@ -51,6 +51,24 @@ it('renders back to a percentage string', function () {
     expect(Rate::ofBasisPoints(100_000)->toPercentString())->toBe('100.00');
 });
 
+it('rounds the rendered percentage half up rather than truncating', function () {
+    // Every case above is an exact multiple of 10 basis points, where
+    // truncating and rounding agree - which is why this defect survived. Two
+    // thirds is the case that exposes it: 66.667% printed as "66.66", a rate
+    // the school did not achieve, and one that disagreed with the same figure
+    // rounded anywhere else in the product.
+    expect(Rate::ofBasisPoints(66_667)->toPercentString())->toBe('66.67');
+    expect(Rate::ofBasisPoints(33_333)->toPercentString())->toBe('33.33');
+
+    // Exactly half a hundredth rounds up, not to even.
+    expect(Rate::ofBasisPoints(1_005)->toPercentString())->toBe('1.01');
+
+    // The carry has to cross both the fraction and the whole number, or
+    // rounding the fraction alone yields the nonsense "66.100".
+    expect(Rate::ofBasisPoints(66_999)->toPercentString())->toBe('67.00');
+    expect(Rate::ofBasisPoints(99_999)->toPercentString())->toBe('100.00');
+});
+
 it('is comparable and has a zero constructor', function () {
     expect(Rate::ofPercent('4.2')->equals(Rate::ofBasisPoints(4_200)))->toBeTrue();
     expect(Rate::zero()->isZero())->toBeTrue();
