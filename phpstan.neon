@@ -1,0 +1,17 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - app
+        - tests
+    tmpDir: build/phpstan
+    ignoreErrors:
+        -
+            # Laravel skeleton's default placeholder test asserts a literal
+            # true, which PHPStan correctly flags as an always-true
+            # assertion at level 8. Left as-is rather than rewritten, since
+            # editing the skeleton's example test is outside this task's scope.
+            message: '#Call to method PHPUnit\\Framework\\Assert::assertTrue\(\) with true will always evaluate to true\.#'
+            path: tests/Unit/ExampleTest.php
