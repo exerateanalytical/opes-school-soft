@@ -16,17 +16,11 @@ it('exposes stable string values usable as database keys', function () {
     expect(Role::Guardian->value)->toBe('guardian');
 });
 
-it('gives every role a bilingual label', function () {
-    foreach (Role::cases() as $role) {
-        expect($role->label('en'))->not->toBe('');
-        expect($role->label('fr'))->not->toBe('');
-    }
-});
-
-it('uses the Cameroonian title where one exists', function () {
-    expect(Role::Principal->label('fr'))->toBe('Proviseur');
-    expect(Role::VicePrincipal->label('fr'))->toBe('Censeur');
-});
+// Label assertions deliberately live in tests/Feature/LocalisationTest.php,
+// not here. label() calls __(), which needs the translator from the container,
+// and tests/Unit does not boot the application. Asserting them here failed with
+// "Target class [translator] does not exist" regardless of whether the lang
+// files existed - a red test that no later task could turn green.
 
 it('marks the two portal roles as portal roles', function () {
     expect(Role::Guardian->isPortal())->toBeTrue();
