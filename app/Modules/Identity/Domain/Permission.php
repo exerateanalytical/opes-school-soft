@@ -44,6 +44,18 @@ enum Permission: string
 
     public function label(string $locale = 'en'): string
     {
-        return __('opes.permissions.'.$this->value, [], $locale);
+        // Permission values contain a dot ('user.view'), and the translator
+        // reads dots as nested-array segments - so 'opes.permissions.user.view'
+        // would look for ['permissions']['user']['view'] and never find the
+        // flat key that lang/*/opes.php actually declares. Fetch the group and
+        // index it directly. Missing keys still return the raw key, which is
+        // what LocalisationTest asserts against.
+        $labels = trans('opes.permissions', [], $locale);
+
+        if (is_array($labels) && is_string($labels[$this->value] ?? null)) {
+            return $labels[$this->value];
+        }
+
+        return 'opes.permissions.'.$this->value;
     }
 }
