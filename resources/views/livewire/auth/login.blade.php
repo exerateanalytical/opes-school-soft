@@ -51,6 +51,24 @@
         </button>
     </form>
 
+    {{-- One-click demo sign-in. Rendered only when the component says it is
+         available, which requires BOTH the config flag and the local
+         environment - see config/opes.php. On any real deployment this whole
+         block is absent from the HTML, not merely hidden by CSS. --}}
+    @if ($this->demoLoginAvailable())
+        <div class="mt-6 rounded border border-dashed border-heritage-yellow bg-heritage-yellow/10 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-charcoal/70">
+                {{ __('opes.auth.demo_heading') }}
+            </p>
+            <button type="button" wire:click="demoLogin"
+                    class="mt-2 w-full rounded border border-chrome bg-chrome px-4 py-2.5 text-sm font-semibold text-white
+                           hover:bg-chrome-light">
+                {{ __('opes.auth.demo_sign_in') }}
+            </button>
+            <p class="mt-2 text-xs text-charcoal/60">{{ __('opes.auth.demo_help') }}</p>
+        </div>
+    @endif
+
     {{-- 00-core 9.3: no SMTP in most schools, so no self-service reset link.
          Say so plainly rather than offering a link that would never arrive. --}}
     <div class="mt-6 border-t border-sand pt-4">

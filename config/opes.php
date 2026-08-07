@@ -46,6 +46,28 @@ return [
         'verify_budget_per_run' => (int) env('OPES_VERIFY_BUDGET', 1),
     ],
 
+    /*
+     * One-click demo sign-in. This is an authentication BYPASS: it signs a
+     * visitor in as an administrator with no credential at all. On a system
+     * holding student records, guardian contact details and payroll it must
+     * never be reachable outside a demo box, so it is guarded twice over:
+     *
+     *   1. this flag, which is off unless OPES_DEMO_LOGIN is explicitly set;
+     *   2. an environment check in the component itself, which refuses in
+     *      any environment except `local` even when the flag is on.
+     *
+     * Two independent guards because either alone is one mistake away from a
+     * public bypass - a stray .env line copied to a server, or an environment
+     * misread. Both must agree. Tests assert the refusal in `production`.
+     */
+    'demo_login' => [
+        // env() returns "" - not the default - for a key that is present but
+        // empty, so filter explicitly rather than trusting the second argument.
+        'enabled' => filter_var(env('OPES_DEMO_LOGIN', false), FILTER_VALIDATE_BOOL),
+        'email' => env('OPES_DEMO_LOGIN_EMAIL') ?: 'demo@opeschool.test',
+        'name' => env('OPES_DEMO_LOGIN_NAME') ?: 'Demo Administrator',
+    ],
+
     'health' => [
         'backup_amber_hours' => (int) env('OPES_BACKUP_AMBER_HOURS', 26),
         'backup_red_hours' => (int) env('OPES_BACKUP_RED_HOURS', 50),
