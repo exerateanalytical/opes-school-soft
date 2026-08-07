@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
+use App\Modules\Academics\Livewire\Settings\AcademicSettings;
+use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
 use App\Modules\Identity\Livewire\Users\Index as UsersIndex;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -30,5 +33,12 @@ class AppServiceProvider extends ServiceProvider
         // stripping logic entirely (Finder::normalizeName resolves it before
         // ever reaching the ".index" special case).
         Livewire::component('users.index', UsersIndex::class);
+
+        // Same reasoning for the Academics screens: two of the three end in
+        // ".index", and the settings screen gets an explicit name for symmetry
+        // so every routed component in this module resolves the same way.
+        Livewire::component('academics.settings', AcademicSettings::class);
+        Livewire::component('subjects.index', SubjectsIndex::class);
+        Livewire::component('classes.index', ClassGroupsIndex::class);
     }
 }

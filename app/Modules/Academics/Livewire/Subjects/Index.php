@@ -1,0 +1,211 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Academics\Livewire\Subjects;
+
+use App\Modules\Academics\Actions\CreateSubject;
+use App\Modules\Academics\Actions\UpdateSubject;
+use App\Modules\Academics\Models\Department;
+use App\Modules\Academics\Models\Subject;
+use App\Modules\Identity\Domain\Permission;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+
+/**
+ * Subject Management (frontend images/subject management.png), composing
+ * x-list-screen the same way Identity's Users\Index does.
+ *
+ * Viewing needs `academics.view` (checked in mount(), mirroring the route);
+ * every mutation needs `academics.manage`. Create/edit is an inline panel on
+ * this screen rather than a routed sibling Form component because routes are
+ * Agent A1's file and only `subjects.index` exists - a page component nothing
+ * routes to would be dead code.
+ */
+#[Layout('layouts.app')]
+final class Index extends Component
+{
+    #[Url]
+    public string $search = '';
+
+    #[Url]
+    public string $status = '';
+
+    #[Url]
+    public int $page = 1;
+
+    public int $perPage = 25;
+
+    // ── Inline create/edit panel ────────────────────────────────────────
+    public bool $showForm = false;
+
+    public ?int $editingId = null;
+
+    public string $subjectCode = '';
+
+    public string $subjectName = '';
+
+    public string $subjectNameFr = '';
+
+    public string $departmentId = '';
+
+    public bool $subjectActive = true;
+
+    public function mount(): void
+    {
+        Gate::authorize(Permission::AcademicsView->value);
+    }
+
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'status']);
+        $this->resetPage();
+    }
+
+    private function resetPage(): void
+    {
+        $this->page = 1;
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function startCreate(): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        $this->resetForm();
+        $this->showForm = true;
+    }
+
+    public function startEdit(int $subjectId): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        /** @var Subject $subject */
+        $subject = Subject::query()->findOrFail($subjectId);
+
+        $this->editingId = (int) $subject->getKey();
+        $this->subjectCode = $subject->code;
+        $this->subjectName = $subject->name;
+        $this->subjectNameFr = $subject->name_fr ?? '';
+        $this->departmentId = $subject->department_id === null ? '' : (string) $subject->department_id;
+        $this->subjectActive = $subject->is_active;
+        $this->showForm = true;
+        $this->resetErrorBag();
+    }
+
+    public function cancelForm(): void
+    {
+        $this->resetForm();
+    }
+
+    public function save(CreateSubject $createSubject, UpdateSubject $updateSubject): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        $validated = $this->validate([
+            'subjectCode' => [
+                'required', 'string', 'max:32',
+                Rule::unique('subjects', 'code')->ignore($this->editingId),
+            ],
+            'subjectName' => ['required', 'string', 'max:160'],
+            'subjectNameFr' => ['nullable', 'string', 'max:160'],
+            // The wire:model value is a string, and '' (the "no department"
+            // option) is not null, so the integer rules only apply when a
+            // department was actually chosen.
+            'departmentId' => $this->departmentId === ''
+                ? ['nullable']
+                : ['integer', 'exists:departments,id'],
+            'subjectActive' => ['boolean'],
+        ]);
+
+        $departmentId = $this->departmentId === '' ? null : (int) $this->departmentId;
+
+        if ($this->editingId === null) {
+            $createSubject->handle(
+                code: $validated['subjectCode'],
+                name: $validated['subjectName'],
+                nameFr: $this->subjectNameFr === '' ? null : $this->subjectNameFr,
+                departmentId: $departmentId,
+                isActive: $this->subjectActive,
+            );
+
+            session()->flash('status', __('opes.subjects_screen.created'));
+        } else {
+            /** @var Subject $subject */
+            $subject = Subject::query()->findOrFail($this->editingId);
+
+            $updateSubject->handle($subject, [
+                'code' => $validated['subjectCode'],
+                'name' => $validated['subjectName'],
+                'name_fr' => $this->subjectNameFr === '' ? null : $this->subjectNameFr,
+                'department_id' => $departmentId,
+                'is_active' => $this->subjectActive,
+            ]);
+
+            session()->flash('status', __('opes.subjects_screen.updated'));
+        }
+
+        $this->resetForm();
+    }
+
+    private function resetForm(): void
+    {
+        $this->reset([
+            'showForm', 'editingId', 'subjectCode', 'subjectName',
+            'subjectNameFr', 'departmentId', 'subjectActive',
+        ]);
+        $this->resetErrorBag();
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, Subject>
+     */
+    private function subjects(): LengthAwarePaginator
+    {
+        return Subject::query()
+            ->when($this->search !== '', function ($query): void {
+                $query->where(function ($inner): void {
+                    $inner->where('code', 'like', '%'.$this->search.'%')
+                        ->orWhere('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('name_fr', 'like', '%'.$this->search.'%');
+                });
+            })
+            ->when($this->status !== '', function ($query): void {
+                $query->where('is_active', $this->status === 'active');
+            })
+            ->orderBy('code')
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+    }
+
+    public function render(): mixed
+    {
+        // Department names fetched as one keyed map rather than through a
+        // per-row relation: Subject carries department_id but Phase 1's model
+        // defines no department() relation, and N+1 lookups in Blade would be
+        // worse than this single bounded query (departments are a short list).
+        return view('livewire.academics.subjects.index', [
+            'subjects' => $this->subjects(),
+            'departmentNames' => Department::query()->orderBy('name')->pluck('name', 'id'),
+            'totalSubjects' => Subject::query()->count(),
+            'canManage' => Gate::allows(Permission::AcademicsManage->value),
+        ]);
+    }
+}
