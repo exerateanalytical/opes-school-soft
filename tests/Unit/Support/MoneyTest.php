@@ -49,7 +49,13 @@ it('compares', function () {
 });
 
 it('rejects a float amount', function () {
-    Money::of(1_500.75);
+    // Invoked through a callable so the static analyser cannot pre-empt the
+    // runtime check. strict_types applies at THIS call site, so PHP raises a
+    // TypeError rather than silently truncating 1500.75 to 1500.
+    /** @var callable $construct */
+    $construct = [Money::class, 'of'];
+
+    $construct(1_500.75);
 })->throws(TypeError::class);
 
 it('sums a list', function () {
