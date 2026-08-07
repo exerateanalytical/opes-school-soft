@@ -334,19 +334,22 @@ final class PreflightCommand extends Command
 
     public function handle(): int
     {
-        $ok = true;
-
         $this->line('OPES SCHOOL preflight');
         $this->line('');
 
-        $ok = $this->checkPhpVersion() && $ok;
-        $ok = $this->checkExtensions() && $ok;
-        $ok = $this->checkArgon2id() && $ok;
-        $ok = $this->checkDatabase() && $ok;
+        // Collected rather than accumulated with &&: every check must run and
+        // print its line, so the operator sees the whole picture in one pass
+        // rather than fixing one problem at a time.
+        $results = [
+            $this->checkPhpVersion(),
+            $this->checkExtensions(),
+            $this->checkArgon2id(),
+            $this->checkDatabase(),
+        ];
 
         $this->line('');
 
-        if (! $ok) {
+        if (in_array(false, $results, true)) {
             $this->error('Preflight FAILED. Fix the items marked FAIL above before continuing.');
 
             return self::FAILURE;
@@ -374,13 +377,26 @@ final class PreflightCommand extends Command
         return false;
     }
 
+    public const MINIMUM_PHP = '8.3.0';
+
+    /**
+     * version_compare against the runtime string rather than PHP_VERSION_ID.
+     *
+     * composer.json already requires ^8.3, so PHPStan constant-folds
+     * `PHP_VERSION_ID >= 80300` to always-true and correctly reports the
+     * comparison as dead. The check still earns its place: an install done
+     * with --ignore-platform-reqs, or a machine with several PHP builds where
+     * the wrong one is on PATH, both reach runtime unguarded. Comparing the
+     * runtime version string keeps the guard real and the analyser honest.
+     */
     private function checkPhpVersion(): bool
     {
         return $this->report(
-            PHP_VERSION_ID >= 80300,
+            version_compare(PHP_VERSION, self::MINIMUM_PHP, '>='),
             'PHP version',
             PHP_VERSION,
-            'PHP 8.3 or newer is required. Use C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe',
+            'PHP '.self::MINIMUM_PHP.' or newer is required. Use Laragon\'s '
+            .'php-8.3.30-Win32-vs16-x64 build.',
         );
     }
 
