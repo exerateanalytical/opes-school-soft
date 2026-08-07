@@ -28,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // route naming. OPES has exactly one landing screen; name it.
         $middleware->redirectUsersTo('/dashboard');
         $middleware->redirectGuestsTo('/login');
+
+        // The operator's UI language, chosen per session. Appended to the web
+        // group so it runs after StartSession - it reads session('locale'), so
+        // it cannot run before the session exists.
+        $middleware->appendToGroup('web', \App\Modules\Identity\Http\Middleware\SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

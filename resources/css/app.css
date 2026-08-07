@@ -20,6 +20,12 @@
     --color-charcoal: #26211A;
 }
 
+/* Alpine hides these until it has booted. Without it the user menu and the
+   mobile drawer flash open on every page load over a slow 3G link. */
+[x-cloak] {
+    display: none !important;
+}
+
 /* Visible focus on every control. 09-ui section 10 requires full keyboard
    operation - a marks grid used for hours is unusable without it. */
 :focus-visible {

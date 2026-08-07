@@ -20,15 +20,46 @@ Route::post('/logout', function () {
     return redirect()->route('login');
 })->middleware('auth')->name('logout');
 
-/*
- * PLACEHOLDER. The real dashboard arrives in Phase 0D task 4. It exists now
- * only so the post-login redirect target resolves, and so Laravel's `guest`
- * middleware - which prefers a route named `dashboard` - has something to
- * point an already-authenticated visitor at.
- */
-Route::get('/dashboard', function () {
-    return response('OPES SCHOOL');
-})->middleware('auth')->name('dashboard');
+Route::middleware('auth')->group(function (): void {
+    /*
+     * The dashboard's own component arrives in Phase 0D task 4. Until then this
+     * renders the real shell, so the post-login redirect target resolves and
+     * layouts/app.blade.php is exercised by a request rather than only by
+     * Livewire::test(), which never renders a layout.
+     */
+    Route::get('/dashboard', function () {
+        return view('shell.placeholder', [
+            'heading' => __('opes.nav.dashboard'),
+            'body' => __('opes.nav.nav_disabled_title'),
+        ]);
+    })->name('dashboard');
+
+    /*
+     * The operator's UI language, not the school's document language - see
+     * Identity\Http\Middleware\SetLocale. Only `en` and `fr` are accepted; a
+     * rejected value comes back as a validation error rather than silently
+     * leaving the interface as it was.
+     */
+    Route::post('/locale', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['locale' => 'required|in:en,fr']);
+        session(['locale' => $validated['locale']]);
+
+        return back();
+    })->name('locale.set');
+
+    /*
+     * STUB. Phase 0D task 6 builds User Management. The gate is real from the
+     * first day on purpose: the sidebar hides this link from a user without
+     * `user.view`, and hiding a link is presentation, never a control
+     * (00-core 6.2). The route has to refuse on its own.
+     */
+    Route::get('/users', function () {
+        return view('shell.placeholder', [
+            'heading' => __('opes.nav.users'),
+            'body' => __('opes.nav.nav_disabled_title'),
+        ]);
+    })->middleware('can:user.view')->name('users.index');
+});
 
 /*
  * Replaces Laravel's stock health route (see bootstrap/app.php). Left
