@@ -42,6 +42,17 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * The model lives in a module, not App\Models, so Laravel's factory-name
+     * guesser cannot find it. Point at the factory explicitly.
+     *
+     * @return UserFactory
+     */
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
+
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
