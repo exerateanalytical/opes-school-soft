@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property string $status
  * @property string $path
  * @property string|null $sha256
+ * @property int|null $size_bytes
  * @property array<string, mixed>|null $manifest
  * @property Carbon|null $completed_at
  * @property Carbon|null $verified_at

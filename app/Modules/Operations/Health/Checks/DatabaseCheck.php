@@ -18,7 +18,14 @@ final class DatabaseCheck implements HealthCheck
             $connection = DB::connection();
             $connection->getPdo();
 
-            $tables = count($connection->getSchemaBuilder()->getTableListing());
+            // Scoped to THIS database explicitly. getTableListing() with no
+            // argument enumerates every schema on the server, and on a shared
+            // Laragon or VPS that reported 2208 tables for an install that has
+            // eleven - a number nobody could sanity-check.
+            $tables = count($connection->getSchemaBuilder()->getTableListing(
+                $connection->getDatabaseName(),
+                false,
+            ));
 
             return new HealthCheckResult(
                 key: 'database.reachable',

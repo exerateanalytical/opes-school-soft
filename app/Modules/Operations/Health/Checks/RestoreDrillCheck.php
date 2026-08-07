@@ -37,14 +37,18 @@ final class RestoreDrillCheck implements HealthCheck
         $days = (int) $latest->completed_at->diffInDays(now());
         $red = (int) config('opes.health.drill_red_days');
         $amber = (int) config('opes.health.drill_amber_days');
-        $age = $days === 1 ? '1 day' : "{$days} days";
+        $age = match (true) {
+            $days < 1 => 'today',
+            $days === 1 => '1 day ago',
+            default => "{$days} days ago",
+        };
 
         if ($days >= $red) {
             return new HealthCheckResult(
                 key: 'drill.recency',
                 label: 'Restore drill',
                 status: HealthStatus::Red,
-                detail: "The last successful restore drill was {$age} ago.",
+                detail: "The last successful restore drill was {$age}.",
                 remedy: 'Run: php artisan opes:backup:drill',
             );
         }
@@ -54,7 +58,7 @@ final class RestoreDrillCheck implements HealthCheck
                 key: 'drill.recency',
                 label: 'Restore drill',
                 status: HealthStatus::Amber,
-                detail: "The last successful restore drill was {$age} ago, and one is due.",
+                detail: "The last successful restore drill was {$age}, and one is due.",
                 remedy: 'Run: php artisan opes:backup:drill',
             );
         }
@@ -63,7 +67,7 @@ final class RestoreDrillCheck implements HealthCheck
             key: 'drill.recency',
             label: 'Restore drill',
             status: HealthStatus::Ok,
-            detail: "A backup was restored and checked {$age} ago.",
+            detail: "A backup was restored and checked {$age}.",
             remedy: '',
         );
     }
