@@ -48,18 +48,30 @@
          class="fixed inset-y-0 left-0 z-20 hidden w-60 shrink-0 flex-col overflow-y-auto bg-chrome pb-4 md:static md:z-auto md:flex"
          :class="{ 'hidden': ! nav, 'flex': nav }">
 
-        {{-- Crest. No real school artwork exists yet, so this is a deliberate
-             placeholder built from the existing tokens - a gold monogram badge,
-             not a broken <img>. --}}
+        {{-- Crest: shield + crown + laurel wreath, gold line-art on the dark
+             chrome sidebar, built from the same two tokens as the rest of the
+             shell chrome (00-core section 8) - no new colours introduced. --}}
         <a href="/dashboard" class="flex flex-col items-center gap-1 px-4 pt-6 pb-4 text-center">
-            <svg class="h-16 w-16" viewBox="0 0 64 64" aria-hidden="true">
-                <circle cx="32" cy="32" r="30" fill="none" stroke="var(--color-heritage-yellow)" stroke-width="2"/>
-                <circle cx="32" cy="32" r="25" fill="var(--color-chrome-light)"/>
-                <text x="32" y="40" text-anchor="middle" font-size="26" font-weight="700"
-                      fill="var(--color-heritage-yellow)" font-family="serif">H</text>
+            <svg class="h-16 w-16" viewBox="0 0 64 64" fill="none" stroke="var(--color-heritage-yellow)"
+                 stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+                {{-- laurel wreath, left and right --}}
+                <path d="M14 46c-5-6-6-16-2-24" stroke-linecap="round"/>
+                <path d="M13 22l-3.5-1 1 3.5M13 30l-4-.5.5 4M14 38l-4 .5.8 4"/>
+                <path d="M50 46c5-6 6-16 2-24" stroke-linecap="round"/>
+                <path d="M51 22l3.5-1-1 3.5M51 30l4-.5-.5 4M50 38l4 .5-.8 4"/>
+                {{-- crown --}}
+                <path d="M24 14l3 6 5-8 5 8 3-6 2 8H22z" stroke-linecap="round"/>
+                {{-- shield --}}
+                <path d="M20 22h24v14c0 10-7 16-12 19-5-3-12-9-12-19V22z" stroke-linecap="round"/>
+                {{-- letterform --}}
+                <text x="32" y="40" text-anchor="middle" font-size="17" font-weight="700"
+                      fill="var(--color-heritage-yellow)" stroke="none" font-family="serif">O</text>
             </svg>
-            <span class="text-sm font-semibold leading-tight text-white">{{ __('opes.shell.brand') }} {{ __('opes.shell.brand_suffix') }}</span>
+            <span class="font-serif text-sm font-bold leading-tight tracking-wide text-heritage-yellow">{{ __('opes.shell.brand') }} {{ __('opes.shell.brand_suffix') }}</span>
+            <span class="text-[11px] italic leading-tight text-heritage-yellow/85">{{ __('opes.shell.tagline') }}</span>
         </a>
+
+        <x-toghu-band/>
 
         <ul class="space-y-0.5 px-2 py-2">
             @foreach ($navItems as $item)

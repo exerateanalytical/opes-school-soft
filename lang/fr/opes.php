@@ -49,6 +49,7 @@ return [
     'shell' => [
         'brand' => 'OPES',
         'brand_suffix' => 'SCHOOL',
+        'tagline' => "Excellence dans l'éducation",
         'primary_navigation' => 'Navigation principale',
         'open_menu' => 'Ouvrir le menu',
         'close_menu' => 'Fermer le menu',
