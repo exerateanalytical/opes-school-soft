@@ -74,33 +74,18 @@ Route::middleware('auth')->group(function (): void {
      * A guardian record is read by whoever may read the student it belongs to,
      * so `guardians.show` is gated on `students.view`; `guardians.manage`
      * gates writing, which happens inside the student screens.
-     *
-     * The class_exists guards are temporary scaffolding: Laravel validates an
-     * invokable route action at registration time, so naming a component that
-     * is still being built would stop the whole application from booting.
-     * Once the Students/Guardians/Admissions Livewire components exist the
-     * guards are always true and should be removed in favour of plain ::class
-     * references.
      */
-    if (class_exists('App\Modules\Students\Livewire\Students\Index')) {
-        Route::get('/students', 'App\Modules\Students\Livewire\Students\Index')
-            ->middleware('can:students.view')->name('students.index');
-    }
+    Route::get('/students', \App\Modules\Students\Livewire\Students\Index::class)
+        ->middleware('can:students.view')->name('students.index');
 
-    if (class_exists('App\Modules\Students\Livewire\Students\Show')) {
-        Route::get('/students/{student}', 'App\Modules\Students\Livewire\Students\Show')
-            ->middleware('can:students.view')->name('students.show');
-    }
+    Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
+        ->middleware('can:students.view')->name('students.show');
 
-    if (class_exists('App\Modules\Guardians\Livewire\Guardians\Show')) {
-        Route::get('/guardians/{guardian}', 'App\Modules\Guardians\Livewire\Guardians\Show')
-            ->middleware('can:students.view')->name('guardians.show');
-    }
+    Route::get('/guardians/{guardian}', \App\Modules\Guardians\Livewire\Guardians\Show::class)
+        ->middleware('can:students.view')->name('guardians.show');
 
-    if (class_exists('App\Modules\Admissions\Livewire\Wizard')) {
-        Route::get('/admissions', 'App\Modules\Admissions\Livewire\Wizard')
-            ->middleware('can:admissions.manage')->name('admissions.index');
-    }
+    Route::get('/admissions', \App\Modules\Admissions\Livewire\Wizard::class)
+        ->middleware('can:admissions.manage')->name('admissions.index');
 });
 
 /*

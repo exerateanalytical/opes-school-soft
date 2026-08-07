@@ -69,7 +69,8 @@ it('never stores a guessable password on the demo account', function () {
 
     // An account with no password at all would defeat the point of the check
     // below, so pin that down before relying on it.
-    expect($hash)->toBeString()->not->toBe('');
+    expect($hash)->toBeString();
+    expect(strlen((string) $hash))->toBeGreaterThan(0);
 
     foreach (['password', 'demo', 'Demo Administrator', 'demo@opeschool.test', 'secret'] as $guess) {
         expect(Hash::check($guess, (string) $hash))->toBeFalse();
