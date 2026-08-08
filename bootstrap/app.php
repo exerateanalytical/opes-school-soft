@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         __DIR__.'/../app/Modules/Identity/Console',
         __DIR__.'/../app/Modules/Operations/Console',
+        __DIR__.'/../app/Modules/Accounting/Console',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         // Stated rather than inferred. Laravel's `guest` middleware falls back
