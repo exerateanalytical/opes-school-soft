@@ -52,15 +52,12 @@ final class Parser
 
     private function parseOr(): Node
     {
-        $this->enter();
         $node = $this->parseAnd();
 
         while ($this->current()->type === TokenType::Or) {
             $this->advance();
             $node = new BinaryNode('or', $node, $this->parseAnd());
         }
-
-        $this->leave();
 
         return $node;
     }
