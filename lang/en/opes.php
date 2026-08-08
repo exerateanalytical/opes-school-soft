@@ -49,6 +49,16 @@ return [
         'settings' => 'Settings',
         'nav_disabled_title' => 'Arrives in a later phase',
     ],
+    // The scheduled-module landing page every not-yet-built sidebar item
+    // links to (shell/module-placeholder.blade.php). Same URL the real
+    // module will occupy later, so a bookmark made today survives it
+    // shipping.
+    'placeholder' => [
+        'chip' => 'Scheduled module',
+        'chip_short' => 'Soon',
+        'body' => ':module is part of this platform and is scheduled in the build plan, but its screens have not been built yet. This page will be replaced by the real module at this same address - a bookmark made now will keep working.',
+        'back_to_dashboard' => 'Back to the dashboard',
+    ],
     'shell' => [
         'brand' => 'OPES',
         'brand_suffix' => 'SCHOOL',

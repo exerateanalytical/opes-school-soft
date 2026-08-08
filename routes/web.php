@@ -122,6 +122,20 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/ledger/trial-balance', \App\Modules\Accounting\Livewire\Reports\TrialBalance::class)
         ->middleware('can:ledger.view')->name('ledger.trial-balance');
+
+    /*
+     * Scheduled modules. Every sidebar item is a real link: modules not yet
+     * built serve an in-shell placeholder page at the SAME URL the real
+     * module will later occupy, so a bookmark made today still works the day
+     * the module ships. Generated from Navigation::placeholderRoutes() so a
+     * new placeholder key gets its route by construction and the two files
+     * cannot drift apart. Auth only - the page contains nothing but
+     * translation strings, so there is no data to gate.
+     */
+    foreach (\App\Modules\Identity\Support\Navigation::placeholderRoutes() as $navKey => $path) {
+        Route::get($path, fn () => view('shell.module-placeholder', ['moduleKey' => $navKey]))
+            ->name('placeholder.'.$navKey);
+    }
 });
 
 /*

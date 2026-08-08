@@ -9,12 +9,18 @@ use App\Modules\Identity\Domain\Permission;
 /**
  * The sidebar, from docs/specs/09-ui.md section 2.
  *
- * Items whose module does not exist yet are listed with `enabled => false` and
- * render disabled with an explanatory title. Hiding them would misrepresent the
- * product; linking them to nothing would be worse. Each item also carries the
- * permission that gates it, so the nav and the route agree by construction.
+ * Every item is a real link. Modules that are not built yet carry
+ * `built => false`: their link leads to an in-shell placeholder page at the
+ * SAME URL the real module will later occupy (so bookmarks survive the
+ * module landing), and the nav renders a small "soon" chip beside them.
+ * Hiding future modules would misrepresent the product; a dead grey label
+ * reads as a defect to an operator, which is exactly how it was reported.
  *
- * @phpstan-type NavItem array{key: string, route: string|null, permission: Permission|null, enabled: bool}
+ * Each item also carries the permission that gates it, so the nav and the
+ * route agree by construction. Placeholder pages contain no data, so
+ * `permission => null` (auth only) is correct for them.
+ *
+ * @phpstan-type NavItem array{key: string, route: string|null, permission: Permission|null, enabled: bool, built: bool}
  */
 final class Navigation
 {
@@ -24,41 +30,79 @@ final class Navigation
     public static function items(): array
     {
         return [
-            ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true],
-            ['key' => 'admissions', 'route' => '/admissions', 'permission' => Permission::AdmissionsManage, 'enabled' => true],
-            ['key' => 'students', 'route' => '/students', 'permission' => Permission::StudentsView, 'enabled' => true],
-            // Guardians are reachable only through a student's record for now:
-            // there is a `guardians.show` route but no guardian list. Pointing
-            // a nav item at a detail route with no id would be a link to
-            // nothing, so this stays disabled until the list screen exists.
-            ['key' => 'guardians', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'staff', 'route' => null, 'permission' => null, 'enabled' => false],
+            ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true, 'built' => true],
+            ['key' => 'admissions', 'route' => '/admissions', 'permission' => Permission::AdmissionsManage, 'enabled' => true, 'built' => true],
+            ['key' => 'students', 'route' => '/students', 'permission' => Permission::StudentsView, 'enabled' => true, 'built' => true],
+            // Guardian RECORDS exist (Phase 2) and are reached through a
+            // student's profile; what is missing is the guardian LIST screen.
+            // The placeholder at /guardians says exactly that, and the real
+            // list will take over the same URL when it ships.
+            ['key' => 'guardians', 'route' => '/guardians', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'staff', 'route' => '/staff', 'permission' => null, 'enabled' => true, 'built' => false],
             // Gated on manage, not view: the route behind it is
             // `can:academics.manage`, and this file's contract is that the nav
             // and the route agree by construction. A Teacher with only
             // `academics.view` must not be shown a link that answers 403.
-            ['key' => 'academics', 'route' => '/academics/settings', 'permission' => Permission::AcademicsManage, 'enabled' => true],
-            ['key' => 'classes', 'route' => '/classes', 'permission' => Permission::AcademicsView, 'enabled' => true],
-            ['key' => 'subjects', 'route' => '/subjects', 'permission' => Permission::AcademicsView, 'enabled' => true],
-            ['key' => 'timetable', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'attendance', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'examinations', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'results', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'finance', 'route' => null, 'permission' => null, 'enabled' => false],
+            ['key' => 'academics', 'route' => '/academics/settings', 'permission' => Permission::AcademicsManage, 'enabled' => true, 'built' => true],
+            ['key' => 'classes', 'route' => '/classes', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
+            ['key' => 'subjects', 'route' => '/subjects', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
+            ['key' => 'timetable', 'route' => '/timetable', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'attendance', 'route' => '/attendance', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Exam SCHEDULING (sittings, invigilators, seating) shipped with
+            // Phase 3's Actions; marks entry lives at /marks. What these two
+            // placeholders await is their dedicated screens.
+            ['key' => 'examinations', 'route' => '/examinations', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'results', 'route' => '/results', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'finance', 'route' => '/finance', 'permission' => null, 'enabled' => true, 'built' => false],
             // The general ledger (09-ui.md's Finance section covers fees and
             // accounting together at `/finance`, but that dashboard route does
             // not exist yet). This item is scoped to the ledger screens Phase 4
             // ships: chart of accounts, journal entries, trial balance. Gated
             // on ledger.view so the sidebar and the routes below agree by
             // construction, per this file's documented contract.
-            ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true],
-            ['key' => 'library', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'inventory', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'transport', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'hostel', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'reports', 'route' => null, 'permission' => null, 'enabled' => false],
-            ['key' => 'users', 'route' => '/users', 'permission' => Permission::UserView, 'enabled' => true],
-            ['key' => 'settings', 'route' => null, 'permission' => Permission::SettingView, 'enabled' => false],
+            ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            ['key' => 'library', 'route' => '/library', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'inventory', 'route' => '/inventory', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'transport', 'route' => '/transport', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'hostel', 'route' => '/hostel', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'reports', 'route' => '/reports', 'permission' => null, 'enabled' => true, 'built' => false],
+            ['key' => 'users', 'route' => '/users', 'permission' => Permission::UserView, 'enabled' => true, 'built' => true],
+            ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => false],
         ];
+    }
+
+    /**
+     * The nav keys whose module is not built yet - each serves the shared
+     * placeholder page at its own future URL. routes/web.php iterates this so
+     * a key added here gets its route by construction, and the
+     * PlaceholderRoutesTest walks it so none can silently 404.
+     *
+     * @return list<string>
+     */
+    public static function placeholderKeys(): array
+    {
+        return array_values(array_map(
+            static fn (array $item): string => $item['key'],
+            array_filter(
+                self::items(),
+                static fn (array $item): bool => ! $item['built'] && is_string($item['route']),
+            ),
+        ));
+    }
+
+    /**
+     * @return array<string, string> nav key => path, for placeholder items
+     */
+    public static function placeholderRoutes(): array
+    {
+        $routes = [];
+
+        foreach (self::items() as $item) {
+            if (! $item['built'] && is_string($item['route'])) {
+                $routes[$item['key']] = $item['route'];
+            }
+        }
+
+        return $routes;
     }
 }

@@ -104,12 +104,14 @@ it('hides the people links from a role without students.view', function () {
     expect($html)->not->toContain('href="/admissions"');
 });
 
-it('never links guardians from the sidebar while there is no guardian list', function () {
-    // `guardians.show` needs an id; a sidebar entry pointing at it would be a
-    // link to nothing. Disabled is the honest rendering.
+it('links guardians from the sidebar to the placeholder that will become the list', function () {
+    // The guardian LIST screen is not built, but a dead grey label read as a
+    // defect to a real operator. The item now links to /guardians, which
+    // serves the scheduled-module page until the real list takes over the
+    // same URL.
     $html = (string) actingAs(shellUser())->get('/dashboard')->getContent();
 
-    expect($html)->not->toContain('href="/guardians');
+    expect($html)->toContain('href="/guardians"');
 });
 
 it('blocks the people routes as well as hiding the links', function () {
@@ -126,16 +128,36 @@ it('blocks the route as well as hiding the link', function () {
     actingAs(shellUser(Role::Bursar))->get('/users')->assertForbidden();
 });
 
-it('marks unbuilt nav items as disabled rather than hiding or faking them', function () {
-    // A shell full of links that silently do nothing is worse than one that
-    // admits what is not built yet.
+it('links every unbuilt module to its placeholder and labels it as coming', function () {
+    // Every sidebar item is a real link. Unbuilt modules carry a "soon" chip
+    // and lead to the scheduled-module page at the URL the real module will
+    // later occupy - honest about what is not built, without a single dead
+    // click anywhere in the sidebar.
     $html = (string) actingAs(shellUser())->get('/dashboard')->getContent();
 
-    // Guardians is built but has no list screen; Library is not built at all.
-    // Both render as inert, labelled entries rather than dead links.
-    expect($html)->toContain('Guardians');
-    expect($html)->toContain('Library');
-    expect($html)->toContain('aria-disabled="true"');
+    expect($html)->toContain('href="/library"');
+    expect($html)->toContain('href="/timetable"');
+    expect($html)->toContain('href="/settings"');
+    expect($html)->toContain(__('opes.placeholder.chip_short'));
+});
+
+it('serves the scheduled-module page on every placeholder route', function () {
+    // Generated from the same source the routes are (Navigation), so a new
+    // placeholder key cannot ship without a working page behind it.
+    actingAs(shellUser());
+
+    foreach (\App\Modules\Identity\Support\Navigation::placeholderRoutes() as $key => $path) {
+        get($path)
+            ->assertOk()
+            ->assertSee(__('opes.nav.'.$key))
+            ->assertSee(__('opes.placeholder.chip'));
+    }
+});
+
+it('redirects a guest away from every placeholder route', function () {
+    foreach (\App\Modules\Identity\Support\Navigation::placeholderRoutes() as $path) {
+        get($path)->assertRedirect('/login');
+    }
 });
 
 it('renders in French when the locale is set', function () {

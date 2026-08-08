@@ -51,6 +51,16 @@ return [
         'settings' => 'Paramètres',
         'nav_disabled_title' => 'Disponible dans une phase ultérieure',
     ],
+    // La page d'accueil des modules planifiés, vers laquelle pointe chaque
+    // élément de la barre latérale dont le module n'est pas encore construit
+    // (shell/module-placeholder.blade.php). Même URL que le futur module :
+    // un favori créé aujourd'hui restera valable.
+    'placeholder' => [
+        'chip' => 'Module planifié',
+        'chip_short' => 'Bientôt',
+        'body' => ':module fait partie de cette plateforme et figure au plan de construction, mais ses écrans ne sont pas encore réalisés. Cette page sera remplacée par le module réel à cette même adresse - un favori créé maintenant restera valable.',
+        'back_to_dashboard' => 'Retour au tableau de bord',
+    ],
     'shell' => [
         'brand' => 'OPES',
         'brand_suffix' => 'SCHOOL',

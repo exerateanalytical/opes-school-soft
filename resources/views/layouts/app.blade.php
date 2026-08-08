@@ -83,11 +83,23 @@
                     @if ($item['enabled'] && is_string($item['route']))
                         <a href="{{ $item['route'] }}"
                            @if ($isActive) aria-current="page" @endif
+                           @unless ($item['built'] ?? true) title="{{ __('opes.nav.nav_disabled_title') }}" @endunless
                            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
                                ? 'bg-chrome-light font-semibold text-white'
-                               : 'text-white/85 hover:bg-chrome-light/60 hover:text-white' }}">
+                               : (($item['built'] ?? true)
+                                   ? 'text-white/85 hover:bg-chrome-light/60 hover:text-white'
+                                   : 'text-white/60 hover:bg-chrome-light/40 hover:text-white/90') }}">
                             <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
-                            {{ $label }}
+                            <span class="min-w-0 truncate">{{ $label }}</span>
+                            @unless ($item['built'] ?? true)
+                                {{-- The module is scheduled, not missing: the
+                                     link works and lands on a page that says
+                                     so. The chip keeps built and coming
+                                     modules distinguishable at a glance. --}}
+                                <span class="ml-auto shrink-0 rounded-full bg-heritage-yellow/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-heritage-yellow">
+                                    {{ __('opes.placeholder.chip_short') }}
+                                </span>
+                            @endunless
                         </a>
                     @else
                         <span aria-disabled="true"
