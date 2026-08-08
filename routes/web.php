@@ -96,17 +96,27 @@ Route::middleware('auth')->group(function (): void {
      * re-checks that through Mark::mayEnter() on mount and on every write -
      * T22 treats reaching an unassigned allocation as a failure even for a
      * user who holds the permission.
-     *
-     * The class_exists guard is temporary scaffolding, the same idiom commit
-     * 316eee0 used for the Academics screens: Laravel validates an invokable
-     * route action at registration time, so naming a component another agent
-     * is still writing would stop the application booting. Remove it at
-     * integration - by then the guard is always true.
      */
-    if (class_exists('App\Modules\Assessment\Livewire\Marks\Entry')) {
-        Route::get('/marks', 'App\Modules\Assessment\Livewire\Marks\Entry')
-            ->middleware('can:marks.enter')->name('marks.entry');
-    }
+    Route::get('/marks', \App\Modules\Assessment\Livewire\Marks\Entry::class)
+        ->middleware('can:marks.enter')->name('marks.entry');
+
+    /*
+     * Ledger, docs/specs/02-accounting.md. Same principle again: the sidebar
+     * hides what the operator cannot reach, but hiding is presentation - each
+     * route refuses on its own. Journal-entry creation is gated harder
+     * (`ledger.post`) because it writes to the books; the rest is read-only.
+     */
+    Route::get('/ledger/chart-of-accounts', \App\Modules\Accounting\Livewire\ChartOfAccounts\Index::class)
+        ->middleware('can:ledger.view')->name('ledger.chart-of-accounts');
+
+    Route::get('/ledger/journal-entries', \App\Modules\Accounting\Livewire\JournalEntries\Index::class)
+        ->middleware('can:ledger.view')->name('ledger.journal-entries.index');
+
+    Route::get('/ledger/journal-entries/create', \App\Modules\Accounting\Livewire\JournalEntries\Form::class)
+        ->middleware('can:ledger.post')->name('ledger.journal-entries.create');
+
+    Route::get('/ledger/trial-balance', \App\Modules\Accounting\Livewire\Reports\TrialBalance::class)
+        ->middleware('can:ledger.view')->name('ledger.trial-balance');
 });
 
 /*

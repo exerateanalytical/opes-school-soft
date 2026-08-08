@@ -71,6 +71,14 @@ enum Permission: string
     case LedgerView = 'ledger.view';
     case LedgerPost = 'ledger.post';
 
+    // 02-accounting §3/§5/§6: configuring journals, opening a fiscal year and
+    // its accounting periods, and closing/unlocking a period are distinct
+    // from posting an entry (ledger.post) - they shape what the ledger IS,
+    // not what gets recorded in it. Kept separate so a bursar-adjacent role
+    // could in principle post without being able to lock a period out from
+    // under everyone else.
+    case LedgerConfigure = 'ledger.configure';
+
     case BackupRun = 'backup.run';
     case BackupRestore = 'backup.restore';
     case LicenceManage = 'licence.manage';
