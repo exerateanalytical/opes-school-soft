@@ -86,6 +86,27 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/admissions', \App\Modules\Admissions\Livewire\Wizard::class)
         ->middleware('can:admissions.manage')->name('admissions.index');
+
+    /*
+     * Marks entry, docs/specs/01-assessment.md 17. The single highest-traffic
+     * academic screen.
+     *
+     * `can:marks.enter` is the OUTER gate only. 7.5 scopes entry to the
+     * allocations the actor teaches or has been delegated, and the component
+     * re-checks that through Mark::mayEnter() on mount and on every write -
+     * T22 treats reaching an unassigned allocation as a failure even for a
+     * user who holds the permission.
+     *
+     * The class_exists guard is temporary scaffolding, the same idiom commit
+     * 316eee0 used for the Academics screens: Laravel validates an invokable
+     * route action at registration time, so naming a component another agent
+     * is still writing would stop the application booting. Remove it at
+     * integration - by then the guard is always true.
+     */
+    if (class_exists('App\Modules\Assessment\Livewire\Marks\Entry')) {
+        Route::get('/marks', 'App\Modules\Assessment\Livewire\Marks\Entry')
+            ->middleware('can:marks.enter')->name('marks.entry');
+    }
 });
 
 /*

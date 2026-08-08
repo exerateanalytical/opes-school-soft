@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
 use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
+use App\Modules\Assessment\Livewire\Marks\Entry as MarksEntry;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
 use App\Modules\Guardians\Livewire\Guardians\Show as GuardiansShow;
@@ -64,5 +65,10 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('students.show', StudentsShow::class);
         Livewire::component('guardians.show', GuardiansShow::class);
         Livewire::component('students.guardians-panel', StudentGuardiansPanel::class);
+
+        // Marks entry (01-assessment 17). Named explicitly for the same reason
+        // as every routed component above: one mechanism finds all of them, so
+        // a future rename cannot quietly change how one is resolved.
+        Livewire::component('assessment.marks-entry', MarksEntry::class);
     }
 }

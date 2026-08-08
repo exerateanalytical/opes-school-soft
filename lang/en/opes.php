@@ -296,6 +296,10 @@ return [
         'students.finalise_matricule' => 'Finalise a matricule',
         'guardians.manage' => 'Manage guardians',
         'admissions.manage' => 'Manage admissions',
+        'marks.enter' => 'Enter marks',
+        'marks.validate' => 'Validate marks',
+        'assessment.configure' => 'Configure the assessment framework',
+        'reports.publish' => 'Publish report cards',
         'fee.view' => 'View fees',
         'fee.collect' => 'Collect payments',
         'fee.void' => 'Void payments',
@@ -304,6 +308,23 @@ return [
         'backup.run' => 'Run a backup',
         'backup.restore' => 'Restore from a backup',
         'licence.manage' => 'Manage the licence',
+    ],
+    // Assessment framework families, 01-assessment 3.2.
+    'framework_family' => [
+        'A' => 'MINESEC Francophone secondary',
+        'B' => 'MINESEC Anglophone secondary',
+        'C' => 'Technical / teacher training',
+        'D' => 'MINEDUB Francophone primary',
+        'E' => 'MINEDUB Anglophone primary',
+        'F' => 'MINEDUB nursery',
+    ],
+    // Assessment component kinds, 01-assessment 5.3.
+    'component_kind' => [
+        'continuous_assessment' => 'Continuous assessment',
+        'examination' => 'Examination',
+        'practical' => 'Practical',
+        'oral' => 'Oral',
+        'other' => 'Other',
     ],
     // Academic Settings screen, Phase 1 (frontend images/accademic setting.png).
     'academics' => [
@@ -856,6 +877,111 @@ return [
             'reason_required' => 'Give a reason for the rejection.',
             'dob_in_future' => 'The date of birth cannot be in the future.',
             'class_group_required' => 'Choose the class group the student joins.',
+        ],
+    ],
+
+    /*
+     * Marks entry (01-assessment 17) and Examinations (16). Appended at the
+     * END of the file so a section edited concurrently above can never
+     * collide with this one.
+     */
+    'assessment_screen' => [
+        'title' => 'Marks entry',
+        'breadcrumb_dashboard' => 'Dashboard',
+        'breadcrumb_marks' => 'Marks entry',
+
+        'choose' => 'Choose...',
+        'choose_scope' => 'Choose a class, a subject, a period and a component to open the grid.',
+        'empty_grid' => 'No student in this class has a mark row for this subject, period and component.',
+
+        'scope_class_group' => 'Class',
+        'scope_allocation' => 'Subject',
+        'scope_period' => 'Period',
+        'scope_component' => 'Component',
+
+        'col_matricule' => 'Matricule',
+        'col_student' => 'Student',
+        'col_score' => 'Mark',
+        'col_state' => 'State',
+        'col_reason' => 'Reason',
+        'col_workflow' => 'Stage',
+
+        'state_scored' => 'Scored',
+        'state_short_scored' => 'Mark',
+        'state_pending' => 'Not yet entered',
+        'state_absent_unjustified' => 'Absent, unexcused',
+        'state_absent_justified' => 'Absent, certified',
+        'state_exempt' => 'Exempt',
+
+        'workflow_draft' => 'Draft',
+        'workflow_submitted' => 'Submitted',
+        'workflow_validated' => 'Validated',
+
+        'kpi_entered' => 'Entered',
+        'kpi_pending' => 'Still pending',
+        'kpi_class_mean' => 'Class mean so far',
+        'kpi_out_of_range' => 'Out of range',
+
+        'keyboard_legend' => 'Keyboard:',
+        'keyboard_move' => 'move between students',
+        'out_of_range' => 'out of range',
+        'reason_placeholder' => 'Why? (required)',
+
+        'footer_entered' => 'entered',
+        'footer_pending' => 'pending',
+        'footer_mean' => 'Class mean:',
+        'footer_out_of_range' => 'out of range',
+        'footer_unsaved' => 'unsaved',
+
+        'save' => 'Save marks',
+        'submit' => 'Submit for validation',
+        'submit_confirm' => 'Submit these marks to the head of department? You will not be able to edit them again until they are returned.',
+        'submitted' => ':submitted mark(s) submitted for validation; :pending still not entered.',
+        'saved_count' => '{0} Nothing to save.|{1} One mark saved.|[2,*] :count marks saved.',
+        'nothing_changed' => 'Nothing has changed since the last save.',
+
+        'conflict_heading' => '{1} One mark was changed by somebody else.|[2,*] :count marks were changed by somebody else.',
+        'conflict_explainer' => 'Nothing of yours was overwritten. Your value is still in the grid: save again to keep it, or type theirs to accept it.',
+        'conflict_set_to' => 'set it to',
+
+        'errors' => [
+            'no_scope' => 'Choose a class, a subject and a period before saving.',
+            'bad_payload' => 'The grid sent a row with no mark or no version; nothing was saved.',
+            'bad_state' => 'Unknown mark state ":state"; nothing was saved.',
+        ],
+    ],
+
+    'exams_screen' => [
+        'title' => 'Examinations',
+        'breadcrumb_dashboard' => 'Dashboard',
+        'breadcrumb_exams' => 'Examinations',
+
+        'col_subject' => 'Subject',
+        'col_class' => 'Class',
+        'col_date' => 'Date',
+        'col_time' => 'Time',
+        'col_duration' => 'Duration',
+        'col_room' => 'Room',
+        'col_invigilators' => 'Invigilators',
+        'col_seats' => 'Seats',
+        'col_status' => 'Status',
+
+        'status_planned' => 'Planned',
+        'status_scheduled' => 'Scheduled',
+        'status_in_progress' => 'In progress',
+        'status_marked' => 'Marked',
+        'status_cancelled' => 'Cancelled',
+
+        'role_chief' => 'Chief invigilator',
+        'role_assistant' => 'Assistant',
+
+        'minutes' => ':count min',
+        'no_room' => 'No room set',
+        'no_seating' => 'Not seated yet',
+
+        'errors' => [
+            'invigilator_overlap' => 'This staff member is already invigilating an overlapping sitting; one person cannot be in two rooms at once.',
+            'over_capacity' => 'There are more candidates than chairs in the chosen room(s).',
         ],
     ],
 ];
