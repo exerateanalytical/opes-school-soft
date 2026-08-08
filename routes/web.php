@@ -5,9 +5,14 @@ use App\Modules\Operations\Http\HealthController;
 use App\Modules\Operations\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+/*
+ * The bare domain is not a page of its own: an operator lands on their
+ * dashboard, and a visitor without a session is bounced to login by the
+ * dashboard's own auth middleware. (Until now this served Laravel's stock
+ * welcome view - the one page of the framework skeleton nobody ever
+ * replaced, so http://opeschool.test greeted a school with Laracasts links.)
+ */
+Route::redirect('/', '/dashboard');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
