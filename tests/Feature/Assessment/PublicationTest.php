@@ -353,6 +353,17 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     DB::purge('assessment_second');
+
+    // This file COMMITS its fixtures (no RefreshDatabase - T17's second
+    // connection needs to see them), so truncating only in beforeEach cleans
+    // up after the PREVIOUS test but leaves the LAST test's rows behind for
+    // every RefreshDatabase file that runs after this one. Those files wrap
+    // their work in a transaction on top of whatever is committed underneath,
+    // and their absolute-count assertions (audit rows, user counts, KPI
+    // totals) silently inherit this file's debris - the exact cascade that
+    // broke 28 unrelated tests in the first full-suite run. Clean up on the
+    // way out, not just on the way in.
+    assessmentTruncateAll();
 });
 
 it('publishes a class group and writes one snapshot per student in one batch', function () {

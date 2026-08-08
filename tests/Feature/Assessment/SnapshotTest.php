@@ -27,6 +27,13 @@ beforeEach(function (): void {
     actingAs(assessmentPublisher());
 });
 
+// See PublicationTest's afterEach note: committed fixtures must be cleaned on
+// the way out too, or the last test's rows leak into every RefreshDatabase
+// file that runs after this one.
+afterEach(function (): void {
+    assessmentTruncateAll();
+});
+
 it('T13: mutating the marks, coefficients, bands and config leaves the pdf_hash identical', function () {
     $fx = assessmentFixture(['groups' => 1, 'students' => 3, 'subjects' => 2]);
 

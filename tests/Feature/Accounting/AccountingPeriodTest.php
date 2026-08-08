@@ -16,7 +16,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-function periodUserAs(Role $role = Role::Accountant): User
+function accountingPeriodUserAs(Role $role = Role::Accountant): User
 {
     (new Database\Seeders\RolePermissionSeeder())->run();
     $user = User::factory()->create();
@@ -26,7 +26,7 @@ function periodUserAs(Role $role = Role::Accountant): User
 }
 
 it('moves an open period to soft_locked through CloseAccountingPeriod', function () {
-    $user = periodUserAs();
+    $user = accountingPeriodUserAs();
     actingAs($user);
 
     $period = AccountingPeriod::factory()->create(['status' => AccountingPeriodStatus::Open]);
@@ -39,7 +39,7 @@ it('moves an open period to soft_locked through CloseAccountingPeriod', function
 });
 
 it('moves a soft_locked period to hard_locked when $hard = true, but not an open one', function () {
-    $user = periodUserAs();
+    $user = accountingPeriodUserAs();
     actingAs($user);
 
     $open = AccountingPeriod::factory()->create(['status' => AccountingPeriodStatus::Open]);
@@ -55,7 +55,7 @@ it('moves a soft_locked period to hard_locked when $hard = true, but not an open
 });
 
 it('refuses to soft-lock a period that is not open', function () {
-    $user = periodUserAs();
+    $user = accountingPeriodUserAs();
     actingAs($user);
 
     $period = AccountingPeriod::factory()->create(['status' => AccountingPeriodStatus::HardLocked]);
@@ -65,7 +65,7 @@ it('refuses to soft-lock a period that is not open', function () {
 });
 
 it('unlocks a soft_locked period back to open with a mandatory reason', function () {
-    $user = periodUserAs();
+    $user = accountingPeriodUserAs();
     actingAs($user);
 
     $period = AccountingPeriod::factory()->create(['status' => AccountingPeriodStatus::SoftLocked]);
@@ -80,7 +80,7 @@ it('unlocks a soft_locked period back to open with a mandatory reason', function
 });
 
 it('refuses to unlock a hard_locked period for anyone but Super Admin', function () {
-    $user = periodUserAs();
+    $user = accountingPeriodUserAs();
     actingAs($user);
 
     $fiscalYear = FiscalYear::factory()->create();
@@ -91,7 +91,7 @@ it('refuses to unlock a hard_locked period for anyone but Super Admin', function
 });
 
 it('lets Super Admin unlock a hard_locked period when the fiscal year has not been DSF-filed', function () {
-    $user = periodUserAs(Role::SuperAdmin);
+    $user = accountingPeriodUserAs(Role::SuperAdmin);
     actingAs($user);
 
     $fiscalYear = FiscalYear::factory()->create();
@@ -103,7 +103,7 @@ it('lets Super Admin unlock a hard_locked period when the fiscal year has not be
 });
 
 it('refuses Super Admin unlock once the fiscal year is DSF-filed', function () {
-    $user = periodUserAs(Role::SuperAdmin);
+    $user = accountingPeriodUserAs(Role::SuperAdmin);
     actingAs($user);
 
     $fiscalYear = FiscalYear::factory()->create(['dsf_filed_at' => now()]);
