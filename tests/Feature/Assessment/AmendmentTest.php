@@ -89,7 +89,9 @@ it('T15: an amendment returns every affected student, not only the corrected one
     // The generation increments (15.2 step 3).
     expect($result['from_generation'])->toBe(1);
     expect($result['to_generation'])->toBe(2);
-    expect((int) PeriodPublication::query()->findOrFail($publication->getKey())->generation)->toBe(2);
+    $refreshedPublication = PeriodPublication::query()->findOrFail((int) $publication->getKey());
+    expect($refreshedPublication)->toBeInstanceOf(PeriodPublication::class);
+    expect((int) $refreshedPublication->generation)->toBe(2);
 
     // A new generation of snapshots for EVERY enrollment in the class group,
     // not only the corrected one (15.2 step 4).
