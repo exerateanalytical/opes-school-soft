@@ -86,6 +86,38 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/admissions', \App\Modules\Admissions\Livewire\Wizard::class)
         ->middleware('can:admissions.manage')->name('admissions.index');
+
+    /*
+     * Ledger, docs/specs/02-accounting.md. Same principle again: the sidebar
+     * hides what the operator cannot reach, but hiding is presentation - each
+     * route refuses on its own. Journal-entry creation is gated harder
+     * (`ledger.post`) because it writes to the books; the rest is read-only.
+     *
+     * The class_exists guards are temporary scaffolding, same idiom as
+     * commit 316eee0: Laravel validates an invokable route action at
+     * registration time, and Accounting's Livewire components are still being
+     * built concurrently. Once they exist the guards are always true and
+     * should be removed in favour of plain ::class references.
+     */
+    if (class_exists('App\Modules\Accounting\Livewire\ChartOfAccounts\Index')) {
+        Route::get('/ledger/chart-of-accounts', 'App\Modules\Accounting\Livewire\ChartOfAccounts\Index')
+            ->middleware('can:ledger.view')->name('ledger.chart-of-accounts');
+    }
+
+    if (class_exists('App\Modules\Accounting\Livewire\JournalEntries\Index')) {
+        Route::get('/ledger/journal-entries', 'App\Modules\Accounting\Livewire\JournalEntries\Index')
+            ->middleware('can:ledger.view')->name('ledger.journal-entries.index');
+    }
+
+    if (class_exists('App\Modules\Accounting\Livewire\JournalEntries\Form')) {
+        Route::get('/ledger/journal-entries/create', 'App\Modules\Accounting\Livewire\JournalEntries\Form')
+            ->middleware('can:ledger.post')->name('ledger.journal-entries.create');
+    }
+
+    if (class_exists('App\Modules\Accounting\Livewire\Reports\TrialBalance')) {
+        Route::get('/ledger/trial-balance', 'App\Modules\Accounting\Livewire\Reports\TrialBalance')
+            ->middleware('can:ledger.view')->name('ledger.trial-balance');
+    }
 });
 
 /*

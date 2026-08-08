@@ -87,7 +87,7 @@ enum Role: string
 
             self::Accountant => [
                 Permission::FeeView, Permission::LedgerView, Permission::LedgerPost,
-                Permission::FeeVoid,
+                Permission::LedgerConfigure, Permission::FeeVoid,
             ],
 
             // 00-core 9.1: the registrar owns the student record end to end -

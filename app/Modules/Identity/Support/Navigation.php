@@ -45,6 +45,13 @@ final class Navigation
             ['key' => 'examinations', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'results', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'finance', 'route' => null, 'permission' => null, 'enabled' => false],
+            // The general ledger (09-ui.md's Finance section covers fees and
+            // accounting together at `/finance`, but that dashboard route does
+            // not exist yet). This item is scoped to the ledger screens Phase 4
+            // ships: chart of accounts, journal entries, trial balance. Gated
+            // on ledger.view so the sidebar and the routes below agree by
+            // construction, per this file's documented contract.
+            ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true],
             ['key' => 'library', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'inventory', 'route' => null, 'permission' => null, 'enabled' => false],
             ['key' => 'transport', 'route' => null, 'permission' => null, 'enabled' => false],

@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
+use App\Modules\Accounting\Livewire\ChartOfAccounts\Index as ChartOfAccountsIndex;
+use App\Modules\Accounting\Livewire\JournalEntries\Form as JournalEntryForm;
+use App\Modules\Accounting\Livewire\JournalEntries\Index as JournalEntriesIndex;
+use App\Modules\Accounting\Livewire\Reports\TrialBalance as TrialBalanceReport;
 use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
@@ -64,5 +68,16 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('students.show', StudentsShow::class);
         Livewire::component('guardians.show', GuardiansShow::class);
         Livewire::component('students.guardians-panel', StudentGuardiansPanel::class);
+
+        // Ledger, docs/specs/02-accounting.md, routed at /ledger/* in
+        // routes/web.php behind `class_exists` guards D5 owns. Both list
+        // screens end in ".index" (the stripping reason above); Form and
+        // TrialBalance are aliased anyway for the same symmetry reason as
+        // every other module here - one resolution mechanism for every
+        // routed component, so a future rename cannot quietly break one.
+        Livewire::component('accounting.chart-of-accounts.index', ChartOfAccountsIndex::class);
+        Livewire::component('accounting.journal-entries.index', JournalEntriesIndex::class);
+        Livewire::component('accounting.journal-entries.form', JournalEntryForm::class);
+        Livewire::component('accounting.reports.trial-balance', TrialBalanceReport::class);
     }
 }
