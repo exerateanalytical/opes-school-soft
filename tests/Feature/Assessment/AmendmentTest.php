@@ -24,6 +24,14 @@ beforeEach(function (): void {
     actingAs(assessmentPublisher());
 });
 
+// See PublicationTest's afterEach note: this file commits its fixtures, so it
+// must clean up on the way out too, or its last test's rows leak into every
+// RefreshDatabase file that runs after it - this file is alphabetically FIRST
+// in the directory, so its debris reached ApprovalChainTest and beyond.
+afterEach(function (): void {
+    assessmentTruncateAll();
+});
+
 if (! function_exists('amendableFixture')) {
     /**
      * Four students with deliberately distinct averages, so that moving one
