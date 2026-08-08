@@ -240,6 +240,15 @@ return [
                 .'altered, which means someone had direct access to the database. Tell the '
                 .'head of school today, keep the current backups, and contact support.',
         ],
+        'ledger_integrity' => [
+            'label' => 'Ledger integrity',
+            'ok_detail' => 'Every accounting invariant holds.',
+            'red_detail' => ':count problem(s) found in the accounts (:invariants). The books '
+                .'no longer add up the way double-entry accounting guarantees they must.',
+            'red_remedy' => 'Do not post any further entries until this is resolved. Call your '
+                .'accountant and show them this page, then run: php artisan opes:ledger:verify '
+                .'to see the detail. Keep the current backups.',
+        ],
         'disk_space' => [
             'label' => 'Disk space',
             'detail' => 'The backup drive is :percent% full, with :free GB free.',

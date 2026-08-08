@@ -248,6 +248,15 @@ return [
                 .'de données. Informez la direction de l\'établissement dès aujourd\'hui, '
                 .'conservez les sauvegardes actuelles et contactez le support.',
         ],
+        'ledger_integrity' => [
+            'label' => 'Intégrité du grand livre',
+            'ok_detail' => 'Tous les invariants comptables sont respectés.',
+            'red_detail' => ':count problème(s) détecté(s) dans les comptes (:invariants). Les '
+                .'écritures ne s\'équilibrent plus comme la partie double le garantit.',
+            'red_remedy' => 'Ne passez plus aucune écriture tant que ce n\'est pas résolu. '
+                .'Appelez votre comptable et montrez-lui cette page, puis lancez : php artisan '
+                .'opes:ledger:verify pour voir le détail. Conservez les sauvegardes actuelles.',
+        ],
         'disk_space' => [
             'label' => 'Espace disque',
             'detail' => 'Le disque de sauvegarde est plein à :percent %, avec :free Go libres.',

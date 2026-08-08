@@ -12,6 +12,12 @@ Artisan::command('inspire', function () {
 // 00-core 14: the chain is only tamper-evident if something actually looks.
 Schedule::command('opes:audit:verify')->dailyAt('02:30');
 
+// 02-accounting 4.3, backstop column: the invariants are only guaranteed if
+// something re-asserts them nightly. After the audit verify (a broken chain
+// makes this run's own audit trail suspect) and before the backup verify, so
+// tonight's backup captures a ledger this sweep has just pronounced on.
+Schedule::command('opes:ledger:verify')->dailyAt('02:45');
+
 // 08-operations 3.3-3.6. Ordered so each step has something to work on: take
 // the backup, verify a bounded number of them, then prune, then - monthly -
 // prove the newest one actually restores.

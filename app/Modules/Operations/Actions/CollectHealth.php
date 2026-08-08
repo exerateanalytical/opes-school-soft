@@ -22,6 +22,7 @@ final class CollectHealth
         Checks\BackupSecondTargetCheck::class,
         Checks\RestoreDrillCheck::class,
         Checks\AuditChainCheck::class,
+        Checks\LedgerIntegrityCheck::class,
         Checks\DiskSpaceCheck::class,
         Checks\QueueHeartbeatCheck::class,
         Checks\FailedJobsCheck::class,
