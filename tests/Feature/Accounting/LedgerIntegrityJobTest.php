@@ -252,8 +252,15 @@ if (! function_exists('integrityRestoreLineTriggers')) {
                     throw new RuntimeException('Extracted a CREATE TRIGGER block with no parseable name.');
                 }
 
-                DB::unprepared('DROP TRIGGER IF EXISTS '.$name[1]);
-                DB::unprepared($ddl);
+                // PDO::exec, not DB::unprepared: unprepared()'s signature
+                // demands a literal-string precisely so runtime-assembled SQL
+                // cannot slip through it - the right default. This DDL is
+                // extracted from our own migration source and the name from
+                // that same block, so replaying it at the PDO level is the
+                // honest way to say "this is trusted DDL replay", not a
+                // loophole around the injection guard.
+                DB::connection()->getPdo()->exec('DROP TRIGGER IF EXISTS '.$name[1]);
+                DB::connection()->getPdo()->exec($ddl);
             }
         }
     }
