@@ -194,7 +194,16 @@ if (! function_exists('integrityDropLineTriggers')) {
      * The whole point of the nightly job is to catch what the guards missed:
      * a trigger dropped in production is silent. These tests reproduce that
      * exact failure mode, then plant the corruption the trigger would have
-     * refused. RefreshDatabase's migrate:fresh restores them for other runs.
+     * refused.
+     *
+     * The drop MUST be undone by integrityRestoreLineTriggers() before the
+     * test ends. RefreshDatabase does NOT restore them mid-suite: it migrates
+     * once per process and then wraps each test in a transaction, and DROP
+     * TRIGGER is DDL - it implicitly commits and survives the rollback. An
+     * unrestored drop would leave every later test in the same run without
+     * L3/L8 protection, including LedgerInvariantsTest's direct-SQL proofs of
+     * those very triggers - the same committed-leak class that once broke 28
+     * unrelated tests in this suite.
      */
     function integrityDropLineTriggers(): void
     {
@@ -204,6 +213,55 @@ if (! function_exists('integrityDropLineTriggers')) {
         DB::unprepared('DROP TRIGGER IF EXISTS trg_jel_l8_before_update');
     }
 }
+
+if (! function_exists('integrityRestoreLineTriggers')) {
+    /**
+     * Re-creates the dropped triggers from the MIGRATIONS' OWN SOURCE, so a
+     * future edit to a trigger body cannot silently diverge from what this
+     * restore installs. Extraction, not duplication.
+     */
+    function integrityRestoreLineTriggers(): void
+    {
+        $migrationFiles = [
+            database_path('migrations/2026_08_07_230008_create_journal_entry_lines_table.php'),
+            database_path('migrations/2026_08_07_230010_add_auxiliary_columns_to_journal_entry_lines.php'),
+        ];
+
+        foreach ($migrationFiles as $file) {
+            $source = file_get_contents($file);
+
+            if ($source === false) {
+                throw new RuntimeException("Cannot read {$file} to restore its triggers.");
+            }
+
+            // Anchored to a standalone END line: trigger bodies contain
+            // "END IF;" lines, and a bare non-greedy END\b would stop at the
+            // first of those, installing a truncated (and invalid) trigger.
+            preg_match_all('/CREATE TRIGGER.*?\n[ \t]*END[ \t]*\r?$/ms', $source, $matches);
+
+            if ($matches[0] === []) {
+                throw new RuntimeException("No CREATE TRIGGER blocks found in {$file} - the restore would silently install nothing.");
+            }
+
+            foreach ($matches[0] as $ddl) {
+                // Drop by the extracted trigger's OWN name first: the
+                // migrations define five triggers but the tests drop only
+                // four, and re-creating a still-installed one (the delete
+                // lock) raises "trigger already exists".
+                if (preg_match('/CREATE TRIGGER (\S+)/', $ddl, $name) !== 1) {
+                    throw new RuntimeException('Extracted a CREATE TRIGGER block with no parseable name.');
+                }
+
+                DB::unprepared('DROP TRIGGER IF EXISTS '.$name[1]);
+                DB::unprepared($ddl);
+            }
+        }
+    }
+}
+
+afterEach(function (): void {
+    integrityRestoreLineTriggers();
+});
 
 if (! function_exists('integrityBalancedPair')) {
     /**

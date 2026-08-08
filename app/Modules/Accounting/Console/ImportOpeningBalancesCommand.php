@@ -6,7 +6,7 @@ namespace App\Modules\Accounting\Console;
 
 use App\Modules\Accounting\Actions\ImportOpeningAuxiliaryBalances;
 use App\Modules\Accounting\Actions\ImportOpeningTrialBalance;
-use App\Modules\Identity\Models\User;
+use App\Support\Audit\Actor;
 use App\Support\Money\Money;
 use DomainException;
 use Illuminate\Console\Command;
@@ -67,10 +67,14 @@ final class ImportOpeningBalancesCommand extends Command
             return self::FAILURE;
         }
 
-        /** @var User|null $user */
-        $user = User::query()->where('email', $email)->first();
+        // Query builder, not Identity's User model: cross-module Model
+        // imports are forbidden absolutely (tests/Architecture/
+        // ModuleBoundaryTest.php), and a console command in the Accounting
+        // module is still the Accounting module. The auth provider resolves
+        // the model instance itself in Auth::loginUsingId() below.
+        $userRow = DB::table('users')->where('email', $email)->first();
 
-        if ($user === null) {
+        if ($userRow === null) {
             $this->error("No user with email {$email}.");
 
             return self::FAILURE;
@@ -147,8 +151,10 @@ final class ImportOpeningBalancesCommand extends Command
 
         // The Actions gate on ledger.post via the authenticated user; the
         // import is posted in the named accountant's name, not as "system".
-        Auth::setUser($user);
-        $actor = $user->toAuditActor();
+        // loginUsingId lets the auth provider produce the model instance, so
+        // this module never touches Identity's User class itself.
+        Auth::loginUsingId((int) $userRow->id);
+        $actor = new Actor((int) $userRow->id, (string) $userRow->name);
 
         try {
             $entry = $isAuxiliary
