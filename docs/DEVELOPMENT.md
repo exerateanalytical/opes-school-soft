@@ -54,8 +54,19 @@ code is wrong.
 | `composer test` | Run the suite |
 | `composer analyse` | PHPStan level 8 |
 | `composer check` | Both, in order |
+| `composer deploy` | Migrate, seed roles/permissions, rebuild assets, print migration status |
 
 ## Rules of the road
+
+- **Every phase ends with `composer deploy`, unconditionally, the moment its
+  branch merges to `main`.** Not "when convenient" — a phase is not finished
+  until its migrations have actually run against the `opeschool` database and
+  its assets are rebuilt, because this working tree is also the docroot for
+  `opeschool.test`. A merged branch whose migrations haven't run is a site
+  serving dead routes: components and permissions the code expects to exist
+  don't, yet, in the database anyone is looking at. `composer deploy` ends
+  with `migrate:status`, printed, not assumed — check the output actually
+  shows every migration `Ran` before calling the phase done.
 
 - PHPStan runs at level 8 with **zero suppressions**. If it reports an error,
   fix the code — do not add an `ignoreErrors` entry. A suppression outlives the
