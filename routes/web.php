@@ -55,6 +55,16 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:user.manage')->name('users.create');
 
     /*
+     * API token management, docs/plans/phase-12-13.md 12.4. Gated on the
+     * dedicated `api.manage_tokens` permission (Phase 12's ApiTokenManage
+     * enum case) rather than the broader `user.manage`: issuing a credential
+     * that works from outside the building is a heavier right than editing a
+     * user record, so it is grantable - and revocable - on its own.
+     */
+    Route::get('/users/{user}/tokens', \App\Modules\Identity\Livewire\Users\Tokens::class)
+        ->middleware('can:api.manage_tokens')->whereNumber('user')->name('users.tokens');
+
+    /*
      * Academic core, docs/specs/00-core.md 9.1. Same principle as /users: the
      * sidebar hides these from a user without `academics.view`, but hiding is
      * presentation - the route refuses on its own. Settings is gated harder

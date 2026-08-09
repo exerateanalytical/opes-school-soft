@@ -1472,4 +1472,30 @@ return [
         'commitments_title' => 'Engagements ouverts',
         'commitments_empty' => 'Aucun bon de commande approuvé en attente de facturation.',
     ],
+
+    // Phase 12 (docs/plans/phase-12-13.md 12.4) : gestion des jetons d'accès
+    // personnels à /users/{user}/tokens.
+    'api_tokens' => [
+        'title' => 'Jetons API',
+        'create_title' => 'Émettre un nouveau jeton',
+        'name_label' => 'Nom du jeton',
+        'name_placeholder' => 'p. ex. intégration de rapports MINESEC',
+        'abilities_label' => 'Capacités',
+        'abilities_hint' => "Un jeton ne peut que restreindre ce que son titulaire peut déjà faire - chaque capacité doit aussi être détenue comme permission par l'utilisateur pour que l'API réponde.",
+        'abilities_required' => 'Sélectionnez au moins une capacité.',
+        'invalid_ability' => "L'une des capacités sélectionnées n'est pas une permission connue.",
+        'create_button' => 'Émettre le jeton',
+        'copy_now_title' => 'Copiez ce jeton maintenant',
+        'copy_now_hint' => "Il n'est affiché qu'une seule fois. Seule une empreinte est conservée - en cas de perte, révoquez-le et émettez-en un nouveau.",
+        'table_caption' => "Jetons d'accès personnels émis pour cet utilisateur",
+        'col_name' => 'Nom',
+        'col_abilities' => 'Capacités',
+        'col_last_used' => 'Dernière utilisation',
+        'col_created' => 'Créé le',
+        'col_actions' => 'Actions',
+        'never_used' => 'Jamais',
+        'revoke' => 'Révoquer',
+        'revoke_confirm' => "Révoquer ce jeton ? Toute intégration l'utilisant cesse de fonctionner immédiatement.",
+        'empty' => 'Aucun jeton émis pour cet utilisateur.',
+    ],
 ];

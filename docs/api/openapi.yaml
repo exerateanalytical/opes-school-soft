@@ -1,0 +1,403 @@
+# OPES School Software - read-only v1 API.
+#
+# HAND-MAINTAINED (docs/plans/phase-12-13.md 12.4): no network doc generator
+# runs against this installation. tests/Feature/Api/OpenApiCoverageTest.php
+# enforces the contract in both directions - every route registered under
+# /api must appear here, and every path documented here must still exist -
+# so this file cannot silently rot.
+#
+# Authentication: personal access tokens (Laravel Sanctum), sent as
+# `Authorization: Bearer <token>`. A token is issued from /users/{user}/tokens
+# and carries ABILITIES that are permission names; every endpoint requires
+# both the user permission and the matching token ability listed in its
+# description. All endpoints are throttled by the named `api` limiter
+# (60 requests/min per token owner).
+openapi: 3.0.3
+info:
+  title: OPES School Software API
+  description: >-
+    Read-only integration surface over the modular monolith. REST is a thin
+    adapter over the same module internals as the Livewire screens
+    (00-core 6.1); it enforces the same permission gates and never exposes a
+    write path in v1.
+  version: 1.0.0
+servers:
+  - url: /api
+security:
+  - bearerToken: []
+paths:
+  /v1/students:
+    get:
+      operationId: listStudents
+      summary: List students
+      description: >-
+        Requires the `students.view` permission and the `students.view` token
+        ability. Sensitive encrypted fields (national ID, medical data) are
+        never exposed.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: status
+          in: query
+          description: Filter by student status value.
+          schema: { type: string }
+        - name: search
+          in: query
+          description: Substring match on matricule, admission number or name.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated students.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Student' }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/students/{student}:
+    get:
+      operationId: getStudent
+      summary: Get one student
+      description: >-
+        Requires the `students.view` permission and the `students.view` token
+        ability.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          description: Student id.
+          schema: { type: integer }
+      responses:
+        '200':
+          description: One student.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Student' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/enrollments:
+    get:
+      operationId: listEnrollments
+      summary: List enrollments
+      description: >-
+        Requires the `students.view` permission and the `students.view` token
+        ability - an enrollment is readable by exactly whoever may read the
+        student it belongs to.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: student_id
+          in: query
+          schema: { type: integer }
+        - name: academic_year_id
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated enrollments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Enrollment' }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/invoices:
+    get:
+      operationId: listInvoices
+      summary: List fee invoices
+      description: >-
+        Requires the `fee.view` permission and the `fee.view` token ability.
+        Amounts are integer XAF; `gross_total` is derived from the invoice
+        lines, never stored (04-fees A1).
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: student_id
+          in: query
+          schema: { type: integer }
+        - name: academic_year_id
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated invoices.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Invoice' }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/invoices/{invoice}:
+    get:
+      operationId: getInvoice
+      summary: Get one fee invoice
+      description: >-
+        Requires the `fee.view` permission and the `fee.view` token ability.
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          description: Invoice id.
+          schema: { type: integer }
+      responses:
+        '200':
+          description: One invoice.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/payments:
+    get:
+      operationId: listPayments
+      summary: List fee payments
+      description: >-
+        Requires the `fee.view` permission and the `fee.view` token ability.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: student_id
+          in: query
+          schema: { type: integer }
+        - name: academic_year_id
+          in: query
+          schema: { type: integer }
+        - name: payment_method
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated payments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Payment' }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/payments/{payment}:
+    get:
+      operationId: getPayment
+      summary: Get one fee payment
+      description: >-
+        Requires the `fee.view` permission and the `fee.view` token ability.
+      parameters:
+        - name: payment
+          in: path
+          required: true
+          description: Payment id.
+          schema: { type: integer }
+      responses:
+        '200':
+          description: One payment.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Payment' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/results:
+    get:
+      operationId: listPublishedResults
+      summary: List published period results
+      description: >-
+        Requires the `academics.view` permission and the `academics.view`
+        token ability. Only results whose class-group publication is in the
+        `published` state are reachable (01-assessment 13.2) - unpublished
+        results do not exist for this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: assessment_period_id
+          in: query
+          schema: { type: integer }
+        - name: class_group_id
+          in: query
+          schema: { type: integer }
+        - name: enrollment_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Paginated published results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PublishedResult' }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+components:
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      description: Sanctum personal access token.
+  parameters:
+    page:
+      name: page
+      in: query
+      description: Page number (1-based).
+      schema: { type: integer, default: 1 }
+    perPage:
+      name: per_page
+      in: query
+      description: Rows per page, 1-100.
+      schema: { type: integer, default: 25, maximum: 100 }
+  responses:
+    Unauthenticated:
+      description: Missing or invalid token.
+    Forbidden:
+      description: >-
+        The user lacks the required permission, or the token lacks the
+        required ability.
+    NotFound:
+      description: No such record.
+    TooManyRequests:
+      description: The 60 requests/min `api` budget is exhausted.
+  schemas:
+    PageMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        last_page: { type: integer }
+    Student:
+      type: object
+      properties:
+        id: { type: integer }
+        matricule: { type: string }
+        matricule_is_official: { type: boolean }
+        admission_no: { type: string }
+        first_name: { type: string }
+        middle_name: { type: string, nullable: true }
+        last_name: { type: string }
+        preferred_name: { type: string, nullable: true }
+        gender: { type: string }
+        date_of_birth: { type: string, format: date }
+        nationality: { type: string }
+        status: { type: string }
+        phone: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        region: { type: string, nullable: true }
+        first_admission_date: { type: string, format: date, nullable: true }
+        left_on: { type: string, format: date, nullable: true }
+        is_archived: { type: boolean }
+    Enrollment:
+      type: object
+      properties:
+        id: { type: integer }
+        student_id: { type: integer }
+        academic_year_id: { type: integer }
+        class_level_id: { type: integer }
+        stream_id: { type: integer, nullable: true }
+        school_section_id: { type: integer }
+        status: { type: string }
+        is_repeat: { type: boolean }
+        enrollment_type: { type: string }
+        enrolled_on: { type: string, format: date }
+        left_on: { type: string, format: date, nullable: true }
+        boarding_status: { type: string }
+    Invoice:
+      type: object
+      properties:
+        id: { type: integer }
+        invoice_no: { type: string, nullable: true }
+        student_id: { type: integer }
+        enrollment_id: { type: integer }
+        academic_year_id: { type: integer }
+        fiscal_year_id: { type: integer }
+        term_id: { type: integer, nullable: true }
+        type: { type: string }
+        status: { type: string }
+        issue_date: { type: string, format: date }
+        due_date: { type: string, format: date }
+        currency: { type: string }
+        gross_total:
+          type: integer
+          description: Integer XAF, derived from the invoice lines.
+    Payment:
+      type: object
+      properties:
+        id: { type: integer }
+        receipt_no: { type: string }
+        student_id: { type: integer }
+        enrollment_id: { type: integer, nullable: true }
+        academic_year_id: { type: integer }
+        fiscal_year_id: { type: integer }
+        payment_method: { type: string }
+        amount: { type: integer, description: Integer XAF. }
+        fee_amount: { type: integer }
+        fee_bearer: { type: string }
+        reference: { type: string, nullable: true }
+        payer_name: { type: string }
+        value_date: { type: string, format: date }
+        posting_date: { type: string, format: date }
+        clearing_state: { type: string }
+        unallocated_amount: { type: integer }
+    PublishedResult:
+      type: object
+      properties:
+        id: { type: integer }
+        assessment_period_id: { type: integer }
+        class_group_id: { type: integer }
+        enrollment_id: { type: integer }
+        general_average: { type: string, nullable: true }
+        general_average_rounded: { type: string, nullable: true }
+        is_pass: { type: boolean, nullable: true }
+        subjects_counted: { type: integer }
+        rank_position: { type: integer, nullable: true }
+        rank_denominator: { type: integer, nullable: true }
+        is_ranked: { type: boolean }
+        nc_reason: { type: string, nullable: true }
+        published_at: { type: string, nullable: true }

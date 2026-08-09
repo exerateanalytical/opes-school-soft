@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -23,6 +24,12 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
+    // Phase 12 (docs/plans/phase-12-13.md 12.4): personal access tokens for
+    // the read-only v1 API. Token abilities are Permission enum values; the
+    // `can:` route gates still check the USER's permissions, so a token can
+    // only ever narrow what its owner may already do, never widen it.
+    use HasApiTokens;
 
     use HasRoles;
     use Notifiable;

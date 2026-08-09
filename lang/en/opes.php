@@ -1475,4 +1475,30 @@ return [
         'commitments_title' => 'Open commitments',
         'commitments_empty' => 'No approved purchase order awaits invoicing.',
     ],
+
+    // Phase 12 (docs/plans/phase-12-13.md 12.4): personal access token
+    // management at /users/{user}/tokens.
+    'api_tokens' => [
+        'title' => 'API tokens',
+        'create_title' => 'Issue a new token',
+        'name_label' => 'Token name',
+        'name_placeholder' => 'e.g. MINESEC reporting integration',
+        'abilities_label' => 'Abilities',
+        'abilities_hint' => 'A token can only ever narrow what its owner may already do - each ability must also be held as a permission by the user for the API to answer.',
+        'abilities_required' => 'Select at least one ability.',
+        'invalid_ability' => 'One of the selected abilities is not a known permission.',
+        'create_button' => 'Issue token',
+        'copy_now_title' => 'Copy this token now',
+        'copy_now_hint' => 'It is shown only once. Only a hash is stored - if it is lost, revoke it and issue a new one.',
+        'table_caption' => 'Personal access tokens issued to this user',
+        'col_name' => 'Name',
+        'col_abilities' => 'Abilities',
+        'col_last_used' => 'Last used',
+        'col_created' => 'Created',
+        'col_actions' => 'Actions',
+        'never_used' => 'Never',
+        'revoke' => 'Revoke',
+        'revoke_confirm' => 'Revoke this token? Any integration using it stops working immediately.',
+        'empty' => 'No tokens issued for this user.',
+    ],
 ];
