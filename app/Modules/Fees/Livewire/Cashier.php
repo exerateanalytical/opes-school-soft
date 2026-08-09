@@ -46,6 +46,11 @@ final class Cashier extends Component
 
     public string $receiptNo = '';
 
+    // Phase 13 D3 (10-documents §10.1): the payment id the just-recorded
+    // receipt prints from - the Print Receipt button needs it, receiptNo
+    // alone is not enough to address /finance/payments/{payment}/receipt.
+    public ?int $lastPaymentId = null;
+
     public string $errorMessage = '';
 
     public function mount(): void
@@ -83,7 +88,7 @@ final class Cashier extends Component
 
     public function clearSelection(): void
     {
-        $this->reset(['studentId', 'search', 'amount', 'reference', 'receiptNo', 'errorMessage']);
+        $this->reset(['studentId', 'search', 'amount', 'reference', 'receiptNo', 'lastPaymentId', 'errorMessage']);
     }
 
     public function collect(): void
@@ -150,6 +155,7 @@ final class Cashier extends Component
             );
 
             $this->receiptNo = $payment->receipt_no;
+            $this->lastPaymentId = (int) $payment->getKey();
             $this->reset(['amount', 'reference']);
         } catch (DomainException $exception) {
             $this->errorMessage = $exception->getMessage();

@@ -50,6 +50,13 @@
                     class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                 {{ __('opes.fees_screen.print') }}
             </button>
+            {{-- Phase 13 D3 (10-documents §10.3): the real, series-lettered
+                 statement PDF - distinct from the browser print-to-PDF
+                 above, which just prints this on-screen table. --}}
+            <a href="{{ route('fees.students.statement.print', ['student' => $studentId]) }}" target="_blank" rel="noopener"
+               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                {{ __('opes.fees_screen.download_pdf') }}
+            </a>
         </div>
     </div>
 

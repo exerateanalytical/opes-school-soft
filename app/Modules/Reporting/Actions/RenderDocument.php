@@ -536,12 +536,29 @@ final class RenderDocument
             return $captured;
         }
 
+        return $this->captureSchoolChrome($template->state_header !== 'none', $schoolSectionId);
+    }
+
+    /**
+     * The public half of schoolChrome(): callers OUTSIDE this pipeline that
+     * assemble their own snapshot payload (phase-12-13 D3's "receipt
+     * pattern" - Fees/Tax/Procurement Actions whose subject already has its
+     * OWN domain number and therefore renders with no registered
+     * SnapshotSourceMap entry) call this to capture the AS-AT-ISSUE `school`
+     * block themselves and embed it under `data['school']`, so their
+     * snapshot-backed template gets the same byte-identity guarantee (4.2)
+     * as a registered source without duplicating this read in every module.
+     *
+     * @return array<string, mixed>
+     */
+    public function captureSchoolChrome(bool $includeStateHeader, ?int $schoolSectionId = null): array
+    {
         $profile = DB::table('school_document_profiles')->where('id', 1)->first();
         $fiscal = DB::table('fiscal_identities')->where('id', 1)->first();
 
         $stateHeader = null;
 
-        if ($template->state_header !== 'none' && $profile !== null && (bool) $profile->state_header_enabled) {
+        if ($includeStateHeader && $profile !== null && (bool) $profile->state_header_enabled) {
             $stateHeader = [
                 'ministry_en' => $profile->ministry_en,
                 'ministry_fr' => $profile->ministry_fr,
@@ -645,10 +662,26 @@ final class RenderDocument
         };
     }
 
+    /**
+     * 10-documents §19's money templates whose OWN domain module already
+     * allocated the printed number before this platform existed (the
+     * "receipt pattern" - phase-12-13 D3: Fees' receipt_no/invoice_no,
+     * Procurement's payment_no, Tax's attestation_no) carry series_code =
+     * NULL by design (see the 310010 seed migration), so they cannot be
+     * recognised by DocumentSeries::FINANCIAL_SERIES membership alone. Their
+     * template CODES are recognised directly here - the SAME
+     * documents.reprint_financial gate a series-numbered financial document
+     * gets, just keyed differently because there is no series to key off.
+     */
+    private const FINANCIAL_TEMPLATE_CODES = [
+        'FEE-RECEIPT', 'FEE-RECEIPT-POS', 'FEE-INVOICE', 'WHT-CERT', 'PAY-VOUCHER',
+    ];
+
     private function isFinancial(DocumentTemplate $template): bool
     {
-        return $template->series_code !== null
-            && in_array($template->series_code, DocumentSeries::FINANCIAL_SERIES, true);
+        return ($template->series_code !== null
+                && in_array($template->series_code, DocumentSeries::FINANCIAL_SERIES, true))
+            || in_array($template->code, self::FINANCIAL_TEMPLATE_CODES, true);
     }
 
     private function schoolShortCode(): string

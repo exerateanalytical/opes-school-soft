@@ -114,6 +114,7 @@
             <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_total') }}</th>
             <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_balance') }}</th>
             <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_status') }}</th>
+            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide"><span class="sr-only">{{ __('opes.fees_screen.print_invoice') }}</span></th>
         </tr>
     </x-slot:head>
 
@@ -134,6 +135,18 @@
             <td class="px-4 py-2.5">
                 <x-status-pill :status="$statusTone[$row['status']] ?? 'amber'"
                                :label="__('opes.fees_screen.status_'.$row['status'])"/>
+            </td>
+            <td class="px-4 py-2.5 text-right">
+                {{-- Phase 13 D3 (10-documents §10.2): only an ISSUED invoice
+                     has an invoice_no to print - PrintInvoice refuses a draft. --}}
+                @if ($row['status'] === 'issued')
+                    <a href="{{ route('fees.invoices.print', ['invoice' => $row['id']]) }}" target="_blank" rel="noopener"
+                       title="{{ __('opes.fees_screen.print_invoice') }}"
+                       class="inline-flex items-center rounded border border-sand p-1.5 text-charcoal/60 hover:border-primary/50 hover:text-primary">
+                        <span class="sr-only">{{ __('opes.fees_screen.print_invoice') }}</span>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6v-7z"/></svg>
+                    </a>
+                @endif
             </td>
         </tr>
     @endforeach
@@ -160,6 +173,12 @@
                         <dd class="font-mono {{ $row['outstanding'] > 0 ? 'text-heritage-red' : '' }}">{{ Money::of($row['outstanding'])->format(false) }}</dd>
                     </div>
                 </dl>
+                @if ($row['status'] === 'issued')
+                    <a href="{{ route('fees.invoices.print', ['invoice' => $row['id']]) }}" target="_blank" rel="noopener"
+                       class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
+                        {{ __('opes.fees_screen.print_invoice') }}
+                    </a>
+                @endif
             </article>
         @endforeach
     </x-slot:cards>

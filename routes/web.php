@@ -203,6 +203,23 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement');
 
     /*
+     * Money-document Print buttons, docs/specs/10-documents.md §10
+     * (phase-12-13 D3). Gated the SAME as the screen they print from
+     * (`fee.view`) - the harder gate (documents.print, and
+     * documents.reprint[_financial] on a second render of the same
+     * payment/invoice) is re-checked inside RenderDocument itself, the
+     * same screen-vs-act split every other module in this file uses.
+     */
+    Route::get('/finance/payments/{payment}/receipt', \App\Modules\Fees\Http\Controllers\PrintReceiptController::class)
+        ->middleware('can:fee.view')->whereNumber('payment')->name('fees.payments.receipt');
+
+    Route::get('/finance/invoices/{invoice}/print', \App\Modules\Fees\Http\Controllers\PrintInvoiceController::class)
+        ->middleware('can:fee.view')->whereNumber('invoice')->name('fees.invoices.print');
+
+    Route::get('/finance/statement/{student}/print', \App\Modules\Fees\Http\Controllers\PrintStatementController::class)
+        ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement.print');
+
+    /*
      * Procurement, docs/specs/03-tax-procurement.md (Phase 5, wired by the
      * F5 pass). Same principle as every block above: the sidebar hides what
      * the operator cannot reach, but hiding is presentation - each route
@@ -254,6 +271,13 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:procurement.view')->name('procurement.payables');
 
     /*
+     * Payment Voucher print button, docs/plans/phase-12-13.md D3 - same gate
+     * as the Payments screens above.
+     */
+    Route::get('/procurement/payments/{payment}/voucher', \App\Modules\Procurement\Http\Controllers\PrintPaymentVoucherController::class)
+        ->middleware('can:procurement.payment_record')->whereNumber('payment')->name('procurement.payments.voucher');
+
+    /*
      * Tax, docs/specs/03-tax-procurement.md §7/§10. The dashboard reads
      * under tax.view; the declarations register requires tax.declare (its
      * content IS the declaration workflow); the configuration cockpit and
@@ -274,6 +298,14 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/settings/tax', \App\Modules\Tax\Livewire\TaxConfiguration::class)
         ->middleware('can:ledger.configure')->name('tax.settings');
+
+    /*
+     * Withholding Attestation print button, 03-tax-procurement §6.6 /
+     * 10-documents §15's WHT-CERT (phase-12-13 D3) - gated tax.view, the
+     * same read right the Tax dashboard uses.
+     */
+    Route::get('/tax/withholding-attestations/{attestation}/print', \App\Modules\Tax\Http\Controllers\PrintWithholdingAttestationController::class)
+        ->middleware('can:tax.view')->whereNumber('attestation')->name('tax.withholding-attestations.print');
 
     /*
      * Operations (Phase 7, docs/specs/08-operations.md §6): the year-rollover
@@ -335,6 +367,42 @@ Route::middleware('auth')->group(function (): void {
         Route::get($path, fn () => view('shell.module-placeholder', ['moduleKey' => $navKey]))
             ->name('placeholder.'.$navKey);
     }
+});
+
+/*
+ * Guardian portal (docs/plans/phase-12-13.md 12.2). Its OWN middleware
+ * stack - `auth` then `guardian.portal` (EnsureGuardianPortal) - deliberately
+ * separate from the staff `auth` group above: this shell shares no sidebar,
+ * no staff permission gate, and no route with it. Every route name here is
+ * the allow-list `GuardianDenyByDefaultRouteEnumerationTest` checks against
+ * a 07-students.md 7.5 row number; adding a route here without a matching
+ * capability check inside its component is exactly what that test exists to
+ * catch.
+ */
+Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function (): void {
+    Route::get('/', \App\Modules\Guardians\Livewire\Portal\Dashboard::class)->name('portal.dashboard');
+
+    Route::get('/children/{student}/results', \App\Modules\Guardians\Livewire\Portal\Results::class)
+        ->whereNumber('student')->name('portal.children.results');
+    Route::get('/children/{student}/fees', \App\Modules\Guardians\Livewire\Portal\Fees::class)
+        ->whereNumber('student')->name('portal.children.fees');
+    Route::get('/children/{student}/profile', \App\Modules\Guardians\Livewire\Portal\ChildProfile::class)
+        ->whereNumber('student')->name('portal.children.profile');
+    Route::get('/children/{student}/discipline', \App\Modules\Guardians\Livewire\Portal\Discipline::class)
+        ->whereNumber('student')->name('portal.children.discipline');
+    Route::get('/children/{student}/documents', \App\Modules\Guardians\Livewire\Portal\Documents::class)
+        ->whereNumber('student')->name('portal.children.documents');
+});
+
+/*
+ * Staff portal shell (docs/plans/phase-12-13.md 12.3) - the `staff_portal`
+ * role's own door, `staff.portal` (EnsureStaffPortal), equally separate from
+ * the staff admin shell above: holding an admin role does not open this
+ * screen, and activating a staff portal account does not open the admin
+ * shell (Identity\Domain\Role: the two scopes are evaluated independently).
+ */
+Route::prefix('portal')->middleware(['auth', 'staff.portal'])->group(function (): void {
+    Route::get('/staff', \App\Modules\HR\Livewire\Portal\Show::class)->name('portal.staff');
 });
 
 /*

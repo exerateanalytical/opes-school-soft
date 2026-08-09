@@ -63,6 +63,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+
+            // Phase 12 portal doors (docs/plans/phase-12-13.md 12.2/12.3):
+            // aliased, not applied globally, so only the /portal route
+            // groups in routes/web.php pay for the extra resolution. Both
+            // are fail-closed 403s - see the middleware classes themselves.
+            'guardian.portal' => \App\Modules\Guardians\Http\Middleware\EnsureGuardianPortal::class,
+            'staff.portal' => \App\Modules\HR\Http\Middleware\EnsureStaffPortal::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

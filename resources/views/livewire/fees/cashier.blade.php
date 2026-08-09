@@ -38,12 +38,23 @@
             <p class="text-sm font-medium text-primary">{{ __('opes.fees_screen.payment_recorded') }}</p>
             <p class="mt-1 text-xs uppercase tracking-wide text-charcoal/60">{{ __('opes.fees_screen.receipt_no') }}</p>
             <p class="font-mono text-2xl font-bold text-charcoal">{{ $receiptNo }}</p>
-            @if ($selected !== null)
-                <a href="{{ route('fees.students.statement', ['student' => $selected['id']]) }}"
-                   class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
-                    {{ __('opes.fees_screen.view_statement') }}
-                </a>
-            @endif
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+                @if ($selected !== null)
+                    <a href="{{ route('fees.students.statement', ['student' => $selected['id']]) }}"
+                       class="inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
+                        {{ __('opes.fees_screen.view_statement') }}
+                    </a>
+                @endif
+                {{-- Phase 13 D3 (10-documents §10.1): the real receipt
+                     template now exists - Print opens the A5 PDF in a new
+                     tab; the request re-authorizes documents.print itself. --}}
+                @if (is_int($lastPaymentId))
+                    <a href="{{ route('fees.payments.receipt', ['payment' => $lastPaymentId]) }}" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
+                        {{ __('opes.fees_screen.print_receipt') }}
+                    </a>
+                @endif
+            </div>
         </div>
     @endif
 
@@ -220,11 +231,12 @@
                                 class="flex-1 rounded border border-primary bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">
                             {{ __('opes.fees_screen.collect_payment') }}
                         </button>
-                        {{-- The mockup's printer button prints the statement
-                             (the printable document that exists); a dedicated
-                             receipt template is a later phase. --}}
+                        {{-- The mockup's printer button now opens the real
+                             statement PDF (10-documents §10.3); the dedicated
+                             receipt template's own Print link is in the
+                             success banner above, once a payment exists. --}}
                         @if ($selected !== null)
-                            <a href="{{ route('fees.students.statement', ['student' => $selected['id']]) }}"
+                            <a href="{{ route('fees.students.statement.print', ['student' => $selected['id']]) }}" target="_blank" rel="noopener"
                                title="{{ __('opes.fees_screen.view_statement') }}"
                                class="rounded border border-sand p-2 text-charcoal/60 hover:border-primary/50 hover:text-primary">
                                 <span class="sr-only">{{ __('opes.fees_screen.view_statement') }}</span>
