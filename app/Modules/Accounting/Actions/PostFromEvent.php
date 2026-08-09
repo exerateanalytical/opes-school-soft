@@ -42,8 +42,13 @@ final class PostFromEvent
 
     /**
      * @param  array<string, mixed>  $payload
+     * @param  string|null  $valueDate  economic date when it differs from the
+     *                                  accounting date - 02-accounting C4 /
+     *                                  06-assets-stores §4.4: a catch-up
+     *                                  entry lands in the first OPEN period
+     *                                  but retains the original value date.
      */
-    public function handle(string $event, array $payload, string $date, Actor $actor, ?string $reference = null): JournalEntry
+    public function handle(string $event, array $payload, string $date, Actor $actor, ?string $reference = null, ?string $valueDate = null): JournalEntry
     {
         try {
             $postingEvent = PostingEvent::from($event);
@@ -53,7 +58,7 @@ final class PostFromEvent
 
         $rule = $this->selectRule($postingEvent, $payload, Carbon::parse($date)->startOfDay());
 
-        return DB::transaction(function () use ($rule, $payload, $date, $actor, $reference): JournalEntry {
+        return DB::transaction(function () use ($rule, $payload, $date, $actor, $reference, $valueDate): JournalEntry {
             $lines = $this->evaluator->handle($rule, $payload);
             $label = LabelTemplate::render(
                 $rule->label_expression,
@@ -63,7 +68,7 @@ final class PostFromEvent
             $entry = $this->draft->handle(
                 journalId: $rule->journal_id,
                 date: $date,
-                valueDate: null,
+                valueDate: $valueDate,
                 label: $label,
                 reference: $reference,
                 lines: $lines,

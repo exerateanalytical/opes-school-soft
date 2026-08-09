@@ -76,6 +76,9 @@ enum PostingEvent: string
     case AssetDisposed = 'asset.disposed';
     case AssetSubsidyReceived = 'asset.subsidy.received';
     case AssetSubsidyReleased = 'asset.subsidy.released';
+    // 06-assets-stores §6.4/§12: grant clawback reverses the unreleased
+    // balance against a liability to the donor.
+    case AssetSubsidyClawedBack = 'asset.subsidy.clawed_back';
 
     // Payroll (05)
     case PayrollApproved = 'payroll.approved';
@@ -214,12 +217,8 @@ enum PostingEvent: string
 
             self::AssetAcquired,
             self::AssetCommissioned,
-            self::AssetDepreciated,
             self::AssetImpaired,
-            self::AssetRevalued,
-            self::AssetDisposed,
-            self::AssetSubsidyReceived,
-            self::AssetSubsidyReleased => [
+            self::AssetRevalued => [
                 'asset.cost' => 'int',
                 'asset.accumulated_depreciation' => 'int',
                 'asset.net_book_value' => 'int',
@@ -230,6 +229,53 @@ enum PostingEvent: string
                 'asset.depreciation_account_id' => 'int',
                 'asset.disposal_value_account_id' => 'int',
                 'asset.disposal_proceeds_account_id' => 'int',
+            ],
+
+            // 06-assets-stores §6.1/§6.2 - the gross disposal entry needs a
+            // settlement side (485 receivable or a treasury account) on top
+            // of the shared asset shape.
+            self::AssetDisposed => [
+                'asset.cost' => 'int',
+                'asset.accumulated_depreciation' => 'int',
+                'asset.net_book_value' => 'int',
+                'asset.proceeds' => 'int',
+                'asset.reference' => 'string',
+                'asset.partner' => 'partner',
+                'asset.asset_account_id' => 'int',
+                'asset.depreciation_account_id' => 'int',
+                'asset.disposal_value_account_id' => 'int',
+                'asset.disposal_proceeds_account_id' => 'int',
+                'asset.settlement_account_id' => 'int',
+            ],
+
+            // 06-assets-stores §4 - ONE journal entry per depreciation run,
+            // one Dr 681x / Cr 28x pair per asset via an iterating rule.
+            // Charges are SIGNED (§5.5 estimate reductions post a credit to
+            // 681x), so rule lines must be declared `signed`.
+            self::AssetDepreciated => [
+                'run.total_charge' => 'int',
+                'run.reference' => 'string',
+                'run.lines' => 'list',
+                'run.lines.*.charge' => 'int',
+                'run.lines.*.expense_account_id' => 'int',
+                'run.lines.*.accumulated_account_id' => 'int',
+                'run.lines.*.reference' => 'string',
+            ],
+
+            // 06-assets-stores §6.3/§6.4 - subventions d'investissement:
+            // receipt into 14, quote-part released to income in step with
+            // depreciation, clawback of the unreleased balance to a donor
+            // liability. counterpart_account_id carries the non-14 side the
+            // Action resolved (income 845 for releases, the donor liability
+            // for clawbacks, the asset account for receipts).
+            self::AssetSubsidyReceived,
+            self::AssetSubsidyReleased,
+            self::AssetSubsidyClawedBack => [
+                'subsidy.amount' => 'int',
+                'subsidy.reference' => 'string',
+                'subsidy.partner' => 'partner',
+                'subsidy.subsidy_account_id' => 'int',
+                'subsidy.counterpart_account_id' => 'int',
             ],
 
             self::PayrollApproved,
