@@ -46,8 +46,15 @@ final class Navigation
             ['key' => 'academics', 'route' => '/academics/settings', 'permission' => Permission::AcademicsManage, 'enabled' => true, 'built' => true],
             ['key' => 'classes', 'route' => '/classes', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
             ['key' => 'subjects', 'route' => '/subjects', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
-            ['key' => 'timetable', 'route' => '/timetable', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'attendance', 'route' => '/attendance', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Phase 8 F1/F5: real screens now live behind these URLs, so the
+            // nav flips to built => true with the permission that gates the
+            // route below - nav and route agree by construction, per this
+            // file's documented contract.
+            ['key' => 'timetable', 'route' => '/timetable', 'permission' => Permission::TimetableView, 'enabled' => true, 'built' => true],
+            // Phase 8 F2/F5: same flip - the Attendance Management screen at
+            // /attendance is the sidebar's target, matching its route's
+            // `can:attendance.view` gate.
+            ['key' => 'attendance', 'route' => '/attendance', 'permission' => Permission::AttendanceView, 'enabled' => true, 'built' => true],
             // Exam SCHEDULING (sittings, invigilators, seating) shipped with
             // Phase 3's Actions; marks entry lives at /marks. What these two
             // placeholders await is their dedicated screens.

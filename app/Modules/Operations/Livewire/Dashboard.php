@@ -11,6 +11,7 @@ use App\Modules\Operations\Actions\CollectHealth;
 use App\Modules\Operations\Domain\HealthCheckResult;
 use App\Modules\Operations\Domain\HealthStatus;
 use App\Modules\Operations\Models\Backup;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -87,6 +88,59 @@ final class Dashboard extends Component
     }
 
     /**
+     * "Today's Attendance", 09-ui §3.3: present ÷ expected from TODAY's
+     * submitted/amended registers only — draft registers do not count, the
+     * same rule the Attendance Management screen itself uses
+     * (Attendance\Livewire\Index::render()). Read cross-module via
+     * DB::table (00-core 6.2: never another module's Model), formatted here
+     * rather than handed back as a bare float so the view never has to
+     * decide between "—" and "0%" itself.
+     *
+     * NULL — not "0%" — when the school has taken no register yet today
+     * (07-students §9, C5): zero registers is "not yet taken", not "nobody
+     * came".
+     */
+    private function todaysAttendanceRate(): ?string
+    {
+        $today = now()->toDateString();
+
+        $registerIds = DB::table('attendance_registers')
+            ->whereDate('date', $today)
+            ->whereIn('status', ['submitted', 'amended'])
+            ->pluck('id');
+
+        if ($registerIds->isEmpty()) {
+            return null;
+        }
+
+        $totals = DB::table('attendance_registers')
+            ->whereIn('id', $registerIds)
+            ->selectRaw('SUM(expected_count) as expected, SUM(present_count) as present, SUM(late_count) as late')
+            ->first();
+
+        // §9.6's formula, the same one Attendance\Livewire\Index and
+        // GetAttendanceRateForEnrollments use: (present + late) over
+        // (expected − suspended-rows), never plain expected.
+        $suspended = DB::table('attendance_records')
+            ->whereIn('attendance_register_id', $registerIds)
+            ->where('status', 'suspended')
+            ->count();
+
+        // MySQL SUM() returns strings — cast.
+        $expected = (int) ($totals->expected ?? 0);
+        $denominator = $expected - $suspended;
+
+        if ($denominator <= 0) {
+            return null;
+        }
+
+        $present = (int) ($totals->present ?? 0);
+        $late = (int) ($totals->late ?? 0);
+
+        return number_format((($present + $late) / $denominator) * 100, 1).'%';
+    }
+
+    /**
      * @return list<array{key: string, label: string, route: string|null}>
      */
     private function quickActions(): array
@@ -121,6 +175,8 @@ final class Dashboard extends Component
         CountActiveUsers $countUsers,
         CountConfiguredRoles $countRoles,
     ): mixed {
+        $canViewAttendance = Gate::allows(Permission::AttendanceView->value);
+
         return view('livewire.dashboard', [
             'activeUsers' => $countUsers->handle(),
             'roleCount' => $countRoles->handle(),
@@ -129,6 +185,10 @@ final class Dashboard extends Component
             'alerts' => $this->alerts($health),
             'quickActions' => $this->quickActions(),
             'canViewUsers' => Gate::allows(Permission::UserView->value),
+            'canViewAttendance' => $canViewAttendance,
+            // Only queried for someone who may actually see it - never
+            // compute a figure the view is about to hide anyway.
+            'todaysAttendanceRate' => $canViewAttendance ? $this->todaysAttendanceRate() : null,
         ]);
     }
 }

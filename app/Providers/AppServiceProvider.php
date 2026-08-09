@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
+use App\Modules\Academics\Livewire\Timetable\Index as TimetableIndex;
 use App\Modules\Accounting\Livewire\ChartOfAccounts\Index as ChartOfAccountsIndex;
 use App\Modules\Accounting\Livewire\JournalEntries\Form as JournalEntryForm;
 use App\Modules\Accounting\Livewire\JournalEntries\Index as JournalEntriesIndex;
@@ -11,6 +12,9 @@ use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
 use App\Modules\Assessment\Livewire\Marks\Entry as MarksEntry;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
+use App\Modules\Attendance\Livewire\CoverageReport as AttendanceCoverageReport;
+use App\Modules\Attendance\Livewire\Index as AttendanceIndex;
+use App\Modules\Attendance\Livewire\TakeRegister as AttendanceTakeRegister;
 use App\Modules\Fees\Livewire\Cashier as FeesCashier;
 use App\Modules\Fees\Livewire\Invoices\Index as FeesInvoicesIndex;
 use App\Modules\Fees\Livewire\Statement as FeesStatement;
@@ -18,8 +22,11 @@ use App\Modules\Guardians\Livewire\Guardians\Show as GuardiansShow;
 use App\Modules\Guardians\Livewire\Students\GuardiansPanel as StudentGuardiansPanel;
 use App\Modules\Identity\Livewire\Users\Index as UsersIndex;
 use App\Modules\Identity\Livewire\Users\Tokens as UserTokens;
+use App\Modules\Students\Livewire\Promotion\Wizard as PromotionWizard;
 use App\Modules\Students\Livewire\Students\Index as StudentsIndex;
 use App\Modules\Students\Livewire\Students\Show as StudentsShow;
+use App\Modules\Welfare\Livewire\Discipline\CaseShow as DisciplineCaseShow;
+use App\Modules\Welfare\Livewire\Discipline\Index as DisciplineIndex;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -126,5 +133,20 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('fees.cashier', FeesCashier::class);
         Livewire::component('fees.invoices.index', FeesInvoicesIndex::class);
         Livewire::component('fees.statement', FeesStatement::class);
+
+        // Phase 8 (docs/plans/phase-08.md), routed by the F5 pass 2 at
+        // /timetable, /attendance*, /welfare/discipline* and
+        // /students/promotion. `timetable.index`, `attendance.index` and
+        // `welfare.discipline.index` need the explicit name for the
+        // ".index"-stripping reason above; the rest are aliased anyway for
+        // the same one-mechanism symmetry as every routed component in this
+        // file.
+        Livewire::component('timetable.index', TimetableIndex::class);
+        Livewire::component('attendance.index', AttendanceIndex::class);
+        Livewire::component('attendance.take', AttendanceTakeRegister::class);
+        Livewire::component('attendance.coverage', AttendanceCoverageReport::class);
+        Livewire::component('welfare.discipline.index', DisciplineIndex::class);
+        Livewire::component('welfare.discipline.show', DisciplineCaseShow::class);
+        Livewire::component('students.promotion', PromotionWizard::class);
     }
 }

@@ -88,6 +88,10 @@ return [
         'tile_roles' => 'Roles configured',
         'tile_health' => 'System health',
         'tile_backup' => 'Last backup',
+        // Phase 8 F5: present ÷ expected from today's TAKEN registers only -
+        // renders "—", never 0%, when no register has been taken yet
+        // (07-students §9, C5: zero registers is "not yet taken").
+        'tile_attendance' => "Today's attendance",
         'alerts' => 'Needs attention',
         'no_alerts' => 'Nothing needs your attention right now.',
         'remedy' => 'What to do',

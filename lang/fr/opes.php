@@ -90,6 +90,10 @@ return [
         'tile_roles' => 'Rôles configurés',
         'tile_health' => 'État du système',
         'tile_backup' => 'Dernière sauvegarde',
+        // Phase 8 F5 : présents ÷ attendus des registres CLÔTURÉS du jour
+        // uniquement - affiche « — », jamais 0 %, tant qu'aucun registre n'a
+        // été pris (07-students §9, C5).
+        'tile_attendance' => "Présence du jour",
         'alerts' => 'À traiter',
         'no_alerts' => 'Rien ne requiert votre attention pour le moment.',
         'remedy' => 'Que faire',

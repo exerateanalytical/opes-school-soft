@@ -5,7 +5,7 @@
          gets the mockup's coloured icon-circle; deltas stay OFF here because
          no "vs last term" comparison exists for any of these four figures
          yet - inventing one would violate the no-fabricated-data rule. ───── --}}
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-{{ $canViewAttendance ? 5 : 4 }}">
         {{-- The tile links to the user list only for someone allowed to open
              it. A link that guarantees a 403 is not a shortcut, it is a trap,
              and it also tells the reader a screen exists that they may not
@@ -45,6 +45,22 @@
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3.5 2"/></svg>
             </x-slot:icon>
         </x-kpi-card>
+
+        {{-- Phase 8 F5: shown only to a role that holds attendance.view - the
+             same permission the /attendance route itself is gated on, so the
+             tile never links anywhere its viewer would get a 403. Null, not
+             zero, when no register has been taken yet today: see
+             Dashboard::todaysAttendanceRate(). --}}
+        @if ($canViewAttendance)
+            <x-kpi-card :label="__('opes.dashboard.tile_attendance')"
+                        :value="$todaysAttendanceRate"
+                        href="/attendance"
+                        icon-bg="bg-badge-teal">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+        @endif
     </div>
 
     {{-- ── "What's open right now" (08-operations §6.4). The panel decides

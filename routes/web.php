@@ -80,6 +80,34 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:academics.view')->name('subjects.index');
 
     /*
+     * Timetable, docs/specs/09-ui.md §8.6 (Phase 8 F1, wired by the F5 pass
+     * 2). One screen, three tabs (Class/Teacher/Room) plus a read-only Exam
+     * tab - all gated on the READ permission; the write actions (assign/
+     * remove a slot) are gated harder (`timetable.manage`) inside the
+     * component and re-authorized in AssignTimetableSlot/RemoveTimetableSlot,
+     * the same screen-vs-write split every module above uses.
+     */
+    Route::get('/timetable', \App\Modules\Academics\Livewire\Timetable\Index::class)
+        ->middleware('can:timetable.view')->name('timetable.index');
+
+    /*
+     * Attendance, docs/specs/07-students.md §9 / 09-ui.md §8.7 (Phase 8 F2,
+     * wired by the F5 pass 2). The management screen and the coverage report
+     * are both READ surfaces (`attendance.view`); taking a register is gated
+     * harder (`attendance.take`) because it is the write path - the
+     * component and OpenAttendanceRegister/SubmitAttendanceRegister
+     * re-authorize it, so the route's `can:` is the outer gate only.
+     */
+    Route::get('/attendance', \App\Modules\Attendance\Livewire\Index::class)
+        ->middleware('can:attendance.view')->name('attendance.index');
+
+    Route::get('/attendance/take', \App\Modules\Attendance\Livewire\TakeRegister::class)
+        ->middleware('can:attendance.take')->name('attendance.take');
+
+    Route::get('/attendance/coverage', \App\Modules\Attendance\Livewire\CoverageReport::class)
+        ->middleware('can:attendance.view')->name('attendance.coverage');
+
+    /*
      * People, docs/specs/07-students.md. Same principle again: the sidebar
      * hides what the operator cannot reach, but hiding is presentation - each
      * route refuses on its own. Every `can:` here matches the permission its
@@ -92,6 +120,22 @@ Route::middleware('auth')->group(function (): void {
      */
     Route::get('/students', \App\Modules\Students\Livewire\Students\Index::class)
         ->middleware('can:students.view')->name('students.index');
+
+    /*
+     * Promotion, docs/specs/07-students.md §10 (Phase 8 F4, wired by the F5
+     * pass 2). One route for the whole evaluate -> review/override -> apply
+     * wizard - the `#[Url] run` query param resumes an in-progress run.
+     * Gated on `promotion.evaluate` as the outer/read gate; the apply step is
+     * gated harder (`promotion.apply`) inside the component and
+     * re-authorized in ApplyPromotionRun, the same screen-vs-write split
+     * every module above uses.
+     *
+     * MUST be registered before `/students/{student}` below: that route
+     * carries no numeric constraint, so "promotion" would otherwise match it
+     * as a student id and this route would never be reached.
+     */
+    Route::get('/students/promotion', \App\Modules\Students\Livewire\Promotion\Wizard::class)
+        ->middleware('can:promotion.evaluate')->name('students.promotion');
 
     Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
         ->middleware('can:students.view')->name('students.show');
@@ -261,6 +305,22 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/documents/verify', \App\Modules\Reporting\Livewire\Verify::class)
         ->middleware(\App\Modules\Reporting\Http\MarkNoIndex::class)
         ->name('documents.verify');
+
+    /*
+     * Discipline, docs/specs/07-students.md / 09-ui.md §2 (Phase 8 F3, wired
+     * by the F5 pass 2). Deliberately NOT in the sidebar - 09-ui §2 places it
+     * "reached from within" (the student profile's Discipline tab and the
+     * Welfare area), so these routes exist without a Navigation item.
+     * Read under `discipline.view`; opening a case, applying a sanction and
+     * resolving are gated harder (`discipline.manage`) inside the component
+     * and re-authorized in the Actions, the same screen-vs-write split every
+     * module above uses.
+     */
+    Route::get('/welfare/discipline', \App\Modules\Welfare\Livewire\Discipline\Index::class)
+        ->middleware('can:discipline.view')->name('welfare.discipline.index');
+
+    Route::get('/welfare/discipline/{case}', \App\Modules\Welfare\Livewire\Discipline\CaseShow::class)
+        ->middleware('can:discipline.view')->whereNumber('case')->name('welfare.discipline.show');
 
     /*
      * Scheduled modules. Every sidebar item is a real link: modules not yet
