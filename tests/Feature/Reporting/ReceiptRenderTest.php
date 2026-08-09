@@ -75,7 +75,7 @@ it('prints the original A5 receipt with the allocated receipt_no, lines and amou
     expect($rendered->html)->toContain($issued->invoice_no ?? '');
     expect($rendered->html)->toContain('One hundred twenty thousand'); // ucfirst() in the blade
     expect($rendered->html)->not->toContain('DUPLICATA');
-    expect($rendered->html)->not->toContain('This receipt has been voided');
+    expect($rendered->html)->not->toContain('ANNULÉ');
 });
 
 it('prints the 80mm POS variant against its own template row', function (): void {
@@ -134,8 +134,13 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
         $voider->toAuditActor(),
     );
 
+    // The VOID overlay is the SAME watermark mechanism as DUPLICATA
+    // (documents.layout's shared watermark block), never a flag baked
+    // into PrintReceipt's own payload - see the comment on
+    // revokeIfIssued() below for why that distinction matters.
     $reprint = app(PrintReceipt::class)->handle($printedThenVoided->id);
-    expect($reprint->html)->toContain('This receipt has been voided');
+    expect($reprint->html)->toContain('ANNULÉ');
+    expect($reprint->isDuplicate)->toBeTrue(); // the void happened after one clean print
 
     // A SECOND payment, voided before it was ever printed once: no original
     // is issued for money that no longer stands (04-fees §11.5).

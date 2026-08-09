@@ -67,6 +67,17 @@ final class PrintReceipt
             ->exists();
 
         if ($isVoided) {
+            // Sets the IssuedDocument row to `revoked`, NOT a flag baked into
+            // this Action's own payload: RenderDocument's reprint path
+            // re-renders the CLEAN artefact from this SAME payload and
+            // hash-compares it against the one recorded at issue (10-
+            // documents §4.5) BEFORE it decides which watermark to apply -
+            // a payload that silently starts including "voided" text the
+            // moment the payment is voided would make that clean re-render
+            // diverge from the original and trip a false
+            // DocumentReproducibilityViolation. `$issued->isRevoked()`
+            // downstream is what selects the ANNULÉ/VOID watermark, exactly
+            // like a DUPLICATA overlay - never this payload.
             $this->revokeIfIssued($templateCode, $paymentId, $payment->receipt_no);
         }
 
@@ -160,7 +171,6 @@ final class PrintReceipt
                 'amount_words' => AmountInWords::render((int) $payment->amount, $lang),
                 'lines' => $lineItems,
                 'paid_to_date' => $paidToDate,
-                'is_voided' => $isVoided,
             ],
         ];
 

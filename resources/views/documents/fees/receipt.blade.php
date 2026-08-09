@@ -16,11 +16,13 @@
     {{-- receipt_no is Fees' OWN number (04-fees §14), not the platform's
          series serial - series_code is deliberately NULL for this template
          (see the 310010 seed migration), so this is the only place it prints. --}}
+    {{-- No is_voided flag here: a voided payment's ANNULÉ/VOID mark is the
+         shared watermark block above (documents.layout - $document['watermark']),
+         driven by IssuedDocument.status, never by this payload - baking a
+         "voided" string into the payload itself would change the CLEAN
+         re-render's bytes on reprint and trip a false
+         DocumentReproducibilityViolation (10-documents §4.5). --}}
     <p class="doc-small"><strong>{{ __('documents.receipt.receipt_no', [], $document['language']) }}:</strong> {{ $r['receipt_no'] }}</p>
-
-    @if ($r['is_voided'])
-        <p class="doc-center" style="color: #a00; font-weight: bold;">{{ __('documents.receipt.void_notice', [], $document['language']) }}</p>
-    @endif
 
     <table class="doc-block doc-small">
         <tr>
