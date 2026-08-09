@@ -35,8 +35,8 @@ require_once __DIR__.'/../Accounting/AccountingTestHelpers.php';
 
 uses(RefreshDatabase::class);
 
-if (! function_exists('feesAccountId')) {
-    function feesAccountId(string $code): int
+if (! function_exists('cnAccountId')) {
+    function cnAccountId(string $code): int
     {
         return (int) assertNotNull(
             DB::table('chart_of_accounts')->where('code', $code)->value('id'),
@@ -45,8 +45,8 @@ if (! function_exists('feesAccountId')) {
     }
 }
 
-if (! function_exists('feesOwnItemId')) {
-    function feesOwnItemId(string $name, string $revenueCode = '706'): int
+if (! function_exists('cnOwnItemId')) {
+    function cnOwnItemId(string $name, string $revenueCode = '706'): int
     {
         $categoryId = DB::table('fee_categories')->insertGetId([
             'code' => 'CAT'.Str::upper(Str::random(6)),
@@ -62,7 +62,7 @@ if (! function_exists('feesOwnItemId')) {
             'name_fr' => $name.' (fr)',
             'fee_category_id' => $categoryId,
             'collection_basis' => 'own_revenue',
-            'revenue_account_id' => feesAccountId($revenueCode),
+            'revenue_account_id' => cnAccountId($revenueCode),
             'recognition_method' => 'on_issue',
             'default_recurrence' => 'per_year',
             'created_at' => now(),
@@ -71,14 +71,14 @@ if (! function_exists('feesOwnItemId')) {
     }
 }
 
-if (! function_exists('feesStructure')) {
+if (! function_exists('cnStructure')) {
     /**
      * Inserts an active fee structure with the given scope and item lines.
      *
      * @param  list<array{fee_item_id: int, amount: int}>  $lines
      * @param  array<string, mixed>  $scope
      */
-    function feesStructure(int $academicYearId, int $schoolSectionId, array $lines, array $scope = []): int
+    function cnStructure(int $academicYearId, int $schoolSectionId, array $lines, array $scope = []): int
     {
         $structureId = (int) DB::table('fee_structures')->insertGetId(array_merge([
             'academic_year_id' => $academicYearId,
@@ -105,7 +105,7 @@ if (! function_exists('feesStructure')) {
     }
 }
 
-if (! function_exists('feesFixture')) {
+if (! function_exists('cnFixture')) {
     /**
      * The §15.1-shaped baseline: an enrollment plus an active structure of
      * two own-revenue lines totalling 350 000, sharing the ledger calendar
@@ -113,7 +113,7 @@ if (! function_exists('feesFixture')) {
      *
      * @return array{enrollment: Enrollment, structure_id: int, options: array{academic_year_id: int, fiscal_year_id: int, term_id: int|null, issue_date: string, due_date: string, installment_plan_id?: int|null}}
      */
-    function feesFixture(): array
+    function cnFixture(): array
     {
         $calendar = ledgerCalendar('2031-03-15');
 
@@ -122,12 +122,12 @@ if (! function_exists('feesFixture')) {
             'academic_year_id' => $calendar['academic_year_id'],
         ]);
 
-        $structureId = feesStructure(
+        $structureId = cnStructure(
             $enrollment->academic_year_id,
             $enrollment->school_section_id,
             [
-                ['fee_item_id' => feesOwnItemId('Tuition Fee'), 'amount' => 200_000],
-                ['fee_item_id' => feesOwnItemId('Development Fee'), 'amount' => 150_000],
+                ['fee_item_id' => cnOwnItemId('Tuition Fee'), 'amount' => 200_000],
+                ['fee_item_id' => cnOwnItemId('Development Fee'), 'amount' => 150_000],
             ],
         );
 
@@ -145,9 +145,9 @@ if (! function_exists('feesFixture')) {
     }
 }
 
-if (! function_exists('feesIssueUserAs')) {
+if (! function_exists('cnUserAs')) {
     /** A logged-in user holding the union of the given roles' permissions. */
-    function feesIssueUserAs(Role ...$roles): User
+    function cnUserAs(Role ...$roles): User
     {
         (new Database\Seeders\RolePermissionSeeder())->run();
         $user = User::factory()->create();
@@ -163,14 +163,14 @@ if (! function_exists('feesIssueUserAs')) {
     }
 }
 
-if (! function_exists('feesSaveInvoiceIssuedRule')) {
+if (! function_exists('cnSaveInvoiceIssuedRule')) {
     /**
      * The §11.2 `fee.invoice.issued` rule, saved through the real
      * SavePostingRule gate: Dr the payload's receivable (4111 gross, student
      * partner), Cr one line per invoice line into its snapshotted revenue
      * account - iteration under the 'item.' prefix.
      */
-    function feesSaveInvoiceIssuedRule(User $accountant): void
+    function cnSaveInvoiceIssuedRule(User $accountant): void
     {
         app(SavePostingRule::class)->handle([
             'code' => 'f2_invoice_issued',
@@ -294,8 +294,8 @@ if (! function_exists('feesIssuedInvoiceFixture')) {
      */
     function feesIssuedInvoiceFixture(User $user): array
     {
-        feesSaveInvoiceIssuedRule($user);
-        $fixture = feesFixture();
+        cnSaveInvoiceIssuedRule($user);
+        $fixture = cnFixture();
 
         $result = app(GenerateInvoices::class)->forEnrollments(
             [$fixture['enrollment']->id],
@@ -313,7 +313,7 @@ if (! function_exists('feesIssuedInvoiceFixture')) {
 }
 
 it('issues a line-level credit note against an issued invoice and posts through PostFromEvent', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveCreditNoteRule($user);
     $set = feesIssuedInvoiceFixture($user);
 
@@ -342,7 +342,7 @@ it('issues a line-level credit note against an issued invoice and posts through 
 });
 
 it('caps a credit note at the invoiced amount per line - you cannot credit more than remains billed', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveCreditNoteRule($user);
     $set = feesIssuedInvoiceFixture($user);
 
@@ -359,7 +359,7 @@ it('caps a credit note at the invoiced amount per line - you cannot credit more 
 })->throws(DomainException::class, 'You cannot credit more than remains billed');
 
 it('counts prior credit notes AND approved adjustments against the per-line cap', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveCreditNoteRule($user);
     feesSaveAdjustmentRule($user);
     $set = feesIssuedInvoiceFixture($user);
@@ -381,10 +381,10 @@ it('counts prior credit notes AND approved adjustments against the per-line cap'
         'amount' => 50_000,
         'reason_type' => FeeAdjustmentReasonType::Hardship,
         'reason_note' => 'Hardship discount.',
-        'adjustment_account_id' => feesAccountId('706'),
+        'adjustment_account_id' => cnAccountId('706'),
         'effective_date' => '2031-03-17',
     ], $user->toAuditActor());
-    $approver = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $approver = cnUserAs(Role::Bursar, Role::Accountant);
     app(ApproveFeeAdjustment::class)->handle((int) $adjustment->getKey(), $approver->toAuditActor());
 
     actingAs($user);
@@ -413,7 +413,7 @@ it('counts prior credit notes AND approved adjustments against the per-line cap'
 });
 
 it('is idempotent on the idempotency key - a double-clicked avoir returns the same credit note', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveCreditNoteRule($user);
     $set = feesIssuedInvoiceFixture($user);
 
@@ -436,9 +436,9 @@ it('is idempotent on the idempotency key - a double-clicked avoir returns the sa
 });
 
 it('refuses a credit note against a draft invoice', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveCreditNoteRule($user);
-    $fixture = feesFixture();
+    $fixture = cnFixture();
 
     $result = app(GenerateInvoices::class)->forEnrollments(
         [$fixture['enrollment']->id],
@@ -463,7 +463,7 @@ it('refuses a credit note against a draft invoice', function (): void {
 })->throws(DomainException::class, 'a credit note corrects an ISSUED invoice');
 
 it('records a PENDING adjustment and blocks a reduction past what remains billed on the line', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
     $set = feesIssuedInvoiceFixture($user);
 
     $adjustment = app(AdjustInvoice::class)->handle([
@@ -471,7 +471,7 @@ it('records a PENDING adjustment and blocks a reduction past what remains billed
         'amount' => 80_000,
         'reason_type' => FeeAdjustmentReasonType::SiblingDiscount,
         'reason_note' => 'Second sibling enrolled.',
-        'adjustment_account_id' => feesAccountId('706'),
+        'adjustment_account_id' => cnAccountId('706'),
         'effective_date' => '2031-03-16',
     ], $user->toAuditActor());
 
@@ -486,13 +486,13 @@ it('records a PENDING adjustment and blocks a reduction past what remains billed
         'amount' => 250_000,
         'reason_type' => FeeAdjustmentReasonType::Hardship,
         'reason_note' => 'Too generous.',
-        'adjustment_account_id' => feesAccountId('706'),
+        'adjustment_account_id' => cnAccountId('706'),
         'effective_date' => '2031-03-16',
     ], $user->toAuditActor()))->toThrow(DomainException::class, 'exceeds the 200000 remaining billed');
 });
 
 it('enforces maker-checker: the granter cannot approve their own adjustment; a second user can, and approval posts', function (): void {
-    $granter = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $granter = cnUserAs(Role::Bursar, Role::Accountant);
     feesSaveAdjustmentRule($granter);
     $set = feesIssuedInvoiceFixture($granter);
 
@@ -501,7 +501,7 @@ it('enforces maker-checker: the granter cannot approve their own adjustment; a s
         'amount' => 60_000,
         'reason_type' => FeeAdjustmentReasonType::ScholarshipInternal,
         'reason_note' => 'Merit scholarship.',
-        'adjustment_account_id' => feesAccountId('706'),
+        'adjustment_account_id' => cnAccountId('706'),
         'effective_date' => '2031-03-16',
     ], $granter->toAuditActor());
 
@@ -509,7 +509,7 @@ it('enforces maker-checker: the granter cannot approve their own adjustment; a s
     expect(fn (): FeeAdjustment => app(ApproveFeeAdjustment::class)->handle((int) $adjustment->getKey(), $granter->toAuditActor()))
         ->toThrow(DomainException::class, 'Segregation of duties');
 
-    $approver = feesIssueUserAs(Role::Bursar, Role::Accountant);
+    $approver = cnUserAs(Role::Bursar, Role::Accountant);
     $approved = app(ApproveFeeAdjustment::class)->handle((int) $adjustment->getKey(), $approver->toAuditActor());
 
     expect($approved->status)->toBe(FeeAdjustmentStatus::Approved)
@@ -528,8 +528,8 @@ it('enforces maker-checker: the granter cannot approve their own adjustment; a s
 });
 
 it('refuses an adjustment against a draft invoice - a draft is simply edited', function (): void {
-    $user = feesIssueUserAs(Role::Bursar, Role::Accountant);
-    $fixture = feesFixture();
+    $user = cnUserAs(Role::Bursar, Role::Accountant);
+    $fixture = cnFixture();
 
     $result = app(GenerateInvoices::class)->forEnrollments(
         [$fixture['enrollment']->id],
@@ -547,7 +547,7 @@ it('refuses an adjustment against a draft invoice - a draft is simply edited', f
         'amount' => 10_000,
         'reason_type' => FeeAdjustmentReasonType::Hardship,
         'reason_note' => 'Draft target.',
-        'adjustment_account_id' => feesAccountId('706'),
+        'adjustment_account_id' => cnAccountId('706'),
         'effective_date' => '2031-03-16',
     ], $user->toAuditActor());
 })->throws(DomainException::class, 'adjustments target ISSUED invoices');

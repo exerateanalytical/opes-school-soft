@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Modules\Academics\Models\AssessmentPeriod;
 use App\Modules\Accounting\Models\ChartOfAccount;
 use App\Modules\Accounting\Models\FiscalYear;
 use App\Modules\Fees\Actions\ThirdPartyFundsReport;
@@ -84,9 +85,11 @@ if (! function_exists('tpfInvoice')) {
         int $agentAmount,
         int $ownAmount,
         string $issueDate,
+        ?int $termId = null,
     ): array {
         $invoiceId = (int) DB::table('invoices')->insertGetId([
             'invoice_no' => 'INV/2026/'.Str::upper(Str::random(8)),
+            'term_id' => $termId,
             'enrollment_id' => $enrollment->id,
             'student_id' => $enrollment->student_id,
             'academic_year_id' => $enrollment->academic_year_id,
@@ -258,13 +261,22 @@ it('excludes voided and bounced payments from collection (§5.2)', function () {
 it('carries prior collections into opening_held and subtracts remittances in the window', function () {
     $s = tpfScaffold();
 
+    // Distinct terms keep the two issued invoices apart under the
+    // issue-idempotency UNIQUE (enrollment, structure, term).
+    $term1 = AssessmentPeriod::factory()->term(1, '2026-09-01', '2026-12-31')->create([
+        'academic_year_id' => $s['enrollment']->academic_year_id,
+    ]);
+    $term2 = AssessmentPeriod::factory()->term(2, '2027-01-01', '2027-03-31')->create([
+        'academic_year_id' => $s['enrollment']->academic_year_id,
+    ]);
+
     // Term 1 (before the reporting window): collect 60 000, remit 40 000.
-    $t1 = tpfInvoice($s['enrollment'], $s['fiscalYearId'], $s['fundId'], 60_000, 0, '2026-09-05');
+    $t1 = tpfInvoice($s['enrollment'], $s['fiscalYearId'], $s['fundId'], 60_000, 0, '2026-09-05', (int) $term1->getKey());
     tpfPayment($s['enrollment'], $s['fiscalYearId'], 60_000, '2026-09-20', $s['user'], $t1['invoiceId'], $t1['agentLineId']);
     tpfRemittance($s['fundId'], 40_000, '2026-09-01', '2026-12-31', '2026-12-15');
 
     // Term 2 (the window): collect 30 000, remit 25 000.
-    $t2 = tpfInvoice($s['enrollment'], $s['fiscalYearId'], $s['fundId'], 30_000, 0, '2027-01-10');
+    $t2 = tpfInvoice($s['enrollment'], $s['fiscalYearId'], $s['fundId'], 30_000, 0, '2027-01-10', (int) $term2->getKey());
     tpfPayment($s['enrollment'], $s['fiscalYearId'], 30_000, '2027-01-20', $s['user'], $t2['invoiceId'], $t2['agentLineId']);
     tpfRemittance($s['fundId'], 25_000, '2027-01-01', '2027-03-31', '2027-03-20');
 
