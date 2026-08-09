@@ -1,4 +1,4 @@
-# OPES SCHOOL — Handover (2026-08-08, end of Phase 6 salvage)
+# OPES SCHOOL — Handover (2026-08-09, Phase 6 green)
 
 New account: start Claude Code in `C:\laragon\www\opeschool`, paste this file's path, and say "read the handover and continue".
 
@@ -14,20 +14,27 @@ School management platform for Cameroon. Laravel 13.24 + Livewire 4.3 + Tailwind
 6. User style: fast, no narration, no time-wasting; verify claims live in the browser rather than asserting.
 
 ## State right now
-- **Phases 0–4b: DONE, verified, deployed** (1072 tests green as of last solo run, PHPStan 0 errors). Ledger invariants L1–L15 via MySQL triggers + nightly `opes:ledger:verify` at 02:45; PostingRule engine (`app/Support/Expression`), analytics, opening balances all merged.
-- **Sidebar: every item clickable**; unbuilt modules serve a "Scheduled module" placeholder page generated from `Identity\Support\Navigation::placeholderRoutes()`.
-- **Phase 6 (Fees): ~90% built, merged to main as WIP commit 656cdbb, schema deployed** to the dev DB (all 13 fee migrations `2026_08_08_240001–240013` Ran). NOT yet green — see "Finish Phase 6" below.
-- Branch `phase-6-fees` pushed; main == phase-6-fees tip right now.
+- **Environments**: the project now runs in TWO places. (a) The original Windows/Laragon box (`C:\laragon\www\opeschool`, PHP 8.3.30, MySQL 8.4.3, opeschool.test vhost) — all Laragon notes below still apply there. (b) A Linux/MySQL 8.0 sandbox (`/home/user/opes-school-soft`, PHP 8.4, DB user/pass `opes`/`opes`, DBs `opeschool` + `opeschool_test` + `opeschool_test_f1..f5`). Sandbox-local environment state (not in git): bcmath built from php-8.4.19 source and installed; `.env` `OPES_MYSQLDUMP`/`OPES_MYSQL_CLIENT` point at `/usr/bin/{mysqldump,mysql}`. A rebuilt sandbox must redo both (or use a SessionStart hook).
+- **Phases 0–4b: DONE, verified, deployed.** Ledger invariants L1–L15 via MySQL triggers + nightly `opes:ledger:verify` at 02:45; PostingRule engine (`app/Support/Expression`), analytics, opening balances all merged.
+- **Phase 6 (Fees): DONE and GREEN (2026-08-09).** Full SOLO suite on `opeschool_test`: **1183 tests — 1182 passed, 1 skipped (by design), 0 failed** (4427 assertions, ~6.3 min). PHPStan level 8: **0 errors repo-wide, zero ignoreErrors**. All 13 fee migrations `2026_08_08_240001–240013` Ran on dev (81 migrations total, zero pending); `migrate:fresh` from scratch verified clean. ModuleBoundaryTest green + grep audit: zero cross-module Model imports, no ledger write bypassing `PostFromEvent`.
+- **Sidebar: every item clickable**; unbuilt modules serve a "Scheduled module" placeholder page generated from `Identity\Support\Navigation::placeholderRoutes()`. Finance is now a built module (invoices/cashier/statement routes live).
+- Working branch in the sandbox: `claude/handoff-document-review-7ojy23`.
 
-## Finish Phase 6 (the immediate task)
-Baseline: 68 fee/tax tests, 62 green. Everything below is small and mechanical:
-1. **Re-run the void/payment suites** — the root-cause fix is already committed: `ReverseJournalEntry` used sequence series `piece_no.*` while `PostJournalEntry` used `journal_entry_piece.*` (parallel counters → duplicate piece_no on first real post-then-reverse). Both now use `journal_entry_piece.*` (also updated `tests/Feature/Accounting/ReversalTest.php` fixture, and int-cast in `tests/Feature/Fees/VoidTest.php:201`). Run: `DB_DATABASE=opeschool_test_f3 php artisan migrate:fresh --force` then `php artisan test tests/Feature/Fees/PaymentTest.php tests/Feature/Fees/ReceiptTest.php tests/Feature/Fees/VoidTest.php tests/Feature/Accounting/ReversalTest.php` (same DB env var).
-2. **Invoice idempotency migration defect**: `2026_08_08_240005_create_invoices_table.php` — unique key `uq_invoices_issue_idem` collides cancelled/draft invoices (duplicate '11-0-0' in StatementTest). Make the generated idempotency column NULL unless status='issued' (MySQL uniques ignore NULL). Edit the migration in place (unreleased), then migrate:fresh test DBs AND `php artisan migrate:fresh` is NOT for the dev DB — for dev, write a follow-up migration or accept a rebuild since no production data exists.
-3. **PHPStan**: `phpstan-findings.json` (repo root) lists the original 49; the Livewire screens are fixed (0 errors). Remaining: `AgedBalances.php` (list<int> cast at :75, return-shape at :144), `StudentStatement.php`, `ThirdPartyFundsReport.php`, `GenerateInvoices.php` (~8 untyped `DB::table` row properties — add object-shape `@var`), plus FeeItemTest/FeeStructureTest were fixed by F1 (committed), InvoiceGenerationTest may still have some.
-4. **New test files exist but are unverified**: InvoiceTest, CreditNoteTest, AgedBalancesTest, ThirdPartyFundsTest, FeesScreensTest — run each, fix, and check helper-name collisions across files (must be function_exists-guarded + unique).
-5. **F5 wiring incomplete**: `Navigation.php` finance flip and fees routes in `routes/web.php` are partially done on the branch — verify: finance item `built => true` pointing at the invoices screen, 'finance' REMOVED from `placeholderRoutes()`, routes `/finance/invoices` (can:fee.view), `/finance/cashier`, `/finance/statement/{student}`; Permission/Role fee permissions seeded in RolePermissionSeeder; `tests/Feature/Ui/ShellTest.php` must stay green after the flip.
-6. **When all green**: SOLO full suite (`php artisan test` on `opeschool_test`, nothing else running), PHPStan 0 across the repo, `composer deploy`, push, then verify the cashier flow live at opeschool.test (demo login → Finance).
+## Phase 6 checklist — final status
+1. **Void/payment suites** — DONE. `piece_no.*` vs `journal_entry_piece.*` parallel-counter fix verified; full fee+tax suite (`tests/Feature/Fees` + `ReversalTest`) 92/92 green.
+2. **Invoice idempotency migration defect** — DONE. `uq_invoices_issue_idem`/`uq_enrollment_key` generated column is NULL unless status='issued'; dev DB already carries the fixed column (migrate:status verified, nothing to migrate).
+3. **PHPStan** — DONE. 0 errors repo-wide at level 8, no ignoreErrors, no baseline. Stale `phpstan-findings.json` deleted. (Config note: `tests/Architecture` is an analysis-path exclusion because Pest's arch() magic-method DSL trips level 8 — not an error suppression.)
+4. **New test files** — DONE and verified (InvoiceTest, CreditNoteTest, AgedBalancesTest, ThirdPartyFundsTest, FeesScreensTest all in the green solo run). All `function_exists`-guarded helper duplicates are now byte-identical FQCN bodies (a divergent `ledgerPostEntry` copy in LetteringTest had resurrected the piece_no bug cross-suite). Debt: consolidate the duplicates into shared helper files (e.g. `AccountingTestHelpers.php`) to remove drift risk.
+5. **F5 finance wiring** — DONE: `Navigation.php` finance `built => true`, 'finance' removed from `placeholderRoutes()`, routes `/finance/invoices` (can:fee.view), `/finance/cashier`, `/finance/statement/{student}` live; fee permissions in RolePermissionSeeder; ShellTest green.
+6. **Deploy** — done in the sandbox (migrate --force, RolePermissionSeeder, `SKIP_REMOTE_FONTS=1 npm run build`, migrate:status). REMAINING: push from the Windows box (sandbox cannot push) and live-browser verification of the cashier flow at opeschool.test (no browser/vhost in the sandbox).
 7. `RESUME-BRIEFS.md` (repo root) has the original per-agent scopes/details.
+
+## Phase 6 integration gotchas (learned 2026-08-09, keep)
+- Assessment/PublicationTest's truncate-all reset was wiping MIGRATION-seeded tables (OHADA chart, journals, analytic axes) for the whole process — RefreshDatabase migrates only once. It now skips migration-seeded tables. Never truncate those in test resets.
+- `RecordPayment` no longer imports `Students\Models\Student` (boundary violation); it reads the student label via `DB::table` and throws ValidationException on a missing student.
+- NumericPolicyTest ignores laravel/pint's bundled `App\Support\Prettier`/`PhpFragmentFormatter` (pint's composer.json maps `App\` to its own app/; vendor objects have no path — crashed pest-arch). A composer-level exclusion would remove the hazard entirely.
+- HealthEndpointTest's DB-password containment probe skips passwords that are substrings of product vocabulary (sandbox pass 'opes' ⊂ 'php artisan opes:backup:run'); re-arms automatically for real passwords.
+- Full-suite results differ from per-file runs — cross-suite state leaks are real; always finish with a SOLO full run.
 
 ## After Phase 6 (build order remaining)
 Phase 5 (procurement/tax full), 7 (operations: year rollover wizard, licensing), 8 (attendance/timetable/discipline/promotion), 9 (assets/inventory/library), 10 (welfare), 11 (HR/payroll CNPS/IRPP), 12 (portals/API), 13 (documents/PDFs/polish).
