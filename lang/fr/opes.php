@@ -342,6 +342,17 @@ return [
         'backup.run' => 'Lancer une sauvegarde',
         'backup.restore' => 'Restaurer une sauvegarde',
         'licence.manage' => 'Gérer la licence',
+        'timetable.view' => 'Consulter les emplois du temps',
+        'timetable.manage' => 'Gérer les emplois du temps',
+        'attendance.view' => 'Consulter les présences',
+        'attendance.take' => 'Faire l\'appel',
+        'attendance.amend' => 'Modifier un registre d\'appel soumis',
+        'attendance.justify' => 'Justifier les absences',
+        'discipline.view' => 'Consulter les dossiers de discipline',
+        'discipline.manage' => 'Gérer les dossiers de discipline',
+        'promotion.evaluate' => 'Évaluer les passages en classe supérieure',
+        'promotion.apply' => 'Appliquer les décisions de passage',
+        'calendar.manage' => 'Gérer le calendrier scolaire',
     ],
     // Familles de systèmes d'évaluation, 01-assessment 3.2.
     'framework_family' => [

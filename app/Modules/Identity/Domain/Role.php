@@ -58,14 +58,17 @@ enum Role: string
         return match ($this) {
             self::SuperAdmin => Permission::cases(),
 
-            self::Administrator => array_filter(
+            // array_values because array_filter keeps the original indexes,
+            // and the withheld cases are no longer the last in the enum - the
+            // gap they leave would break the list<Permission> contract.
+            self::Administrator => array_values(array_filter(
                 Permission::cases(),
                 static fn (Permission $p): bool => ! in_array(
                     $p,
                     [Permission::LicenceManage, Permission::BackupRestore],
                     true,
                 ),
-            ),
+            )),
 
             // The Proviseur signs the bulletin, so publication is his; he does
             // not enter or validate marks himself.
@@ -74,6 +77,15 @@ enum Role: string
                 Permission::SettingView, Permission::FeeView, Permission::LedgerView,
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::ReportsPublish,
+                // Phase 8: the Proviseur oversees the timetable and calendar,
+                // reads attendance and discipline, and owns promotion - both
+                // the evaluation and the irreversible apply (07-students
+                // §10.6 puts the conseil de classe decision under his seal).
+                Permission::TimetableView, Permission::TimetableManage,
+                Permission::CalendarManage,
+                Permission::AttendanceView, Permission::AttendanceAmend,
+                Permission::DisciplineView,
+                Permission::PromotionEvaluate, Permission::PromotionApply,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -86,6 +98,15 @@ enum Role: string
                 Permission::StudentsView,
                 Permission::MarksValidate, Permission::AssessmentConfigure,
                 Permission::ReportsPublish,
+                // Phase 8: the Censeur builds the timetable, runs the
+                // attendance operation day to day (take, amend, justify) and
+                // manages discipline alongside the Surveillant Général. He
+                // does NOT hold promotion rights - evaluation and apply stay
+                // with the Proviseur per the phase-08 §1 matrix.
+                Permission::TimetableView, Permission::TimetableManage,
+                Permission::AttendanceView, Permission::AttendanceTake,
+                Permission::AttendanceAmend, Permission::AttendanceJustify,
+                Permission::DisciplineView, Permission::DisciplineManage,
             ],
 
             // The bursar reads the student roll to collect against it, but
@@ -111,6 +132,9 @@ enum Role: string
                 Permission::StudentsView, Permission::StudentsManage,
                 Permission::StudentsMatriculeFinalise,
                 Permission::GuardiansManage, Permission::AdmissionsManage,
+                // Phase 8: the registrar reads the timetable (scheduling
+                // context for enrolment) but never edits it.
+                Permission::TimetableView,
             ],
 
             // 00-core 9.1: these three read the academic structure (year,
@@ -125,6 +149,12 @@ enum Role: string
             self::Teacher => [
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter,
+                // Phase 8: attendance.take is assignment-gated in the Action
+                // (same outer-gate/inner-scope pattern as marks.enter): the
+                // permission opens the door, the subject-allocation check
+                // decides which registers this teacher may actually open.
+                Permission::TimetableView,
+                Permission::AttendanceView, Permission::AttendanceTake,
             ],
 
             // The Professeur Principal enters marks for his own subject and
@@ -143,8 +173,17 @@ enum Role: string
                 Permission::AssessmentConfigure, Permission::ReportsPublish,
             ],
 
+            // Phase 8: the Surveillant Général polices attendance and owns
+            // discipline casework. He views and justifies absences but does
+            // not take registers (that is the teacher in front of the class)
+            // and does not amend a submitted register (leadership only).
+            self::DisciplineMaster => [
+                Permission::AttendanceView, Permission::AttendanceJustify,
+                Permission::DisciplineView, Permission::DisciplineManage,
+            ],
+
             self::HrOfficer, self::PayrollOfficer,
-            self::DisciplineMaster, self::Librarian, self::StoreKeeper,
+            self::Librarian, self::StoreKeeper,
             self::Nurse, self::WelfareOfficer, self::FrontDesk => [],
 
             self::Guardian, self::StaffPortal => [],

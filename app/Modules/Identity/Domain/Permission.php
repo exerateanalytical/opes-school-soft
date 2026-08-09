@@ -89,6 +89,38 @@ enum Permission: string
     case BackupRestore = 'backup.restore';
     case LicenceManage = 'licence.manage';
 
+    // Phase 8 (docs/plans/phase-08.md §1): timetable, attendance, discipline,
+    // promotion, school calendar. Two segments only, like every case above -
+    // these values double as translation keys and Laravel reads a dot as a
+    // nested-array step.
+    //
+    // attendance.take is the outer gate only: the Action further scopes a
+    // Teacher to the class groups they are actually allocated to, same
+    // pattern as marks.enter (01-assessment 7.5).
+    case TimetableView = 'timetable.view';
+    case TimetableManage = 'timetable.manage';
+
+    case AttendanceView = 'attendance.view';
+    case AttendanceTake = 'attendance.take';
+    // Amending re-opens a submitted register - a heavier right than taking
+    // it, so it stays with school leadership rather than the class teacher.
+    case AttendanceAmend = 'attendance.amend';
+    case AttendanceJustify = 'attendance.justify';
+
+    // Also gates the student-profile Discipline tab (07-students
+    // `students.discipline.view` semantics; spelled two-segment here for the
+    // same translation-key reason as StudentsMatriculeFinalise above).
+    case DisciplineView = 'discipline.view';
+    case DisciplineManage = 'discipline.manage';
+
+    // Evaluate and apply are separate rights because apply is the
+    // irreversible step (07-students §10.6): it closes segments and creates
+    // next-year enrolments, so it is deliberately narrower than evaluate.
+    case PromotionEvaluate = 'promotion.evaluate';
+    case PromotionApply = 'promotion.apply';
+
+    case CalendarManage = 'calendar.manage';
+
     public function label(string $locale = 'en'): string
     {
         // Permission values contain a dot ('user.view'), and the translator

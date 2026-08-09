@@ -330,6 +330,17 @@ return [
         'backup.run' => 'Run a backup',
         'backup.restore' => 'Restore from a backup',
         'licence.manage' => 'Manage the licence',
+        'timetable.view' => 'View timetables',
+        'timetable.manage' => 'Manage timetables',
+        'attendance.view' => 'View attendance',
+        'attendance.take' => 'Take attendance',
+        'attendance.amend' => 'Amend a submitted attendance register',
+        'attendance.justify' => 'Justify absences',
+        'discipline.view' => 'View discipline cases',
+        'discipline.manage' => 'Manage discipline cases',
+        'promotion.evaluate' => 'Evaluate promotion runs',
+        'promotion.apply' => 'Apply promotion decisions',
+        'calendar.manage' => 'Manage the school calendar',
     ],
     // Assessment framework families, 01-assessment 3.2.
     'framework_family' => [
