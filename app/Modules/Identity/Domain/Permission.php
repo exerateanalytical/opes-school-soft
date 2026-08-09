@@ -68,6 +68,12 @@ enum Permission: string
     case FeeCollect = 'fee.collect';
     case FeeVoid = 'fee.void';
 
+    // 04-fees §2: shaping the fee catalogue (categories, items, structures,
+    // instalment plans) is a different right from collecting against it. The
+    // Bursar collects; the Accountant and Administrator configure - pricing
+    // policy stays out of the hands that touch the cash.
+    case FeeConfigure = 'fee.configure';
+
     case LedgerView = 'ledger.view';
     case LedgerPost = 'ledger.post';
 

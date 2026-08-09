@@ -323,6 +323,7 @@ return [
         'fee.view' => 'View fees',
         'fee.collect' => 'Collect payments',
         'fee.void' => 'Void payments',
+        'fee.configure' => 'Configure fees',
         'ledger.view' => 'View the ledger',
         'ledger.post' => 'Post to the ledger',
         'ledger.configure' => 'Configure journals, fiscal years and accounting periods',
@@ -1167,6 +1168,7 @@ return [
         'receipt_no' => 'Receipt number',
         'view_statement' => 'View student statement',
         'amount_invalid' => 'Enter a payment amount greater than zero.',
+        'no_open_year' => 'No current academic year or open fiscal year is configured. Ask an administrator to open one before collecting payments.',
 
         // ── Invoices list ────────────────────────────────────────────────
         'invoices_title' => 'Invoices',

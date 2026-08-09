@@ -128,7 +128,7 @@ if (! function_exists('ledgerPostEntry')) {
         array $lines,
         User $actor,
     ): JournalEntry {
-        $series = sprintf('piece_no.%d.%d', $journal->id, $fiscalYear->id);
+        $series = sprintf('journal_entry_piece.%d.%d', $journal->id, $fiscalYear->id);
         $sequence = app(SequenceAllocator::class)->allocate($series);
         $pieceNo = sprintf('%s/%s/%06d', $journal->code, $fiscalYear->code, $sequence);
 

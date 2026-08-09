@@ -97,6 +97,9 @@ enum Role: string
             self::Accountant => [
                 Permission::FeeView, Permission::LedgerView, Permission::LedgerPost,
                 Permission::LedgerConfigure, Permission::FeeVoid,
+                // 04-fees: the accountant shapes the fee catalogue; the
+                // bursar (who handles the cash) deliberately does not.
+                Permission::FeeConfigure,
             ],
 
             // 00-core 9.1: the registrar owns the student record end to end -

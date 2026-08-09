@@ -143,7 +143,9 @@ final class ReverseJournalEntry
 
             // §9.2 step 9 - a fresh piece_no, gapless per (journal, fiscal
             // year), allocated inside this transaction (00-core §12 / L7).
-            $series = sprintf('piece_no.%d.%d', $journal->getKey(), $fiscalYearId);
+            // SAME series as PostJournalEntry - a reversal continues the
+            // journal's numbering, it does not run a parallel counter.
+            $series = sprintf('journal_entry_piece.%d.%d', $journal->getKey(), $fiscalYearId);
             $sequenceNumber = $this->sequences->allocate($series);
             $pieceNo = $this->renderPieceNo($journal->piece_no_format, $journal->code, $fiscalYear->code, $sequenceNumber);
 

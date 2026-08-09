@@ -215,7 +215,8 @@
                     </label>
 
                     <div class="flex items-center gap-2">
-                        <button type="submit" @disabled($selected === null)
+                        <button type="submit" @disabled($selected === null || ! $canCollect)
+                                @if (! $canCollect) title="{{ __('opes.nav.nav_disabled_title') }}" @endif
                                 class="flex-1 rounded border border-primary bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">
                             {{ __('opes.fees_screen.collect_payment') }}
                         </button>

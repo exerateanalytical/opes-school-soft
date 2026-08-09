@@ -53,7 +53,12 @@ final class Navigation
             // placeholders await is their dedicated screens.
             ['key' => 'examinations', 'route' => '/examinations', 'permission' => null, 'enabled' => true, 'built' => false],
             ['key' => 'results', 'route' => '/results', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'finance', 'route' => '/finance', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Fees (Phase 6): /finance is the cashier screen. Gated on
+            // fee.view, matching its route, per this file's nav-and-route-
+            // agree-by-construction contract; the ACT of collecting is gated
+            // harder (fee.collect) inside the screen, the same screen-vs-write
+            // split the ledger item uses.
+            ['key' => 'finance', 'route' => '/finance', 'permission' => Permission::FeeView, 'enabled' => true, 'built' => true],
             // The general ledger (09-ui.md's Finance section covers fees and
             // accounting together at `/finance`, but that dashboard route does
             // not exist yet). This item is scoped to the ledger screens Phase 4

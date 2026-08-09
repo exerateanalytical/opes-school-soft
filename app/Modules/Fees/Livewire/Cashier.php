@@ -1,0 +1,348 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Fees\Livewire;
+
+use App\Modules\Fees\Actions\RecordPayment;
+use App\Modules\Fees\Domain\PaymentMethod;
+use App\Modules\Identity\Domain\Permission;
+use App\Support\Audit\Actor;
+use App\Support\Clock\BusinessDate;
+use App\Support\Money\Money;
+use DomainException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+
+/**
+ * Fee Collection (Cashier) at /finance - mockup panel 3, gated `fee.collect`.
+ *
+ * Search a student (query builder over `students` - ModuleBoundaryTest bars
+ * a Fees class from Students\Models), review the open-invoice breakdown,
+ * record a payment through F3's RecordPayment. That Action owns the entire
+ * financial consequence (receipt number, oldest-first allocation, posting
+ * through the Phase 4 rule engine); this screen owns none of it.
+ *
+ * Domain refusals (no open accounting period, no posting rule, negative
+ * amount past the browser…) surface as inline text, never a 500:
+ * ValidationException lands in the error bag under the field it names,
+ * DomainException in a banner, verbatim - those messages are written for
+ * operators.
+ */
+#[Layout('layouts.app')]
+final class Cashier extends Component
+{
+    public string $search = '';
+
+    public ?int $studentId = null;
+
+    public string $amount = '';
+
+    public string $method = 'cash';
+
+    public string $reference = '';
+
+    public string $receiptNo = '';
+
+    public string $errorMessage = '';
+
+    public function mount(): void
+    {
+        // The SCREEN is readable under fee.view (nav/route agreement - the
+        // sidebar's finance item is gated fee.view). The ACT of collecting
+        // requires fee.collect: checked in collect() below, re-authorized
+        // inside RecordPayment, and the view disables the button without it.
+        Gate::authorize(Permission::FeeView->value);
+    }
+
+    public function canCollect(): bool
+    {
+        return Gate::allows(Permission::FeeCollect->value);
+    }
+
+    public function updatedSearch(): void
+    {
+        // A new search implicitly abandons the previous selection.
+        $this->studentId = null;
+        $this->receiptNo = '';
+        $this->errorMessage = '';
+    }
+
+    public function selectStudent(int $studentId): void
+    {
+        $exists = DB::table('students')->where('id', $studentId)->exists();
+
+        if ($exists) {
+            $this->studentId = $studentId;
+            $this->receiptNo = '';
+            $this->errorMessage = '';
+        }
+    }
+
+    public function clearSelection(): void
+    {
+        $this->reset(['studentId', 'search', 'amount', 'reference', 'receiptNo', 'errorMessage']);
+    }
+
+    public function collect(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->receiptNo = '';
+        $this->errorMessage = '';
+
+        $studentId = $this->studentId;
+
+        if ($studentId === null) {
+            return;
+        }
+
+        $this->validate([
+            'amount' => ['required', 'integer', 'min:1'],
+            'method' => ['required', 'in:cash,mobile_money,bank'],
+            'reference' => ['nullable', 'string', 'max:120'],
+        ], [
+            'amount.required' => __('opes.fees_screen.amount_invalid'),
+            'amount.integer' => __('opes.fees_screen.amount_invalid'),
+            'amount.min' => __('opes.fees_screen.amount_invalid'),
+        ]);
+
+        $method = PaymentMethod::from($this->method);
+
+        $academicYearId = DB::table('academic_years')->where('is_current', true)->value('id');
+        $fiscalYearId = DB::table('fiscal_years')->where('status', 'open')->value('id');
+
+        if ($academicYearId === null || $fiscalYearId === null) {
+            // No current academic year / open fiscal year configured: a
+            // configuration gap the operator can name to an administrator.
+            $this->errorMessage = __('opes.fees_screen.no_open_year');
+
+            return;
+        }
+
+        /** @var object{first_name: string, last_name: string}|null $student */
+        $student = DB::table('students')->where('id', $studentId)->first(['first_name', 'last_name']);
+
+        if ($student === null) {
+            return;
+        }
+
+        $user = auth()->user();
+        $actor = new Actor($user?->id, $user->name ?? 'system');
+
+        try {
+            $payment = app(RecordPayment::class)->handle(
+                studentId: $studentId,
+                academicYearId: (int) $academicYearId,
+                fiscalYearId: (int) $fiscalYearId,
+                method: $method,
+                amount: Money::of((int) $this->amount),
+                // The walk-up payer at a cashier desk is recorded as the
+                // student's own name unless a dedicated payer field exists;
+                // the mockup's form carries no payer input.
+                payerName: $student->first_name.' '.$student->last_name,
+                valueDate: BusinessDate::today(),
+                actor: $actor,
+                reference: $this->reference !== '' ? $this->reference : null,
+                enrollmentId: $this->latestEnrollmentId($studentId),
+            );
+
+            $this->receiptNo = $payment->receipt_no;
+            $this->reset(['amount', 'reference']);
+        } catch (DomainException $exception) {
+            $this->errorMessage = $exception->getMessage();
+        }
+    }
+
+    private function latestEnrollmentId(int $studentId): ?int
+    {
+        $id = DB::table('enrollments')
+            ->where('student_id', $studentId)
+            ->orderByDesc('academic_year_id')
+            ->orderByDesc('id')
+            ->value('id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * @return list<array{id: int, name: string, matricule: string}>
+     */
+    private function results(): array
+    {
+        if ($this->search === '' || $this->studentId !== null) {
+            return [];
+        }
+
+        $term = '%'.$this->search.'%';
+
+        $rows = DB::table('students')
+            ->where('is_archived', false)
+            ->where(function ($query) use ($term): void {
+                $query->where('first_name', 'like', $term)
+                    ->orWhere('last_name', 'like', $term)
+                    ->orWhere('matricule', 'like', $term)
+                    ->orWhere('admission_no', 'like', $term);
+            })
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit(8)
+            ->get(['id', 'first_name', 'last_name', 'matricule']);
+
+        $results = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, first_name: string, last_name: string, matricule: string} $row */
+            $results[] = [
+                'id' => (int) $row->id,
+                'name' => $row->first_name.' '.$row->last_name,
+                'matricule' => (string) $row->matricule,
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * @return array{id: int, name: string, matricule: string, class: string, initials: string}|null
+     */
+    private function selected(): ?array
+    {
+        if ($this->studentId === null) {
+            return null;
+        }
+
+        /** @var object{id: int|string, first_name: string, last_name: string, matricule: string}|null $row */
+        $row = DB::table('students')
+            ->where('id', $this->studentId)
+            ->first(['id', 'first_name', 'last_name', 'matricule']);
+
+        if ($row === null) {
+            return null;
+        }
+
+        $className = DB::table('enrollment_segments as seg')
+            ->join('enrollments as enr', 'enr.id', '=', 'seg.enrollment_id')
+            ->join('class_groups as cg', 'cg.id', '=', 'seg.class_group_id')
+            ->where('enr.student_id', $this->studentId)
+            ->whereNull('seg.ends_on')
+            ->whereIn('enr.status', ['pending', 'active', 'suspended'])
+            ->orderByDesc('seg.starts_on')
+            ->value('cg.name');
+
+        return [
+            'id' => (int) $row->id,
+            'name' => $row->first_name.' '.$row->last_name,
+            'matricule' => (string) $row->matricule,
+            'class' => is_string($className) ? $className : '',
+            'initials' => mb_strtoupper(mb_substr($row->first_name, 0, 1).mb_substr($row->last_name, 0, 1)),
+        ];
+    }
+
+    /**
+     * Per-line outstanding over the student's ISSUED invoices - the §5
+     * formula at line grain: (amount + tax) − valid allocations − approved
+     * adjustments − issued credit notes. Balance is computed, never stored.
+     *
+     * @return list<array{invoice_no: string, description: string, amount: int, outstanding: int}>
+     */
+    private function breakdown(): array
+    {
+        if ($this->studentId === null) {
+            return [];
+        }
+
+        $allocated = "(SELECT COALESCE(SUM(pa.amount), 0)
+            FROM payment_allocations pa
+            JOIN payments p ON p.id = pa.payment_id
+            WHERE pa.invoice_line_id = l.id
+              AND pa.reversed_at IS NULL
+              AND p.clearing_state <> 'bounced'
+              AND NOT EXISTS (SELECT 1 FROM payment_voids v WHERE v.payment_id = p.id AND v.status = 'confirmed'))";
+
+        $adjusted = "(SELECT COALESCE(SUM(fa.amount), 0) FROM fee_adjustments fa
+            WHERE fa.invoice_line_id = l.id AND fa.status = 'approved')";
+
+        $credited = "(SELECT COALESCE(SUM(cnl.amount + cnl.tax_amount), 0)
+            FROM credit_note_lines cnl
+            JOIN credit_notes cn ON cn.id = cnl.credit_note_id
+            WHERE cnl.invoice_line_id = l.id AND cn.status = 'issued')";
+
+        $rows = DB::table('invoice_lines as l')
+            ->join('invoices as i', 'i.id', '=', 'l.invoice_id')
+            ->where('i.student_id', $this->studentId)
+            ->where('i.status', 'issued')
+            ->orderBy('i.issue_date')
+            ->orderBy('i.id')
+            ->orderBy('l.line_no')
+            ->select([
+                'i.invoice_no',
+                'l.description',
+                DB::raw('(l.amount + l.tax_amount) as gross'),
+                DB::raw("((l.amount + l.tax_amount) - {$allocated} - {$adjusted} - {$credited}) as outstanding"),
+            ])
+            ->get();
+
+        $breakdown = [];
+
+        foreach ($rows as $row) {
+            /** @var object{invoice_no: string|null, description: string, gross: int|string, outstanding: int|string} $row */
+            $breakdown[] = [
+                'invoice_no' => (string) ($row->invoice_no ?? ''),
+                'description' => (string) $row->description,
+                'amount' => (int) $row->gross,
+                'outstanding' => (int) $row->outstanding,
+            ];
+        }
+
+        return $breakdown;
+    }
+
+    /**
+     * @param  list<array{invoice_no: string, description: string, amount: int, outstanding: int}>  $breakdown
+     * @return array{invoiced: int, paid: int, balance: int}
+     */
+    private function totals(array $breakdown): array
+    {
+        $invoiced = 0;
+        $balance = 0;
+
+        foreach ($breakdown as $line) {
+            $invoiced += $line['amount'];
+            $balance += $line['outstanding'];
+        }
+
+        $paid = 0;
+
+        if ($this->studentId !== null) {
+            $paid = (int) DB::table('payments as p')
+                ->where('p.student_id', $this->studentId)
+                ->where('p.clearing_state', '<>', 'bounced')
+                ->whereNotExists(function ($query): void {
+                    $query->selectRaw('1')
+                        ->from('payment_voids as v')
+                        ->whereColumn('v.payment_id', 'p.id')
+                        ->where('v.status', 'confirmed');
+                })
+                ->sum('p.amount');
+        }
+
+        return ['invoiced' => $invoiced, 'paid' => $paid, 'balance' => $balance];
+    }
+
+    public function render(): mixed
+    {
+        $breakdown = $this->breakdown();
+
+        return view('livewire.fees.cashier', [
+            'results' => $this->results(),
+            'selected' => $this->selected(),
+            'breakdown' => $breakdown,
+            'totals' => $this->totals($breakdown),
+            'methodOptions' => array_map(static fn (PaymentMethod $m): string => $m->value, PaymentMethod::cases()),
+            'canCollect' => $this->canCollect(),
+        ]);
+    }
+}

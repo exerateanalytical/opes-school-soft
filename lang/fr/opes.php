@@ -335,6 +335,7 @@ return [
         'fee.view' => 'Consulter les frais',
         'fee.collect' => 'Encaisser les paiements',
         'fee.void' => 'Annuler les paiements',
+        'fee.configure' => 'Configurer les frais',
         'ledger.view' => 'Consulter le grand livre',
         'ledger.post' => 'Enregistrer une écriture',
         'ledger.configure' => 'Configurer les journaux, exercices et périodes comptables',
@@ -1164,6 +1165,7 @@ return [
         'receipt_no' => 'Numéro de reçu',
         'view_statement' => "Voir le relevé de l'élève",
         'amount_invalid' => 'Saisissez un montant de paiement supérieur à zéro.',
+        'no_open_year' => "Aucune année scolaire courante ni aucun exercice ouvert n'est configuré. Demandez à un administrateur d'en ouvrir un avant d'encaisser des paiements.",
 
         // ── Liste des factures ───────────────────────────────────────────
         'invoices_title' => 'Factures',

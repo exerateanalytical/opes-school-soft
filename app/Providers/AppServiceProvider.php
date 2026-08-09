@@ -11,6 +11,9 @@ use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
 use App\Modules\Assessment\Livewire\Marks\Entry as MarksEntry;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
+use App\Modules\Fees\Livewire\Cashier as FeesCashier;
+use App\Modules\Fees\Livewire\Invoices\Index as FeesInvoicesIndex;
+use App\Modules\Fees\Livewire\Statement as FeesStatement;
 use App\Modules\Guardians\Livewire\Guardians\Show as GuardiansShow;
 use App\Modules\Guardians\Livewire\Students\GuardiansPanel as StudentGuardiansPanel;
 use App\Modules\Identity\Livewire\Users\Index as UsersIndex;
@@ -85,5 +88,13 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('accounting.journal-entries.index', JournalEntriesIndex::class);
         Livewire::component('accounting.journal-entries.form', JournalEntryForm::class);
         Livewire::component('accounting.reports.trial-balance', TrialBalanceReport::class);
+
+        // Fees (docs/specs/04-fees.md), routed at /finance/* in routes/web.php.
+        // `fees.invoices.index` needs the explicit name for the ".index"
+        // stripping reason above; Cashier and Statement are aliased for the
+        // same one-mechanism symmetry as every routed component here.
+        Livewire::component('fees.cashier', FeesCashier::class);
+        Livewire::component('fees.invoices.index', FeesInvoicesIndex::class);
+        Livewire::component('fees.statement', FeesStatement::class);
     }
 }

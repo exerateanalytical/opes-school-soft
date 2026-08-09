@@ -97,8 +97,8 @@ it('creates a tax code and writes an audit entry naming the actor', function () 
         ->first();
 
     expect($audit)->not->toBeNull()
-        ->and($audit->module)->toBe('Tax')
-        ->and($audit->actor_id)->toBe($user->getKey());
+        ->and($audit?->module)->toBe('Tax')
+        ->and($audit?->actor_id)->toBe($user->getKey());
 });
 
 // ── Validation ──────────────────────────────────────────────────────────
@@ -245,6 +245,6 @@ it('allows renaming and account wiring in place, audited with before and after',
         ->first();
 
     expect($audit)->not->toBeNull();
-    $before = json_decode((string) $audit->before, true);
+    $before = json_decode((string) $audit?->before, true);
     expect($before)->toBe(['name' => 'Standard TVA']);
 });
