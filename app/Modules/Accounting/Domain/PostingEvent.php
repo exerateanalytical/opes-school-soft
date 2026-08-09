@@ -28,6 +28,12 @@ enum PostingEvent: string
     case FeeRefundIssued = 'fee.refund.issued';
     case FeeAdjustmentGranted = 'fee.adjustment.granted';
     case ReceivableWrittenOff = 'receivable.written_off';
+    // 04-fees §12.6/§22: the per-student reclassification of a credit balance
+    // to 4191 (advances received). Emitted by CarryForwardStudentCredit at
+    // year rollover (08-operations §6.2 step 7) and, later, by the nightly
+    // RunReceivableReclassification. One entry per student - OHADA
+    // non-compensation forbids netting across students (04-fees A5/C9).
+    case ReceivableReclassified = 'receivable.reclassified';
     case ReceivableProvisionRecognized = 'receivable.provision.recognized';
     case ReceivableProvisionReversed = 'receivable.provision.reversed';
     case RevenueDeferralRecognized = 'revenue.deferral.recognized';
@@ -134,6 +140,7 @@ enum PostingEvent: string
 
             self::FeeAdjustmentGranted,
             self::ReceivableWrittenOff,
+            self::ReceivableReclassified,
             self::ReceivableProvisionRecognized,
             self::ReceivableProvisionReversed,
             self::RevenueDeferralRecognized,
