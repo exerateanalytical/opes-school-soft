@@ -158,9 +158,15 @@ enum Role: string
                 // bursar (who handles the cash) deliberately does not.
                 Permission::FeeConfigure,
                 // Phase 13 (10-documents §19): same financial-reprint right
-                // as the bursar.
+                // as the bursar. DocumentsRevoke rides along with FeeVoid
+                // above - voiding a payment automatically revokes its
+                // receipt's IssuedDocument row (10-documents §10.1, "a
+                // voided payment's receipt... IssuedDocument.status becomes
+                // revoked"), and the accountant is the one role trusted with
+                // FeeVoid, so she is the one who can carry out that same
+                // action's direct, unavoidable consequence.
                 Permission::DocumentsPrint, Permission::DocumentsReprint,
-                Permission::DocumentsReprintFinancial,
+                Permission::DocumentsReprintFinancial, Permission::DocumentsRevoke,
                 // Phase 5 (03-tax-procurement): the accountant APPROVES what
                 // the bursar captured (invoices; match overrides) and voids
                 // payments (mirroring FeeVoid), and owns the tax cycle -

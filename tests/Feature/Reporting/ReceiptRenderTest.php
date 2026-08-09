@@ -140,7 +140,14 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
         throw $e;
     }
 
-    $reprint = app(PrintReceipt::class)->handle($printedThenVoided->id);
+    file_put_contents('/tmp/void_debug.log', "before reprint, auth id=".auth()->id().' can fee.view='.(auth()->user()?->can('fee.view') ? 'y' : 'n').' can documents.print='.(auth()->user()?->can('documents.print') ? 'y' : 'n').' can documents.reprint='.(auth()->user()?->can('documents.reprint') ? 'y' : 'n').' can documents.reprint_financial='.(auth()->user()?->can('documents.reprint_financial') ? 'y' : 'n')."\n", FILE_APPEND);
+    try {
+        $reprint = app(PrintReceipt::class)->handle($printedThenVoided->id);
+        file_put_contents('/tmp/void_debug.log', "reprint ok\n", FILE_APPEND);
+    } catch (\Throwable $e) {
+        file_put_contents('/tmp/void_debug.log', 'DEBUG2: '.$e::class.' '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n", FILE_APPEND);
+        throw $e;
+    }
     expect($reprint->html)->toContain('This receipt has been voided');
 
     // A SECOND payment, voided before it was ever printed once: no original
@@ -149,12 +156,19 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
     $neverPrinted = p13moneyRecordCash(Student::factory()->create()->id, null, $cal, $secondCashier, 15_000);
 
     $secondVoider = p13moneyUserAs(Role::Accountant);
-    app(VoidPayment::class)->handle(
-        $neverPrinted->id,
-        PaymentVoidReason::KeyingError,
-        'Duplicate entry, caught before printing.',
-        $secondVoider->toAuditActor(),
-    );
+    file_put_contents('/tmp/void_debug.log', "before second void\n", FILE_APPEND);
+    try {
+        app(VoidPayment::class)->handle(
+            $neverPrinted->id,
+            PaymentVoidReason::KeyingError,
+            'Duplicate entry, caught before printing.',
+            $secondVoider->toAuditActor(),
+        );
+        file_put_contents('/tmp/void_debug.log', "second void ok\n", FILE_APPEND);
+    } catch (\Throwable $e) {
+        file_put_contents('/tmp/void_debug.log', 'DEBUG3: '.$e::class.' '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n", FILE_APPEND);
+        throw $e;
+    }
 
     expect(fn () => app(PrintReceipt::class)->handle($neverPrinted->id))
         ->toThrow(DomainException::class, 'voided');

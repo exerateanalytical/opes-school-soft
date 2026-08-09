@@ -118,7 +118,7 @@ if (! function_exists('p12scrPublishedSnapshot')) {
             'name' => 'Sequence '.Str::random(4),
             'name_fr' => 'Séquence '.Str::random(4),
             'starts_on' => $startsOn,
-            'ends_on' => date('Y-m-d', strtotime($startsOn.' +30 days')),
+            'ends_on' => \Illuminate\Support\Carbon::parse($startsOn)->addDays(30)->toDateString(),
         ]);
 
         /** @var ClassGroup $classGroup */

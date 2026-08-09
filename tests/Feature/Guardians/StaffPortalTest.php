@@ -12,12 +12,13 @@ declare(strict_types=1);
 // permission at all.
 
 use App\Modules\HR\Livewire\Portal\Show;
-use App\Modules\HR\Models\StaffMember;
+use App\Modules\Identity\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 require_once __DIR__.'/P12PortalScreensHelpers.php';
@@ -46,8 +47,9 @@ it('changes the principal\'s own password given the correct current password', f
         'must_change_password_at' => now(),
     ]);
 
-    Livewire::actingAs($user)
-        ->test(Show::class)
+    actingAs($user);
+
+    Livewire::test(Show::class)
         ->set('currentPassword', 'correct-horse-battery')
         ->set('newPassword', 'a-brand-new-secret')
         ->set('newPasswordConfirmation', 'a-brand-new-secret')
@@ -56,8 +58,8 @@ it('changes the principal\'s own password given the correct current password', f
         ->assertDispatched('opes-portal-password-changed');
 
     $row = DB::table('users')->where('id', $user->getKey())->first(['password', 'must_change_password_at']);
-    expect(Hash::check('a-brand-new-secret', (string) $row->password))->toBeTrue();
-    expect($row->must_change_password_at)->toBeNull();
+    expect(Hash::check('a-brand-new-secret', (string) $row?->password))->toBeTrue();
+    expect($row?->must_change_password_at)->toBeNull();
 });
 
 it('refuses the password change when the current password is wrong', function () {
@@ -65,8 +67,9 @@ it('refuses the password change when the current password is wrong', function ()
 
     DB::table('users')->where('id', $user->getKey())->update(['password' => Hash::make('correct-horse-battery')]);
 
-    Livewire::actingAs($user)
-        ->test(Show::class)
+    actingAs($user);
+
+    Livewire::test(Show::class)
         ->set('currentPassword', 'not-the-right-password')
         ->set('newPassword', 'a-brand-new-secret')
         ->set('newPasswordConfirmation', 'a-brand-new-secret')
@@ -74,7 +77,7 @@ it('refuses the password change when the current password is wrong', function ()
         ->assertHasErrors(['currentPassword']);
 
     $row = DB::table('users')->where('id', $user->getKey())->first(['password']);
-    expect(Hash::check('correct-horse-battery', (string) $row->password))->toBeTrue();
+    expect(Hash::check('correct-horse-battery', (string) $row?->password))->toBeTrue();
 });
 
 it('refuses the password change when the confirmation does not match', function () {
@@ -82,8 +85,9 @@ it('refuses the password change when the confirmation does not match', function 
 
     DB::table('users')->where('id', $user->getKey())->update(['password' => Hash::make('correct-horse-battery')]);
 
-    Livewire::actingAs($user)
-        ->test(Show::class)
+    actingAs($user);
+
+    Livewire::test(Show::class)
         ->set('currentPassword', 'correct-horse-battery')
         ->set('newPassword', 'a-brand-new-secret')
         ->set('newPasswordConfirmation', 'a-different-secret')
@@ -96,8 +100,9 @@ it('refuses a new password shorter than 8 characters', function () {
 
     DB::table('users')->where('id', $user->getKey())->update(['password' => Hash::make('correct-horse-battery')]);
 
-    Livewire::actingAs($user)
-        ->test(Show::class)
+    actingAs($user);
+
+    Livewire::test(Show::class)
         ->set('currentPassword', 'correct-horse-battery')
         ->set('newPassword', 'short')
         ->set('newPasswordConfirmation', 'short')
@@ -107,10 +112,10 @@ it('refuses a new password shorter than 8 characters', function () {
 
 it('denies the staff portal shell to an authenticated user with no staff_members link', function () {
     p12scrGrantPortalAccess('staff_portal');
-    $user = \App\Modules\Identity\Models\User::factory()->create();
+    $user = User::factory()->create();
     $user->assignRole('staff_portal');
 
-    $this->actingAs($user->fresh() ?? $user);
+    actingAs($user->fresh() ?? $user);
 
     get(route('portal.staff'))->assertForbidden();
 });
@@ -120,7 +125,7 @@ it('denies the staff portal shell when the linked staff_members row is not activ
 
     DB::table('staff_members')->where('id', $staffId)->update(['status' => 'inactive']);
 
-    $this->actingAs($user);
+    actingAs($user);
 
     get(route('portal.staff'))->assertForbidden();
 });

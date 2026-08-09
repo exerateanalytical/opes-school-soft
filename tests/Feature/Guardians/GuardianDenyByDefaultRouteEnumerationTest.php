@@ -24,6 +24,9 @@ declare(strict_types=1);
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
 require_once __DIR__.'/P12PortalScreensHelpers.php';
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -54,6 +57,7 @@ if (! function_exists('p12denyBuildUri')) {
 
 it('denies a guardian portal principal on every non-portal web route, walked from the live route table', function () {
     ['user' => $user] = p12scrPortalGuardian(login: false);
+    actingAs($user);
 
     // The guardian's OWN door - row 1 of the allow-list, and the ONLY
     // names this suite treats as "explicitly allow-listed" per
@@ -108,7 +112,7 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
 
         $walked[] = $name;
 
-        $response = $this->actingAs($user)->get(p12denyBuildUri($route));
+        $response = get(p12denyBuildUri($route));
 
         expect($response->getStatusCode())->not->toBe(
             200,
@@ -132,10 +136,10 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
 it('still lets the guardian reach their own dashboard - the allow-list is not accidentally empty', function () {
     p12scrPortalGuardian();
 
-    $this->get(route('portal.dashboard'))->assertOk();
+    get(route('portal.dashboard'))->assertOk();
 });
 
 it('denies an unauthenticated visitor on both the staff dashboard and the guardian portal', function () {
-    $this->get('/dashboard')->assertRedirect('/login');
-    $this->get('/portal')->assertRedirect('/login');
+    get('/dashboard')->assertRedirect('/login');
+    get('/portal')->assertRedirect('/login');
 });
