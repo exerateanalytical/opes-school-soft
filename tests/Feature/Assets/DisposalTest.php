@@ -44,17 +44,12 @@ it('posts the §6.2 gross disposal with no gain_or_loss line (acceptance 4)', fu
     // One entry, five lines, gross: Dr 28 / Dr 812 / Cr 2442 / Dr 485 / Cr 822.
     expect($lines)->toHaveCount(5);
 
-    $byCode = [];
-    foreach ($lines as $line) {
-        $byCode[$line->code][] = $line;
-    }
-
-    expect($byCode['28'][0]->debit)->toBe(11_925_000)
-        ->and($byCode['812'][0]->debit)->toBe(23_850_000)
-        ->and($byCode['2442'][0]->credit)->toBe(35_775_000)
-        ->and($byCode['485'][0]->debit)->toBe(22_000_000)
-        ->and($byCode['485'][0]->partner_id)->toBe($baseline['supplier_id'])
-        ->and($byCode['822'][0]->credit)->toBe(22_000_000);
+    expect(phase9DeprLineFor($lines, '28')->debit)->toBe(11_925_000)
+        ->and(phase9DeprLineFor($lines, '812')->debit)->toBe(23_850_000)
+        ->and(phase9DeprLineFor($lines, '2442')->credit)->toBe(35_775_000)
+        ->and(phase9DeprLineFor($lines, '485')->debit)->toBe(22_000_000)
+        ->and(phase9DeprLineFor($lines, '485')->partner_id)->toBe($baseline['supplier_id'])
+        ->and(phase9DeprLineFor($lines, '822')->credit)->toBe(22_000_000);
 
     // Acceptance 4 verbatim: an 81-family debit, an 82-family credit, and
     // NO line whose amount equals |gain_or_loss|.

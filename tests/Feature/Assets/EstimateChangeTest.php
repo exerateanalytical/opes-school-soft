@@ -103,15 +103,15 @@ it('requires a reason and writes the audit trail (§5.5)', function (): void {
     expect($asset->useful_life_months)->toBe(240)
         ->and($asset->residual_value)->toBe(1_000_000);
 
+    /** @var object{after: string} $audit */
     $audit = DB::table('audit_logs')
         ->where('auditable_type', App\Modules\Assets\Models\Asset::class)
         ->where('auditable_id', (int) $asset->getKey())
         ->orderByDesc('id')
-        ->first(['after_json']);
+        ->firstOrFail(['after']);
 
-    expect($audit)->not->toBeNull()
-        ->and((string) $audit->after_json)->toContain('estimate_changed')
-        ->and((string) $audit->after_json)->toContain('Board-approved revision');
+    expect((string) $audit->after)->toContain('estimate_changed')
+        ->and((string) $audit->after)->toContain('Board-approved revision');
 });
 
 it('rejects invalid estimates and frozen assets', function (): void {

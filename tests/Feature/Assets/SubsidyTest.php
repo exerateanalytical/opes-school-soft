@@ -126,10 +126,12 @@ it('skips the release with an exception while 845 is unconfigured, and still dep
         ->and(phase9DeprLedgerSum('6811'))->toBe(750_000);
 
     // ...but nothing released, nothing guessed, and the run says why.
+    $exceptions = $run->refresh()->exceptions_json ?? [];
+
     expect(InvestmentSubsidyRelease::query()->count())->toBe(0)
         ->and(phase9DeprLedgerSum('845'))->toBe(0)
-        ->and($run->refresh()->exceptions_json)->not->toBeNull()
-        ->and($run->refresh()->exceptions_json[0]['reason'])->toContain('V5')
+        ->and($exceptions)->not->toBeEmpty()
+        ->and($exceptions[0]['reason'])->toContain('V5')
         ->and($subsidy->refresh()->status->value)->toBe('active');
 });
 

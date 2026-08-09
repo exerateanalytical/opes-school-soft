@@ -109,6 +109,21 @@ if (! function_exists('phase9DeprAccounts')) {
             ])->save();
         }
 
+        // §6.4: the clawback's donor liability line is partner-stamped
+        // (ClawBackSubsidy 'subsidy.partner' => supplier), so the account
+        // the fixture points it at must be configured COLLECTIVE too - the
+        // same school-side choice as the 485 flip above, else L8 rejects
+        // the partner-carrying line outright.
+        /** @var ChartOfAccount $donorLiability */
+        $donorLiability = ChartOfAccount::query()->where('code', '476')->firstOrFail();
+
+        if (! $donorLiability->is_collective) {
+            $donorLiability->forceFill([
+                'is_collective' => true,
+                'allowed_partner_types' => ['supplier'],
+            ])->save();
+        }
+
         return [
             'expense_681' => phase9DeprAccount('6811', 'expense', 'debit'),
             'release_845' => phase9DeprAccount('845', 'revenue', 'credit'),
@@ -482,5 +497,27 @@ if (! function_exists('phase9DeprLedgerSum')) {
         }
 
         return (int) ($row->d ?? 0) - (int) ($row->c ?? 0);
+    }
+}
+
+if (! function_exists('phase9DeprLineFor')) {
+    /**
+     * The single line matching $code, or a hard failure - mirrors F4's
+     * f4PayRow guard against silently indexing a missing/duplicate entry
+     * instead of leaving PHPStan (and the reader) staring at a bare
+     * array-offset access on a grouped, possibly-absent key.
+     *
+     * @param  list<object{code: string, debit: int, credit: int, partner_type: string|null, partner_id: int|null}>  $lines
+     * @return object{code: string, debit: int, credit: int, partner_type: string|null, partner_id: int|null}
+     */
+    function phase9DeprLineFor(array $lines, string $code): object
+    {
+        foreach ($lines as $line) {
+            if ($line->code === $code) {
+                return $line;
+            }
+        }
+
+        throw new RuntimeException("no journal line with code {$code} - the fixture did not produce it.");
     }
 }

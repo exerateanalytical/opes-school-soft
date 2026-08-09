@@ -180,9 +180,11 @@ it('skips an asset whose category lacks the 681x expense account, with an except
 
     $run = app(RunDepreciation::class)->handle($baseline['fiscal_year_id'], 9, $baseline['actor']);
 
+    $exceptions = $run->exceptions_json ?? [];
+
     expect($run->assets_processed)->toBe(1)
-        ->and($run->exceptions_json)->toHaveCount(1)
-        ->and($run->exceptions_json[0]['reason'])->toContain('V3');
+        ->and($exceptions)->toHaveCount(1)
+        ->and($exceptions[0]['reason'])->toContain('V3');
 });
 
 it('enforces maker/checker on approval', function (): void {
