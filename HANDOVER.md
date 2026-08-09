@@ -1,4 +1,32 @@
-# OPES SCHOOL — Handover (2026-08-09, overnight phases 5/7-13 built, integration pending)
+# OPES SCHOOL — Handover (2026-08-09, session stopped by user request — read this whole file before doing anything)
+
+**STOP AND READ FIRST:** the previous session was building phases 5, 7-13 with a large fleet of parallel subagents overnight and was explicitly halted by the user mid-flight ("stop wherever you are"). Everything reachable was committed and pushed, all migrations were deployed to the dev DB, and this file was rewritten to reflect the true state. Nothing is silently broken, but **no phase past 6 has been through a full-suite integration pass** — that is the very next thing to do. Read the "Session-stop status" section below before touching anything.
+
+## Session-stop status (2026-08-09, this session's final state)
+- **Every migration is deployed.** `DB_DATABASE=opeschool php artisan migrate --force` ran clean to completion: 198 migrations Ran, zero pending, zero errors. `RolePermissionSeeder` ran successfully after. Confirmed via `migrate:status`.
+- **All committed work is pushed.** Branch `claude/handoff-document-review-7ojy23` on `exerateanalytical/opes-school-soft`, HEAD is the salvage commit described below. `git status` is clean in the sandbox as of session end.
+- **PHPStan is NOT clean repo-wide right now: 17 errors, confined to 4 files**, all newly-committed WIP (see "Interrupted WIP" below):
+  - `tests/Feature/Guardians/GuardianDenyByDefaultRouteEnumerationTest.php` — 4 errors, all `Call to an undefined method Pest\PendingCalls\TestCall::actingAs()/get()` — the test is written using a `test()->actingAs()->get()` chain style that doesn't match this codebase's established Pest helper pattern (compare to any passing test file for the working idiom, e.g. `tests/Feature/Guardians/GuardianPortalAccessTest.php`).
+  - `tests/Feature/Guardians/P12PortalScreensHelpers.php` — 2 errors, `date()` called with a possibly-`false` timestamp (lines 121, 230) — needs a `strtotime()` false-check or `Carbon::parse()` instead.
+  - `tests/Feature/Guardians/StaffPortalTest.php` — 9 errors: 4x `Unable to resolve the template type TComponent` on `Livewire::test(...)` calls (likely a missing `@var` or wrong component class reference), 3x `actingAs()` chain issue same as above, 2x nullable `stdClass` property access on `$password`/`$must_change_password_at` (wrap in `assertNotNull()` per the repo's established pattern in `tests/Feature/Accounting/AccountingTestHelpers.php`).
+  - `tests/Feature/Reporting/P13MoneyHelpers.php` — 2 errors, missing iterable value type on `$calendar` array param in two functions — add `@param array<string, mixed> $calendar` or a precise shape.
+  - **All 4 files are test-only** (no application code affected) — fixing them is mechanical and self-contained, a good first task for the next agent.
+- **The full Phase 5 solo test suite was started three separate times and never completed** — not because of a real failure, but because of a session/tooling problem (see "What went wrong" below). Nobody has yet seen the actual pass/fail result of `DB_DATABASE=opeschool_test php artisan test` for the current HEAD. **This is the single most important next step.**
+
+## Interrupted WIP (commit `740b4bd`, last commit of the session)
+Two builder workstreams were mid-run when the session was stopped and their in-flight work was salvaged and committed as-is, untested on this final pass:
+- **P12-P2 (guardian portal screens)**: `app/Modules/Guardians/Livewire/Portal/Fees.php`, `Results.php`, `Support/Portal/ChildFeeStatement.php`, plus the 4 test files with PHPStan errors listed above.
+- **P13-D3 (money documents)**: print actions for receipts/invoices/withholding-attestations/payment-vouchers (`app/Modules/Fees/Actions/PrintReceipt.php`, `app/Modules/Tax/Actions/PrintWithholdingAttestation.php`, `app/Modules/Procurement/Actions/PrintPaymentVoucher.php`), their Blade templates under `resources/views/documents/`, lang files, and 5 new Reporting render tests (`InvoiceRenderTest`, `PaymentVoucherRenderTest`, `ReceiptRenderTest`, `StatementRenderTest`, `WithholdingAttestationRenderTest`).
+
+Neither workstream's tests have been run to completion since being committed. Run them on a scratch DB first (e.g. `opeschool_test_f33`) before folding them into the Phase 5/13 integration.
+
+## What went wrong this session (context for why some things look messy)
+Three things worth knowing so the next agent doesn't repeat the same mistakes:
+1. **The Claude usage limit was hit three times** during the overnight build (roughly every 6 hours). Each time, in-flight agent work was salvaged (`git add -A` + commit) and the build workflows were resumed. This worked fine and is why you'll see several `wip: salvage in-flight agent work interrupted by Nth session limit` commits in the log — they're not a sign of broken work, just checkpointing.
+2. **Two "Phase 5 full-suite integrator" subagents got stuck in a bad pattern**: each launched a background `php artisan test` against the shared `opeschool_test` database, then ended its own turn believing some external "monitor" would notify it — but no such external monitor exists for a plain subagent, so each one kept waking up, seeing no result, and launching ANOTHER background test run, colliding with the other agent's still-running one and with a third bare-metal retry the main session started directly. This produced a long stretch of "table already exists" migration errors that looked like real breakage but was actually just concurrent-connection chaos. **Root cause: never delegate "run the full suite and wait for it" to a subagent that doesn't have a way to block synchronously on a background command it started — either run it as a directly-tracked background Bash call in the orchestrating session (`run_in_background: true` on the Bash tool), or give the subagent explicit instructions to run it as a single blocking foreground command with a generous timeout and NO polling/waiting pattern.** Both zombie agents were eventually found and explicitly told to stop via SendMessage, which worked immediately.
+3. **`opeschool_test` was left in an unknown state** after the above — the session ended before a clean single full-suite run completed. The dev DB (`opeschool`) is fine and fully migrated; only the disposable test database is in question, and `migrate:fresh` will reset it trivially.
+
+## New account: start Claude Code in `C:\laragon\www\opeschool`, paste this file's path, and say "read the handover and continue".
 
 New account: start Claude Code in `C:\laragon\www\opeschool`, paste this file's path, and say "read the handover and continue".
 
@@ -43,14 +71,15 @@ Migration series present under `database/migrations` (count by day-prefix): 25xx
 - `app/Modules/Guardians/Livewire/Portal/Documents.php`, `Discipline.php`, `Support/Portal/ChildFeeStatement.php`, `app/Modules/HR/Livewire/Portal/Show.php` — all explicitly defer parts of their behaviour to "remaining_issues in the P12-P2 build report" (that report is not in this repo snapshot; someone needs to track it down or reconstruct the gap list before treating the guardian/HR portals as complete).
 - No `NEEDS-VERIFICATION` or `remaining_issues` markers were found in Phases 7, 9, 10, or 13 code, but absence of a marker is not proof of correctness — none of these phases have had an integrator pass either.
 
-## Remaining work
-1. **Sequential full-suite integrations, one phase at a time**, in roughly build order: Phase 5, then 7, 8, 9, 10, 11, 12, 13 — each needs a SOLO full-suite run (`opeschool_test`), a PHPStan level-8 pass, and a `ModuleBoundaryTest` + cross-module grep audit, the same process Phase 6's `d5e6994` INTEGRATOR commit followed. Record results in this file and in `docs/BUILD-LOG.md` per phase, the same way Phase 6 was recorded.
-2. **Resolve the known NEEDS-VERIFICATION items** above (IssueInvoice withholding config, CapitaliseAsset account selection, ImpairAsset TODO) before relying on Phase 5/9 accounting output.
-3. **Track down or reconstruct the "P12-P2 build report"** referenced by four Guardian/HR portal files — the guardian portal Documents/Discipline tabs and the HR portal Show screen are explicitly partial pending it.
-4. **Nav/route wiring audit** for phases 9–13: Phase 8 got an explicit two-pass wiring commit (`2955617` permissions, `2e88744` routes/nav); confirm the newer phases (9-13) have equivalent nav wiring rather than living only as backend code + placeholder pages.
-5. **Push to remote** — this session (like the Phase 6 session before it) worked in a Linux sandbox that cannot push; the accumulated commits need pushing from a box with push access once integration is judged acceptable.
-6. Prior tracked debts from Phase 6 remain open (see "Tracked debts" below) and were not touched this session.
-7. `RESUME-BRIEFS.md` (repo root) has the original per-agent scopes/details for reference.
+## Remaining work (in order)
+1. **Fix the 4 PHPStan-failing test files** listed under "Session-stop status" — mechanical, test-only, no app code involved. Confirm `php vendor/bin/phpstan analyse --memory-limit=1G` returns 0 errors repo-wide afterward.
+2. **Run the interrupted P12-P2/P13-D3 WIP tests** on a scratch DB (`opeschool_test_f33` or similar) and fix anything red before it enters the Phase 5/13 integration below.
+3. **Sequential full-suite integrations, one phase at a time**, in build order: Phase 5 first (this is the one that got stuck three times — see "What went wrong"; just run it as a single directly-tracked background command and actually wait for its result this time), then 7, 8, 9, 10, 11, 12, 13. Each needs: `DB_DATABASE=opeschool_test php artisan migrate:fresh --force`, then `DB_DATABASE=opeschool_test php artisan test` (SOLO — nothing else touching that database), fix any real failures, PHPStan level-8 clean repo-wide, `ModuleBoundaryTest` + cross-module grep audit, then deploy (`php artisan migrate --force` + seeder on the dev DB) and record the result in this file and in `docs/BUILD-LOG.md`, the same way Phase 6's `d5e6994` INTEGRATOR commit did it. That is the template to copy.
+4. **Resolve the known NEEDS-VERIFICATION items** (IssueInvoice withholding config, CapitaliseAsset account selection, ImpairAsset TODO) before relying on Phase 5/9 accounting output.
+5. **Track down or reconstruct the "P12-P2 build report"** referenced by four Guardian/HR portal files — the guardian portal Documents/Discipline tabs and the HR portal Show screen are explicitly partial pending it.
+6. **Nav/route wiring audit** for phases 9–13: Phase 8 got an explicit two-pass wiring commit (`2955617` permissions, `2e88744` routes/nav); confirm the newer phases (9-13) have equivalent nav wiring rather than living only as backend code + placeholder pages.
+7. Prior tracked debts from Phase 6 remain open (see "Tracked debts" below) and were not touched this session.
+8. `RESUME-BRIEFS.md` and `docs/plans/` (repo root / repo docs) have the original per-agent scopes/plans for every phase if you need to see what a builder was told to do.
 
 ## Phase 6 integration gotchas (learned 2026-08-09, keep)
 - Assessment/PublicationTest's truncate-all reset was wiping MIGRATION-seeded tables (OHADA chart, journals, analytic axes) for the whole process — RefreshDatabase migrates only once. It now skips migration-seeded tables. Never truncate those in test resets.
