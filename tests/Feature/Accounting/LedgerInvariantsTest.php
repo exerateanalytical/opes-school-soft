@@ -251,11 +251,16 @@ if (! function_exists('ledgerFixture')) {
      */
     function ledgerFixture(?Carbon $date = null): array
     {
-        $date = $date instanceof Carbon ? $date : fixedDate(2027, 3, 15);
+        // Carbon::create() is typed to allow a null return for an invalid
+        // calendar date, even though 2027-03-15 can never actually be one -
+        // Carbon::parse() of a literal string has no such nullable escape
+        // hatch. (This guarded helper is BYTE-IDENTICAL in JournalEntryTest
+        // and LedgerInvariantsTest - keep both copies in sync.)
+        $date = $date instanceof Carbon ? $date : Carbon::parse('2027-03-15');
         $year = (int) $date->format('Y');
 
         $fiscalYear = FiscalYear::factory()->create([
-            'code' => strtoupper(Illuminate\Support\Str::random(8)),
+            'code' => strtoupper(\Illuminate\Support\Str::random(8)),
             'starts_on' => "{$year}-01-01",
             'ends_on' => "{$year}-12-31",
             'status' => FiscalYearStatus::Open,
@@ -293,15 +298,21 @@ if (! function_exists('ledgerFixture')) {
 }
 
 if (! function_exists('ledgerUserAs')) {
-    function ledgerUserAs(bool $withPermission = true): App\Modules\Identity\Models\User
+    // BYTE-IDENTICAL in every file that defines it (JournalEntryTest,
+    // LedgerInvariantsTest, LetteringTest, ReversalTest): the guard means the
+    // FIRST loaded copy serves the whole process, so a divergent copy is a
+    // load-order-dependent bug. FQCNs on purpose - the body must not depend
+    // on any single file's `use` table.
+    function ledgerUserAs(bool $withPermission = true): \App\Modules\Identity\Models\User
     {
-        app()->make(Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-        Spatie\Permission\Models\Permission::findOrCreate(App\Modules\Identity\Domain\Permission::LedgerPost->value, 'web');
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        \Spatie\Permission\Models\Permission::findOrCreate('ledger.post', 'web');
+        \Spatie\Permission\Models\Permission::findOrCreate('ledger.view', 'web');
 
-        $user = App\Modules\Identity\Models\User::factory()->create();
+        $user = \App\Modules\Identity\Models\User::factory()->create();
 
         if ($withPermission) {
-            $user->givePermissionTo(App\Modules\Identity\Domain\Permission::LedgerPost->value);
+            $user->givePermissionTo('ledger.post', 'ledger.view');
         }
 
         return $user->fresh() ?? $user;

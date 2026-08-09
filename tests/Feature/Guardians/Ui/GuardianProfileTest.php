@@ -23,10 +23,10 @@ uses(RefreshDatabase::class);
 
 /* Shared with the Students UI files; guarded, see StudentsScreenTest.php. */
 if (! function_exists('studentsUiUserAs')) {
-    function studentsUiUserAs(Role $role): User
+    function studentsUiUserAs(Role $role): \App\Modules\Identity\Models\User
     {
         (new \Database\Seeders\RolePermissionSeeder())->run();
-        $user = User::factory()->create();
+        $user = \App\Modules\Identity\Models\User::factory()->create();
         $user->assignRole($role->value);
 
         return $user->fresh() ?? $user;

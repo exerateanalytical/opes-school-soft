@@ -15,7 +15,6 @@ use App\Modules\Fees\Models\Receipt;
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Domain\Permission;
-use App\Modules\Students\Models\Student;
 use App\Support\Audit\Actor;
 use App\Support\Money\Money;
 use App\Support\Sequence\SequenceAllocator;
@@ -116,8 +115,25 @@ final class RecordPayment
                 }
             }
 
-            /** @var Student $student */
-            $student = Student::query()->findOrFail($studentId);
+            // Cross-module read via the query builder (00-core 6.2: never
+            // another module's Models) - the label is the only thing Fees
+            // needs from Students here.
+            /** @var object{first_name: string, middle_name: string|null, last_name: string}|null $student */
+            $student = DB::table('students')
+                ->where('id', $studentId)
+                ->first(['first_name', 'middle_name', 'last_name']);
+
+            if ($student === null) {
+                throw ValidationException::withMessages([
+                    'student_id' => 'The student does not exist.',
+                ]);
+            }
+
+            $partnerLabel = trim(implode(' ', array_filter([
+                $student->first_name,
+                $student->middle_name,
+                $student->last_name,
+            ])));
 
             // §14: gaps-permitted, GLOBAL uniqueness scope, allocated from
             // the row-locked sequence inside this transaction - never max()+1.
@@ -167,7 +183,7 @@ final class RecordPayment
                         'reference' => $receiptNo,
                         'commission_rate_label' => $commission->isPositive() ? $commission->format() : '',
                         'partner' => ['type' => 'student', 'id' => $studentId],
-                        'partner_label' => $student->fullName(),
+                        'partner_label' => $partnerLabel,
                         'invoice_reference' => $this->firstInvoiceReference($payment),
                         'method' => [
                             'fee_bearer_is_school' => $feeBearer === FeeBearer::School,

@@ -25,16 +25,23 @@ use Spatie\Permission\PermissionRegistrar;
 
 use function Pest\Laravel\actingAs;
 
+require_once __DIR__.'/AccountingTestHelpers.php';
+
 uses(RefreshDatabase::class);
 
 if (! function_exists('ledgerUserAs')) {
-    function ledgerUserAs(bool $withPermission = true): User
+    // BYTE-IDENTICAL in every file that defines it (JournalEntryTest,
+    // LedgerInvariantsTest, LetteringTest, ReversalTest): the guard means the
+    // FIRST loaded copy serves the whole process, so a divergent copy is a
+    // load-order-dependent bug. FQCNs on purpose - the body must not depend
+    // on any single file's `use` table.
+    function ledgerUserAs(bool $withPermission = true): \App\Modules\Identity\Models\User
     {
-        app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
-        Permission::findOrCreate('ledger.post', 'web');
-        Permission::findOrCreate('ledger.view', 'web');
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        \Spatie\Permission\Models\Permission::findOrCreate('ledger.post', 'web');
+        \Spatie\Permission\Models\Permission::findOrCreate('ledger.view', 'web');
 
-        $user = User::factory()->create();
+        $user = \App\Modules\Identity\Models\User::factory()->create();
 
         if ($withPermission) {
             $user->givePermissionTo('ledger.post', 'ledger.view');

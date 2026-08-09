@@ -74,8 +74,17 @@ if (! function_exists('assessmentTruncateAll')) {
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
 
+        // Tables the MIGRATIONS THEMSELVES seed (the OHADA chart, the seeded
+        // journals, the four analytic axes) must survive this reset:
+        // RefreshDatabase runs migrate:fresh ONCE per process, so a truncate
+        // here would leave every later suite in the run with an empty chart -
+        // "Account 706 is not seeded" across the whole Fees suite was exactly
+        // this. Publication never writes these tables, so skipping them keeps
+        // the reset honest.
+        $seededByMigrations = ['migrations', 'chart_of_accounts', 'journals', 'analytic_axes'];
+
         foreach ($tables as $table) {
-            if ($table === 'migrations') {
+            if (in_array($table, $seededByMigrations, true)) {
                 continue;
             }
 

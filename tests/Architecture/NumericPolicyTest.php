@@ -7,7 +7,17 @@ declare(strict_types=1);
 
 arch('support code declares strict types')
     ->expect('App\Support')
-    ->toUseStrictTypes();
+    ->toUseStrictTypes()
+    // laravel/pint is an application-style package: its own composer.json maps
+    // `App\` to its bundled app/ directory, so the merged autoloader ALSO
+    // resolves App\Support to vendor/laravel/pint/app/Support. Its two classes
+    // there are vendor code with no source path in the arch layer - evaluating
+    // them crashes the plugin (ObjectDescriptionBase::$path uninitialized),
+    // and they are not this project's code to police anyway.
+    ->ignoring([
+        'App\Support\PhpFragmentFormatter',
+        'App\Support\Prettier',
+    ]);
 
 arch('value objects are final')
     ->expect([
