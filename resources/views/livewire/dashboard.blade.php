@@ -47,6 +47,12 @@
         </x-kpi-card>
     </div>
 
+    {{-- ── "What's open right now" (08-operations §6.4). The panel decides
+         its own visibility (fee.view or ledger.view - the Bursar, Accountant,
+         Principal, Administrator set the spec names) and renders nothing for
+         anyone else. --}}
+    @livewire(\App\Modules\Operations\Livewire\WhatsOpenPanel::class)
+
     {{-- ── Alerts ───────────────────────────────────────────────────────── --}}
     <section aria-labelledby="opes-alerts">
         <h2 id="opes-alerts" class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">

@@ -89,6 +89,14 @@ enum Permission: string
     case BackupRestore = 'backup.restore';
     case LicenceManage = 'licence.manage';
 
+    // Phase 7 (docs/plans/phase-07.md §3): the year-rollover wizard. One
+    // permission gates the whole run - starting it, every step's Apply, and
+    // the undo - because the wizard is a single consequential annual
+    // operation, not a bundle of separable rights (08-operations §6.1). The
+    // step Actions gate on this VALUE by string constant; this case is their
+    // compile-time face.
+    case RolloverRun = 'rollover.run';
+
     // Phase 8 (docs/plans/phase-08.md §1): timetable, attendance, discipline,
     // promotion, school calendar. Two segments only, like every case above -
     // these values double as translation keys and Laravel reads a dot as a

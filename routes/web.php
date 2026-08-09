@@ -232,6 +232,26 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:ledger.configure')->name('tax.settings');
 
     /*
+     * Operations (Phase 7, docs/specs/08-operations.md §6): the year-rollover
+     * wizard. One permission gates the whole run - see
+     * Identity\Domain\Permission::RolloverRun - and every step Action
+     * re-authorizes it, so the route's `can:` is the outer gate only, same
+     * screen-vs-write split as everywhere above.
+     */
+    Route::get('/operations/rollover', \App\Modules\Operations\Livewire\RolloverWizard::class)
+        ->middleware('can:rollover.run')->name('operations.rollover');
+
+    /*
+     * The licence panel (08-operations §4). Behind licence.manage - which the
+     * plain Administrator deliberately does NOT hold (AuthorizationMatrixTest)
+     * - and NOT under the /settings placeholder route: /settings itself still
+     * serves the scheduled-module page, while this concrete settings screen
+     * has its own address, as /settings/tax and /settings/fiscal-identity do.
+     */
+    Route::get('/settings/licence', \App\Modules\Operations\Livewire\LicencePanel::class)
+        ->middleware('can:licence.manage')->name('settings.licence');
+
+    /*
      * Document verification, docs/specs/10-documents.md §17.2: the in-app
      * (LAN) screen - paste or scan an OPES1 token, get the four-state answer.
      * Auth-only, no permission: the page holds no student data by

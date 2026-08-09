@@ -68,6 +68,40 @@ return [
         'name' => env('OPES_DEMO_LOGIN_NAME') ?: 'Demo Administrator',
     ],
 
+    /*
+     * Licensing (08-operations §4). Only PUBLIC key halves live here - no
+     * private key of any kind exists in this repository or on a school
+     * machine; tests generate throwaway pairs in memory.
+     *
+     * The two verification keys are DELIBERATELY SPLIT (§4.1): the ECDSA
+     * P-256 key verifies offline .opeslic licence files, the RSA-2048 key
+     * verifies activation-server responses, so a compromise of the
+     * internet-facing activation server cannot forge offline licence files
+     * and vice versa. An unset key makes that verification path fail closed
+     * (Operations\Licensing\LicenceKeyType).
+     */
+    'licensing' => [
+        // `?:` for the same present-but-empty reason as the backup path
+        // above: an empty PEM must mean "not configured", never a key.
+        'licence_file_public_key' => env('OPES_LICENCE_FILE_PUBLIC_KEY') ?: null,
+        'activation_public_key' => env('OPES_LICENCE_ACTIVATION_PUBLIC_KEY') ?: null,
+
+        // The ONLY network endpoint in the whole licensing stack: used by
+        // ActivateOnline (once, on the operator's click) and the panel-only
+        // opportunistic re-check. Null = offline school, both stay disabled;
+        // no status check anywhere ever touches the network (§4.3).
+        'activation_url' => env('OPES_LICENCE_ACTIVATION_URL') ?: null,
+
+        // Machine-identity override for the activation fingerprint
+        // (Operations\Licensing\MachineFingerprint). Semantics differ from
+        // every key above ON PURPOSE: null (absent) = auto-detect from the
+        // OS; SET, including set-to-empty, = use this exact value, which is
+        // how the installer pins identity on machines where reading the OS
+        // GUID needs elevation, and how tests model a machine with no
+        // readable identity. So: plain env(), no `?:`.
+        'fingerprint_source' => env('OPES_LICENCE_FINGERPRINT_SOURCE'),
+    ],
+
     'health' => [
         'backup_amber_hours' => (int) env('OPES_BACKUP_AMBER_HOURS', 26),
         'backup_red_hours' => (int) env('OPES_BACKUP_RED_HOURS', 50),

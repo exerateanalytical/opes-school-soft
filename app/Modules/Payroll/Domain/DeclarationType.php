@@ -18,4 +18,8 @@ enum DeclarationType: string
     case AnnualSalaryReturn = 'annual_salary_return';
     case CnpsAnnual = 'cnps_annual';
     case StaffRegister = 'staff_register';
+
+    // 11.5: the required CNPS filing on termination, materialised as a
+    // per-person declaration row by GenerateStatutoryDeclarations.
+    case StaffDeparture = 'staff_departure';
 }

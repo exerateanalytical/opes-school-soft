@@ -28,9 +28,15 @@ it('marks the two portal roles as portal roles', function () {
     expect(Role::Bursar->isPortal())->toBeFalse();
 });
 
-it('grants every permission to super admin and nothing to portal roles by default', function () {
+it('grants every permission to super admin and only the portal gate to portal roles', function () {
     expect(Role::SuperAdmin->defaultPermissions())->toBe(Permission::cases());
-    expect(Role::Guardian->defaultPermissions())->toBe([]);
+
+    // Phase 12 (docs/plans/phase-12-13.md 12.5): portal roles hold exactly
+    // ONE permission - portal.access, the outer gate to the /portal shell.
+    // Everything else stays denied; AuthorizationMatrixTest asserts the
+    // deny-by-default across the whole enum, this pins the exact list.
+    expect(Role::Guardian->defaultPermissions())->toBe([Permission::PortalAccess]);
+    expect(Role::StaffPortal->defaultPermissions())->toBe([Permission::PortalAccess]);
 });
 
 it('gives the bursar fee permissions but not ledger permissions', function () {

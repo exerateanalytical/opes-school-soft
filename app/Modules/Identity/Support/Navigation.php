@@ -85,6 +85,16 @@ final class Navigation
             ['key' => 'transport', 'route' => '/transport', 'permission' => null, 'enabled' => true, 'built' => false],
             ['key' => 'hostel', 'route' => '/hostel', 'permission' => null, 'enabled' => true, 'built' => false],
             ['key' => 'reports', 'route' => '/reports', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Operations (Phase 7): the year-rollover wizard. The mockups'
+            // sidebars carry operations entries (Backup & Restore, Database
+            // Maintenance in flow wizards.png 10/12), and 08-operations §6.1
+            // calls the rollover the most consequential annual operation -
+            // it gets a first-class item rather than hiding behind Settings.
+            // Gated on rollover.run, matching its route, per this file's
+            // nav-and-route-agree-by-construction contract. The licence
+            // panel lives at /settings/licence (licence.manage) and is
+            // reached from Settings, not the sidebar.
+            ['key' => 'operations', 'route' => '/operations/rollover', 'permission' => Permission::RolloverRun, 'enabled' => true, 'built' => true],
             ['key' => 'users', 'route' => '/users', 'permission' => Permission::UserView, 'enabled' => true, 'built' => true],
             ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => false],
         ];

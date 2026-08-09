@@ -62,6 +62,13 @@ enum Role: string
             // array_values because array_filter keeps the original indexes,
             // and the withheld cases are no longer the last in the enum - the
             // gap they leave would break the list<Permission> contract.
+            //
+            // Phase 7: rollover.run rides this everything-but baseline, so
+            // the Administrator can run the year rollover by default. The
+            // phase-07 plan also suggested licence.manage here, but the
+            // withhold below predates it and AuthorizationMatrixTest asserts
+            // it as a security property - managing the licence stays a
+            // SuperAdmin (or individually granted) right.
             self::Administrator => array_values(array_filter(
                 Permission::cases(),
                 static fn (Permission $p): bool => ! in_array(
