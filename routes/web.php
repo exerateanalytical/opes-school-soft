@@ -232,6 +232,17 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:ledger.configure')->name('tax.settings');
 
     /*
+     * Document verification, docs/specs/10-documents.md §17.2: the in-app
+     * (LAN) screen - paste or scan an OPES1 token, get the four-state answer.
+     * Auth-only, no permission: the page holds no student data by
+     * construction, and verifying a presented certificate is front-desk work.
+     * noindex via header per §17.2.
+     */
+    Route::get('/documents/verify', \App\Modules\Reporting\Livewire\Verify::class)
+        ->middleware(\App\Modules\Reporting\Http\MarkNoIndex::class)
+        ->name('documents.verify');
+
+    /*
      * Scheduled modules. Every sidebar item is a real link: modules not yet
      * built serve an in-shell placeholder page at the SAME URL the real
      * module will later occupy, so a bookmark made today still works the day
