@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Academics\Models;
 
+use App\Modules\Academics\Domain\AttendanceMode;
 use Database\Factories\ClassGroupFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $room_id
  * @property int $capacity
  * @property string $status
+ * @property AttendanceMode $attendance_mode
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -38,6 +40,7 @@ final class ClassGroup extends Model
         'room_id',
         'capacity',
         'status',
+        'attendance_mode',
     ];
 
     /**
@@ -52,6 +55,7 @@ final class ClassGroup extends Model
             'class_teacher_staff_id' => 'integer',
             'room_id' => 'integer',
             'capacity' => 'integer',
+            'attendance_mode' => AttendanceMode::class,
         ];
     }
 
