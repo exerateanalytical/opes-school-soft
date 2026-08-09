@@ -127,31 +127,26 @@ Route::middleware('auth')->group(function (): void {
      * Fees, docs/specs/04-fees.md. All three screens are REACHABLE under
      * `fee.view` - the sidebar's finance item is gated on fee.view, and the
      * Navigation contract is that nav and route agree by construction, so a
-     * Principal who may read fee data can open the cashier screen. What is
+     * Principal who may read fee data can open the fee screens. What is
      * gated harder is the ACT of collecting: the Collect button requires
      * `fee.collect` (checked in the component AND re-authorized inside F3's
      * RecordPayment), the same screen-vs-write split the ledger uses for
      * journal-entry creation.
      *
-     * The class_exists guards are the same temporary scaffolding commit
-     * 316eee0 used for Academics: Laravel validates an invokable route action
-     * at registration, and this phase's five workstreams land in parallel.
-     * The integrator strips the guards once the phase is assembled.
+     * /finance itself redirects to the invoices list - the sidebar item
+     * lands there, and the bookmark made while /finance was a placeholder
+     * still resolves.
      */
-    if (class_exists(\App\Modules\Fees\Livewire\Cashier::class)) {
-        Route::get('/finance', \App\Modules\Fees\Livewire\Cashier::class)
-            ->middleware('can:fee.view')->name('fees.cashier');
-    }
+    Route::redirect('/finance', '/finance/invoices');
 
-    if (class_exists(\App\Modules\Fees\Livewire\Invoices\Index::class)) {
-        Route::get('/finance/invoices', \App\Modules\Fees\Livewire\Invoices\Index::class)
-            ->middleware('can:fee.view')->name('fees.invoices.index');
-    }
+    Route::get('/finance/invoices', \App\Modules\Fees\Livewire\Invoices\Index::class)
+        ->middleware('can:fee.view')->name('fees.invoices.index');
 
-    if (class_exists(\App\Modules\Fees\Livewire\Statement::class)) {
-        Route::get('/finance/students/{student}/statement', \App\Modules\Fees\Livewire\Statement::class)
-            ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement');
-    }
+    Route::get('/finance/cashier', \App\Modules\Fees\Livewire\Cashier::class)
+        ->middleware('can:fee.view')->name('fees.cashier');
+
+    Route::get('/finance/statement/{student}', \App\Modules\Fees\Livewire\Statement::class)
+        ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement');
 
     /*
      * Scheduled modules. Every sidebar item is a real link: modules not yet
