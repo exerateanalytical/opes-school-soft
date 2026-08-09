@@ -8,11 +8,14 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
-                }),
-            ],
+            // SKIP_REMOTE_FONTS=1 lets sandboxed/offline environments build without fetching from fonts.bunny.net
+            fonts: process.env.SKIP_REMOTE_FONTS
+                ? []
+                : [
+                      bunny('Instrument Sans', {
+                          weights: [400, 500, 600],
+                      }),
+                  ],
         }),
         tailwindcss(),
     ],
