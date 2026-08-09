@@ -35,6 +35,10 @@ use Illuminate\Support\Carbon;
  */
 final class StaffCompensation extends Model
 {
+    // Laravel treats "compensation" as uncountable and would otherwise
+    // guess `staff_compensation`; the table (290009) is plural.
+    protected $table = 'staff_compensations';
+
     /** @var list<string> */
     protected $fillable = [
         'staff_contract_id',
