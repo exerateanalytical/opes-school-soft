@@ -121,6 +121,37 @@ enum Permission: string
 
     case CalendarManage = 'calendar.manage';
 
+    // Phase 12 (docs/plans/phase-12-13.md §12.5): portals, API tokens,
+    // webhooks and the communication outbox. portal.access is the outer gate
+    // only - what a guardian may actually see per child is decided by
+    // GuardianScopeMatrix (07-students §7.5), never by this permission alone.
+    // Two segments only, like every case above: these values double as
+    // translation keys and Laravel reads a dot as a nested-array step.
+    case PortalAccess = 'portal.access';
+    case PortalManage = 'portal.manage';
+    case ApiTokenManage = 'api.manage_tokens';
+    case WebhookManage = 'webhook.manage';
+    case CommunicationSend = 'communication.send';
+    case CommunicationView = 'communication.view';
+
+    // Phase 13 (10-documents §19): the document platform. Reprinting a money
+    // document (receipt/invoice/credit note/refund/payslip) is a separate,
+    // narrower right than reprinting in general, mirroring the payment-void
+    // segregation in 04-fees. override_gate lets the Principal issue a
+    // Transfer/Leaving/Character certificate despite a clearance or
+    // discipline block, always with a recorded reason.
+    //
+    // 10-documents spells the last four `documents.reprint.financial`,
+    // `documents.template.manage` etc.; spelled two-segment here for the same
+    // translation-key reason as StudentsMatriculeFinalise above.
+    case DocumentsPrint = 'documents.print';
+    case DocumentsReprint = 'documents.reprint';
+    case DocumentsReprintFinancial = 'documents.reprint_financial';
+    case DocumentsBulkPrint = 'documents.bulk_print';
+    case DocumentsRevoke = 'documents.revoke';
+    case DocumentsTemplateManage = 'documents.template_manage';
+    case DocumentsOverrideGate = 'documents.override_gate';
+
     public function label(string $locale = 'en'): string
     {
         // Permission values contain a dot ('user.view'), and the translator

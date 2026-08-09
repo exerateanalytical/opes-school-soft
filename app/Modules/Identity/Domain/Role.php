@@ -46,10 +46,11 @@ enum Role: string
     }
 
     /**
-     * The seeded baseline. Portal roles get nothing here: guardian access is
-     * decided per-child by GuardianScopeMatrix (07-students 7.5, Phase 2), and
-     * granting it through a role would create a second, contradictory source
-     * of truth for the highest-risk boundary in the product.
+     * The seeded baseline. Portal roles get only the portal.access outer
+     * gate (Phase 12): guardian access is decided per-child by
+     * GuardianScopeMatrix (07-students 7.5), and granting anything more
+     * through a role would create a second, contradictory source of truth
+     * for the highest-risk boundary in the product.
      *
      * @return list<Permission>
      */
@@ -86,6 +87,11 @@ enum Role: string
                 Permission::AttendanceView, Permission::AttendanceAmend,
                 Permission::DisciplineView,
                 Permission::PromotionEvaluate, Permission::PromotionApply,
+                // Phase 13: the Proviseur renders documents and holds the
+                // clearance-gate override for Transfer/Leaving/Character
+                // certificates (10-documents §19) - always with a recorded
+                // reason. He does not hold the financial-reprint right.
+                Permission::DocumentsPrint, Permission::DocumentsOverrideGate,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -113,6 +119,11 @@ enum Role: string
             // never edits it - 07-students 7.5 keeps money and identity apart.
             self::Bursar => [
                 Permission::FeeView, Permission::FeeCollect, Permission::StudentsView,
+                // Phase 13 (10-documents §19): reprinting a receipt or other
+                // money document is reserved to the money offices, mirroring
+                // the payment-void segregation in 04-fees.
+                Permission::DocumentsPrint, Permission::DocumentsReprint,
+                Permission::DocumentsReprintFinancial,
             ],
 
             self::Accountant => [
@@ -121,6 +132,10 @@ enum Role: string
                 // 04-fees: the accountant shapes the fee catalogue; the
                 // bursar (who handles the cash) deliberately does not.
                 Permission::FeeConfigure,
+                // Phase 13 (10-documents §19): same financial-reprint right
+                // as the bursar.
+                Permission::DocumentsPrint, Permission::DocumentsReprint,
+                Permission::DocumentsReprintFinancial,
             ],
 
             // 00-core 9.1: the registrar owns the student record end to end -
@@ -186,7 +201,12 @@ enum Role: string
             self::Librarian, self::StoreKeeper,
             self::Nurse, self::WelfareOfficer, self::FrontDesk => [],
 
-            self::Guardian, self::StaffPortal => [],
+            // Phase 12: portal roles hold exactly one permission - the outer
+            // portal gate. Everything a guardian may actually SEE per child
+            // is still decided by GuardianScopeMatrix (07-students 7.5);
+            // portal.access only opens the /portal shell, so the matrix
+            // remains the single source of truth for the high-risk boundary.
+            self::Guardian, self::StaffPortal => [Permission::PortalAccess],
         };
     }
 }

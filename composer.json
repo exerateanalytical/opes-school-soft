@@ -7,9 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "bacon/bacon-qr-code": "^3.1",
+        "barryvdh/laravel-dompdf": "^3.1",
         "laravel/framework": "^13.8",
+        "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.3",
+        "picqer/php-barcode-generator": "^3.2",
         "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {
