@@ -113,7 +113,12 @@ it('additionally requires documents.reprint_financial on a financial series', fu
 
     $template = DocumentTemplate::factory()
         ->snapshotBacked()
-        ->withSeries(DocumentSeries::factory()->fiscalYear()->create(['code' => 'RCPT']))
+        // 310010 (D3) now seeds the real RCPT catalogue row itself - reuse it
+        // instead of colliding with document_series.code's unique key.
+        ->withSeries(DocumentSeries::query()->firstOrCreate(
+            ['code' => 'RCPT'],
+            DocumentSeries::factory()->fiscalYear()->make()->toArray()
+        ))
         ->create(['blade_view' => 'p13core-snapshot']);
 
     $snap = p13coreSnapshotRow(p13coreSnapshotPayload());
