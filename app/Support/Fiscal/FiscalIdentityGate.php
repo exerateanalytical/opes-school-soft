@@ -38,7 +38,7 @@ final class FiscalIdentityGate
         foreach (['niu', 'tax_regime', 'tax_centre_name', 'legal_name'] as $field) {
             $value = $row?->{$field};
 
-            if ($value === null || (is_string($value) && trim($value) === '')) {
+            if ($value === null || trim($value) === '') {
                 $missing[] = $field;
             }
         }

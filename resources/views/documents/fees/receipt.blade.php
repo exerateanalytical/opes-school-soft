@@ -13,6 +13,11 @@
 
     <h2 class="doc-center" style="margin: 4pt 0 8pt 0;">{{ __('documents.receipt.title', [], $document['language']) }}</h2>
 
+    {{-- receipt_no is Fees' OWN number (04-fees §14), not the platform's
+         series serial - series_code is deliberately NULL for this template
+         (see the 310010 seed migration), so this is the only place it prints. --}}
+    <p class="doc-small"><strong>{{ __('documents.receipt.receipt_no', [], $document['language']) }}:</strong> {{ $r['receipt_no'] }}</p>
+
     @if ($r['is_voided'])
         <p class="doc-center" style="color: #a00; font-weight: bold;">{{ __('documents.receipt.void_notice', [], $document['language']) }}</p>
     @endif
@@ -64,7 +69,7 @@
 
     <p class="doc-small"><strong>{{ __('documents.receipt.amount_words', [], $document['language']) }}:</strong>
         {{ ucfirst($r['amount_words']) }}
-        {{ $document['language'] === 'fr' ? 'francs CFA.' : 'CFA francs.' }}</p>
+        {{ __('documents.receipt.currency_suffix', [], $document['language']) }}</p>
 
     <p class="doc-small">{{ __('documents.receipt.paid_to_date', [], $document['language']) }}:
         {{ \App\Support\Money\Money::of($r['paid_to_date'])->format() }}</p>

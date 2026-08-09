@@ -79,6 +79,7 @@ return [
     // phase-12-13 D3 - documents monétaires (10-documents.md §10).
     'receipt' => [
         'title' => 'Reçu de paiement',
+        'receipt_no' => 'N° de reçu',
         'received_from' => 'Reçu de',
         'student' => 'Élève',
         'matricule' => 'Matricule',
@@ -97,10 +98,12 @@ return [
         'method_cash' => 'Espèces',
         'method_mobile_money' => 'Mobile Money',
         'method_bank' => 'Virement bancaire',
+        'currency_suffix' => 'francs CFA.',
     ],
 
     'invoice' => [
         'title' => 'Facture de frais',
+        'invoice_no' => 'N° de facture',
         'to' => 'À',
         'student' => 'Élève',
         'matricule' => 'Matricule',
@@ -117,6 +120,7 @@ return [
         'own_revenue' => 'Frais scolaires',
         'third_party' => 'Sommes encaissées pour le compte de tiers / Amounts collected on behalf of third parties',
         'thank_you' => 'Merci pour votre règlement rapide.',
+        'currency_suffix' => 'francs CFA.',
     ],
 
     'statement' => [
@@ -166,5 +170,6 @@ return [
         'allocations' => 'Affecté à',
         'invoice' => 'Facture',
         'amount' => 'Montant',
+        'currency_suffix' => 'francs CFA.',
     ],
 ];

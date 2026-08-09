@@ -85,6 +85,7 @@ return [
     // phase-12-13 D3 - money documents (10-documents.md §10).
     'receipt' => [
         'title' => 'Payment Receipt',
+        'receipt_no' => 'Receipt No.',
         'received_from' => 'Received from',
         'student' => 'Student',
         'matricule' => 'Matricule',
@@ -103,10 +104,12 @@ return [
         'method_cash' => 'Cash',
         'method_mobile_money' => 'Mobile Money',
         'method_bank' => 'Bank Transfer',
+        'currency_suffix' => 'CFA francs.',
     ],
 
     'invoice' => [
         'title' => 'Fee Invoice',
+        'invoice_no' => 'Invoice No.',
         'to' => 'To',
         'student' => 'Student',
         'matricule' => 'Matricule',
@@ -123,6 +126,7 @@ return [
         'own_revenue' => 'School fees',
         'third_party' => 'Amounts collected on behalf of third parties / Sommes encaissées pour le compte de tiers',
         'thank_you' => 'Thank you for your prompt payment.',
+        'currency_suffix' => 'CFA francs.',
     ],
 
     'statement' => [
@@ -172,5 +176,6 @@ return [
         'allocations' => 'Applied to',
         'invoice' => 'Invoice',
         'amount' => 'Amount',
+        'currency_suffix' => 'CFA francs.',
     ],
 ];

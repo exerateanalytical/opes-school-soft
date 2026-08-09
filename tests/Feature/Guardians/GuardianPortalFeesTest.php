@@ -17,6 +17,8 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\get;
 
+require_once __DIR__.'/P12PortalScreensHelpers.php';
+
 uses(RefreshDatabase::class);
 
 it('shows the full statement, invoices and receipts to a receives_invoices guardian', function () {

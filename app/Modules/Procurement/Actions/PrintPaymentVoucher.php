@@ -57,7 +57,7 @@ final class PrintPaymentVoucher
             ->where('spa.supplier_payment_id', $supplierPaymentId)
             ->whereNull('spa.reversed_at')
             ->orderBy('spa.id')
-            ->get(['si.invoice_no', 'spa.amount']);
+            ->get(['si.internal_no as invoice_no', 'spa.amount']);
 
         $allocationRows = [];
 

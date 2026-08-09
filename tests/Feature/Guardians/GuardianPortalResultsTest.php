@@ -13,6 +13,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\get;
 
+require_once __DIR__.'/P12PortalScreensHelpers.php';
+
 uses(RefreshDatabase::class);
 
 it('shows a published report card - average, mention, rank and subjects', function () {
@@ -39,7 +41,7 @@ it('never shows an unpublished period - row 8, checked before the flag', functio
 
     // A snapshot exists, but its publication is `marks_open`, not
     // `published` - the default PeriodPublicationFactory state.
-    $period = App\Modules\Assessment\Models\AssessmentPeriod::factory()->create(['name' => 'Unpublished Sequence']);
+    $period = App\Modules\Academics\Models\AssessmentPeriod::factory()->create(['name' => 'Unpublished Sequence']);
     $classGroup = App\Modules\Academics\Models\ClassGroup::factory()->create();
     $publication = App\Modules\Assessment\Models\PeriodPublication::factory()
         ->forPeriod((int) $period->getKey())

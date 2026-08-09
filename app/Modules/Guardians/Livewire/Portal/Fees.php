@@ -103,7 +103,7 @@ final class Fees extends Component
             }
 
             $allReceipts = $context === null ? collect() : $reader->receipts($enrollmentId, $context->guardian->phone);
-            $receipts = $this->canWide ? $allReceipts : $allReceipts->filter(static fn (object $r): bool => $r->is_own)->values();
+            $receipts = $this->canWide ? $allReceipts : $allReceipts->filter(static fn (\stdClass $r): bool => $r->is_own)->values();
         }
 
         return view('livewire.guardians.portal.fees', [

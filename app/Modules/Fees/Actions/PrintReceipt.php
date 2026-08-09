@@ -135,7 +135,7 @@ final class PrintReceipt
             ->where('p.value_date', '<=', $payment->value_date)
             ->where('p.id', '<=', $paymentId)
             ->where('p.clearing_state', '<>', 'bounced')
-            ->whereNotExists(function ($query) use ($paymentId): void {
+            ->whereNotExists(function ($query): void {
                 $query->selectRaw('1')
                     ->from('payment_voids as v')
                     ->whereColumn('v.payment_id', 'p.id')

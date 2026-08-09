@@ -7,6 +7,7 @@ namespace App\Modules\Operations\Livewire;
 use App\Modules\Identity\Actions\CountActiveUsers;
 use App\Modules\Identity\Actions\CountConfiguredRoles;
 use App\Modules\Identity\Domain\Permission;
+use App\Modules\Identity\Domain\Role;
 use App\Modules\Operations\Actions\CollectHealth;
 use App\Modules\Operations\Domain\HealthCheckResult;
 use App\Modules\Operations\Domain\HealthStatus;
@@ -27,6 +28,31 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 final class Dashboard extends Component
 {
+    /**
+     * The staff shell's landing route carries no `can:` gate of its own -
+     * every authenticated user lands here by the app's single hard-coded
+     * post-login destination (`Login::authenticate()`,
+     * `bootstrap/app.php`'s `redirectUsersTo('/dashboard')`) - so without
+     * this check a `guardian`/`staff_portal` portal principal, whose ENTIRE
+     * grant is the single `portal.access` permission
+     * (Identity\Domain\Role::defaultPermissions,
+     * AuthorizationMatrixTest), would still see this staff shell render
+     * (empty tiles, but the shell itself: sidebar, nav, layout). That is
+     * exactly the leak docs/plans/phase-12-13.md 12.2 promises the portal
+     * shells do NOT share -
+     * `GuardianDenyByDefaultRouteEnumerationTest`/`StaffPortalTest` assert
+     * a portal principal gets refused here, same as any other
+     * non-allow-listed route (00-core 9.2).
+     */
+    public function mount(): void
+    {
+        $user = auth()->user();
+
+        if ($user !== null && ($user->hasRole(Role::Guardian->value) || $user->hasRole(Role::StaffPortal->value))) {
+            abort(403);
+        }
+    }
+
     /**
      * Which permission a health alert requires before it is worth showing.
      *

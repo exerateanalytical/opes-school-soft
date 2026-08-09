@@ -63,7 +63,14 @@ final class PrintWithholdingAttestation
             $relatedDocument = is_string($paymentNo) ? $paymentNo : '';
         }
 
+        $rule = $attestation->rule;
+
+        if ($rule === null) {
+            throw new DomainException("Withholding rule {$attestation->withholding_rule_id} does not exist.");
+        }
+
         $chrome = $this->render->captureSchoolChrome(includeStateHeader: false);
+        $legalBasis = $rule->legal_ref ?? $rule->name;
 
         $payload = [
             'school' => $chrome,
@@ -73,7 +80,7 @@ final class PrintWithholdingAttestation
                 'supplier_niu' => $supplier->niu,
                 'supplier_address' => trim(implode(', ', array_filter([$supplier->address_line1, $supplier->city]))),
                 'period' => sprintf('%04d-%02d', $attestation->period_year, $attestation->period_month),
-                'legal_basis' => $attestation->rule?->legal_ref ?? $attestation->rule?->name ?? '',
+                'legal_basis' => $legalBasis,
                 'base_amount' => $attestation->base_amount,
                 'rate_bp' => $attestation->rate_bp_applied,
                 'withheld_amount' => $attestation->withheld_amount,

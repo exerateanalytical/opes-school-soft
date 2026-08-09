@@ -83,4 +83,9 @@ final class InvoiceLine extends Model
     {
         return $this->belongsTo(Invoice::class);
     }
+
+    protected static function newFactory(): InvoiceLineFactory
+    {
+        return InvoiceLineFactory::new();
+    }
 }

@@ -145,7 +145,7 @@ final readonly class ChildFeeStatement
     /**
      * Invoice list and detail (7.5 row 13).
      *
-     * @return Collection<int, object>
+     * @return Collection<int, \stdClass>
      */
     public function invoices(int $enrollmentId): Collection
     {
@@ -181,7 +181,7 @@ final readonly class ChildFeeStatement
      * P12-P2 build report - a follow-up migration should add the FK so
      * row 16/17 stop sharing an approximation.
      *
-     * @return Collection<int, object{id: int, receipt_no: string, value_date: string, amount: int, payment_method: string, clearing_state: string, is_own: bool}>
+     * @return Collection<int, object{id: int, receipt_no: string, value_date: string, amount: int, payment_method: string, clearing_state: string, is_own: bool}&\stdClass>
      */
     public function receipts(int $enrollmentId, string $guardianPhone): Collection
     {
@@ -220,7 +220,7 @@ final readonly class ChildFeeStatement
 
         $paymentIds = $payments->pluck('id')->all();
 
-        /** @var array<int, object> $confirmedVoids */
+        /** @var array<int, object{payment_id: int, voided_at: string}> $confirmedVoids */
         $confirmedVoids = $paymentIds === [] || ! Schema::hasTable('payment_voids') ? [] : DB::table('payment_voids')
             ->whereIn('payment_id', $paymentIds)
             ->where('status', 'confirmed')

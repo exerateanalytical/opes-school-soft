@@ -63,7 +63,7 @@ final class Results extends Component
     }
 
     /**
-     * @return Collection<int, object>
+     * @return Collection<int, \stdClass>
      */
     private function publishedSnapshots(): Collection
     {
@@ -123,7 +123,7 @@ final class Results extends Component
 
         $snapshots = $this->publishedSnapshots();
 
-        $periods = $snapshots->map(static fn (object $s): array => [
+        $periods = $snapshots->map(static fn (\stdClass $s): array => [
             'id' => (int) $s->id,
             'label' => app()->getLocale() === 'fr' ? (string) $s->period_name_fr : (string) $s->period_name,
             'generation' => (int) $s->generation,
@@ -134,7 +134,7 @@ final class Results extends Component
 
         if ($snapshots->isNotEmpty()) {
             $selectedRow = $this->selectedSnapshotId !== null
-                ? $snapshots->first(static fn (object $s): bool => (int) $s->id === $this->selectedSnapshotId)
+                ? $snapshots->first(fn (\stdClass $s): bool => (int) $s->id === $this->selectedSnapshotId)
                 : $snapshots->first();
 
             if ($selectedRow !== null) {

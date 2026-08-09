@@ -9,8 +9,8 @@ declare(strict_types=1);
 // parallel-agent convention: Pest includes every suite file before running
 // any test, and names must stay globally unique across agents.
 
+use App\Modules\Academics\Models\AssessmentPeriod;
 use App\Modules\Academics\Models\ClassGroup;
-use App\Modules\Assessment\Models\AssessmentPeriod;
 use App\Modules\Assessment\Models\PeriodPublication;
 use App\Modules\Fees\Models\Invoice;
 use App\Modules\Fees\Models\InvoiceLine;
@@ -75,7 +75,7 @@ if (! function_exists('p12scrStudent')) {
             'last_name' => 'Screens',
             'date_of_birth' => '2012-05-01',
             'gender' => 'male',
-            'nationality' => 'Cameroonian',
+            'nationality' => 'CM',
             'created_at' => now(),
             'updated_at' => now(),
         ], $overrides));
@@ -124,12 +124,12 @@ if (! function_exists('p12scrPublishedSnapshot')) {
         /** @var ClassGroup $classGroup */
         $classGroup = ClassGroup::factory()->create();
 
-        /** @var PeriodPublication $publication */
-        $publication = PeriodPublication::factory()
-            ->forPeriod((int) $period->getKey())
-            ->forClassGroup((int) $classGroup->getKey())
-            ->create(['status' => PeriodPublication::STATUS_PUBLISHED]);
-
+        // The `chk_period_publications_version_pinned` check requires
+        // `report_card_config_version_id IS NOT NULL` from `published`
+        // onwards (01-assessment 13.1), so the config/version rows must
+        // exist BEFORE the publication row is inserted with that status -
+        // not after, which is what a fixed-column-order factory call would
+        // otherwise tempt you into.
         $configId = DB::table('report_card_configs')->insertGetId([
             'framework_id' => null,
             'code' => 'P12S'.Str::upper(Str::random(4)),
@@ -149,6 +149,15 @@ if (! function_exists('p12scrPublishedSnapshot')) {
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        /** @var PeriodPublication $publication */
+        $publication = PeriodPublication::factory()
+            ->forPeriod((int) $period->getKey())
+            ->forClassGroup((int) $classGroup->getKey())
+            ->create([
+                'status' => PeriodPublication::STATUS_PUBLISHED,
+                'report_card_config_version_id' => $versionId,
+            ]);
 
         return (int) DB::table('report_card_snapshots')->insertGetId([
             'enrollment_id' => $enrollmentId,

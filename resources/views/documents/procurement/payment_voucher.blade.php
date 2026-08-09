@@ -71,7 +71,7 @@
 
     <p class="doc-small"><strong>{{ __('documents.voucher.amount_words', [], $document['language']) }}:</strong>
         {{ ucfirst($v['amount_words']) }}
-        {{ $document['language'] === 'fr' ? 'francs CFA.' : 'CFA francs.' }}</p>
+        {{ __('documents.voucher.currency_suffix', [], $document['language']) }}</p>
 
     @include('documents.blocks.signature_block')
     @include('documents.blocks.qr_block')

@@ -11,6 +11,11 @@
 
     <h2 class="doc-center" style="margin: 4pt 0 8pt 0;">{{ __('documents.invoice.title', [], $document['language']) }}</h2>
 
+    {{-- invoice_no is Fees' OWN number (04-fees §4.1), not the platform's
+         series serial - series_code is deliberately NULL for this template
+         (see the 310010 seed migration), so this is the only place it prints. --}}
+    <p class="doc-small"><strong>{{ __('documents.invoice.invoice_no', [], $document['language']) }}:</strong> {{ $inv['invoice_no'] }}</p>
+
     <table class="doc-block doc-small">
         <tr>
             <td style="width: 50%;"><strong>{{ __('documents.invoice.to', [], $document['language']) }}:</strong> {{ $inv['student_name'] }}</td>
@@ -86,7 +91,7 @@
 
     <p class="doc-small"><strong>{{ __('documents.invoice.amount_words', [], $document['language']) }}:</strong>
         {{ ucfirst($inv['amount_words']) }}
-        {{ $document['language'] === 'fr' ? 'francs CFA.' : 'CFA francs.' }}</p>
+        {{ __('documents.invoice.currency_suffix', [], $document['language']) }}</p>
 
     <p class="doc-center doc-small">{{ __('documents.invoice.thank_you', [], $document['language']) }}</p>
 
