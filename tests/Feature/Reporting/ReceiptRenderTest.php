@@ -73,7 +73,7 @@ it('prints the original A5 receipt with the allocated receipt_no, lines and amou
     expect($rendered->serial)->toBeNull(); // receipt pattern: no platform series number
     expect($rendered->html)->toContain($payment->receipt_no);
     expect($rendered->html)->toContain($issued->invoice_no ?? '');
-    expect($rendered->html)->toContain('one hundred twenty thousand');
+    expect($rendered->html)->toContain('One hundred twenty thousand'); // ucfirst() in the blade
     expect($rendered->html)->not->toContain('DUPLICATA');
     expect($rendered->html)->not->toContain('This receipt has been voided');
 });
@@ -122,32 +122,19 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
     app(PrintReceipt::class)->handle($printedThenVoided->id);
 
     // 04-fees §11.5: the cashier who recorded a payment cannot void it - a
-    // second office does, here a fresh Accountant.
+    // second office does, here a fresh Accountant (the one role holding
+    // both FeeVoid and DocumentsRevoke, since voiding automatically
+    // revokes the receipt's IssuedDocument row - 10-documents §10.1).
     $voider = p13moneyUserAs(Role::Accountant);
 
-    file_put_contents('/tmp/void_debug.log', "before void\n", FILE_APPEND);
+    app(VoidPayment::class)->handle(
+        $printedThenVoided->id,
+        PaymentVoidReason::CashierError,
+        'Wrong amount keyed in at the till.',
+        $voider->toAuditActor(),
+    );
 
-    try {
-        app(VoidPayment::class)->handle(
-            $printedThenVoided->id,
-            PaymentVoidReason::CashierError,
-            'Wrong amount keyed in at the till.',
-            $voider->toAuditActor(),
-        );
-        file_put_contents('/tmp/void_debug.log', "void ok\n", FILE_APPEND);
-    } catch (\Throwable $e) {
-        file_put_contents('/tmp/void_debug.log', 'DEBUG1: '.$e::class.' '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n", FILE_APPEND);
-        throw $e;
-    }
-
-    file_put_contents('/tmp/void_debug.log', "before reprint, auth id=".auth()->id().' can fee.view='.(auth()->user()?->can('fee.view') ? 'y' : 'n').' can documents.print='.(auth()->user()?->can('documents.print') ? 'y' : 'n').' can documents.reprint='.(auth()->user()?->can('documents.reprint') ? 'y' : 'n').' can documents.reprint_financial='.(auth()->user()?->can('documents.reprint_financial') ? 'y' : 'n')."\n", FILE_APPEND);
-    try {
-        $reprint = app(PrintReceipt::class)->handle($printedThenVoided->id);
-        file_put_contents('/tmp/void_debug.log', "reprint ok\n", FILE_APPEND);
-    } catch (\Throwable $e) {
-        file_put_contents('/tmp/void_debug.log', 'DEBUG2: '.$e::class.' '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n", FILE_APPEND);
-        throw $e;
-    }
+    $reprint = app(PrintReceipt::class)->handle($printedThenVoided->id);
     expect($reprint->html)->toContain('This receipt has been voided');
 
     // A SECOND payment, voided before it was ever printed once: no original
@@ -156,19 +143,12 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
     $neverPrinted = p13moneyRecordCash(Student::factory()->create()->id, null, $cal, $secondCashier, 15_000);
 
     $secondVoider = p13moneyUserAs(Role::Accountant);
-    file_put_contents('/tmp/void_debug.log', "before second void\n", FILE_APPEND);
-    try {
-        app(VoidPayment::class)->handle(
-            $neverPrinted->id,
-            PaymentVoidReason::KeyingError,
-            'Duplicate entry, caught before printing.',
-            $secondVoider->toAuditActor(),
-        );
-        file_put_contents('/tmp/void_debug.log', "second void ok\n", FILE_APPEND);
-    } catch (\Throwable $e) {
-        file_put_contents('/tmp/void_debug.log', 'DEBUG3: '.$e::class.' '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n", FILE_APPEND);
-        throw $e;
-    }
+    app(VoidPayment::class)->handle(
+        $neverPrinted->id,
+        PaymentVoidReason::KeyingError,
+        'Duplicate entry, caught before printing.',
+        $secondVoider->toAuditActor(),
+    );
 
     expect(fn () => app(PrintReceipt::class)->handle($neverPrinted->id))
         ->toThrow(DomainException::class, 'voided');

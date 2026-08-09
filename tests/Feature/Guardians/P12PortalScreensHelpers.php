@@ -227,7 +227,7 @@ if (! function_exists('p12scrInvoice')) {
             ->create([
                 'enrollment_id' => $enrollmentId,
                 'issue_date' => $issueDate,
-                'due_date' => date('Y-m-d', strtotime($issueDate.' +30 days')),
+                'due_date' => \Illuminate\Support\Carbon::parse($issueDate)->addDays(30)->toDateString(),
             ]);
 
         InvoiceLine::factory()->create([

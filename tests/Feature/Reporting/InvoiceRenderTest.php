@@ -37,7 +37,7 @@ it('prints the issued invoice with its invoice_no, lines, grand total and amount
     expect($rendered->html)->toContain((string) $issued->invoice_no);
     expect($rendered->html)->toContain('Tuition Fee');
     expect($rendered->html)->toContain('Development Fee');
-    expect($rendered->html)->toContain('three hundred fifty thousand');
+    expect($rendered->html)->toContain('Three hundred fifty thousand'); // ucfirst() in the blade
 });
 
 it('refuses to print a draft invoice that has not been issued yet', function (): void {
