@@ -193,7 +193,7 @@ it('voiding the payment flags every issued copy and blocks any further reissue (
         $cashier->toAuditActor(),
     );
 
-    $supervisor = paymentUserAs(Role::Accountant);
+    $supervisor = paymentUserAs(Role::Bursar, Role::Accountant);
     app(VoidPayment::class)->handle(
         $payment->id,
         PaymentVoidReason::WrongStudent,

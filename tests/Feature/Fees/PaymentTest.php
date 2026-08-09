@@ -108,10 +108,11 @@ if (! function_exists('feesIssueInvoice')) {
      * @param  array{fiscal_year_id: int, accounting_period_id: int, academic_year_id: int}  $cal
      * @return array{invoice_id: int, line_ids: list<int>}
      */
-    function feesIssueInvoice(Student $student, array $lines, string $dueDate, array $cal, User $creator): array
+    function feesIssueInvoice(Student $student, array $lines, string $dueDate, array $cal, User $creator, string $type = 'standard'): array
     {
         /** @var Enrollment $enrollment */
-        $enrollment = Enrollment::factory()->create(['student_id' => $student->id]);
+        $enrollment = Enrollment::query()->where('student_id', $student->id)->first()
+            ?? Enrollment::factory()->create(['student_id' => $student->id]);
 
         $invoiceId = (int) DB::table('invoices')->insertGetId([
             'invoice_no' => 'INV/2031/'.str_pad((string) random_int(1, 999_999), 6, '0', STR_PAD_LEFT),
@@ -119,8 +120,8 @@ if (! function_exists('feesIssueInvoice')) {
             'student_id' => $student->id,
             'academic_year_id' => $cal['academic_year_id'],
             'fiscal_year_id' => $cal['fiscal_year_id'],
-            'type' => 'standard',
-            'issue_date' => '2031-03-01',
+            'type' => $type,
+            'issue_date' => '2031-01-01',
             'due_date' => $dueDate,
             'currency' => 'XAF',
             'status' => 'issued',
@@ -243,7 +244,7 @@ it('auto-allocates oldest invoice first and holds the surplus as unallocated cre
 
     // Older invoice (due first): 200 000. Newer: 100 000. Payment: 350 000.
     $older = feesIssueInvoice($student, [['amount' => 200_000]], '2031-01-31', $cal, $cashier);
-    $newer = feesIssueInvoice($student, [['amount' => 100_000]], '2031-04-30', $cal, $cashier);
+    $newer = feesIssueInvoice($student, [['amount' => 100_000]], '2031-04-30', $cal, $cashier, 'supplementary');
 
     $payment = feesRecordMomo($student, $cal, $cashier);
 
