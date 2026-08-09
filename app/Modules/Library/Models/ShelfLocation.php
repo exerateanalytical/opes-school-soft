@@ -34,4 +34,9 @@ final class ShelfLocation extends Model
             'capacity' => 'integer',
         ];
     }
+
+    protected static function newFactory(): ShelfLocationFactory
+    {
+        return ShelfLocationFactory::new();
+    }
 }

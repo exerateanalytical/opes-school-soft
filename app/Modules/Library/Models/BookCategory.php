@@ -55,4 +55,9 @@ final class BookCategory extends Model
     {
         return $this->hasMany(Book::class);
     }
+
+    protected static function newFactory(): BookCategoryFactory
+    {
+        return BookCategoryFactory::new();
+    }
 }

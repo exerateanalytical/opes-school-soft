@@ -87,4 +87,9 @@ final class Book extends Model
     {
         return $this->copies()->where('status', BookCopyStatus::Available->value)->count();
     }
+
+    protected static function newFactory(): BookFactory
+    {
+        return BookFactory::new();
+    }
 }

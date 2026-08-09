@@ -60,4 +60,9 @@ final class MembershipClass extends Model
             'is_archived' => 'boolean',
         ];
     }
+
+    protected static function newFactory(): MembershipClassFactory
+    {
+        return MembershipClassFactory::new();
+    }
 }
