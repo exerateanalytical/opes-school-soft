@@ -8,6 +8,7 @@ use App\Modules\Academics\Domain\AcademicYearStatus;
 use App\Modules\Academics\Models\AcademicYear;
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
+use App\Modules\Operations\Actions\AssertEntitlement;
 use App\Support\Audit\Actor;
 use DomainException;
 use Illuminate\Support\Carbon;
@@ -38,6 +39,10 @@ final class CreateAcademicYear
     public function handle(string $code, string $name, string $startsOn, string $endsOn, Actor $actor): AcademicYear
     {
         Gate::authorize(self::PERMISSION);
+
+        // Entitlement gate (08-operations §4.4): creating an academic year is
+        // one of the four annual operations blocked when expired-enforced.
+        app(AssertEntitlement::class)->handle('academics.create_year');
 
         $starts = Carbon::parse($startsOn)->startOfDay();
         $ends = Carbon::parse($endsOn)->startOfDay();

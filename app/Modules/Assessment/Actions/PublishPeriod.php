@@ -12,6 +12,7 @@ use App\Modules\Assessment\Models\ReportCardSnapshot;
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Domain\Permission;
+use App\Modules\Operations\Actions\AssertEntitlement;
 use App\Support\Audit\Actor;
 use App\Support\Score\Score;
 use DomainException;
@@ -92,6 +93,12 @@ final class PublishPeriod
     public function handle(int $periodId, array $classGroupIds, int $reportCardConfigId): array
     {
         Gate::authorize(Permission::ReportsPublish->value);
+
+        // Entitlement gate (08-operations §4.4): report-card publication is
+        // one of the four annual/termly operations blocked when
+        // expired-enforced. Sits OUTSIDE the per-class-group loop so the
+        // refusal is one clear sentence, not thirty "failed" rows.
+        app(AssertEntitlement::class)->handle('assessment.publish_period');
 
         $actor = $this->currentActor();
         $configVersionId = $this->pinConfigVersion($reportCardConfigId);

@@ -121,6 +121,46 @@ enum Permission: string
 
     case CalendarManage = 'calendar.manage';
 
+    // Phase 5 (docs/plans/phase-05.md §5): Procurement & Tax. The values
+    // mirror the string constants the F1-F4 packages gate on
+    // (Procurement\Domain\{Procurement,SupplierInvoice,SupplierPayment}
+    // Permission) - this enum is their compile-time face, added by the F5
+    // wiring pass. Two segments only, like every case above.
+    //
+    // The SoD pairs are deliberate: creating an invoice, approving it,
+    // recording a payment, approving it, and voiding it are five distinct
+    // rights, split across roles in Role::defaultPermissions() so no single
+    // baseline both authors and approves the same money movement.
+    case ProcurementView = 'procurement.view';
+    case ProcurementSupplierManage = 'procurement.supplier_manage';
+    case ProcurementSupplierOverrideDuplicate = 'procurement.supplier_override_duplicate';
+    case ProcurementRequisitionApprove = 'procurement.requisition_approve';
+    case ProcurementOrderManage = 'procurement.order_manage';
+    case ProcurementOrderApprove = 'procurement.order_approve';
+    case ProcurementInvoiceView = 'procurement.invoice_view';
+    case ProcurementInvoiceCreate = 'procurement.invoice_create';
+    case ProcurementInvoiceApprove = 'procurement.invoice_approve';
+    case ProcurementInvoiceApproveUnmatched = 'procurement.invoice_approve_unmatched';
+    case ProcurementInvoiceOverrideMatch = 'procurement.invoice_override_match';
+    case ProcurementInvoiceWaiveWithholding = 'procurement.invoice_waive_withholding';
+    case ProcurementPaymentRecord = 'procurement.payment_record';
+    case ProcurementPaymentApprove = 'procurement.payment_approve';
+    case ProcurementPaymentVoid = 'procurement.payment_void';
+
+    // Tax (03-tax-procurement §7): reading the dashboard, generating
+    // declarations and recording their filing are three rights - filing is
+    // the one that stamps the DGI acknowledgement and arms the DSF reopen
+    // block, so it is granted narrower than generation.
+    case TaxView = 'tax.view';
+    case TaxDeclare = 'tax.declare';
+    case TaxFile = 'tax.file';
+
+    // 03-tax-procurement §2.2 invariant 1: correcting a CONFIRMED
+    // NIU/identity is its own permission-gated act (reason + document),
+    // granted to almost nobody - a NIU typo silently propagates onto every
+    // printed invoice and every filed declaration.
+    case FiscalIdentityCorrect = 'fiscal_identity.correct';
+
     // Phase 12 (docs/plans/phase-12-13.md §12.5): portals, API tokens,
     // webhooks and the communication outbox. portal.access is the outer gate
     // only - what a guardian may actually see per child is decided by

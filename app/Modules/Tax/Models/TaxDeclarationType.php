@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string $name_fr
  * @property string $period_type
+ * @property array<string, string>|null $form_boxes
  * @property bool $is_archived
  */
 final class TaxDeclarationType extends Model
@@ -27,6 +28,7 @@ final class TaxDeclarationType extends Model
         'name',
         'name_fr',
         'period_type',
+        'form_boxes',
         'is_archived',
     ];
 
@@ -36,6 +38,7 @@ final class TaxDeclarationType extends Model
     protected function casts(): array
     {
         return [
+            'form_boxes' => 'array',
             'is_archived' => 'boolean',
         ];
     }

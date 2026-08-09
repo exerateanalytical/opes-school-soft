@@ -67,6 +67,19 @@ final class Navigation
             // on ledger.view so the sidebar and the routes below agree by
             // construction, per this file's documented contract.
             ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // Procurement (Phase 5): lands on the supplier register; the
+            // rest of the P2P chain (requisitions, orders, receipts,
+            // invoices, payments) hangs off it. Gated on procurement.view,
+            // matching its route, per this file's nav-and-route-agree-by-
+            // construction contract; the ACTS (approve, pay, void) are
+            // gated harder inside the screens and Actions.
+            ['key' => 'procurement', 'route' => '/procurement/suppliers', 'permission' => Permission::ProcurementView, 'enabled' => true, 'built' => true],
+            // Tax & declarations (Phase 5): the compliance dashboard.
+            // Gated on tax.view to match its route; generating and filing
+            // are gated harder (tax.declare / tax.file) on their screens
+            // and Actions. The tax CONFIGURATION cockpit lives under
+            // /settings/tax behind ledger.configure.
+            ['key' => 'tax', 'route' => '/tax', 'permission' => Permission::TaxView, 'enabled' => true, 'built' => true],
             ['key' => 'library', 'route' => '/library', 'permission' => null, 'enabled' => true, 'built' => false],
             ['key' => 'inventory', 'route' => '/inventory', 'permission' => null, 'enabled' => true, 'built' => false],
             ['key' => 'transport', 'route' => '/transport', 'permission' => null, 'enabled' => true, 'built' => false],

@@ -32,3 +32,17 @@ Schedule::call(static function (): void {
     Cache::put('opes.queue.heartbeat', now()->toIso8601String(), 3600);
 })->everyFiveMinutes()->name('opes-queue-heartbeat');
 
+
+// 06-assets-stores 10.4/10.5 - the library's nightly discipline, in order:
+// promote open loans past due to the PERSISTED `overdue` state, then recompute
+// every overdue fine to its full entitlement (idempotent - running twice, or
+// catching up after a missed week, lands on the same figure), then lapse
+// reservations nobody collected. Unattended: Actor::system(), no Gate.
+Schedule::call(static function (): void {
+    $today = now()->toDateString();
+    $system = \App\Support\Audit\Actor::system();
+
+    app(\App\Modules\Library\Actions\PromoteOverdueIssues::class)->handle($today, $system);
+    app(\App\Modules\Library\Actions\AccrueOverdueFines::class)->handle($today, $system);
+    app(\App\Modules\Library\Actions\ExpireReservations::class)->handle($today, $system);
+})->dailyAt('01:45')->name('opes-library-nightly');

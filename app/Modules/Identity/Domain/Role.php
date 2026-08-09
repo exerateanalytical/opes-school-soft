@@ -92,6 +92,14 @@ enum Role: string
                 // certificates (10-documents §19) - always with a recorded
                 // reason. He does not hold the financial-reprint right.
                 Permission::DocumentsPrint, Permission::DocumentsOverrideGate,
+                // Phase 5 (03-tax-procurement): the Proviseur APPROVES the
+                // spending chain - requisitions, purchase orders, payments -
+                // and reads the tax position, while the money offices below
+                // author it. The SoD pairs (create vs approve) are split
+                // across Bursar/Accountant/Principal on purpose.
+                Permission::ProcurementView, Permission::ProcurementRequisitionApprove,
+                Permission::ProcurementOrderApprove, Permission::ProcurementPaymentApprove,
+                Permission::TaxView,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -124,6 +132,16 @@ enum Role: string
                 // the payment-void segregation in 04-fees.
                 Permission::DocumentsPrint, Permission::DocumentsReprint,
                 Permission::DocumentsReprintFinancial,
+                // Phase 5 (03-tax-procurement): the bursar RECORDS the
+                // payables chain - suppliers, orders, invoice capture,
+                // payment - and deliberately holds NO approval right in it:
+                // approving is the Principal's (orders, payments) and the
+                // Accountant's (invoices), keeping author and approver two
+                // people (§4).
+                Permission::ProcurementView, Permission::ProcurementSupplierManage,
+                Permission::ProcurementOrderManage, Permission::ProcurementInvoiceView,
+                Permission::ProcurementInvoiceCreate, Permission::ProcurementPaymentRecord,
+                Permission::TaxView,
             ],
 
             self::Accountant => [
@@ -136,6 +154,16 @@ enum Role: string
                 // as the bursar.
                 Permission::DocumentsPrint, Permission::DocumentsReprint,
                 Permission::DocumentsReprintFinancial,
+                // Phase 5 (03-tax-procurement): the accountant APPROVES what
+                // the bursar captured (invoices; match overrides) and voids
+                // payments (mirroring FeeVoid), and owns the tax cycle -
+                // generation AND recording the filing. She does not RECORD
+                // supplier payments: recorder and voider stay two people
+                // (§11.9), as do invoice author and approver (§4.6).
+                Permission::ProcurementView, Permission::ProcurementInvoiceView,
+                Permission::ProcurementInvoiceApprove, Permission::ProcurementInvoiceOverrideMatch,
+                Permission::ProcurementPaymentVoid,
+                Permission::TaxView, Permission::TaxDeclare, Permission::TaxFile,
             ],
 
             // 00-core 9.1: the registrar owns the student record end to end -
