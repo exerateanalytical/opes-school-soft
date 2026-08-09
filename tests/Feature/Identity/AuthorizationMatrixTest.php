@@ -56,11 +56,25 @@ it('lets a bursar collect fees but not post to the ledger', function () {
 it('gives portal roles no operational permission at all', function () {
     // Deny-by-default. This is the first expression of the principle that
     // 00-core 9.2 requires for the guardian boundary: a guardian's access is
-    // decided per-child by GuardianScopeMatrix in Phase 2, never by a role.
+    // decided per-child by GuardianScopeMatrix, never by a role.
+    //
+    // Phase 12 (docs/plans/phase-12-13.md 12.5) grants portal roles exactly
+    // ONE permission - portal.access, the outer gate to the /portal shell.
+    // It is not an operational right: what a guardian may actually see per
+    // child is still the matrix's decision alone. Everything else remains
+    // denied, and this test is what keeps that list at exactly one.
     foreach ([Role::Guardian, Role::StaffPortal] as $role) {
         $user = userWithRole($role);
 
         foreach (Permission::cases() as $permission) {
+            if ($permission === Permission::PortalAccess) {
+                expect($user->can($permission->value))->toBeTrue(
+                    "{$role->value} should hold the portal gate {$permission->value}"
+                );
+
+                continue;
+            }
+
             expect($user->can($permission->value))->toBeFalse(
                 "{$role->value} should not hold {$permission->value}"
             );
