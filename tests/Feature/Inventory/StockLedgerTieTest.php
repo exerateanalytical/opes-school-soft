@@ -8,6 +8,22 @@ use App\Modules\Inventory\Models\StockMovement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
+if (! function_exists('phase9StockNumeric')) {
+    /**
+     * Narrow a decimal-column string to the numeric-string bccomp() requires.
+     *
+     * @return numeric-string
+     */
+    function phase9StockNumeric(string $value): string
+    {
+        if (! is_numeric($value)) {
+            throw new InvalidArgumentException("Not a numeric string: {$value}");
+        }
+
+        return $value;
+    }
+}
+
 require_once __DIR__.'/../Accounting/AccountingTestHelpers.php';
 require_once __DIR__.'/InventoryTestHelpers.php';
 
@@ -80,7 +96,7 @@ it('keeps stock ledger, balance row and general ledger tied over a seeded random
     $movementQty = (string) StockMovement::query()
         ->where('item_id', $itemId)
         ->sum('quantity');
-    expect(bccomp($balance->quantity_on_hand, $movementQty, 3))->toBe(0);
+    expect(bccomp(phase9StockNumeric($balance->quantity_on_hand), phase9StockNumeric($movementQty), 3))->toBe(0);
 
     // 2. Balance value ties to the movement money.
     $movementValue = (int) StockMovement::query()
@@ -105,13 +121,13 @@ it('keeps stock ledger, balance row and general ledger tied over a seeded random
         ->where('item_id', $itemId)
         ->orderByDesc('id')
         ->firstOrFail();
-    expect(bccomp($last->balance_qty_after, $balance->quantity_on_hand, 3))->toBe(0)
+    expect(bccomp(phase9StockNumeric($last->balance_qty_after), phase9StockNumeric($balance->quantity_on_hand), 3))->toBe(0)
         ->and($last->balance_value_after)->toBe($balance->value_on_hand);
 
     // 5. I8 held throughout (the walk empties the bin whenever the random
     // issue consumes everything): whatever the final position, zero
     // quantity means zero value.
-    if (bccomp($balance->quantity_on_hand, '0', 3) === 0) {
+    if (bccomp(phase9StockNumeric($balance->quantity_on_hand), '0', 3) === 0) {
         expect($balance->value_on_hand)->toBe(0);
     }
 

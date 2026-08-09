@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\Payroll\Models\PayrollComponent;
 use App\Modules\Payroll\Models\StatutoryRate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
@@ -24,7 +25,7 @@ uses(RefreshDatabase::class);
  */
 
 it('leaves zero non-null statutory amounts after migrate and db:seed', function () {
-    $this->seed();
+    Artisan::call('db:seed', ['--force' => true]);
 
     // Shells exist - the settings screen needs them to render its
     // "Not configured - payroll is blocked" empty states (9.2)...
@@ -45,7 +46,7 @@ it('leaves zero non-null statutory amounts after migrate and db:seed', function 
 });
 
 it('leaves every seeded rate unverified, unlocked and cited', function () {
-    $this->seed();
+    Artisan::call('db:seed', ['--force' => true]);
 
     $rows = StatutoryRate::query()->get();
 
@@ -64,7 +65,7 @@ it('ships no RAV or TDL band rows at all', function () {
     // 4.5: band VALUES are not created until the customer supplies the
     // table from their own DGI/commune notice. One unverified shell per
     // code carries the metadata; nothing carries a band boundary.
-    $this->seed();
+    Artisan::call('db:seed', ['--force' => true]);
 
     expect(
         StatutoryRate::query()
@@ -75,7 +76,7 @@ it('ships no RAV or TDL band rows at all', function () {
 });
 
 it('seeds the system component set with no accounts mapped', function () {
-    $this->seed();
+    Artisan::call('db:seed', ['--force' => true]);
 
     $components = PayrollComponent::query()->where('is_system', true)->get();
 
@@ -101,7 +102,7 @@ it('keeps db:seed from adding statutory rows beyond the migration shells', funct
     $before = StatutoryRate::query()->count();
     $beforeComponents = DB::table('payroll_components')->count();
 
-    $this->seed();
+    Artisan::call('db:seed', ['--force' => true]);
 
     expect(StatutoryRate::query()->count())->toBe($before)
         ->and(DB::table('payroll_components')->count())->toBe($beforeComponents);

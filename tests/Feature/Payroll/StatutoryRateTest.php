@@ -340,7 +340,7 @@ it('closes and supersedes a locked row as one operation', function () {
         ceilingAmount: 800_000,
     );
 
-    $closed = StatutoryRate::query()->findOrFail($rate->getKey());
+    $closed = StatutoryRate::query()->findOrFail((int) $rate->getKey());
 
     expect($closed->effective_to?->toDateString())->toBe('2025-01-01')
         // History intact: the closed row still carries its original amounts.

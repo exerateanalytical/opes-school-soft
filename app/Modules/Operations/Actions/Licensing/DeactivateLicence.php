@@ -48,7 +48,7 @@ final class DeactivateLicence
         }
 
         /** @var array<string, mixed> $payload */
-        $payload = is_array($licence->payload) ? $licence->payload : [];
+        $payload = $licence->payload;
         $wasActivation = $licence->source === Licence::SOURCE_ACTIVATION;
         $fingerprint = $licence->fingerprint;
         $licenceId = (int) $licence->getKey();

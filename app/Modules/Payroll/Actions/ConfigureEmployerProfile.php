@@ -12,6 +12,7 @@ use App\Modules\Payroll\Domain\PayrollPermission;
 use App\Modules\Payroll\Models\EmployerProfile;
 use App\Support\Audit\Actor;
 use DomainException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -97,7 +98,7 @@ final class ConfigureEmployerProfile
                     // Close the open profile at the new effective date -
                     // exclusive end, so the old version covers up to the
                     // day before the new one takes over.
-                    $profile->effective_to = $effectiveFrom;
+                    $profile->effective_to = Carbon::parse($effectiveFrom);
                     $profile->save();
                 } elseif ($profile->effective_to->toDateString() > $effectiveFrom) {
                     throw new DomainException(

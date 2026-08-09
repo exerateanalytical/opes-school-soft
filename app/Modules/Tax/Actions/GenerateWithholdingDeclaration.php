@@ -93,7 +93,7 @@ final class GenerateWithholdingDeclaration
                     ->where('declaration_type', DeclarationTypeCode::WithholdingMonthly->value)
                     ->where('period_year', $periodYear)
                     ->where('period_month', $periodMonth)
-                    ->where('period_slot', $amends?->id ?? 0)
+                    ->where('period_slot', $amends === null ? 0 : $amends->id)
                     ->lockForUpdate()
                     ->first();
 
@@ -291,7 +291,7 @@ final class GenerateWithholdingDeclaration
 
             $annex[] = [
                 'supplier_id' => $row['supplier_id'],
-                'supplier_name' => $supplier?->name ?? ('Supplier #'.$row['supplier_id']),
+                'supplier_name' => $supplier->name ?? ('Supplier #'.$row['supplier_id']),
                 'supplier_niu' => $supplier?->niu,
                 'base' => $row['base'],
                 'rate_bp' => $row['rate_bp'],

@@ -18,7 +18,11 @@ uses(RefreshDatabase::class);
  * (verified) DSF obligation.
  */
 if (! function_exists('f5DeclMonthlyObligation')) {
-    /** A monthly obligation row for a fresh type, due day 15 of the next month. */
+    /**
+     * A monthly obligation row for a fresh type, due day 15 of the next month.
+     *
+     * @param array<string, mixed>|null $appliesWhen
+     */
     function f5DeclMonthlyObligation(string $typeCode = 'tva_monthly', ?array $appliesWhen = null): void
     {
         $typeId = f5DeclType($typeCode);

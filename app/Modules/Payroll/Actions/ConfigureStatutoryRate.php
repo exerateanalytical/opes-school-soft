@@ -116,7 +116,7 @@ final class ConfigureStatutoryRate
 
                 $rate = StatutoryRate::query()->create(array_merge([
                     'code' => $code->value,
-                    'label' => $template?->label ?? $code->value,
+                    'label' => $template->label ?? $code->value,
                     'label_fr' => $template?->label_fr,
                     'shape' => $template?->shape->value ?? 'percentage',
                     'basis' => $template?->basis->value ?? 'gross',

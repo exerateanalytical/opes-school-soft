@@ -67,7 +67,7 @@ final class OpportunisticRecheck
         }
 
         /** @var array<string, mixed> $cached */
-        $cached = is_array($licence->payload) ? $licence->payload : [];
+        $cached = $licence->payload;
 
         $response = Http::timeout(10)->acceptJson()->asJson()->post($url, [
             'action' => 'check',
@@ -108,7 +108,7 @@ final class OpportunisticRecheck
                 auditableType: Licence::class,
                 auditableId: $licenceId,
                 after: [
-                    'reason' => is_string($status) ? $status : 'revoked',
+                    'reason' => $status,
                     'via' => 'opportunistic_recheck',
                 ],
                 actor: Actor::system(),

@@ -133,12 +133,12 @@ it('sells one jumper on credit: Fees invoice Dr 4111/Cr 701 for 15,000 AND cost 
         ->get();
     $code = fn (JournalEntryLine $l): string => (string) DB::table('chart_of_accounts')->where('id', $l->account_id)->value('code');
 
-    expect($code($revenueLines[0]))->toBe('4111')
-        ->and($revenueLines[0]->debit)->toBe(15_000)
-        ->and($revenueLines[0]->partner_type?->value)->toBe('student')
-        ->and($revenueLines[0]->partner_id)->toBe($fixture['enrollment']->student_id)
-        ->and($code($revenueLines[1]))->toBe('701')
-        ->and($revenueLines[1]->credit)->toBe(15_000);
+    expect($code(assertNotNull($revenueLines[0])))->toBe('4111')
+        ->and(assertNotNull($revenueLines[0])->debit)->toBe(15_000)
+        ->and(assertNotNull($revenueLines[0])->partner_type?->value)->toBe('student')
+        ->and(assertNotNull($revenueLines[0])->partner_id)->toBe($fixture['enrollment']->student_id)
+        ->and($code(assertNotNull($revenueLines[1])))->toBe('701')
+        ->and(assertNotNull($revenueLines[1])->credit)->toBe(15_000);
 
     // The invoice really is a Fees supplementary invoice on the enrollment.
     /** @var object{enrollment_id: int|string, type: string, status: string} $invoice */
@@ -153,10 +153,10 @@ it('sells one jumper on credit: Fees invoice Dr 4111/Cr 701 for 15,000 AND cost 
         ->where('journal_entry_id', $result['cost_entry_id'])
         ->orderBy('sequence')
         ->get();
-    expect($code($costLines[0]))->toBe('6031')
-        ->and($costLines[0]->debit)->toBe(9_200)
-        ->and($code($costLines[1]))->toBe('31')
-        ->and($costLines[1]->credit)->toBe(9_200);
+    expect($code(assertNotNull($costLines[0])))->toBe('6031')
+        ->and(assertNotNull($costLines[0])->debit)->toBe(9_200)
+        ->and($code(assertNotNull($costLines[1])))->toBe('31')
+        ->and(assertNotNull($costLines[1])->credit)->toBe(9_200);
 
     // Movement: sale, -1 at -9,200, referencing the Invoice.
     /** @var StockMovement $movement */

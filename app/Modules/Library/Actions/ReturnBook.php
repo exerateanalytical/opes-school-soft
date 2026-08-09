@@ -149,7 +149,7 @@ final class ReturnBook
 
         DB::table('outbox_messages')->insert([
             'channel' => 'sms',
-            'recipient' => $member?->external_contact ?? ($member->member_no ?? 'unknown'),
+            'recipient' => $member->external_contact ?? ($member->member_no ?? 'unknown'),
             'subject_type' => 'library_reservation',
             'subject_id' => (int) $reservation->getKey(),
             'language' => 'en',

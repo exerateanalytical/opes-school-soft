@@ -338,7 +338,7 @@ final class GenerateTvaDeclaration
             ->where('declaration_type', $typeCode)
             ->where('period_year', $periodYear)
             ->where('period_month', $periodMonth)
-            ->where('period_slot', $amends?->id ?? 0)
+            ->where('period_slot', $amends === null ? 0 : $amends->id)
             ->lockForUpdate()
             ->first();
 

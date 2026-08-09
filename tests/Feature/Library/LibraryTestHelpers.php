@@ -149,7 +149,7 @@ if (! function_exists('phase9LibStudentMember')) {
     /**
      * A student member through the REAL EnrollLibraryMember door.
      *
-     * @param  array<string, mixed>  $overrides
+     * @param  array{member_type?: string, membership_class_id?: int, academic_year_id?: int, joined_on?: string, enrollment_id?: int|null, staff_member_id?: int|null, external_name?: string|null, external_contact?: string|null}  $overrides
      */
     function phase9LibStudentMember(
         User $user,

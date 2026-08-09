@@ -156,10 +156,10 @@ it('capitalises an equipment receipt at/above the threshold: asset created, Dr 2
         ->where('journal_entry_id', $result['journal_entry_id'])
         ->orderBy('sequence')
         ->get();
-    expect($code($lines[0]))->toBe('2442')
-        ->and($lines[0]->debit)->toBe(2_000_000)
-        ->and($code($lines[1]))->toBe('4812')
-        ->and($lines[1]->credit)->toBe(2_000_000);
+    expect($code(assertNotNull($lines[0])))->toBe('2442')
+        ->and(assertNotNull($lines[0])->debit)->toBe(2_000_000)
+        ->and($code(assertNotNull($lines[1])))->toBe('4812')
+        ->and(assertNotNull($lines[1])->credit)->toBe(2_000_000);
 });
 
 it('expenses a below-threshold equipment receipt (expense_only): Dr expense / Cr 401, no asset, no stock', function (): void {
@@ -186,10 +186,10 @@ it('expenses a below-threshold equipment receipt (expense_only): Dr expense / Cr
         ->where('journal_entry_id', $result['journal_entry_id'])
         ->orderBy('sequence')
         ->get();
-    expect($code($lines[0]))->toBe('604')
-        ->and($lines[0]->debit)->toBe(300_000)
-        ->and($code($lines[1]))->toBe('401')
-        ->and($lines[1]->credit)->toBe(300_000);
+    expect($code(assertNotNull($lines[0])))->toBe('604')
+        ->and(assertNotNull($lines[0])->debit)->toBe(300_000)
+        ->and($code(assertNotNull($lines[1])))->toBe('401')
+        ->and(assertNotNull($lines[1])->credit)->toBe(300_000);
 });
 
 it('expense_and_track adds a zero-cost draft custody shell alongside the expense posting', function (): void {
