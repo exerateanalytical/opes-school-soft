@@ -51,7 +51,7 @@ final class IrppFormula
      */
     public static function parameters(Collection $bracketRows): IrppParameters
     {
-        $brackets = $bracketRows
+        $brackets = array_values($bracketRows
             ->sortBy(fn (StatutoryRate $row): int => (int) $row->band_from)
             ->values()
             ->map(fn (StatutoryRate $row): IrppBracket => new IrppBracket(
@@ -60,7 +60,7 @@ final class IrppFormula
                 rateBp: (int) $row->employee_rate_bp,
                 statutoryRateId: (int) $row->getKey(),
             ))
-            ->all();
+            ->all());
 
         return new IrppParameters(
             abatementRateBp: self::ABATEMENT_RATE_BP,

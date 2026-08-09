@@ -12,6 +12,7 @@ use App\Modules\Payroll\Domain\PayrollPermission;
 use App\Modules\Payroll\Domain\ProvisionAccountsUnconfigured;
 use App\Modules\Payroll\Models\PayrollComponent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\AssertionFailedError;
 
 require_once __DIR__.'/../HR/P11F4TestHelpers.php';
 
@@ -36,6 +37,7 @@ if (! function_exists('p11declProvisionFixture')) {
         $user = p11declUser(
             PayrollPermission::RUN,
             Permission::LedgerConfigure->value,
+            Permission::LedgerPost->value,
         );
 
         $staff = p11declStaff();
@@ -70,7 +72,8 @@ it('computes but refuses to post while the 66x/428x accounts are unconfigured', 
 
     try {
         app(PostLeaveProvision::class)->handle('2031-03-01', p11declActor($user));
-        $this->fail('Expected ProvisionAccountsUnconfigured.');
+
+        throw new AssertionFailedError('Expected ProvisionAccountsUnconfigured.');
     } catch (ProvisionAccountsUnconfigured $e) {
         // 1,600,000 / 16 x (12 / 24) = 50,000 - computed, reported, not posted.
         expect($e->report['provision_total'])->toBe(50000)
@@ -89,7 +92,8 @@ it('lists contracts as unquantified while the annual entitlement is NULL', funct
 
     try {
         app(PostLeaveProvision::class)->handle('2031-03-01', p11declActor($user));
-        $this->fail('Expected ProvisionAccountsUnconfigured.');
+
+        throw new AssertionFailedError('Expected ProvisionAccountsUnconfigured.');
     } catch (ProvisionAccountsUnconfigured $e) {
         expect($e->report['provision_total'])->toBe(0)
             ->and($e->report['lines'])->toBeEmpty()
@@ -112,6 +116,11 @@ it('posts Dr expense / Cr liability through PostFromEvent once the accounts are 
 
     p11declProvisionRule($user);
 
+    // The provision posts AT the month end (2031-03-31): its own accounting
+    // period, distinct from the two trailing months' calendars p11declRun()
+    // already opened.
+    p11declCalendar('2031-03-15');
+
     $report = app(PostLeaveProvision::class)->handle('2031-03-01', p11declActor($user));
 
     expect($report['provision_total'])->toBe(50000)
@@ -120,7 +129,7 @@ it('posts Dr expense / Cr liability through PostFromEvent once the accounts are 
     /** @var JournalEntry $entry */
     $entry = JournalEntry::query()->findOrFail($report['journal_entry_id']);
 
-    expect($entry->status->value)->toBe('posted')
+    expect($entry->status)->toBe(JournalEntry::STATUS_POSTED)
         // Single posting path: rule provenance is stamped.
         ->and($entry->posting_rule_id)->not->toBeNull();
 

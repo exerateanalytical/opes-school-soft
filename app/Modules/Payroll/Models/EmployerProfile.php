@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Payroll\Models;
 
+use Database\Factories\EmployerProfileFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -47,6 +49,9 @@ use Illuminate\Support\Carbon;
  */
 final class EmployerProfile extends Model
 {
+    /** @use HasFactory<EmployerProfileFactory> */
+    use HasFactory;
+
     /** @var list<string> */
     protected $fillable = [
         'cnps_employer_number',
@@ -113,5 +118,10 @@ final class EmployerProfile extends Model
     {
         return $this->proration_basis !== null
             && $this->ceiling_prorates_partial_month !== null;
+    }
+
+    protected static function newFactory(): EmployerProfileFactory
+    {
+        return EmployerProfileFactory::new();
     }
 }

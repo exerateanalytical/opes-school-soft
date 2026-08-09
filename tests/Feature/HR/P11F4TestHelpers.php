@@ -3,14 +3,19 @@
 declare(strict_types=1);
 
 use App\Modules\Accounting\Actions\SavePostingRule;
+use App\Modules\Accounting\Domain\AccountingPeriodStatus;
 use App\Modules\Accounting\Domain\AccountSource;
+use App\Modules\Accounting\Domain\FiscalYearStatus;
 use App\Modules\Accounting\Domain\LineSign;
 use App\Modules\Accounting\Domain\PostingEvent;
+use App\Modules\Accounting\Models\AccountingPeriod;
 use App\Modules\Accounting\Models\ChartOfAccount;
+use App\Modules\Accounting\Models\FiscalYear;
 use App\Modules\Accounting\Models\Journal;
 use App\Modules\HR\Models\StaffContract;
 use App\Modules\HR\Models\StaffMember;
 use App\Modules\Identity\Models\User;
+use App\Modules\Payroll\Models\EmployerProfile;
 use App\Modules\Payroll\Models\PayrollRun;
 use App\Support\Audit\Actor;
 use Illuminate\Support\Carbon;
@@ -79,13 +84,99 @@ if (! function_exists('p11declContract')) {
 
 if (! function_exists('p11declCalendar')) {
     /**
-     * Open fiscal year + accounting period + academic year covering $date.
+     * Open fiscal year + accounting period + academic year covering $date -
+     * idempotent PER CALENDAR YEAR (unlike JournalEntryFactory::buildCalendar,
+     * which mints a fresh year-spanning FiscalYear on every call). These
+     * suites open several months within the SAME year (the two trailing
+     * payroll runs, then the provision's own month-end); a second
+     * buildCalendar() for that year would create an overlapping FiscalYear
+     * row and trip the L6/C3 "fiscal_year_id does not match the fiscal year
+     * derived from date" trigger. Every month of the year is opened in one
+     * pass so a later p11declRun()/PostLeaveProvision() in the same test
+     * never needs a fresh fiscal year at all.
      *
      * @return array{fiscal_year_id: int, accounting_period_id: int, academic_year_id: int}
      */
     function p11declCalendar(string $date = '2031-03-15'): array
     {
-        return (new Database\Factories\JournalEntryFactory)->buildCalendar(Carbon::parse($date));
+        $date = Carbon::parse($date);
+        $year = (int) $date->format('Y');
+
+        /** @var FiscalYear|null $fiscalYear */
+        $fiscalYear = FiscalYear::query()
+            ->whereDate('starts_on', Carbon::createFromDate($year, 1, 1)->toDateString())
+            ->first();
+
+        if ($fiscalYear === null) {
+            $fiscalYear = FiscalYear::factory()->create([
+                'code' => strtoupper(Str::random(8)),
+                'starts_on' => Carbon::createFromDate($year, 1, 1)->toDateString(),
+                'ends_on' => Carbon::createFromDate($year, 12, 31)->toDateString(),
+                'status' => FiscalYearStatus::Open,
+            ]);
+
+            for ($month = 1; $month <= 12; $month++) {
+                $start = Carbon::createFromDate($year, $month, 1);
+
+                AccountingPeriod::factory()->create([
+                    'fiscal_year_id' => $fiscalYear->getKey(),
+                    'period_month' => $start->toDateString(),
+                    'starts_on' => $start->toDateString(),
+                    'ends_on' => $start->copy()->endOfMonth()->toDateString(),
+                    'status' => AccountingPeriodStatus::Open,
+                ]);
+            }
+        }
+
+        /** @var AccountingPeriod $period */
+        $period = AccountingPeriod::query()
+            ->where('fiscal_year_id', $fiscalYear->getKey())
+            ->whereDate('starts_on', $date->copy()->startOfMonth()->toDateString())
+            ->firstOrFail();
+
+        $academicYearId = DB::table('academic_years')
+            ->whereDate('starts_on', '<=', $date->toDateString())
+            ->whereDate('ends_on', '>=', $date->toDateString())
+            ->value('id');
+
+        if ($academicYearId === null) {
+            $academicYearId = DB::table('academic_years')->insertGetId([
+                'code' => 'AY-'.$year.'-'.Str::random(8),
+                'name' => 'Academic Year covering '.$date->toDateString(),
+                'starts_on' => Carbon::createFromDate($year, 1, 1)->toDateString(),
+                'ends_on' => Carbon::createFromDate($year, 12, 31)->toDateString(),
+                'is_current' => false,
+                'status' => 'planned',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return [
+            'fiscal_year_id' => (int) $fiscalYear->getKey(),
+            'accounting_period_id' => (int) $period->getKey(),
+            'academic_year_id' => (int) $academicYearId,
+        ];
+    }
+}
+
+if (! function_exists('p11declEmployerProfileId')) {
+    /**
+     * One shared EmployerProfile per test: PayrollRunFactory's nested
+     * `EmployerProfile::factory()` default would otherwise mint a fresh row
+     * (fixed `effective_from`) on every run and collide on the schema's
+     * one-effective-date-at-a-time UNIQUE - so every p11declRun() call in a
+     * test reuses the same profile, exactly like a real school has one.
+     */
+    function p11declEmployerProfileId(): int
+    {
+        $existing = DB::table('employer_profiles')->orderBy('id')->first(['id']);
+
+        if ($existing !== null) {
+            return (int) $existing->id;
+        }
+
+        return EmployerProfile::factory()->create()->id;
     }
 }
 
@@ -106,6 +197,7 @@ if (! function_exists('p11declRun')) {
         return PayrollRun::factory()->create([
             'payroll_month' => $month,
             'status' => $status,
+            'employer_profile_id' => p11declEmployerProfileId(),
             'fiscal_year_id' => $calendar['fiscal_year_id'],
             'academic_year_id' => $calendar['academic_year_id'],
             'accounting_period_id' => $calendar['accounting_period_id'],

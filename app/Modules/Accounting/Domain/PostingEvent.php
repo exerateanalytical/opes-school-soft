@@ -279,10 +279,7 @@ enum PostingEvent: string
             ],
 
             self::PayrollApproved,
-            self::PayrollPaid,
             self::PayrollReversed,
-            self::PayrollLeaveProvision,
-            self::PayrollLeaveProvisionReversed,
             self::PayrollSettlementFinal => [
                 'run.total_gross' => 'int',
                 'run.total_employer_charges' => 'int',
@@ -296,6 +293,30 @@ enum PostingEvent: string
                 'run.remittances.*.amount' => 'int',
                 'run.remittances.*.liability_account_id' => 'int',
                 'run.remittances.*.label' => 'string',
+            ],
+
+            // 8.8 - the disbursement batch total leaving staff payable for
+            // treasury (ExportDisbursementFile): a lump sum, not a
+            // per-employee list, because the per-employee detail already
+            // posted at approval (PayrollApproved above).
+            self::PayrollPaid => [
+                'payment.amount' => 'int',
+                'payment.reference' => 'string',
+                'payment.method' => 'string',
+                'payment.treasury_account_id' => 'int',
+                'payment.payroll_month' => 'string',
+            ],
+
+            // 12.5 - the monthly accrued-leave provision (PostLeaveProvision):
+            // one Dr 66x / Cr 428x lump sum per month, mapped from the
+            // ALLOCATION_CONGE component once its accounts are confirmed.
+            self::PayrollLeaveProvision,
+            self::PayrollLeaveProvisionReversed => [
+                'provision.amount' => 'int',
+                'provision.month' => 'string',
+                'provision.expense_account_id' => 'int',
+                'provision.liability_account_id' => 'int',
+                'provision.reference' => 'string',
             ],
 
             self::TaxVatDeclared,

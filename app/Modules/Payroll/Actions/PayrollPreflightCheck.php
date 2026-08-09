@@ -18,7 +18,6 @@ use App\Modules\Payroll\Models\PayrollPreflightResult;
 use App\Modules\Payroll\Models\PayrollRun;
 use App\Modules\Payroll\Models\StatutoryRate;
 use App\Modules\Payroll\Support\RunScope;
-use App\Support\Expression\ExpressionException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -135,7 +134,6 @@ final class PayrollPreflightCheck
     private function checkRegimeConfirmed(?EmployerProfile $profile): array
     {
         $confirmed = $profile !== null
-            && $profile->cnps_regime !== null
             && trim($profile->rp_risk_class) !== ''
             && $profile->cnps_notification_document_id !== 0;
 
@@ -389,7 +387,7 @@ final class PayrollPreflightCheck
                     /** @var array<string, int> $inputs */
                     $inputs = $test->inputs;
                     $actual = $formula->evaluate($inputs);
-                } catch (ExpressionException|Throwable $e) {
+                } catch (Throwable $e) {
                     $failures[] = ['code' => $component->code, 'test' => $test->name, 'reason' => $e->getMessage()];
 
                     continue;

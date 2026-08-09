@@ -31,18 +31,21 @@ it('materialises the monthly return set with 15th-of-following-month deadlines',
 
     expect($written)->toBe(4);
 
-    $byType = StatutoryDeclaration::query()->get()->keyBy(fn (StatutoryDeclaration $d): string => $d->type->value);
-
     foreach (['dipe', 'cnps_contribution_schedule', 'dgi_monthly_salary_return'] as $type) {
-        expect($byType[$type]->due_date?->toDateString())->toBe('2031-04-15');
+        $declaration = StatutoryDeclaration::query()->where('type', $type)->firstOrFail();
+        expect($declaration->due_date?->toDateString())->toBe('2031-04-15');
     }
 
-    expect($byType['dipe']->payee)->toBe('CNPS')
-        ->and($byType['dgi_monthly_salary_return']->payee)->toBe('DGI')
+    $dipe = StatutoryDeclaration::query()->where('type', 'dipe')->firstOrFail();
+    $dgi = StatutoryDeclaration::query()->where('type', 'dgi_monthly_salary_return')->firstOrFail();
+    $tdl = StatutoryDeclaration::query()->where('type', 'tdl_remittance')->firstOrFail();
+
+    expect($dipe->payee)->toBe('CNPS')
+        ->and($dgi->payee)->toBe('DGI')
         // TDL: per-commune schedule NEEDS VERIFICATION => NO fabricated date.
-        ->and($byType['tdl_remittance']->payee)->toBe('Commune')
-        ->and($byType['tdl_remittance']->due_date)->toBeNull()
-        ->and($byType['dipe']->generated_from_run_ids)->toBe([$run->id]);
+        ->and($tdl->payee)->toBe('Commune')
+        ->and($tdl->due_date)->toBeNull()
+        ->and($dipe->generated_from_run_ids)->toBe([$run->id]);
 
     // Idempotent: the dedupe UNIQUE absorbs the re-run.
     expect(app(GenerateStatutoryDeclarations::class)->handle('2031-03-01'))->toBe(0)

@@ -39,11 +39,16 @@ final class GenerateStatutoryDeclarations
         $dueOn15th = $month->copy()->addMonth()->day(15)->toDateString();
 
         return DB::transaction(function () use ($month, $dueOn15th): int {
-            $runIds = DB::table('payroll_runs')
-                ->where('payroll_month', $month->toDateString())
-                ->whereIn('status', ['approved', 'paid', 'closed'])
-                ->pluck('id')
-                ->all();
+            $runIds = [];
+
+            foreach (
+                DB::table('payroll_runs')
+                    ->where('payroll_month', $month->toDateString())
+                    ->whereIn('status', ['approved', 'paid', 'closed'])
+                    ->pluck('id') as $runId
+            ) {
+                $runIds[] = is_string($runId) ? $runId : (int) $runId;
+            }
 
             $written = 0;
 
@@ -129,7 +134,7 @@ final class GenerateStatutoryDeclarations
             'status' => DeclarationStatus::Due->value,
             'generated_at' => now(),
             'penalty_amount' => 0,
-            'generated_from_run_ids' => $runIds === [] ? null : json_encode(array_values($runIds)),
+            'generated_from_run_ids' => $runIds === [] ? null : json_encode($runIds),
             'created_at' => now(),
             'updated_at' => now(),
         ]);

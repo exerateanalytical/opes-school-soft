@@ -188,8 +188,10 @@ it('accrues one idempotent monthly row per eligible contract once configured', f
     expect(app(AccrueMonthlyLeave::class)->handle('2031-03-01'))->toBe(0)
         ->and(LeaveAccrual::query()->where('entry_type', 'accrual')->count())->toBe(1);
 
-    // The next month accrues again.
-    expect(app(AccrueMonthlyLeave::class)->handle('2031-04-01'))->toBe(1);
+    // The next month accrues again for the first contract, and by April the
+    // second contract (started 2031-03-15) has also completed a full month
+    // of effective service (starts_on <= monthStart), so it becomes eligible too.
+    expect(app(AccrueMonthlyLeave::class)->handle('2031-04-01'))->toBe(2);
 });
 
 it('accrues nothing for a month spent wholly on non-effective-service leave', function () {

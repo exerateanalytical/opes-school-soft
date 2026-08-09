@@ -6,7 +6,6 @@ namespace App\Modules\Payroll\Actions;
 
 use App\Modules\Accounting\Actions\PostFromEvent;
 use App\Modules\Accounting\Domain\PostingEvent;
-use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Payroll\Domain\PayrollPermission;
 use App\Modules\Payroll\Domain\ProvisionAccountsUnconfigured;
 use App\Modules\Payroll\Models\PayrollComponent;

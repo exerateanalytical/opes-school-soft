@@ -245,7 +245,7 @@ final class CalculatePayrollRun
                 'order' => $c->calculation_order,
                 'type' => $c->type,
                 'calculation' => $c->calculation,
-                'depends_on' => array_values(array_map(strval(...), $c->depends_on)),
+                'depends_on' => array_map(strval(...), $c->depends_on),
             ], $components),
             IrppFormula::BASES_BARRIER_ORDER,
         );
@@ -458,10 +458,8 @@ final class CalculatePayrollRun
                     $amounts['BASIC'] ?? 0, $irppAmount,
                 );
 
-                if ($line !== null) {
-                    $amounts[$component->code] = (int) $line['amount'];
-                    $lines[] = $line;
-                }
+                $amounts[$component->code] = (int) $line['amount'];
+                $lines[] = $line;
 
                 continue;
             }
@@ -746,7 +744,7 @@ final class CalculatePayrollRun
      * A percentage or flat-band statutory line above the barrier.
      *
      * @param  array{staff_member_id: int, staff_no: string, primary_contract_id: int, contract_ids: list<int>, working_times: list<string>, social_security_status: string, rp_risk_class_override: string|null, cnps_number_present: bool, starts_on: string, ends_on: string|null, is_partial: bool}  $member
-     * @return array<string, mixed>|null
+     * @return array<string, mixed>
      */
     private function statutoryLine(
         PayrollComponent $component,
@@ -759,7 +757,7 @@ final class CalculatePayrollRun
         int $cnpsUncapped,
         int $basic,
         int $irppAmount,
-    ): ?array {
+    ): array {
         $base = match ((string) $component->basis?->value) {
             'gross' => $gross,
             'sbt' => $sbt,

@@ -44,7 +44,7 @@ final class RecordDisbursementOutcome
             }
 
             foreach ($outcomes as $lineId => $outcome) {
-                $status = PaymentLineStatus::tryFrom($outcome['status'] ?? '');
+                $status = PaymentLineStatus::tryFrom($outcome['status']);
 
                 if (! in_array($status, [PaymentLineStatus::Confirmed, PaymentLineStatus::Failed], true)) {
                     throw ValidationException::withMessages([
@@ -66,7 +66,7 @@ final class RecordDisbursementOutcome
                     ->update([
                         'status' => $status->value,
                         'failure_reason' => $status === PaymentLineStatus::Failed
-                            ? (string) $outcome['failure_reason']
+                            ? (string) ($outcome['failure_reason'] ?? '')
                             : null,
                     ]);
 

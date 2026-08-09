@@ -100,7 +100,7 @@ final class ExportDisbursementFile
 
                 $rows[] = implode(',', [
                     (string) $line->id,
-                    (string) ($staff?->staff_no ?? ''),
+                    (string) ($staff !== null ? $staff->staff_no : ''),
                     '"'.($staff !== null ? trim($staff->first_name.' '.$staff->last_name) : '').'"',
                     '"'.($beneficiary ?? 'CASH').'"',
                     (string) $line->amount,

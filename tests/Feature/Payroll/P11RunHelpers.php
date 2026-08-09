@@ -251,7 +251,7 @@ if (! function_exists('p11runPostingRule')) {
         ], [
             [
                 'sequence' => 1,
-                'account_source' => AccountSource::Path,
+                'account_source' => AccountSource::PayloadPath,
                 'account_path' => 'item.liability_account_id',
                 'sign' => LineSign::Credit,
                 'amount_expression' => 'item.amount',
