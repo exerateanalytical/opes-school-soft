@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Guardians\Livewire\Guardians;
 
+use App\Modules\Guardians\Actions\IssuePortalInvitation;
+use App\Modules\Guardians\Actions\RevokePortalInvitation;
+use App\Modules\Guardians\Domain\PortalSubjectType;
 use App\Modules\Guardians\Models\Guardian;
 use App\Modules\Guardians\Models\GuardianCommunication;
 use App\Modules\Guardians\Models\GuardianMeeting;
+use App\Modules\Guardians\Models\PortalInvitation;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Identity\Domain\Permission;
 use Illuminate\Support\Collection;
@@ -57,7 +61,15 @@ final class Show extends Component
     public Guardian $guardian;
 
     /** @var list<string> */
-    public const LIVE_TABS = ['linked_students', 'meetings', 'communications'];
+    public const LIVE_TABS = ['linked_students', 'meetings', 'communications', 'portal'];
+
+    /**
+     * The plaintext invitation code, present ONLY between issuing and the
+     * next navigation. It is never persisted anywhere - the database holds
+     * its SHA-256 - so this transient property is the single place the
+     * operator can copy it from (Phase 12, docs/plans/phase-12-13.md 12.2).
+     */
+    public ?string $issuedCode = null;
 
     /** @var list<string> */
     public const DISABLED_TABS = ['address', 'documents', 'payments'];
@@ -79,6 +91,70 @@ final class Show extends Component
     public function selectTab(string $tab): void
     {
         $this->tab = in_array($tab, self::LIVE_TABS, true) ? $tab : 'linked_students';
+
+        // Leaving the portal tab discards the one-time code display.
+        if ($this->tab !== 'portal') {
+            $this->issuedCode = null;
+        }
+    }
+
+    /**
+     * Issue (or reissue - the Action revokes the predecessor) an activation
+     * code for this guardian. The Action gates on portal.manage; the
+     * component repeats nothing because a thrown AuthorizationException is
+     * already the correct outcome for a forged wire call.
+     */
+    public function issuePortalInvitation(): void
+    {
+        $result = app(IssuePortalInvitation::class)->handle(
+            PortalSubjectType::Guardian,
+            (int) $this->guardian->getKey(),
+        );
+
+        $this->issuedCode = $result['code'];
+        $this->tab = 'portal';
+    }
+
+    public function revokePortalInvitation(int $invitationId): void
+    {
+        $invitation = PortalInvitation::query()
+            ->where('subject_type', PortalSubjectType::Guardian->value)
+            ->where('subject_id', $this->guardian->getKey())
+            ->findOrFail($invitationId);
+
+        app(RevokePortalInvitation::class)->handle($invitation);
+
+        $this->issuedCode = null;
+    }
+
+    /**
+     * The open (still redeemable) invitation for this guardian, if any.
+     */
+    private function openInvitation(): ?PortalInvitation
+    {
+        return PortalInvitation::query()
+            ->where('subject_type', PortalSubjectType::Guardian->value)
+            ->where('subject_id', $this->guardian->getKey())
+            ->whereNull('used_at')
+            ->whereNull('revoked_at')
+            ->where('expires_at', '>=', now())
+            ->orderByDesc('issued_at')
+            ->first();
+    }
+
+    /**
+     * The linked portal account's email, resolved through the query builder:
+     * users belongs to Identity, whose Models this module must not import.
+     */
+    private function portalUserEmail(): ?string
+    {
+        if ($this->guardian->portal_user_id === null) {
+            return null;
+        }
+
+        $email = DB::table('users')->where('id', $this->guardian->portal_user_id)->value('email');
+
+        return is_string($email) ? $email : null;
     }
 
     private function activeTab(): string
@@ -199,6 +275,9 @@ final class Show extends Component
             'studentRows' => $this->studentRows($studentIds),
             'meetings' => $tab === 'meetings' ? $this->meetings() : new Collection(),
             'communications' => $tab === 'communications' ? $this->communications() : new Collection(),
+            'openInvitation' => $tab === 'portal' ? $this->openInvitation() : null,
+            'portalUserEmail' => $tab === 'portal' ? $this->portalUserEmail() : null,
+            'canManagePortal' => Gate::allows(Permission::PortalManage->value),
         ]);
     }
 }

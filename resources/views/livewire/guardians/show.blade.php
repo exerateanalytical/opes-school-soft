@@ -440,4 +440,67 @@
             @endif
         </section>
     @endif
+
+    {{-- ── Portal access (Phase 12, docs/plans/phase-12-13.md 12.2). The
+         activation CODE is shown exactly once, here, after issuing: only its
+         SHA-256 is stored, and 00-core 9.3 assumes no SMTP - the office hands
+         the code over on paper or over the counter. --}}
+    @if ($tab === 'portal')
+        <section class="space-y-3">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+                {{ __('opes.guardians_screen.portal_heading') }}
+            </h2>
+
+            @if ($issuedCode !== null)
+                <div class="rounded border border-primary/40 bg-primary/5 p-4">
+                    <p class="text-sm font-semibold text-charcoal">{{ __('opes.guardians_screen.portal_code_heading') }}</p>
+                    <p class="mt-2 font-mono text-2xl tracking-widest text-primary">{{ $issuedCode }}</p>
+                    <p class="mt-2 text-xs text-charcoal/60">{{ __('opes.guardians_screen.portal_code_notice') }}</p>
+                </div>
+            @endif
+
+            <div class="rounded border border-sand bg-white p-4">
+                @if ($guardian->portal_user_id !== null)
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-medium text-charcoal">{{ __('opes.guardians_screen.portal_account_active') }}</p>
+                            <p class="mt-1 text-xs text-charcoal/60">{{ $portalUserEmail ?? $notRecorded }}</p>
+                        </div>
+                        <x-status-pill status="ok" :label="__('opes.guardians_screen.portal_pill_active')"/>
+                    </div>
+                @elseif ($openInvitation !== null)
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-medium text-charcoal">{{ __('opes.guardians_screen.portal_invitation_open') }}</p>
+                            <p class="mt-1 text-xs text-charcoal/60">
+                                {{ __('opes.guardians_screen.portal_invitation_expires', ['date' => $openInvitation->expires_at->translatedFormat('d M Y H:i')]) }}
+                            </p>
+                        </div>
+                        @if ($canManagePortal)
+                            <div class="flex items-center gap-2">
+                                <button type="button" wire:click="issuePortalInvitation"
+                                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                    {{ __('opes.guardians_screen.portal_reissue_button') }}
+                                </button>
+                                <button type="button" wire:click="revokePortalInvitation({{ $openInvitation->id }})"
+                                        class="rounded border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                                    {{ __('opes.guardians_screen.portal_revoke_button') }}
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-sm text-charcoal/70">{{ __('opes.guardians_screen.portal_account_none') }}</p>
+                        @if ($canManagePortal && ! $guardian->is_archived && $guardian->isActive())
+                            <button type="button" wire:click="issuePortalInvitation"
+                                    class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90">
+                                {{ __('opes.guardians_screen.portal_issue_button') }}
+                            </button>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endif
 </div>
