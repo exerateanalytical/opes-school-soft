@@ -6,6 +6,7 @@ namespace App\Modules\Operations\Actions\Rollover;
 
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
+use App\Modules\Operations\Actions\AssertEntitlement;
 use App\Modules\Operations\Actions\Rollover\Support\RolloverStepMechanics;
 use App\Modules\Operations\Domain\RolloverRunStatus;
 use App\Modules\Operations\Domain\RolloverStep;
@@ -35,9 +36,9 @@ use stdClass;
  * and the inputs hash); calling after a completed run refuses.
  *
  * ENTITLEMENT: phase-07 plan decision 6 places an
- * `Operations\Actions\AssertEntitlement` call at the top of this handle();
- * that Action is delivered by the licensing workstream (F4), which owns
- * inserting the one-line call here once it lands.
+ * `Operations\Actions\AssertEntitlement` call at the top of this handle() -
+ * the rollover wizard is one of the four annual/termly operations blocked
+ * when expired-enforced (08-operations §4.4).
  */
 final class StartRolloverRun
 {
@@ -55,6 +56,10 @@ final class StartRolloverRun
     public function handle(int $fromAcademicYearId, int $backupId, Actor $actor): RolloverRun
     {
         Gate::authorize(self::PERMISSION);
+
+        // Entitlement gate (08-operations §4.4): the rollover wizard is one
+        // of the four annual operations blocked when expired-enforced.
+        app(AssertEntitlement::class)->handle('operations.rollover');
 
         $from = RolloverStepMechanics::yearRow($fromAcademicYearId);
 
