@@ -41,9 +41,9 @@
             <p class="text-sm text-charcoal/60">{{ __('opes.payables_dashboard.aged_empty') }}</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full divide-y divide-sand text-sm">
                     <thead>
-                        <tr class="text-xs text-charcoal/70">
+                        <tr class="text-left text-xs uppercase tracking-wide text-charcoal/60">
                             <th class="px-2 py-1 text-left">{{ __('opes.payables_dashboard.col_supplier') }}</th>
                             <th class="px-2 py-1 text-right">{{ __('opes.payables_dashboard.col_current') }}</th>
                             <th class="px-2 py-1 text-right">1–30</th>
@@ -53,9 +53,9 @@
                             <th class="px-2 py-1 text-right">{{ __('opes.payables_dashboard.col_total') }}</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-sand">
                         @foreach ($aged['rows'] as $row)
-                            <tr wire:key="aged-{{ $row->supplier_id }}" class="border-t border-sand/60">
+                            <tr wire:key="aged-{{ $row->supplier_id }}">
                                 <td class="px-2 py-1">{{ $row->supplier_name }}</td>
                                 <td class="px-2 py-1 text-right font-mono">{{ number_format($row->current, 0, ',', ' ') }}</td>
                                 <td class="px-2 py-1 text-right font-mono">{{ number_format($row->days_1_30, 0, ',', ' ') }}</td>
