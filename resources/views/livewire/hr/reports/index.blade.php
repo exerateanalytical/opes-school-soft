@@ -22,11 +22,11 @@
     >
         <x-slot:actions>
             <button type="button" wire:click="exportExcel"
-                    class="print:hidden rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="print:hidden rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Export Excel
             </button>
             <button type="button" wire:click="exportPdf"
-                    class="print:hidden rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="print:hidden rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Export PDF
             </button>
             <button type="button" onclick="window.print()"
@@ -47,7 +47,7 @@
                 <label for="report-filter-department" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Department</span>
                     <select id="report-filter-department" wire:model.live="department"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">All departments</option>
                         @foreach ($departmentOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -60,7 +60,7 @@
                 <label for="report-filter-status" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Status</span>
                     <select id="report-filter-status" wire:model.live="status"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">All statuses</option>
                         @foreach ($statusOptions as $option)
                             <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -73,7 +73,7 @@
                 <label for="report-filter-payroll-run" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Payroll run</span>
                     <select id="report-filter-payroll-run" wire:model.live="payrollRun"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a run</option>
                         @foreach ($payrollRunOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -123,7 +123,7 @@
 
             <x-slot:cards>
                 @foreach ($rows as $row)
-                    <article class="rounded border border-sand bg-white p-3">
+                    <article class="rounded border border-border-primary bg-white p-3">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }} ({{ $row->staff_no }})</p>
                         <p class="text-sm text-charcoal/70">{{ $row->contract_type }} · {{ $row->department_name }} · {{ $row->position_name }}</p>
                         <p class="text-sm text-charcoal/70">{{ $row->starts_on }} – {{ $row->ends_on ?? 'present' }}</p>
@@ -157,7 +157,7 @@
 
             <x-slot:cards>
                 @foreach ($rows as $row)
-                    <article class="rounded border border-sand bg-white p-3">
+                    <article class="rounded border border-border-primary bg-white p-3">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }} ({{ $row->staff_no }})</p>
                         <p class="text-sm text-charcoal/70">{{ $row->leave_type_name }} · {{ $row->starts_on }} – {{ $row->ends_on }} · {{ $row->working_days }} day(s)</p>
                         <p class="text-sm text-charcoal/70">{{ ucfirst($row->status) }}</p>
@@ -187,7 +187,7 @@
 
             <x-slot:cards>
                 @foreach ($rows as $row)
-                    <article class="rounded border border-sand bg-white p-3">
+                    <article class="rounded border border-border-primary bg-white p-3">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }} ({{ $row->staff_no }})</p>
                         <p class="text-sm text-charcoal/70">Gross {{ number_format($row->gross) }} · Deductions {{ number_format($row->total_employee_deductions) }}</p>
                         <p class="text-sm font-medium text-charcoal">Net {{ number_format($row->net) }}</p>
@@ -219,7 +219,7 @@
 
             <x-slot:cards>
                 @foreach ($rows as $row)
-                    <article class="rounded border border-sand bg-white p-3">
+                    <article class="rounded border border-border-primary bg-white p-3">
                         <p class="font-medium text-charcoal">{{ $row->first_name }} {{ $row->last_name }} ({{ $row->staff_no }})</p>
                         <p class="text-sm text-charcoal/70">{{ $row->department_name ?? '-' }} · {{ $row->position_name ?? '-' }}</p>
                         <p class="text-sm text-charcoal/70">{{ ucfirst(str_replace('_', ' ', $row->status)) }}</p>

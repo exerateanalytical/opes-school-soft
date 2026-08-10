@@ -121,7 +121,7 @@
         <label for="hr-filter-department" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Department</span>
             <select id="hr-filter-department" wire:model.live="department"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All departments</option>
                 @foreach ($departmentOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -133,7 +133,7 @@
             <label for="hr-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="hr-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -146,7 +146,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="hr-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search name, staff no..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -250,7 +250,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="hr-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'staff')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>
@@ -291,39 +291,39 @@
     <x-slot:rail>
         <div class="space-y-4">
             @if ($showHireForm)
-                <section aria-label="Hire staff member" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Hire staff member" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Hire Staff Member</h3>
                     <div class="space-y-2">
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             First name
-                            <input type="text" wire:model="hireFirstName" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="text" wire:model="hireFirstName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Last name
-                            <input type="text" wire:model="hireLastName" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="text" wire:model="hireLastName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Gender
-                            <select wire:model="hireGender" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="hireGender" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Date of birth
-                            <input type="date" wire:model="hireDateOfBirth" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="hireDateOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Phone
-                            <input type="text" wire:model="hirePhone" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="text" wire:model="hirePhone" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Email (optional)
-                            <input type="email" wire:model="hireEmail" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="email" wire:model="hireEmail" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Hired on
-                            <input type="date" wire:model="hireHiredOn" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="hireHiredOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="button" wire:click="saveHire" wire:confirm="Hire this staff member?"
                                 class="w-full rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
@@ -334,12 +334,12 @@
             @endif
 
             @if ($showContractForm)
-                <section aria-label="Open staff contract" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Open staff contract" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Open Contract</h3>
                     <div class="space-y-2">
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Staff member
-                            <select wire:model="contractStaffId" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="contractStaffId" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">Select…</option>
                                 @foreach ($staffOptions as $option)
                                     <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -348,11 +348,11 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Contract role
-                            <input type="text" wire:model="contractRole" placeholder="e.g. teacher, bursar" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="text" wire:model="contractRole" placeholder="e.g. teacher, bursar" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Contract type
-                            <select wire:model="contractType" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="contractType" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="cdi">CDI</option>
                                 <option value="cdd">CDD</option>
                                 <option value="temporaire">Temporaire</option>
@@ -364,7 +364,7 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Working time
-                            <select wire:model="contractWorkingTime" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="contractWorkingTime" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="full_time">Full time</option>
                                 <option value="part_time">Part time</option>
                                 <option value="hourly">Hourly</option>
@@ -372,7 +372,7 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Department
-                            <select wire:model="contractDepartmentId" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="contractDepartmentId" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">Select…</option>
                                 @foreach ($departmentOptions as $option)
                                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -381,7 +381,7 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Position
-                            <select wire:model="contractPositionId" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="contractPositionId" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">Select…</option>
                                 @foreach ($positionOptions as $option)
                                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -390,11 +390,11 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Starts on
-                            <input type="date" wire:model="contractStartsOn" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="contractStartsOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Ends on (leave blank for CDI)
-                            <input type="date" wire:model="contractEndsOn" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="contractEndsOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="button" wire:click="saveContract" wire:confirm="Open this contract?"
                                 class="w-full rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
@@ -405,12 +405,12 @@
             @endif
 
             @if ($showLeaveForm)
-                <section aria-label="Request leave" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Request leave" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Request Leave</h3>
                     <div class="space-y-2">
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Contract
-                            <select wire:model="leaveStaffContractId" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="leaveStaffContractId" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">Select…</option>
                                 @foreach ($activeContractOptions as $option)
                                     <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -419,7 +419,7 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Leave type
-                            <select wire:model="leaveTypeCode" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="leaveTypeCode" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">Select…</option>
                                 @foreach ($leaveTypeOptions as $option)
                                     <option value="{{ $option['code'] }}">{{ $option['name'] }}</option>
@@ -428,15 +428,15 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             From
-                            <input type="date" wire:model="leaveStartsOn" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="leaveStartsOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             To
-                            <input type="date" wire:model="leaveEndsOn" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="leaveEndsOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Working days
-                            <input type="number" step="0.5" min="0" wire:model="leaveWorkingDays" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="number" step="0.5" min="0" wire:model="leaveWorkingDays" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="button" wire:click="saveLeaveRequest" wire:confirm="Submit this leave request?"
                                 class="w-full rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
@@ -452,7 +452,7 @@
                     <div class="space-y-2">
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Reason
-                            <select wire:model="terminateReason" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal">
+                            <select wire:model="terminateReason" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
                                 <option value="resignation">Resignation</option>
                                 <option value="licenciement">Licenciement</option>
                                 <option value="licenciement_faute_lourde">Licenciement (faute lourde)</option>
@@ -464,7 +464,7 @@
                         </label>
                         <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
                             Last working day
-                            <input type="date" wire:model="terminateLastWorkingDay" class="rounded border border-sand px-2 py-1.5 text-sm text-charcoal"/>
+                            <input type="date" wire:model="terminateLastWorkingDay" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="button" wire:click="saveTermination" wire:confirm="Terminate this contract? This cannot be undone."
                                 class="w-full rounded border border-heritage-red bg-heritage-red px-3 py-1.5 text-sm font-medium text-white hover:bg-heritage-red/90">
@@ -474,7 +474,7 @@
                 </section>
             @endif
 
-            <section aria-label="About this directory" class="rounded border border-sand bg-white p-3">
+            <section aria-label="About this directory" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Staff Directory</h3>
                 <p class="text-sm text-charcoal/70">Browse staff, their active contracts and leave requests. Submitted leave requests can be approved directly from the Leave Requests tab; hiring and contract changes are still handled elsewhere in HR.</p>
             </section>

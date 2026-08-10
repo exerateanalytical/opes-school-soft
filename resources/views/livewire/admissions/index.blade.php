@@ -54,7 +54,7 @@
             <label for="admissions-reject-reason" class="mt-2 flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Reason</span>
                 <textarea id="admissions-reject-reason" rows="2" wire:model="rejectionReason"
-                          class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                          class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
             </label>
             @error('decision_reason')
                 <p class="mt-1 text-xs font-medium text-heritage-red">{{ $message }}</p>
@@ -65,7 +65,7 @@
                     Confirm rejection
                 </button>
                 <button type="button" wire:click="closeDialogs"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
                     Cancel
                 </button>
             </div>
@@ -90,7 +90,7 @@
                 <label for="admissions-class-group" class="mt-2 flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Class group</span>
                     <select id="admissions-class-group" wire:model="classGroupId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a class group</option>
                         @foreach ($classGroupOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -109,7 +109,7 @@
                     Confirm enrolment
                 </button>
                 <button type="button" wire:click="closeDialogs"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
                     Cancel
                 </button>
             </div>
@@ -142,13 +142,13 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="admissions-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Application no or name"
-                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
             </label>
 
             <label for="admissions-year" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Academic year</span>
                 <select id="admissions-year" wire:model.live="academicYear"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All years</option>
                     @foreach ($academicYearOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -159,7 +159,7 @@
             <label for="admissions-level" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Class level</span>
                 <select id="admissions-level" wire:model.live="classLevel"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All levels</option>
                     @foreach ($classLevelOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -217,7 +217,7 @@
                 <td class="px-3 py-2">
                     <div class="flex flex-wrap items-center gap-1">
                         <a href="{{ $this->wizardUrl((int) $row->id) }}"
-                           class="print:hidden rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                           class="print:hidden rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ $status === ApplicationStatus::Draft ? 'Continue' : 'Open' }}
                         </a>
                         @if ($convertible)
@@ -252,7 +252,7 @@
                         ApplicationStatus::Accepted,
                     ], true);
                 @endphp
-                <article class="rounded border border-sand bg-white p-3">
+                <article class="rounded border border-border-primary bg-white p-3">
                     <p class="font-medium text-charcoal">{{ $name !== '' ? $name : 'Unnamed draft #'.$row->id }}</p>
                     <p class="text-sm text-charcoal/70">
                         {{ $row->application_no ?? 'No number yet' }} · {{ $row->class_level_name ?? '—' }} · {{ $row->academic_year_code ?? '—' }}
@@ -263,7 +263,7 @@
                     </p>
                     <div class="mt-2 flex flex-wrap items-center gap-1">
                         <a href="{{ $this->wizardUrl((int) $row->id) }}"
-                           class="print:hidden rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                           class="print:hidden rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ $status === ApplicationStatus::Draft ? 'Continue' : 'Open' }}
                         </a>
                         @if ($convertible)

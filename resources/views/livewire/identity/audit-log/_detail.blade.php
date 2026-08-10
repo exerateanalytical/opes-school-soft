@@ -15,9 +15,9 @@
             This entry records no before/after payload — the action itself is the record.
         </p>
     @else
-        <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+        <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
             <table class="w-full min-w-[36rem] border-collapse text-sm">
-                <thead class="border-b border-sand bg-sand/40 text-left">
+                <thead class="border-b border-border-primary bg-sand/40 text-left">
                     <tr>
                         <th class="px-3 py-2 font-medium text-charcoal/70">Field</th>
                         <th class="px-3 py-2 font-medium text-charcoal/70">Before</th>
@@ -25,7 +25,7 @@
                         <th class="px-3 py-2 font-medium text-charcoal/70">Change</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @foreach ($diff as $line)
                         <tr class="{{ $line['changed'] ? 'bg-heritage-yellow/10' : '' }}">
                             <td class="px-3 py-1.5 font-medium text-charcoal">{{ $line['field'] }}</td>

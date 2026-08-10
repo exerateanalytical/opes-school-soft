@@ -37,11 +37,11 @@
 
             @if ($canExport)
                 <button type="button" wire:click="exportExcel"
-                        class="print:hidden rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="print:hidden rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export Excel
                 </button>
                 <button type="button" wire:click="exportPdf"
-                        class="print:hidden rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="print:hidden rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -63,19 +63,19 @@
             <label for="audit-from" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">From</span>
                 <input id="audit-from" type="date" wire:model.live="from"
-                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
             </label>
 
             <label for="audit-to" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">To</span>
                 <input id="audit-to" type="date" wire:model.live="to"
-                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
             </label>
 
             <label for="audit-module" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Module</span>
                 <select id="audit-module" wire:model.live="module"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All modules</option>
                     @foreach ($moduleOptions as $option)
                         <option value="{{ $option }}">{{ $option }}</option>
@@ -86,7 +86,7 @@
             <label for="audit-action" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Action</span>
                 <select id="audit-action" wire:model.live="action"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All actions</option>
                     @foreach ($actionOptions as $option)
                         <option value="{{ $option }}">{{ ucfirst(str_replace('_', ' ', $option)) }}</option>
@@ -97,7 +97,7 @@
             <label for="audit-actor" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Actor</span>
                 <select id="audit-actor" wire:model.live="actor"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All actors</option>
                     @foreach ($actorOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -108,7 +108,7 @@
             <label for="audit-type" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Subject type</span>
                 <select id="audit-type" wire:model.live="auditableType"
-                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                     <option value="">All subjects</option>
                     @foreach ($typeOptions as $option)
                         <option value="{{ $option }}">{{ \App\Modules\Identity\Livewire\AuditLog\Index::shortType($option) }}</option>
@@ -120,7 +120,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="audit-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Actor, subject or IP"
-                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
             </label>
         </x-slot:filters>
 
@@ -153,7 +153,7 @@
                 <td class="px-3 py-2">{{ $entry->ip ?? '-' }}</td>
                 <td class="px-3 py-2">
                     <button type="button" wire:click="toggle({{ $entry->id }})"
-                            class="print:hidden rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            class="print:hidden rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ $selectedId === $entry->id ? 'Hide' : 'View changes' }}
                     </button>
                 </td>
@@ -170,7 +170,7 @@
 
         <x-slot:cards>
             @foreach ($rows as $entry)
-                <article class="rounded border border-sand bg-white p-3">
+                <article class="rounded border border-border-primary bg-white p-3">
                     <p class="font-medium text-charcoal">
                         #{{ $entry->id }} · {{ ucfirst(str_replace('_', ' ', $entry->action)) }} · {{ $entry->module }}
                     </p>
@@ -181,7 +181,7 @@
                         {{ \App\Modules\Identity\Livewire\AuditLog\Index::shortType($entry->auditable_type) }}@if ($entry->auditable_id !== null) #{{ $entry->auditable_id }}@endif
                     </p>
                     <button type="button" wire:click="toggle({{ $entry->id }})"
-                            class="print:hidden mt-2 rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            class="print:hidden mt-2 rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ $selectedId === $entry->id ? 'Hide changes' : 'View changes' }}
                     </button>
 

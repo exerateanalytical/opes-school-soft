@@ -5,7 +5,7 @@
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.staff_portal.profile') }}</h2>
             <dl class="mt-2 space-y-1 text-sm">
                 <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.staff_portal.staff_no') }}</dt><dd class="font-mono">{{ $staff->staff_no ?? '—' }}</dd></div>
@@ -16,26 +16,26 @@
             </dl>
         </div>
 
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.staff_portal.change_password') }}</h2>
 
             <form wire:submit.prevent="changePassword" class="mt-2 space-y-2">
                 <div>
                     <label for="staff-portal-current" class="block text-xs text-charcoal/60">{{ __('opes.staff_portal.password_current') }}</label>
                     <input id="staff-portal-current" type="password" wire:model="currentPassword"
-                           class="mt-0.5 w-full rounded border border-sand px-2 py-1.5 text-sm">
+                           class="mt-0.5 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
                     @error('currentPassword') <p class="mt-0.5 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="staff-portal-new" class="block text-xs text-charcoal/60">{{ __('opes.staff_portal.password_new') }}</label>
                     <input id="staff-portal-new" type="password" wire:model="newPassword"
-                           class="mt-0.5 w-full rounded border border-sand px-2 py-1.5 text-sm">
+                           class="mt-0.5 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
                     @error('newPassword') <p class="mt-0.5 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="staff-portal-confirm" class="block text-xs text-charcoal/60">{{ __('opes.staff_portal.password_confirm') }}</label>
                     <input id="staff-portal-confirm" type="password" wire:model="newPasswordConfirmation"
-                           class="mt-0.5 w-full rounded border border-sand px-2 py-1.5 text-sm">
+                           class="mt-0.5 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
                     @error('newPasswordConfirmation') <p class="mt-0.5 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
@@ -44,7 +44,7 @@
             </form>
         </div>
 
-        <div class="rounded border border-sand bg-white p-4 sm:col-span-2">
+        <div class="rounded border border-border-primary bg-white p-4 sm:col-span-2">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.staff_portal.panel_timetable') }}</h2>
 
             @php
@@ -67,7 +67,7 @@
                         </thead>
                         <tbody>
                             @foreach ($timetableSlots as $slot)
-                                <tr class="border-t border-sand/60">
+                                <tr class="border-t border-border-primary/60">
                                     <td class="py-1 pr-3">{{ $dayNames[$slot->day_of_week] ?? $slot->day_of_week }}</td>
                                     <td class="py-1 pr-3">{{ $slot->period_name }}</td>
                                     <td class="py-1 pr-3">{{ $slot->subject_name }}</td>
@@ -81,7 +81,7 @@
             @endif
         </div>
 
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.staff_portal.panel_leave') }}</h2>
 
             @if (count($leaveBalances) === 0)
@@ -98,7 +98,7 @@
             @endif
 
             @if (count($leaveRequests) > 0)
-                <div class="mt-3 space-y-1 border-t border-sand/60 pt-2 text-xs">
+                <div class="mt-3 space-y-1 border-t border-border-primary/60 pt-2 text-xs">
                     @foreach ($leaveRequests as $request)
                         <div class="flex justify-between gap-3">
                             <span class="text-charcoal/60">{{ $request->leave_type_name }} · {{ $request->starts_on }} → {{ $request->ends_on }}</span>
@@ -109,7 +109,7 @@
             @endif
         </div>
 
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.staff_portal.panel_payslips') }}</h2>
 
             @if (count($payslips) === 0)

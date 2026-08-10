@@ -27,11 +27,11 @@
         <x-slot:actions>
             <div class="flex items-center gap-2 no-print">
                 <button type="button" wire:click="exportExcel"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export Excel
                 </button>
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -45,7 +45,7 @@
             <label for="fr-fiscal-year" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Fiscal year</span>
                 <select id="fr-fiscal-year" wire:model.live="fiscalYearId"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All</option>
                     @foreach ($fiscalYearOptions as $fiscalYear)
                         <option value="{{ $fiscalYear->id }}">{{ $fiscalYear->code }}</option>
@@ -57,7 +57,7 @@
                 <label for="fr-accounting-period" class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Accounting period</span>
                     <select id="fr-accounting-period" wire:model.live="accountingPeriodId"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All</option>
                         @foreach ($accountingPeriodOptions as $period)
                             <option value="{{ $period->id }}">{{ $period->period_month->format('Y-m') }}</option>
@@ -70,7 +70,7 @@
                 <label for="fr-account" class="flex min-w-[14rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Account</span>
                     <select id="fr-account" wire:model.live="accountId"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">Select an account</option>
                         @foreach ($accountOptions as $account)
                             <option value="{{ $account->id }}">{{ $account->code }} — {{ $account->name }}</option>

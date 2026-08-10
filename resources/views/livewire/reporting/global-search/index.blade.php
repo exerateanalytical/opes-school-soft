@@ -9,14 +9,14 @@
         <input id="opes-search" type="search" wire:model.live.debounce.300ms="query"
                placeholder="{{ __('opes.shell.search') }}"
                autocomplete="off"
-               class="w-full rounded-full border border-sand bg-white py-1.5 pl-9 pr-3 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-primary focus:outline-none">
+               class="w-full rounded-full border border-border-primary bg-white py-1.5 pl-9 pr-3 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-primary focus:outline-none">
     </div>
 
     <div x-show="open" x-cloak
-         class="absolute left-0 right-0 z-40 mt-1 max-h-96 overflow-y-auto rounded-lg border border-sand bg-white shadow-lg">
+         class="absolute left-0 right-0 z-40 mt-1 max-h-96 overflow-y-auto rounded-lg border border-border-primary bg-white shadow-lg">
         @forelse ($results as $result)
             <a href="{{ $result['url'] }}"
-               class="block border-t border-sand px-3 py-2 text-sm first:border-t-0 hover:bg-sand/40">
+               class="block border-t border-border-primary px-3 py-2 text-sm first:border-t-0 hover:bg-sand/40">
                 <span class="block font-medium text-charcoal">{{ $result['label'] }}</span>
                 <span class="block text-xs text-slate-500">
                     {{ __('opes.global_search.group_'.$result['group']) }}

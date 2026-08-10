@@ -26,11 +26,11 @@
         <x-slot:actions>
             <div class="flex items-center gap-2 no-print">
                 <button type="button" wire:click="exportExcel"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export Excel
                 </button>
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -45,7 +45,7 @@
                 <label for="tr-fiscal-year" class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Fiscal year</span>
                     <select id="tr-fiscal-year" wire:model.live="fiscalYearId"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All</option>
                         @foreach ($fiscalYearOptions as $fiscalYear)
                             <option value="{{ $fiscalYear->id }}">{{ $fiscalYear->code }}</option>
@@ -58,7 +58,7 @@
                 <label for="tr-declaration-type" class="flex min-w-[12rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Declaration type</span>
                     <select id="tr-declaration-type" wire:model.live="declarationType"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All</option>
                         @foreach ($declarationTypeOptions as $option)
                             <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -71,7 +71,7 @@
                 <label for="tr-status" class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Status</span>
                     <select id="tr-status" wire:model.live="status"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All</option>
                         @foreach ($statusOptions as $option)
                             <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>

@@ -36,11 +36,11 @@
 >
     <x-slot:actions>
         <button type="button" wire:click="exportExcel" wire:loading.attr="disabled"
-                class="no-print rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="no-print rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             Export Excel
         </button>
         <button type="button" wire:click="exportPdf" wire:loading.attr="disabled"
-                class="no-print rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="no-print rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             Export PDF
         </button>
         <button type="button" onclick="window.print()"
@@ -76,7 +76,7 @@
         <label for="fees-report-filter-class" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Class</span>
             <select id="fees-report-filter-class" wire:model.live="classGroup"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All classes</option>
                 @foreach ($classGroupOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -87,7 +87,7 @@
         <label for="fees-report-filter-year" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Academic year</span>
             <select id="fees-report-filter-year" wire:model.live="academicYear"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All years</option>
                 @foreach ($academicYearOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -99,7 +99,7 @@
             <label for="fees-report-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="fees-report-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -111,13 +111,13 @@
         <label for="fees-report-filter-from" class="flex min-w-[9rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">From</span>
             <input id="fees-report-filter-from" type="date" wire:model.live="dateFrom"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         <label for="fees-report-filter-to" class="flex min-w-[9rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">To</span>
             <input id="fees-report-filter-to" type="date" wire:model.live="dateTo"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 

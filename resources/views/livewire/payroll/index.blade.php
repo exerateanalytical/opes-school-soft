@@ -85,7 +85,7 @@
 
 {{-- Inline "configure employer profile" setup panel (payroll.configure). --}}
 @if ($showEmployerForm)
-    <section aria-label="Configure employer profile" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Configure employer profile" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Configure Employer Profile</h2>
         <p class="mt-1 text-xs text-charcoal/60">Transcribe these values from the school's own CNPS notification letter. Confirming both boxes is mandatory - nothing here is pre-filled.</p>
 
@@ -94,37 +94,37 @@
                 <label for="ep-cnps-employer-number" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CNPS employer number</span>
                     <input id="ep-cnps-employer-number" type="text" wire:model="epCnpsEmployerNumber"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-dipe-number" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">DIPE number</span>
                     <input id="ep-dipe-number" type="text" wire:model="epDipeNumber"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-niu" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">NIU</span>
                     <input id="ep-niu" type="text" wire:model="epNiu"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-dgi-centre" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">DGI centre (optional)</span>
                     <input id="ep-dgi-centre" type="text" wire:model="epDgiCentre"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-tdl-commune" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">TDL commune ID</span>
                     <input id="ep-tdl-commune" type="number" min="1" wire:model="epTdlCommuneId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-cnps-regime" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CNPS regime</span>
                     <select id="ep-cnps-regime" wire:model="epCnpsRegime"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="general">General</option>
                         <option value="agricole">Agricole</option>
                         <option value="enseignement_prive">Enseignement privé</option>
@@ -137,35 +137,35 @@
                 <label for="ep-rp-risk-class" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">RP risk class</span>
                     <input id="ep-rp-risk-class" type="text" wire:model="epRpRiskClass"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-cnps-doc-id" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CNPS notification document ID</span>
                     <input id="ep-cnps-doc-id" type="number" min="1" wire:model="epCnpsNotificationDocumentId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-cnps-doc-ref" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CNPS notification reference</span>
                     <input id="ep-cnps-doc-ref" type="text" wire:model="epCnpsNotificationReference"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="ep-effective-from" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Effective from</span>
                     <input id="ep-effective-from" type="date" wire:model="epEffectiveFrom"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-6">
                 <label class="flex items-center gap-2 text-sm text-charcoal/80">
-                    <input type="checkbox" wire:model="epRegimeConfirmed" class="rounded border-sand"/>
+                    <input type="checkbox" wire:model="epRegimeConfirmed" class="rounded border-border-primary"/>
                     I confirm the CNPS regime against the notification letter
                 </label>
                 <label class="flex items-center gap-2 text-sm text-charcoal/80">
-                    <input type="checkbox" wire:model="epRiskClassConfirmed" class="rounded border-sand"/>
+                    <input type="checkbox" wire:model="epRiskClassConfirmed" class="rounded border-border-primary"/>
                     I confirm the risk class against the notification letter
                 </label>
             </div>
@@ -176,7 +176,7 @@
                     Save employer profile
                 </button>
                 <button type="button" wire:click="toggleEmployerForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -186,7 +186,7 @@
 
 {{-- Inline "payroll component" setup panel (payroll.configure). --}}
 @if ($showComponentForm)
-    <section aria-label="Save payroll component" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Save payroll component" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Payroll Component</h2>
         <p class="mt-1 text-xs text-charcoal/60">Define an allowance, deduction or employer charge. The component code is fixed once created.</p>
 
@@ -195,25 +195,25 @@
                 <label for="pc-code" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Component code</span>
                     <input id="pc-code" type="text" wire:model="pcCode"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="pc-name" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Name</span>
                     <input id="pc-name" type="text" wire:model="pcName"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="pc-name-fr" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Name (French, optional)</span>
                     <input id="pc-name-fr" type="text" wire:model="pcNameFr"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="pc-type" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Type</span>
                     <select id="pc-type" wire:model="pcType"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="earning">Earning (allowance)</option>
                         <option value="employee_deduction">Employee deduction</option>
                         <option value="employer_charge">Employer charge</option>
@@ -227,7 +227,7 @@
                 <label for="pc-calculation" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Calculation basis</span>
                     <select id="pc-calculation" wire:model="pcCalculation"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="fixed">Fixed amount</option>
                         <option value="percentage">Percentage</option>
                         <option value="hourly">Hourly</option>
@@ -243,13 +243,13 @@
                 <label for="pc-calc-order" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Calculation order</span>
                     <input id="pc-calc-order" type="number" min="1" wire:model="pcCalculationOrder"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="pc-statutory-code" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Statutory rate code (if calculation = statutory)</span>
                     <select id="pc-statutory-code" wire:model="pcStatutoryRateCode"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">—</option>
                         <option value="PVID">PVID</option>
                         <option value="PF">PF</option>
@@ -266,27 +266,27 @@
                 <label for="pc-effective-from" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Effective from</span>
                     <input id="pc-effective-from" type="date" wire:model="pcEffectiveFrom"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="pc-formula" class="flex flex-col gap-1 sm:col-span-3">
                     <span class="text-xs font-medium text-charcoal/70">Formula expression (if calculation = formula)</span>
                     <input id="pc-formula" type="text" wire:model="pcFormulaExpression"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-6">
                 <label class="flex items-center gap-2 text-sm text-charcoal/80">
-                    <input type="checkbox" wire:model="pcIsTaxable" class="rounded border-sand"/>
+                    <input type="checkbox" wire:model="pcIsTaxable" class="rounded border-border-primary"/>
                     Taxable
                 </label>
                 <label class="flex items-center gap-2 text-sm text-charcoal/80">
-                    <input type="checkbox" wire:model="pcIsCnpsLiable" class="rounded border-sand"/>
+                    <input type="checkbox" wire:model="pcIsCnpsLiable" class="rounded border-border-primary"/>
                     CNPS-liable
                 </label>
                 <label class="flex items-center gap-2 text-sm text-charcoal/80">
-                    <input type="checkbox" wire:model="pcIsEnabled" class="rounded border-sand"/>
+                    <input type="checkbox" wire:model="pcIsEnabled" class="rounded border-border-primary"/>
                     Enabled
                 </label>
             </div>
@@ -297,7 +297,7 @@
                     Save component
                 </button>
                 <button type="button" wire:click="toggleComponentForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -307,7 +307,7 @@
 
 {{-- Inline "statutory rate" setup panel (payroll.configure). --}}
 @if ($showRateForm)
-    <section aria-label="Configure statutory rate" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Configure statutory rate" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Statutory Rate</h2>
         <p class="mt-1 text-xs text-charcoal/60">Transcribe the value from the school's own CNPS notification letter or DGI notice. A source citation is mandatory.</p>
 
@@ -316,7 +316,7 @@
                 <label for="sr-code" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Code</span>
                     <select id="sr-code" wire:model="srCode"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="PVID">PVID</option>
                         <option value="PF">PF</option>
                         <option value="RP">RP</option>
@@ -335,19 +335,19 @@
                 <label for="sr-effective-from" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Effective from</span>
                     <input id="sr-effective-from" type="date" wire:model="srEffectiveFrom"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="sr-risk-class" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Risk class (RP only, optional)</span>
                     <input id="sr-risk-class" type="text" wire:model="srRiskClass"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="sr-cnps-regime" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CNPS regime (PF only, optional)</span>
                     <select id="sr-cnps-regime" wire:model="srCnpsRegime"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">—</option>
                         <option value="general">General</option>
                         <option value="agricole">Agricole</option>
@@ -358,25 +358,25 @@
                 <label for="sr-employee-rate" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Employee rate (basis points)</span>
                     <input id="sr-employee-rate" type="number" min="0" wire:model="srEmployeeRateBp"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="sr-employer-rate" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Employer rate (basis points)</span>
                     <input id="sr-employer-rate" type="number" min="0" wire:model="srEmployerRateBp"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="sr-flat-amount" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Flat amount (mutually exclusive with rates)</span>
                     <input id="sr-flat-amount" type="number" min="0" wire:model="srFlatAmount"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
 
                 <label for="sr-source-citation" class="flex flex-col gap-1 sm:col-span-3">
                     <span class="text-xs font-medium text-charcoal/70">Source citation (mandatory)</span>
                     <input id="sr-source-citation" type="text" wire:model="srSourceCitation"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
@@ -386,7 +386,7 @@
                     Save statutory rate
                 </button>
                 <button type="button" wire:click="toggleRateForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -396,7 +396,7 @@
 
 {{-- Inline "start payroll run" panel (money-sensitive; no separate route). --}}
 @if ($showForm)
-    <section aria-label="Start payroll run" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Start payroll run" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Start Payroll Run</h2>
 
         <form wire:submit="startRun" class="mt-4 space-y-4">
@@ -404,7 +404,7 @@
                 <label for="payroll-form-month" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Payroll month</span>
                     <input id="payroll-form-month" type="month" wire:model="formPayrollMonth"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formPayrollMonth')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -413,7 +413,7 @@
                 <label for="payroll-form-run-type" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Run type</span>
                     <select id="payroll-form-run-type" wire:model="formRunType"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="regular">Regular</option>
                         <option value="thirteenth_month">13th month</option>
                         <option value="final_settlement">Final settlement</option>
@@ -431,7 +431,7 @@
                     Calculate run
                 </button>
                 <button type="button" wire:click="toggleForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -441,7 +441,7 @@
 
 {{-- Inline "prepare payment" panel for the row selected via togglePayForm(). --}}
 @if ($payRunId !== null)
-    <section aria-label="Prepare payment" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Prepare payment" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Prepare Payment for Run #{{ $payRunId }}</h2>
 
         <form wire:submit="preparePayment" class="mt-4 space-y-4">
@@ -449,7 +449,7 @@
                 <label for="payroll-pay-method" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Payment method</span>
                     <select id="payroll-pay-method" wire:model="payMethod"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="bank">Bank</option>
                         <option value="mobile_money">Mobile money</option>
                         <option value="cash">Cash</option>
@@ -459,7 +459,7 @@
                 <label for="payroll-pay-treasury" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Treasury account ID</span>
                     <input id="payroll-pay-treasury" type="number" min="1" wire:model="payTreasuryAccountId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('payTreasuryAccountId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -468,7 +468,7 @@
                 <label for="payroll-pay-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Value date</span>
                     <input id="payroll-pay-date" type="date" wire:model="payValueDate"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('payValueDate')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -481,7 +481,7 @@
                     Prepare payment
                 </button>
                 <button type="button" wire:click="togglePayForm(null)"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -499,7 +499,7 @@
             <label for="payroll-reverse-reason" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Reversal reason (minimum 10 characters)</span>
                 <textarea id="payroll-reverse-reason" wire:model="reverseReason" rows="2"
-                          class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                          class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                 @error('reverseReason')
                     <span class="text-xs text-heritage-red">{{ $message }}</span>
                 @enderror
@@ -511,7 +511,7 @@
                     Reverse run
                 </button>
                 <button type="button" wire:click="toggleReverseForm(null)"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -528,15 +528,15 @@
 >
     <x-slot:actions>
         <button type="button" wire:click="toggleEmployerForm"
-                class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
             {{ $showEmployerForm ? 'Hide employer profile' : 'Configure employer profile' }}
         </button>
         <button type="button" wire:click="toggleComponentForm"
-                class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
             {{ $showComponentForm ? 'Hide component form' : 'New payroll component' }}
         </button>
         <button type="button" wire:click="toggleRateForm"
-                class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
             {{ $showRateForm ? 'Hide rate form' : 'Configure statutory rate' }}
         </button>
         <button type="button" wire:click="toggleForm"
@@ -575,7 +575,7 @@
             <label for="payroll-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="payroll-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -588,7 +588,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="payroll-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search run type, reference..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -720,7 +720,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="payroll-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'runs')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ \Illuminate\Support\Carbon::parse($row->payroll_month)->format('F Y') }}</p>

@@ -12,7 +12,7 @@
 <body class="min-h-screen bg-sand font-sans text-charcoal antialiased">
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
         <main class="w-full max-w-md">
-            <div class="overflow-hidden rounded-lg border border-sand bg-white shadow-lg shadow-charcoal/5">
+            <div class="overflow-hidden rounded-lg border border-border-primary bg-white shadow-lg shadow-charcoal/5">
                 {{-- Chrome-green band with a shield/crest mark, echoing the
                      sidebar wordmark treatment. Red and yellow stay accents:
                      the crest's gold rim is the only heritage-yellow mark on

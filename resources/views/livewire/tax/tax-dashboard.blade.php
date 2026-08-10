@@ -15,11 +15,11 @@
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded-lg border border-sand bg-white p-4">
+        <div class="rounded-lg border border-border-primary bg-white p-4">
             <div class="text-xs uppercase tracking-wide text-charcoal/60">Open TVA credit carried forward</div>
             <div class="mt-1 text-2xl font-semibold text-charcoal">{{ number_format($openCredit, 0, ',', ' ') }} FCFA</div>
         </div>
-        <div class="rounded-lg border border-sand bg-white p-4">
+        <div class="rounded-lg border border-border-primary bg-white p-4">
             <div class="text-xs uppercase tracking-wide text-charcoal/60">Declarations on record</div>
             <div class="mt-1 text-2xl font-semibold text-charcoal">{{ $recentDeclarations->count() }}</div>
         </div>
@@ -36,12 +36,12 @@
         @endforeach
 
         @if ($calendarItems === [])
-            <p class="rounded border border-sand bg-white px-3 py-4 text-sm text-charcoal/70">
+            <p class="rounded border border-border-primary bg-white px-3 py-4 text-sm text-charcoal/70">
                 Nothing to show - configure the tax obligations with your accountant.
             </p>
         @else
-            <div class="overflow-x-auto rounded-lg border border-sand bg-white">
-                <table class="min-w-full divide-y divide-sand text-sm">
+            <div class="overflow-x-auto rounded-lg border border-border-primary bg-white">
+                <table class="min-w-full divide-y divide-border-primary text-sm">
                     <thead>
                         <tr class="text-left text-xs uppercase tracking-wide text-charcoal/60">
                             <th class="px-3 py-2">Obligation</th>
@@ -50,7 +50,7 @@
                             <th class="px-3 py-2">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($calendarItems as $item)
                             <tr>
                                 <td class="px-3 py-2 text-charcoal">{{ $item['declaration_name'] }}</td>
@@ -68,7 +68,7 @@
                                     @elseif (in_array($item['alert_level'], ['t-1', 't-7', 't-15'], true))
                                         <span class="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">Due soon ({{ strtoupper($item['alert_level']) }})</span>
                                     @else
-                                        <span class="rounded-full border border-sand bg-white px-2 py-0.5 text-xs text-charcoal/70">Upcoming</span>
+                                        <span class="rounded-full border border-border-primary bg-white px-2 py-0.5 text-xs text-charcoal/70">Upcoming</span>
                                     @endif
                                 </td>
                             </tr>
@@ -83,10 +83,10 @@
         <h2 class="mb-2 text-base font-semibold text-charcoal">Recent declarations</h2>
 
         @if ($recentDeclarations->isEmpty())
-            <p class="rounded border border-sand bg-white px-3 py-4 text-sm text-charcoal/70">No declaration has been generated yet.</p>
+            <p class="rounded border border-border-primary bg-white px-3 py-4 text-sm text-charcoal/70">No declaration has been generated yet.</p>
         @else
-            <div class="overflow-x-auto rounded-lg border border-sand bg-white">
-                <table class="min-w-full divide-y divide-sand text-sm">
+            <div class="overflow-x-auto rounded-lg border border-border-primary bg-white">
+                <table class="min-w-full divide-y divide-border-primary text-sm">
                     <thead>
                         <tr class="text-left text-xs uppercase tracking-wide text-charcoal/60">
                             <th class="px-3 py-2">Type</th>
@@ -95,7 +95,7 @@
                             <th class="px-3 py-2">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($recentDeclarations as $declaration)
                             <tr>
                                 <td class="px-3 py-2 text-charcoal">{{ $declaration->declaration_type }}</td>

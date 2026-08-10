@@ -15,7 +15,7 @@
          mutation happens on the list screen itself). --}}
     @if ($showForm && $canManage)
         <section aria-label="{{ $editingId === null ? __('opes.subjects_screen.form_create_title') : __('opes.subjects_screen.form_edit_title') }}"
-                 class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+                 class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">
                 {{ $editingId === null ? __('opes.subjects_screen.form_create_title') : __('opes.subjects_screen.form_edit_title') }}
             </h2>
@@ -26,7 +26,7 @@
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.code_field') }}</span>
                         <input id="subject-code" type="text" wire:model="subjectCode"
                                placeholder="{{ __('opes.subjects_screen.code_placeholder') }}"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('subjectCode')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -35,7 +35,7 @@
                     <label for="subject-name" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.name_field') }}</span>
                         <input id="subject-name" type="text" wire:model="subjectName"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('subjectName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -44,7 +44,7 @@
                     <label for="subject-name-fr" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.name_fr_field') }}</span>
                         <input id="subject-name-fr" type="text" wire:model="subjectNameFr"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('subjectNameFr')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -53,7 +53,7 @@
                     <label for="subject-department" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.column_department') }}</span>
                         <select id="subject-department" wire:model="departmentId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.subjects_screen.no_department') }}</option>
                             @foreach ($departmentNames as $id => $departmentName)
                                 <option value="{{ $id }}">{{ $departmentName }}</option>
@@ -67,17 +67,17 @@
 
                 <label for="subject-active" class="flex items-center gap-2">
                     <input id="subject-active" type="checkbox" wire:model="subjectActive"
-                           class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                           class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
                     <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.status_active') }}</span>
                 </label>
 
-                <div class="flex items-center gap-2 border-t border-sand pt-4">
+                <div class="flex items-center gap-2 border-t border-border-primary pt-4">
                     <button type="submit"
                             class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                         {{ __('opes.subjects_screen.save') }}
                     </button>
                     <button type="button" wire:click="cancelForm"
-                            class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.subjects_screen.cancel') }}
                     </button>
                 </div>
@@ -122,13 +122,13 @@
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.search_label') }}</span>
                 <input id="subjects-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="{{ __('opes.subjects_screen.search_placeholder') }}"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <label for="subjects-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.status_label') }}</span>
                 <select id="subjects-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">{{ __('opes.ui.all') }}</option>
                     <option value="active">{{ __('opes.subjects_screen.status_active') }}</option>
                     <option value="inactive">{{ __('opes.subjects_screen.status_inactive') }}</option>
@@ -188,7 +188,7 @@
                         @else
                             <div class="space-y-2">
                                 @foreach ($expandedAllocations as $allocation)
-                                    <div wire:key="allocation-{{ $allocation->id }}" class="rounded border border-sand bg-white p-3">
+                                    <div wire:key="allocation-{{ $allocation->id }}" class="rounded border border-border-primary bg-white p-3">
                                         @if ($editingAllocationId === $allocation->id)
                                             <form wire:submit="saveAllocation" class="space-y-3">
                                                 <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
@@ -196,34 +196,34 @@
                                                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.coefficient_field') }}</span>
                                                         <input id="alloc-coefficient-{{ $allocation->id }}" type="number" step="0.01" min="0" max="99.99"
                                                                wire:model="allocCoefficient"
-                                                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                                         @error('allocCoefficient')
                                                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                                                         @enderror
                                                     </label>
                                                     <label for="alloc-optional-{{ $allocation->id }}" class="flex items-center gap-2 pt-5">
                                                         <input id="alloc-optional-{{ $allocation->id }}" type="checkbox" wire:model="allocIsOptional"
-                                                               class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                               class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
                                                         <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.is_optional_field') }}</span>
                                                     </label>
                                                     <label for="alloc-counts-{{ $allocation->id }}" class="flex items-center gap-2 pt-5">
                                                         <input id="alloc-counts-{{ $allocation->id }}" type="checkbox" wire:model="allocCountsTowardAverage"
-                                                               class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                               class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
                                                         <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.counts_toward_average_field') }}</span>
                                                     </label>
                                                 </div>
                                                 <label for="alloc-active-{{ $allocation->id }}" class="flex items-center gap-2">
                                                     <input id="alloc-active-{{ $allocation->id }}" type="checkbox" wire:model="allocIsActive"
-                                                           class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                           class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
                                                     <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.status_active') }}</span>
                                                 </label>
-                                                <div class="flex items-center gap-2 border-t border-sand pt-3">
+                                                <div class="flex items-center gap-2 border-t border-border-primary pt-3">
                                                     <button type="submit"
                                                             class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                                                         {{ __('opes.subjects_screen.save') }}
                                                     </button>
                                                     <button type="button" wire:click="cancelAllocationForm"
-                                                            class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                                            class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                                                         {{ __('opes.subjects_screen.cancel') }}
                                                     </button>
                                                 </div>
@@ -253,7 +253,7 @@
 
         <x-slot:cards>
             @foreach ($subjects as $subject)
-                <article wire:key="subject-card-{{ $subject->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="subject-card-{{ $subject->id }}" class="rounded border border-border-primary bg-white p-3">
                     <div class="flex items-start justify-between gap-2">
                         <div>
                             <div class="font-medium text-charcoal">{{ $subject->name }}</div>
@@ -273,7 +273,7 @@
                         </div>
                     </dl>
                     @if ($canManage)
-                        <div class="mt-2 border-t border-sand pt-2">
+                        <div class="mt-2 border-t border-border-primary pt-2">
                             <button type="button" wire:click="startEdit({{ $subject->id }})"
                                     class="text-sm font-medium text-primary hover:underline">
                                 {{ __('opes.subjects_screen.edit') }}

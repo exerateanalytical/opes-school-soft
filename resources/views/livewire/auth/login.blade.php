@@ -22,7 +22,7 @@
             <input id="email" name="email" type="email" wire:model="email"
                    autocomplete="username" required autofocus
                    @error('email') aria-invalid="true" @enderror
-                   class="mt-1 block w-full rounded border border-sand bg-white px-3 py-2 text-charcoal
+                   class="mt-1 block w-full rounded border border-border-primary bg-white px-3 py-2 text-charcoal
                           focus:border-primary focus:outline-none">
         </div>
 
@@ -32,13 +32,13 @@
             </label>
             <input id="password" name="password" type="password" wire:model="password"
                    autocomplete="current-password" required
-                   class="mt-1 block w-full rounded border border-sand bg-white px-3 py-2 text-charcoal
+                   class="mt-1 block w-full rounded border border-border-primary bg-white px-3 py-2 text-charcoal
                           focus:border-primary focus:outline-none">
         </div>
 
         <div class="flex items-center gap-2">
             <input id="remember" name="remember" type="checkbox" wire:model="remember"
-                   class="h-4 w-4 rounded border-sand text-primary">
+                   class="h-4 w-4 rounded border-border-primary text-primary">
             <label for="remember" class="text-sm text-charcoal">
                 {{ __('opes.auth.remember') }}
             </label>
@@ -84,7 +84,7 @@
 
     {{-- 00-core 9.3: no SMTP in most schools, so no self-service reset link.
          Say so plainly rather than offering a link that would never arrive. --}}
-    <div class="mt-6 border-t border-sand pt-4">
+    <div class="mt-6 border-t border-border-primary pt-4">
         <p class="text-sm font-medium text-charcoal">{{ __('opes.auth.forgot') }}</p>
         <p class="mt-1 text-sm text-charcoal/70">{{ __('opes.auth.forgot_help') }}</p>
     </div>

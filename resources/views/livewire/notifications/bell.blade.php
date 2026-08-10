@@ -19,8 +19,8 @@
     <div x-show="open"
          x-on:click.outside="open = false"
          x-cloak
-         class="absolute right-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border border-sand bg-white shadow-lg">
-        <div class="flex items-center justify-between border-b border-sand px-3 py-2">
+         class="absolute right-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border border-border-primary bg-white shadow-lg">
+        <div class="flex items-center justify-between border-b border-border-primary px-3 py-2">
             <span class="text-sm font-semibold text-charcoal">{{ __('opes.notifications.title') }}</span>
             @if ($unreadCount > 0)
                 <button type="button" wire:click="markAllRead" class="text-xs font-medium text-primary hover:underline">
@@ -29,7 +29,7 @@
             @endif
         </div>
 
-        <ul class="max-h-96 divide-y divide-sand overflow-y-auto">
+        <ul class="max-h-96 divide-y divide-border-primary overflow-y-auto">
             @forelse ($notifications as $notification)
                 <li class="{{ $notification->read_at === null ? 'bg-primary/5' : '' }}">
                     <button type="button" wire:click="markRead({{ $notification->id }})"

@@ -132,7 +132,7 @@
     {{-- ── Filter bar. ALWAYS ends with Filter | Reset (09-ui 4). ───────── --}}
     @isset($filters)
         <section aria-label="{{ __('opes.ui.filters') }}"
-                 class="rounded border border-sand bg-white p-3">
+                 class="rounded border border-border-primary bg-white p-3">
             <div class="flex flex-wrap items-end gap-3">
                 {{ $filters }}
 
@@ -147,12 +147,12 @@
                          blank screen the operator reads as "no data". --}}
                     @if (is_string($resetUrl) && $resetUrl !== '')
                         <a href="{{ $resetUrl }}"
-                           class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                           class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ __('opes.ui.reset') }}
                         </a>
                     @else
                         <button type="button" wire:click="{{ $resetAction }}"
-                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ __('opes.ui.reset') }}
                         </button>
                     @endif
@@ -163,7 +163,7 @@
 
     {{-- ── Status tabs ──────────────────────────────────────────────────── --}}
     @isset($tabs)
-        <div class="-mx-4 overflow-x-auto border-b border-sand px-4 sm:mx-0 sm:px-0">
+        <div class="-mx-4 overflow-x-auto border-b border-border-primary px-4 sm:mx-0 sm:px-0">
             <div class="flex min-w-max items-center gap-1">
                 {{ $tabs }}
             </div>
@@ -192,14 +192,14 @@
 
                 {{-- Rule 4: the wide thing scrolls inside ITSELF. The page body
                      never scrolls horizontally (09-ui 10). --}}
-                <div class="{{ isset($cards) ? 'hidden md:block ' : '' }}min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="{{ isset($cards) ? 'hidden md:block ' : '' }}min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[40rem] border-collapse text-sm">
                         @isset($head)
-                            <thead class="border-b border-sand bg-sand/40 text-left">
+                            <thead class="border-b border-border-primary bg-sand/40 text-left">
                                 {{ $head }}
                             </thead>
                         @endisset
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             {{ $slot }}
                         </tbody>
                     </table>
@@ -239,7 +239,7 @@
                 <label for="list-screen-per-page" class="flex items-center gap-2">
                     <span class="whitespace-nowrap">{{ __('opes.ui.per_page') }}</span>
                     <select id="list-screen-per-page" wire:model.live="{{ $perPageProperty }}"
-                            class="rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal">
                         @foreach ($perPageOptions as $option)
                             <option value="{{ $option }}"
                                     @if ((int) $option === $paginator->perPage()) selected @endif>

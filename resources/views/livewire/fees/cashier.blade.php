@@ -26,7 +26,7 @@
     <div class="flex flex-wrap items-start justify-between gap-3">
         <h1 class="min-w-0 text-xl font-semibold text-charcoal">{{ __('opes.fees_screen.cashier_title') }}</h1>
         <a href="{{ route('fees.invoices.index') }}"
-           class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+           class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ __('opes.fees_screen.invoices_title') }}
         </a>
     </div>
@@ -72,7 +72,7 @@
          they declared, what this shift has collected, and what should
          therefore be there right now. Cash collection is refused until this
          panel says a session is open. --}}
-    <section class="rounded border border-sand bg-white p-4" aria-labelledby="cash-desk-heading">
+    <section class="rounded border border-border-primary bg-white p-4" aria-labelledby="cash-desk-heading">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
                 <h2 id="cash-desk-heading" class="text-sm font-semibold text-primary">Cash desk</h2>
@@ -102,7 +102,7 @@
                              is not rendered rather than fataling the screen. --}}
                         @if (Route::has('fees.cashdesk.show'))
                             <a href="{{ route('fees.cashdesk.show', ['session' => $session['id']]) }}"
-                               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                                 Close-out sheet
                             </a>
                         @endif
@@ -125,19 +125,19 @@
 
         @if ($session !== null)
             <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div class="rounded border border-sand p-3">
+                <div class="rounded border border-border-primary p-3">
                     <dt class="text-xs uppercase tracking-wide text-charcoal/60">Opening float</dt>
                     <dd class="mt-1 font-mono text-sm font-semibold text-charcoal">{{ Money::of($session['opening_float'])->format(false) }}</dd>
                 </div>
-                <div class="rounded border border-sand p-3">
+                <div class="rounded border border-border-primary p-3">
                     <dt class="text-xs uppercase tracking-wide text-charcoal/60">Collections</dt>
                     <dd class="mt-1 font-mono text-sm font-semibold text-charcoal">{{ $session['collections'] }}</dd>
                 </div>
-                <div class="rounded border border-sand p-3">
+                <div class="rounded border border-border-primary p-3">
                     <dt class="text-xs uppercase tracking-wide text-charcoal/60">Collected</dt>
                     <dd class="mt-1 font-mono text-sm font-semibold text-charcoal">{{ Money::of($session['collected'])->format(false) }}</dd>
                 </div>
-                <div class="rounded border border-sand p-3">
+                <div class="rounded border border-border-primary p-3">
                     <dt class="text-xs uppercase tracking-wide text-charcoal/60">Expected in till</dt>
                     <dd class="mt-1 font-mono text-sm font-bold text-primary">{{ Money::of($session['expected'])->format(false) }}</dd>
                 </div>
@@ -146,12 +146,12 @@
 
         {{-- Open --}}
         @if ($canCollect && $session === null && $showOpenSessionForm)
-            <form wire:submit="openSessionAction" class="mt-4 border-t border-sand pt-4">
+            <form wire:submit="openSessionAction" class="mt-4 border-t border-border-primary pt-4">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <label for="cashdesk-box" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Cash box</span>
                         <select id="cashdesk-box" wire:model="sessionTreasuryAccountId"
-                                class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">{{ __('opes.ui.select_placeholder') }}</option>
                             @foreach ($cashBoxOptions as $boxOption)
                                 <option value="{{ $boxOption['id'] }}">{{ $boxOption['label'] }}</option>
@@ -163,7 +163,7 @@
                     <label for="cashdesk-float" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Opening float (FCFA)</span>
                         <input id="cashdesk-float" type="number" min="0" step="1" wire:model="openingFloat"
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
                         @error('openingFloat')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
                 </div>
@@ -178,19 +178,19 @@
              from this session's own collections; the cashier declares only
              what they counted. That asymmetry is the control. --}}
         @if ($canCollect && $session !== null && $showCloseSessionForm)
-            <form wire:submit="closeSessionAction" class="mt-4 border-t border-sand pt-4">
+            <form wire:submit="closeSessionAction" class="mt-4 border-t border-border-primary pt-4">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <label for="cashdesk-counted" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Counted cash (FCFA)</span>
                         <input id="cashdesk-counted" type="number" min="0" step="1" wire:model="countedCash"
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
                         @error('countedCash')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
 
                     <label for="cashdesk-reason" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Variance reason (required if it does not balance)</span>
                         <input id="cashdesk-reason" type="text" maxlength="400" wire:model="varianceReason"
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                         @error('varianceReason')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
                 </div>
@@ -210,19 +210,19 @@
     <div class="flex min-w-0 flex-col gap-4 lg:flex-row">
         {{-- ── Left: student search, card, breakdown ───────────────────── --}}
         <div class="min-w-0 flex-1 space-y-4">
-            <section class="rounded border border-sand bg-white p-4">
+            <section class="rounded border border-border-primary bg-white p-4">
                 <label for="cashier-search" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.select_student') }}</span>
                     <input id="cashier-search" type="search" wire:model.live.debounce.400ms="search"
                            placeholder="{{ __('opes.fees_screen.search_placeholder') }}"
-                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                           class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                 </label>
 
                 @if ($search !== '' && $selected === null)
                     @if ($results === [])
                         <p class="mt-2 text-sm text-charcoal/60">{{ __('opes.fees_screen.search_no_results') }}</p>
                     @else
-                        <ul class="mt-2 divide-y divide-sand rounded border border-sand">
+                        <ul class="mt-2 divide-y divide-border-primary rounded border border-border-primary">
                             @foreach ($results as $result)
                                 <li wire:key="cashier-result-{{ $result['id'] }}">
                                     <button type="button" wire:click="selectStudent({{ $result['id'] }})"
@@ -244,7 +244,7 @@
                      private-disk path with no serving controller yet, same
                      reasoning as the students list), matricule | class,
                      balance due in red. --}}
-                <section class="rounded border border-sand bg-white p-4">
+                <section class="rounded border border-border-primary bg-white p-4">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-chrome-light text-sm font-semibold uppercase text-white">
@@ -275,8 +275,8 @@
 
                 {{-- Fee Breakdown: one row per open invoice line, exactly what
                      the payment will be allocated against. --}}
-                <section class="rounded border border-sand bg-white">
-                    <h2 class="border-b border-sand px-4 py-2.5 text-sm font-semibold text-primary">
+                <section class="rounded border border-border-primary bg-white">
+                    <h2 class="border-b border-border-primary px-4 py-2.5 text-sm font-semibold text-primary">
                         {{ __('opes.fees_screen.fee_breakdown') }}
                     </h2>
                     @if ($breakdown === [])
@@ -284,7 +284,7 @@
                     @else
                         <div class="overflow-x-auto">
                             <table class="w-full min-w-[28rem] border-collapse text-sm">
-                                <thead class="border-b border-sand bg-sand/40 text-left">
+                                <thead class="border-b border-border-primary bg-sand/40 text-left">
                                     <tr>
                                         <th scope="col" class="px-4 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_invoice') }}</th>
                                         <th scope="col" class="px-4 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_description') }}</th>
@@ -292,7 +292,7 @@
                                         <th scope="col" class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_outstanding') }}</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-sand">
+                                <tbody class="divide-y divide-border-primary">
                                     @foreach ($breakdown as $line)
                                         <tr wire:key="cashier-line-{{ $loop->index }}">
                                             <td class="px-4 py-2 font-mono text-xs text-charcoal/70">{{ $line['invoice_no'] }}</td>
@@ -302,7 +302,7 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
-                                <tfoot class="border-t border-sand bg-sand/30">
+                                <tfoot class="border-t border-border-primary bg-sand/30">
                                     <tr>
                                         <th scope="row" colspan="2" class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.breakdown_total') }}</th>
                                         <td class="px-4 py-2 text-right font-mono font-semibold text-charcoal">{{ Money::of($totals['invoiced'])->format(false) }}</td>
@@ -318,7 +318,7 @@
 
         {{-- ── Right rail: payment details + collection form ────────────── --}}
         <aside class="w-full shrink-0 space-y-4 lg:w-80">
-            <section class="rounded border border-sand bg-white p-4">
+            <section class="rounded border border-border-primary bg-white p-4">
                 <h2 class="text-sm font-semibold text-primary">{{ __('opes.fees_screen.payment_details') }}</h2>
                 <dl class="mt-3 space-y-2 text-sm">
                     <div class="flex justify-between gap-2">
@@ -329,20 +329,20 @@
                         <dt class="text-charcoal/60">{{ __('opes.fees_screen.total_paid') }}</dt>
                         <dd class="font-mono text-charcoal">{{ $selected === null ? '—' : Money::of($totals['paid'])->format() }}</dd>
                     </div>
-                    <div class="flex justify-between gap-2 border-t border-sand pt-2">
+                    <div class="flex justify-between gap-2 border-t border-border-primary pt-2">
                         <dt class="font-medium text-charcoal">{{ __('opes.fees_screen.balance_due') }}</dt>
                         <dd class="font-mono font-bold text-heritage-red">{{ $selected === null ? '—' : Money::of($totals['balance'])->format() }}</dd>
                     </div>
                 </dl>
             </section>
 
-            <form wire:submit="collect" class="rounded border border-sand bg-white p-4">
+            <form wire:submit="collect" class="rounded border border-border-primary bg-white p-4">
                 <div class="space-y-3">
                     <label for="cashier-amount" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.payment_amount') }}</span>
                         <input id="cashier-amount" type="number" min="1" step="1" wire:model="amount"
                                @disabled($selected === null)
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal disabled:bg-sand/40"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal disabled:bg-sand/40"/>
                         @error('amount')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
 
@@ -353,7 +353,7 @@
                              would resolve the default only at submit and
                              silently overwrite an explicit override. --}}
                         <select id="cashier-method" wire:model.live="method" @disabled($selected === null)
-                                class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
                             @foreach ($methodOptions as $option)
                                 <option value="{{ $option }}">{{ __('opes.fees_screen.method_'.$option) }}</option>
                             @endforeach
@@ -370,7 +370,7 @@
                     <label for="cashier-treasury" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.treasury_account') }}</span>
                         <select id="cashier-treasury" wire:model="treasuryAccountId" @disabled($selected === null)
-                                class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
                             <option value="">{{ __('opes.ui.select_placeholder') }}</option>
                             @foreach ($treasuryOptions as $treasuryOption)
                                 <option value="{{ $treasuryOption['id'] }}">{{ $treasuryOption['label'] }}</option>
@@ -384,7 +384,7 @@
                         <input id="cashier-reference" type="text" wire:model="reference"
                                placeholder="{{ __('opes.fees_screen.reference_placeholder') }}"
                                @disabled($selected === null)
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
                         @error('reference')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
 
@@ -401,7 +401,7 @@
                         @if ($selected !== null)
                             <a href="{{ route('fees.students.statement.print', ['student' => $selected['id']]) }}" target="_blank" rel="noopener"
                                title="{{ __('opes.fees_screen.view_statement') }}"
-                               class="rounded border border-sand p-2 text-charcoal/60 hover:border-primary/50 hover:text-primary">
+                               class="rounded border border-border-primary p-2 text-charcoal/60 hover:border-primary/50 hover:text-primary">
                                 <span class="sr-only">{{ __('opes.fees_screen.view_statement') }}</span>
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6v-7z"/></svg>
                             </a>
@@ -415,7 +415,7 @@
                  standalone lookup-by-receipt toggle form, gated fee.void and
                  requiring a reason - never a silent correction. --}}
             @if ($canVoid)
-                <section class="rounded border border-sand bg-white p-4">
+                <section class="rounded border border-border-primary bg-white p-4">
                     <button type="button" wire:click="toggleVoidForm"
                             class="flex w-full items-center justify-between text-left text-sm font-semibold text-heritage-red">
                         <span>{{ __('opes.fees_screen.void_payment') }}</span>
@@ -431,14 +431,14 @@
                             <label for="cashier-void-receipt" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.receipt_no') }}</span>
                                 <input id="cashier-void-receipt" type="text" wire:model="voidReceiptNo"
-                                       class="rounded border border-sand bg-white px-2 py-1.5 font-mono text-sm text-charcoal"/>
+                                       class="rounded border border-border-primary bg-white px-2 py-1.5 font-mono text-sm text-charcoal"/>
                                 @error('voidReceiptNo')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                             </label>
 
                             <label for="cashier-void-reason" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.void_reason') }}</span>
                                 <select id="cashier-void-reason" wire:model="voidReasonType"
-                                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                     <option value="">{{ __('opes.ui.select_placeholder') }}</option>
                                     @foreach ($voidReasonOptions as $option)
                                         <option value="{{ $option }}">{{ __('opes.fees_screen.void_reason_'.$option) }}</option>
@@ -450,7 +450,7 @@
                             <label for="cashier-void-note" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.void_reason_note') }}</span>
                                 <textarea id="cashier-void-note" wire:model="voidReasonNote" rows="3"
-                                          class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
+                                          class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
                                 @error('voidReasonNote')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                             </label>
 

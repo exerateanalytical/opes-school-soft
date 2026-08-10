@@ -43,9 +43,9 @@
     }
 
     $link = 'inline-flex min-w-9 items-center justify-center rounded border px-2.5 py-1.5 text-sm';
-    $idle = $link.' border-sand bg-white text-charcoal hover:border-primary/50 hover:text-primary';
+    $idle = $link.' border-border-primary bg-white text-charcoal hover:border-primary/50 hover:text-primary';
     $active = $link.' border-primary bg-primary text-white font-semibold';
-    $disabled = $link.' border-sand bg-sand/40 text-charcoal/40 cursor-not-allowed';
+    $disabled = $link.' border-border-primary bg-sand/40 text-charcoal/40 cursor-not-allowed';
 @endphp
 
 <nav role="navigation" aria-label="{{ __('opes.ui.pagination') }}"

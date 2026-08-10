@@ -34,7 +34,7 @@
                 </a>
             @endcan
             <a href="{{ url('/attendance/coverage') }}"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ __('attendance.coverage_title') }}
             </a>
         </div>
@@ -60,8 +60,8 @@
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
             {{-- ── Today's registers ──────────────────────────────────── --}}
             <div class="min-w-0 xl:col-span-2">
-                <div class="rounded border border-sand bg-white">
-                    <div class="border-b border-sand px-4 py-3">
+                <div class="rounded border border-border-primary bg-white">
+                    <div class="border-b border-border-primary px-4 py-3">
                         <h2 class="text-sm font-semibold text-charcoal">
                             {{ __('attendance.todays_registers') }} — {{ $today->toDateString() }}
                         </h2>
@@ -73,7 +73,7 @@
                         </div>
                     @else
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-sand text-sm">
+                            <table class="min-w-full divide-y divide-border-primary text-sm">
                                 <thead class="bg-cream text-left text-xs uppercase tracking-wide text-charcoal/60">
                                     <tr>
                                         <th scope="col" class="px-4 py-2">{{ __('attendance.col_class') }}</th>
@@ -86,7 +86,7 @@
                                         <th scope="col" class="px-4 py-2">{{ __('attendance.col_status') }}</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-sand bg-white">
+                                <tbody class="divide-y divide-border-primary bg-white">
                                     @foreach ($registerRows as $row)
                                         <tr wire:key="register-{{ $row->id }}">
                                             <td class="px-4 py-2 font-medium text-charcoal">{{ $row->class_group_name }}</td>
@@ -111,7 +111,7 @@
 
             {{-- ── Right rail: overview donut + class calendar ────────── --}}
             <div class="min-w-0 space-y-4">
-                <div class="rounded border border-sand bg-white p-4">
+                <div class="rounded border border-border-primary bg-white p-4">
                     <h2 class="text-sm font-semibold text-charcoal">{{ __('attendance.overview_title') }}</h2>
 
                     @if ($donutRate === null)
@@ -141,7 +141,7 @@
                     @endif
                 </div>
 
-                <div class="rounded border border-sand bg-white p-4">
+                <div class="rounded border border-border-primary bg-white p-4">
                     <h2 class="text-sm font-semibold text-charcoal">
                         {{ __('attendance.calendar_title') }} — {{ $today->isoFormat('MMMM YYYY') }}
                     </h2>

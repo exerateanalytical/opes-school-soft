@@ -8,15 +8,15 @@
         <p class="lg:col-span-3 rounded border border-heritage-red/40 bg-heritage-red/10 p-3 text-sm text-heritage-red" role="alert">{{ $error }}</p>
     @endif
 
-    <aside class="rounded-lg border border-sand bg-white shadow-sm">
-        <div class="border-b border-sand p-3">
+    <aside class="rounded-lg border border-border-primary bg-white shadow-sm">
+        <div class="border-b border-border-primary p-3">
             <button type="button" wire:click="$set('showCompose', true)"
                     class="w-full rounded bg-primary px-3 py-2 text-sm font-semibold text-white">
                 {{ __('opes.messages_screen.new_conversation') }}
             </button>
         </div>
 
-        <ul class="max-h-[28rem] overflow-y-auto divide-y divide-sand">
+        <ul class="max-h-[28rem] overflow-y-auto divide-y divide-border-primary">
             @forelse ($threads as $thread)
                 <li>
                     <button type="button" wire:click="selectThread({{ $thread['id'] }})"
@@ -38,13 +38,13 @@
         </ul>
     </aside>
 
-    <section class="lg:col-span-2 flex flex-col rounded-lg border border-sand bg-white shadow-sm">
+    <section class="lg:col-span-2 flex flex-col rounded-lg border border-border-primary bg-white shadow-sm">
         @if ($activeThread === null)
             <div class="flex flex-1 items-center justify-center p-8 text-sm text-slate-500">
                 {{ __('opes.messages_screen.select_a_conversation') }}
             </div>
         @else
-            <div class="border-b border-sand p-3">
+            <div class="border-b border-border-primary p-3">
                 <h2 class="text-sm font-semibold text-charcoal">{{ $activeThread->title }}</h2>
             </div>
 
@@ -58,9 +58,9 @@
                 @endforeach
             </div>
 
-            <form wire:submit.prevent="send" class="flex gap-2 border-t border-sand p-3">
+            <form wire:submit.prevent="send" class="flex gap-2 border-t border-border-primary p-3">
                 <input type="text" wire:model="reply" placeholder="{{ __('opes.messages_screen.write_a_reply') }}"
-                       class="flex-1 rounded border border-sand p-2 text-sm">
+                       class="flex-1 rounded border border-border-primary p-2 text-sm">
                 <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
                     {{ __('opes.messages_screen.send') }}
                 </button>
@@ -75,24 +75,24 @@
             <div class="mt-2 grid gap-2 sm:grid-cols-2">
                 <label class="text-sm">
                     <span class="block text-slate-600">{{ __('opes.messages_screen.title_label') }}</span>
-                    <input type="text" wire:model="newTitle" class="mt-1 w-full rounded border border-sand p-2">
+                    <input type="text" wire:model="newTitle" class="mt-1 w-full rounded border border-border-primary p-2">
                 </label>
                 <label class="text-sm">
                     <span class="block text-slate-600">{{ __('opes.messages_screen.recipient_email') }}</span>
-                    <input type="text" wire:model="newRecipient" class="mt-1 w-full rounded border border-sand p-2">
+                    <input type="text" wire:model="newRecipient" class="mt-1 w-full rounded border border-border-primary p-2">
                 </label>
             </div>
 
             <label class="mt-2 block text-sm">
                 <span class="block text-slate-600">{{ __('opes.messages_screen.message') }}</span>
-                <textarea wire:model="newBody" rows="3" class="mt-1 w-full rounded border border-sand p-2"></textarea>
+                <textarea wire:model="newBody" rows="3" class="mt-1 w-full rounded border border-border-primary p-2"></textarea>
             </label>
 
             <div class="mt-2 flex gap-2">
                 <button type="button" wire:click="startThread" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
                     {{ __('opes.messages_screen.send') }}
                 </button>
-                <button type="button" wire:click="$set('showCompose', false)" class="rounded border border-sand px-4 py-2 text-sm">
+                <button type="button" wire:click="$set('showCompose', false)" class="rounded border border-border-primary px-4 py-2 text-sm">
                     {{ __('opes.messages_screen.cancel') }}
                 </button>
             </div>

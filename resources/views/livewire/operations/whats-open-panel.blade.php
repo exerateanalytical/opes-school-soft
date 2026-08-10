@@ -5,13 +5,13 @@
      and this panel is simply not their business. --}}
 <div>
     @if ($data !== null)
-        <section aria-labelledby="opes-whats-open" class="rounded border border-sand bg-white px-4 py-3">
+        <section aria-labelledby="opes-whats-open" class="rounded border border-border-primary bg-white px-4 py-3">
             <h2 id="opes-whats-open" class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                 {{ __('opes.whats_open.title') }}
             </h2>
 
             <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.academic_year') }}</dt>
                     <dd class="mt-0.5 text-sm font-semibold text-charcoal">
                         @if ($data['year'] !== null)
@@ -25,7 +25,7 @@
                     </dd>
                 </div>
 
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.exercice') }}</dt>
                     <dd class="mt-0.5 text-sm font-semibold text-charcoal">
                         @if ($data['exercice'] !== null)
@@ -39,7 +39,7 @@
                     </dd>
                 </div>
 
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.current_period') }}</dt>
                     <dd class="mt-0.5 text-sm font-semibold text-charcoal">
                         @if ($data['period'] !== null)
@@ -54,7 +54,7 @@
                     </dd>
                 </div>
 
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.locked_months') }}</dt>
                     <dd class="mt-0.5 text-sm text-charcoal">
                         @if ($data['locked'] === [])
@@ -74,14 +74,14 @@
                     </dd>
                 </div>
 
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.next_quarter_closure') }}</dt>
                     <dd class="mt-0.5 text-sm font-semibold text-charcoal">
                         {{ $data['nextClosure'] ?? __('opes.whats_open.no_quarter_closure') }}
                     </dd>
                 </div>
 
-                <div class="rounded border border-sand bg-sand/20 p-3">
+                <div class="rounded border border-border-primary bg-sand/20 p-3">
                     <dt class="text-xs text-charcoal/60">{{ __('opes.whats_open.marks_entry') }}</dt>
                     <dd class="mt-0.5 text-sm font-semibold text-charcoal">
                         @if ($data['marksOpen'] > 0)

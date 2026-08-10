@@ -17,7 +17,7 @@
 
     <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ $childName }}</h1>
 
-    <nav aria-label="{{ __('opes.guardian_portal.tab_nav_label') }}" class="mt-3 flex flex-wrap gap-1 border-b border-sand">
+    <nav aria-label="{{ __('opes.guardian_portal.tab_nav_label') }}" class="mt-3 flex flex-wrap gap-1 border-b border-border-primary">
         @foreach ([
             'profile' => ['portal.children.profile', __('opes.guardian_portal.tab_profile')],
             'results' => ['portal.children.results', __('opes.guardian_portal.tab_results')],

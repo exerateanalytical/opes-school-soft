@@ -43,7 +43,7 @@
 
         <div class="statement-screen-only flex flex-wrap items-center gap-2">
             <a href="{{ route('fees.cashier') }}"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ __('opes.fees_screen.back_to_cashier') }}
             </a>
             <button type="button" onclick="window.print()"
@@ -54,7 +54,7 @@
                  statement PDF - distinct from the browser print-to-PDF
                  above, which just prints this on-screen table. --}}
             <a href="{{ route('fees.students.statement.print', ['student' => $studentId]) }}" target="_blank" rel="noopener"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ __('opes.fees_screen.download_pdf') }}
             </a>
         </div>
@@ -63,9 +63,9 @@
     @if ($lines === [])
         <x-empty-state :message="__('opes.fees_screen.statement_empty')"/>
     @else
-        <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white print:overflow-visible print:rounded-none print:border-0">
+        <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white print:overflow-visible print:rounded-none print:border-0">
             <table class="w-full min-w-[36rem] border-collapse text-sm">
-                <thead class="border-b border-sand bg-sand/40 text-left">
+                <thead class="border-b border-border-primary bg-sand/40 text-left">
                     <tr>
                         <th scope="col" class="px-4 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_date') }}</th>
                         <th scope="col" class="px-4 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_description') }}</th>
@@ -75,7 +75,7 @@
                         <th scope="col" class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_running_balance') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @foreach ($lines as $line)
                         <tr wire:key="statement-line-{{ $loop->index }}">
                             <td class="whitespace-nowrap px-4 py-2 text-charcoal/70">{{ $line['date'] }}</td>
@@ -87,7 +87,7 @@
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot class="border-t border-sand bg-sand/30">
+                <tfoot class="border-t border-border-primary bg-sand/30">
                     <tr>
                         <th scope="row" colspan="5" class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.closing_balance') }}</th>
                         <td class="px-4 py-2 text-right font-mono font-bold {{ $closingBalance > 0 ? 'text-heritage-red' : 'text-charcoal' }}">{{ Money::of($closingBalance)->format() }}</td>

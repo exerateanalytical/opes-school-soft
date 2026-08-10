@@ -36,7 +36,7 @@
              happens on the list screen itself). --}}
         @if ($showForm && $canManage)
             <section aria-label="{{ $editingGroupId === null ? __('opes.classes_screen.form_title') : __('opes.classes_screen.form_edit_title') }}"
-                     class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+                     class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
                 <h2 class="text-base font-semibold text-charcoal">
                     {{ $editingGroupId === null ? __('opes.classes_screen.form_title') : __('opes.classes_screen.form_edit_title') }}
                 </h2>
@@ -47,7 +47,7 @@
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.name_field') }}</span>
                             <input id="class-name" type="text" wire:model="className"
                                    placeholder="{{ __('opes.classes_screen.name_placeholder') }}"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('className')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -61,7 +61,7 @@
                         <label for="class-level" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_field') }}</span>
                             <select id="class-level" wire:model="classLevelId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">{{ __('opes.classes_screen.level_placeholder') }}</option>
                                 @foreach ($levelOptions as $level)
                                     <option value="{{ $level->id }}">{{ app()->getLocale() === 'fr' ? $level->name_fr : $level->name }}</option>
@@ -75,7 +75,7 @@
                         <label for="class-stream" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.stream_field') }}</span>
                             <select id="class-stream" wire:model="streamId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">{{ __('opes.classes_screen.stream_placeholder') }}</option>
                                 @foreach ($streamOptions as $stream)
                                     <option value="{{ $stream->id }}">{{ app()->getLocale() === 'fr' ? $stream->name_fr : $stream->name }}</option>
@@ -89,7 +89,7 @@
                         <label for="class-capacity" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.capacity_field') }}</span>
                             <input id="class-capacity" type="number" min="1" max="500" wire:model="capacity"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('capacity')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -99,7 +99,7 @@
                             <label for="class-status" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.column_status') }}</span>
                                 <select id="class-status" wire:model="groupStatus"
-                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                     <option value="active">{{ __('opes.classes_screen.status_active') }}</option>
                                     <option value="inactive">{{ __('opes.classes_screen.status_inactive') }}</option>
                                 </select>
@@ -110,13 +110,13 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center gap-2 border-t border-sand pt-4">
+                    <div class="flex items-center gap-2 border-t border-border-primary pt-4">
                         <button type="submit"
                                 class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                             {{ __('opes.classes_screen.save') }}
                         </button>
                         <button type="button" wire:click="cancelForm"
-                                class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ __('opes.classes_screen.cancel') }}
                         </button>
                     </div>
@@ -162,7 +162,7 @@
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.search_label') }}</span>
                     <input id="classes-filter-search" type="search" wire:model.live.debounce.400ms="search"
                            placeholder="{{ __('opes.classes_screen.search_placeholder') }}"
-                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                           class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                 </label>
             </x-slot:filters>
 
@@ -212,7 +212,7 @@
 
             <x-slot:cards>
                 @foreach ($classGroups as $classGroup)
-                    <article wire:key="class-group-card-{{ $classGroup->id }}" class="rounded border border-sand bg-white p-3">
+                    <article wire:key="class-group-card-{{ $classGroup->id }}" class="rounded border border-border-primary bg-white p-3">
                         <div class="flex items-start justify-between gap-2">
                             <div class="font-medium text-charcoal">{{ $classGroup->name }}</div>
                             <x-status-pill :status="$classGroup->status === 'active' ? 'ok' : 'red'"
@@ -233,7 +233,7 @@
                             </div>
                         </dl>
                         @if ($canManage)
-                            <div class="mt-2 border-t border-sand pt-2">
+                            <div class="mt-2 border-t border-border-primary pt-2">
                                 <button type="button" wire:click="startEditGroup({{ $classGroup->id }})"
                                         class="text-sm font-medium text-primary hover:underline">
                                     {{ __('opes.subjects_screen.edit') }}

@@ -45,7 +45,7 @@
     @endif
 
     {{-- ── Header summary ─────────────────────────────────────────────── --}}
-    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-xl font-semibold text-charcoal">{{ $item->name }}</h1>
@@ -75,26 +75,26 @@
 
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('inventory.index') }}"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Back to list
             </a>
         </div>
     </div>
 
     {{-- ── Stock balance per location ─────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Stock balance by location</h2>
 
-        <div class="mt-3 min-w-0 overflow-x-auto rounded border border-sand">
+        <div class="mt-3 min-w-0 overflow-x-auto rounded border border-border-primary">
             <table class="w-full min-w-[36rem] border-collapse text-sm">
-                <thead class="border-b border-sand text-left">
+                <thead class="border-b border-border-primary text-left">
                     <tr class="bg-chrome text-white">
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Location</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Quantity on hand</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Value on hand</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @forelse ($balances as $balance)
                         <tr wire:key="item-balance-{{ $balance['location_id'] }}">
                             <td class="px-4 py-2.5">
@@ -113,12 +113,12 @@
     </section>
 
     {{-- ── Stock movement history ─────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Stock movement history</h2>
 
-        <div class="mt-3 min-w-0 overflow-x-auto rounded border border-sand">
+        <div class="mt-3 min-w-0 overflow-x-auto rounded border border-border-primary">
             <table class="w-full min-w-[48rem] border-collapse text-sm">
-                <thead class="border-b border-sand text-left">
+                <thead class="border-b border-border-primary text-left">
                     <tr class="bg-chrome text-white">
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Date</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Location</th>
@@ -127,7 +127,7 @@
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Reference</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @forelse ($movements as $movement)
                         <tr wire:key="item-movement-{{ $movement->id }}">
                             <td class="px-4 py-2.5 text-charcoal/70">{{ \Illuminate\Support\Carbon::parse($movement->moved_on)->translatedFormat('d M Y') }}</td>
@@ -149,12 +149,12 @@
     </section>
 
     {{-- ── Print Item Card ────────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="item-card-section">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="item-card-section">
         <div class="flex items-center justify-between gap-3 print:hidden">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Print item card</h2>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="window.print()"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Print
                 </button>
                 <button type="button" wire:click="exportItemCardPdf"

@@ -18,7 +18,7 @@
         @enderror
     @endforeach
 
-    <section aria-label="Treasury float and period" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Treasury float and period" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h1 class="text-base font-semibold text-charcoal">{{ __('opes.reconciliation_screen.title') }}</h1>
         <p class="mt-1 text-xs text-charcoal/60">
             Every postable class-5 account flagged reconcilable gets its own reconciliation - the bank account,
@@ -29,7 +29,7 @@
         <div class="mt-4 flex flex-wrap gap-2">
             @foreach ($accounts as $option)
                 <button type="button" wire:click="selectAccount({{ $option->id }})"
-                        class="rounded border px-3 py-1.5 text-sm {{ $accountId === $option->id ? 'border-primary bg-primary/10 font-semibold text-primary' : 'border-sand text-charcoal' }}">
+                        class="rounded border px-3 py-1.5 text-sm {{ $accountId === $option->id ? 'border-primary bg-primary/10 font-semibold text-primary' : 'border-border-primary text-charcoal' }}">
                     {{ $option->code }} — {{ $option->display_alias ?? $option->name }}
                 </button>
             @endforeach
@@ -38,7 +38,7 @@
         <label for="recon-period" class="mt-4 flex max-w-xs flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.accounting_period') }}</span>
             <select id="recon-period" wire:model.live="periodId"
-                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                 @foreach ($periodOptions as $option)
                     <option value="{{ $option->id }}">
                         {{ $option->starts_on->format('M Y') }} ({{ $option->status->value }})
@@ -54,7 +54,7 @@
                     Open reconciliation
                 </button>
             @else
-                <span class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal">
+                <span class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
                     {{ $session->session_no }} — {{ $session->status->label() }}
                 </span>
 
@@ -70,20 +70,20 @@
                 @endif
 
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
                     Print état de rapprochement (PDF)
                 </button>
             @endif
 
             <button type="button" wire:click="toggleImportForm" @disabled(! $canPost)
-                    class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal disabled:opacity-50">
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal disabled:opacity-50">
                 {{ $showImportForm ? __('opes.reconciliation_screen.cancel_import') : __('opes.reconciliation_screen.import_statement') }}
             </button>
         </div>
     </section>
 
     @if ($showImportForm)
-        <section aria-label="{{ __('opes.reconciliation_screen.import_statement') }}" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="{{ __('opes.reconciliation_screen.import_statement') }}" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">{{ __('opes.reconciliation_screen.import_statement') }}</h2>
             <p class="mt-1 text-xs text-charcoal/60">
                 CSV columns, in this order and with this header row:
@@ -97,34 +97,34 @@
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.statement_reference') }}</span>
                         <input type="text" wire:model="importReference"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal"/>
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.period_start') }}</span>
                         <input type="date" wire:model="importPeriodStart"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal"/>
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.period_end') }}</span>
                         <input type="date" wire:model="importPeriodEnd"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal"/>
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.opening_balance') }}</span>
                         <input type="number" wire:model="importOpeningBalance"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal"/>
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.reconciliation_screen.closing_balance') }}</span>
                         <input type="number" wire:model="importClosingBalance"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal"/>
                     </label>
                 </div>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">CSV</span>
                     <textarea wire:model="importCsv" rows="6"
-                              class="rounded border border-sand bg-white px-3 py-1.5 font-mono text-xs text-charcoal"></textarea>
+                              class="rounded border border-border-primary bg-white px-3 py-1.5 font-mono text-xs text-charcoal"></textarea>
                 </label>
 
                 <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white">
@@ -135,7 +135,7 @@
     @endif
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section aria-label="Statement lines" class="min-w-0 rounded-lg border border-sand bg-white p-4 shadow-sm">
+        <section aria-label="Statement lines" class="min-w-0 rounded-lg border border-border-primary bg-white p-4 shadow-sm">
             <h2 class="text-base font-semibold text-charcoal">
                 The relevé
                 @if ($statement)
@@ -163,7 +163,7 @@
                         </thead>
                         <tbody>
                             @foreach ($statementLines as $line)
-                                <tr class="border-t border-sand/60">
+                                <tr class="border-t border-border-primary/60">
                                     <td class="py-1 pr-2">
                                         @if ($line->isAvailable() && $session?->isDraft())
                                             <input type="checkbox" value="{{ $line->id }}"
@@ -189,7 +189,7 @@
             @endif
         </section>
 
-        <section aria-label="Unreconciled ledger lines" class="min-w-0 rounded-lg border border-sand bg-white p-4 shadow-sm">
+        <section aria-label="Unreconciled ledger lines" class="min-w-0 rounded-lg border border-border-primary bg-white p-4 shadow-sm">
             <h2 class="text-base font-semibold text-charcoal">
                 The books
                 <span class="text-xs font-normal text-charcoal/60">— unmatched movements on this float</span>
@@ -209,7 +209,7 @@
                     </thead>
                     <tbody>
                         @forelse ($ledgerLines as $line)
-                            <tr class="border-t border-sand/60">
+                            <tr class="border-t border-border-primary/60">
                                 <td class="py-1 pr-2">
                                     @if ($session?->isDraft())
                                         <input type="checkbox" value="{{ $line->id }}"
@@ -246,7 +246,7 @@
     @endif
 
     @if ($etat !== null)
-        <section aria-label="Reconciliation statement" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Reconciliation statement" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">
                 État de rapprochement
                 <span class="text-xs font-normal text-charcoal/60">
@@ -259,7 +259,7 @@
                 <div class="flex justify-between"><dt>+ Encaissements comptabilisés non encore au relevé</dt><dd>{{ number_format($etat['deposits_in_transit']) }}</dd></div>
                 <div class="flex justify-between"><dt>− Décaissements comptabilisés non encore au relevé</dt><dd>({{ number_format($etat['unpresented_payments']) }})</dd></div>
                 <div class="flex justify-between"><dt>− Opérations au relevé non encore comptabilisées</dt><dd>({{ number_format($etat['unrecorded_statement_items']) }})</dd></div>
-                <div class="flex justify-between border-t border-sand pt-1 font-semibold"><dt>= Solde comptable</dt><dd>{{ number_format($etat['book_balance']) }}</dd></div>
+                <div class="flex justify-between border-t border-border-primary pt-1 font-semibold"><dt>= Solde comptable</dt><dd>{{ number_format($etat['book_balance']) }}</dd></div>
                 <div class="flex justify-between {{ $etat['computed_difference'] === 0 ? 'text-charcoal/60' : 'font-semibold text-heritage-red' }}">
                     <dt>{{ __('opes.reconciliation_screen.difference') }}</dt><dd>{{ number_format($etat['computed_difference']) }}</dd>
                 </div>
@@ -275,7 +275,7 @@
     @endif
 
     @if ($matches->isNotEmpty())
-        <section aria-label="Matches" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Matches" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">{{ __('opes.reconciliation_screen.matches') }}</h2>
 
             <div class="mt-3 overflow-x-auto">
@@ -292,7 +292,7 @@
                     </thead>
                     <tbody>
                         @foreach ($matches as $row)
-                            <tr class="border-t border-sand/60">
+                            <tr class="border-t border-border-primary/60">
                                 <td class="py-1 pr-2 text-xs">{{ $row->match_type }}{{ $row->is_auto ? ' (auto)' : '' }}</td>
                                 <td class="py-1 pr-2 text-right">{{ number_format((int) $row->amount) }}</td>
                                 <td class="py-1 pr-2">{{ $row->statement_lines }}</td>

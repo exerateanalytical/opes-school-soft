@@ -55,7 +55,7 @@
 
     {{-- Inline issue-book panel. --}}
     @if ($showIssueForm)
-        <section aria-label="Issue book" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Issue book" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Issue Book</h2>
 
             <form wire:submit="saveIssue" class="mt-4 space-y-4">
@@ -63,7 +63,7 @@
                     <label for="issue-form-copy" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Book copy</span>
                         <select id="issue-form-copy" wire:model="issueBookCopyId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a copy...</option>
                             @foreach ($availableCopyOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -77,7 +77,7 @@
                     <label for="issue-form-member" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Member</span>
                         <select id="issue-form-member" wire:model="issueLibraryMemberId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a member...</option>
                             @foreach ($activeMemberOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -91,7 +91,7 @@
                     <label for="issue-form-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Issued on</span>
                         <input id="issue-form-date" type="date" wire:model="issuedOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('issuedOn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -104,7 +104,7 @@
                         Issue book
                     </button>
                     <button type="button" wire:click="toggleIssueForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -114,7 +114,7 @@
 
     {{-- Inline enroll-member panel. --}}
     @if ($showEnrollForm)
-        <section aria-label="Enroll library member" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Enroll library member" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Enroll Member</h2>
 
             <form wire:submit="saveEnroll" class="mt-4 space-y-4">
@@ -122,7 +122,7 @@
                     <label for="enroll-form-type" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Member type</span>
                         <select id="enroll-form-type" wire:model.live="enrollMemberType"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="student">Student</option>
                             <option value="staff">Staff</option>
                             <option value="external">External</option>
@@ -135,7 +135,7 @@
                     <label for="enroll-form-class" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Membership class</span>
                         <select id="enroll-form-class" wire:model="enrollMembershipClassId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a class...</option>
                             @foreach ($membershipClassOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -149,7 +149,7 @@
                     <label for="enroll-form-year" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Academic year</span>
                         <select id="enroll-form-year" wire:model="enrollAcademicYearId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a year...</option>
                             @foreach ($academicYearOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -165,7 +165,7 @@
                             <span class="text-xs font-medium text-charcoal/70">Enrollment ID</span>
                             <input id="enroll-form-enrollment" type="text" wire:model="enrollEnrollmentId"
                                    placeholder="e.g. 1024"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('enrollEnrollmentId')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -175,7 +175,7 @@
                             <span class="text-xs font-medium text-charcoal/70">Staff member ID</span>
                             <input id="enroll-form-staff" type="text" wire:model="enrollStaffMemberId"
                                    placeholder="e.g. 42"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('enrollStaffMemberId')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -184,7 +184,7 @@
                         <label for="enroll-form-ext-name" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">External name</span>
                             <input id="enroll-form-ext-name" type="text" wire:model="enrollExternalName"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('enrollExternalName')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -193,7 +193,7 @@
                         <label for="enroll-form-ext-contact" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">External contact</span>
                             <input id="enroll-form-ext-contact" type="text" wire:model="enrollExternalContact"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('enrollExternalContact')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -203,7 +203,7 @@
                     <label for="enroll-form-joined" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Joined on</span>
                         <input id="enroll-form-joined" type="date" wire:model="enrollJoinedOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('enrollJoinedOn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -212,7 +212,7 @@
                     <label for="enroll-form-expires" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Expires on (optional)</span>
                         <input id="enroll-form-expires" type="date" wire:model="enrollExpiresOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('enrollExpiresOn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -225,7 +225,7 @@
                         Enroll member
                     </button>
                     <button type="button" wire:click="toggleEnrollForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -235,7 +235,7 @@
 
     {{-- Inline register-book panel. --}}
     @if ($showRegisterBookForm)
-        <section aria-label="Register book" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Register book" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Register Book</h2>
 
             <form wire:submit="saveRegisterBook" class="mt-4 space-y-4">
@@ -243,7 +243,7 @@
                     <label for="register-form-title" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Title</span>
                         <input id="register-form-title" type="text" wire:model="registerTitle"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('registerTitle')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -252,7 +252,7 @@
                     <label for="register-form-author" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Author</span>
                         <input id="register-form-author" type="text" wire:model="registerAuthor"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('registerAuthor')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -261,7 +261,7 @@
                     <label for="register-form-isbn" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">ISBN (optional)</span>
                         <input id="register-form-isbn" type="text" wire:model="registerIsbn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('registerIsbn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -270,7 +270,7 @@
                     <label for="register-form-category" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Category</span>
                         <select id="register-form-category" wire:model="registerBookCategoryId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a category...</option>
                             @foreach ($categoryOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -284,7 +284,7 @@
                     <label for="register-form-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Replacement cost (optional)</span>
                         <input id="register-form-cost" type="number" min="0" wire:model="registerReplacementCost"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('registerReplacementCost')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -292,7 +292,7 @@
 
                     <label for="register-form-reference" class="flex items-center gap-2 self-end">
                         <input id="register-form-reference" type="checkbox" wire:model="registerIsReferenceOnly"
-                               class="rounded border-sand text-primary focus:ring-primary/50"/>
+                               class="rounded border-border-primary text-primary focus:ring-primary/50"/>
                         <span class="text-sm text-charcoal/80">Reference only (never circulates)</span>
                     </label>
                 </div>
@@ -303,7 +303,7 @@
                         Register book
                     </button>
                     <button type="button" wire:click="toggleRegisterBookForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -313,7 +313,7 @@
 
     {{-- Inline add-copies panel. --}}
     @if ($showAddCopiesForm)
-        <section aria-label="Add book copies" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add book copies" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Add Book Copies</h2>
 
             <form wire:submit="saveAddCopies" class="mt-4 space-y-4">
@@ -321,7 +321,7 @@
                     <label for="copies-form-book" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Book title</span>
                         <select id="copies-form-book" wire:model="addCopiesBookId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a title...</option>
                             @foreach ($bookOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -335,7 +335,7 @@
                     <label for="copies-form-shelf" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Shelf location</span>
                         <select id="copies-form-shelf" wire:model="addCopiesShelfLocationId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a shelf...</option>
                             @foreach ($shelfLocationOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -349,7 +349,7 @@
                     <label for="copies-form-count" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Number of copies</span>
                         <input id="copies-form-count" type="number" min="1" wire:model="addCopiesCount"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('addCopiesCount')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -358,7 +358,7 @@
                     <label for="copies-form-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Unit cost (optional)</span>
                         <input id="copies-form-cost" type="number" min="0" wire:model="addCopiesUnitCost"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('addCopiesUnitCost')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -371,7 +371,7 @@
                         Add copies
                     </button>
                     <button type="button" wire:click="toggleAddCopiesForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -439,7 +439,7 @@
             <label for="library-filter-category" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Category</span>
                 <select id="library-filter-category" wire:model.live="category"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All categories</option>
                     @foreach ($categoryOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -451,7 +451,7 @@
         <label for="library-filter-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Status</span>
             <select id="library-filter-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All statuses</option>
                 @foreach ($statusOptions as $option)
                     <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -463,7 +463,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="library-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search title, author, member..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -570,7 +570,7 @@
                                     Return
                                 </button>
                                 <button type="button" wire:click="renewIssue({{ $row->id }})"
-                                        class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-charcoal/70 hover:text-charcoal">
+                                        class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-charcoal/70 hover:text-charcoal">
                                     Renew
                                 </button>
                             </div>
@@ -606,7 +606,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="library-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'books')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->title }}</p>
@@ -638,7 +638,7 @@
 
     <x-slot:rail>
         <div class="space-y-4">
-            <section aria-label="Library summary" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Library summary" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Library Overview</h3>
                 <ul class="space-y-2 text-sm text-charcoal/80">
                     <li class="flex items-center justify-between"><span>Total titles</span><span class="tabular-nums">{{ $kpis['titles'] }}</span></li>

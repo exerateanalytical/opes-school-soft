@@ -75,7 +75,7 @@
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             class="relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-lg bg-white shadow-xl sm:rounded-lg sm:m-4 {{ $maxWidthClass }}"
         >
-            <header class="flex shrink-0 items-center justify-between border-b border-sand px-5 py-3">
+            <header class="flex shrink-0 items-center justify-between border-b border-border-primary px-5 py-3">
                 <h2 class="text-base font-semibold text-charcoal">{{ $title }}</h2>
                 <button type="button"
                         wire:click="$set('{{ $wireModel }}', false)"

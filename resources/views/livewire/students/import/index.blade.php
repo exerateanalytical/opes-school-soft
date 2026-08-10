@@ -12,11 +12,11 @@
         <p class="rounded border border-heritage-red/40 bg-heritage-red/10 p-3 text-sm text-heritage-red" role="alert">{{ $error }}</p>
     @endif
 
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="flex flex-wrap items-end gap-3">
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.import_screen.kind') }}</span>
-                <select wire:model="kind" class="mt-1 rounded border border-sand p-2">
+                <select wire:model="kind" class="mt-1 rounded border border-border-primary p-2">
                     @foreach ($kinds as $option)
                         <option value="{{ $option->value }}">{{ $option->label() }}</option>
                     @endforeach
@@ -25,14 +25,14 @@
 
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.import_screen.filename') }}</span>
-                <input type="text" wire:model="filename" class="mt-1 rounded border border-sand p-2" placeholder="students.csv">
+                <input type="text" wire:model="filename" class="mt-1 rounded border border-border-primary p-2" placeholder="students.csv">
             </label>
         </div>
 
         <label class="mt-3 block text-sm">
             <span class="block text-slate-600">{{ __('opes.import_screen.csv') }}</span>
             <textarea wire:model="csv" rows="8"
-                      class="mt-1 w-full rounded border border-sand p-2 font-mono text-xs"
+                      class="mt-1 w-full rounded border border-border-primary p-2 font-mono text-xs"
                       placeholder="first_name,last_name,date_of_birth,gender"></textarea>
         </label>
 
@@ -56,7 +56,7 @@
     </section>
 
     @if ($batch !== null)
-        <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">{{ __('opes.import_screen.report') }}</h2>
 
             <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -79,7 +79,7 @@
             </dl>
         </section>
 
-        <section class="overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+        <section class="overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
             <table class="min-w-full text-sm">
                 <thead class="bg-sand/40">
                 <tr>
@@ -91,7 +91,7 @@
                 </thead>
                 <tbody>
                 @forelse ($rows as $row)
-                    <tr class="border-t border-sand align-top">
+                    <tr class="border-t border-border-primary align-top">
                         <td class="p-2 font-mono">{{ $row->row_no }}</td>
                         <td class="p-2">{{ $row->status->value }}</td>
                         <td class="p-2 font-mono text-xs">{{ implode(' · ', array_filter(array_map(fn ($v) => is_scalar($v) ? (string) $v : '', $row->payload))) }}</td>

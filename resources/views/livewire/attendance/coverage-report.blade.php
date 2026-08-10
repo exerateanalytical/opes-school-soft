@@ -20,7 +20,7 @@
             <label class="block text-xs font-medium text-charcoal/70">
                 {{ __('attendance.filter_period') }}
                 <select wire:model.live="periodId"
-                        class="mt-1 rounded border-sand text-sm focus:border-primary focus:ring-primary">
+                        class="mt-1 rounded border-border-primary text-sm focus:border-primary focus:ring-primary">
                     @foreach ($periods as $periodOption)
                         <option value="{{ $periodOption->id }}">{{ $periodOption->name }}</option>
                     @endforeach
@@ -38,14 +38,14 @@
             {{ __('attendance.coverage_explainer', ['from' => $period->starts_on, 'to' => $period->ends_on]) }}
         </p>
 
-        <div class="rounded border border-sand bg-white">
+        <div class="rounded border border-border-primary bg-white">
             @if ($rows === [])
                 <div class="px-4 py-6">
                     <x-empty-state :message="__('attendance.no_class_groups')"/>
                 </div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-sand text-sm">
+                    <table class="min-w-full divide-y divide-border-primary text-sm">
                         <thead class="bg-cream text-left text-xs uppercase tracking-wide text-charcoal/60">
                             <tr>
                                 <th scope="col" class="px-4 py-2">{{ __('attendance.col_class') }}</th>
@@ -56,7 +56,7 @@
                                 <th scope="col" class="px-4 py-2">{{ __('attendance.col_status') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand bg-white">
+                        <tbody class="divide-y divide-border-primary bg-white">
                             @foreach ($rows as $row)
                                 @php
                                     $coverage = $row['coverage'];

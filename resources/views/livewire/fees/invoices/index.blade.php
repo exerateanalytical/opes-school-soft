@@ -28,20 +28,20 @@
     <x-slot:actions>
         @if ($canConfigureFees)
             <button type="button" wire:click="toggleStructures"
-                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ $showStructures ? __('opes.ui.cancel') : __('opes.fees_screen.structures_toggle') }}
             </button>
         @endif
         <button type="button" wire:click="toggleGenerateForm"
-                class="rounded border border-sand bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ $showGenerateForm ? __('opes.ui.cancel') : 'Generate invoices' }}
         </button>
         <button type="button" wire:click="toggleIssueForm"
-                class="rounded border border-sand bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ $showIssueForm ? __('opes.ui.cancel') : 'Issue invoice' }}
         </button>
         <button type="button" wire:click="toggleCreditForm"
-                class="rounded border border-sand bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ $showCreditForm ? __('opes.ui.cancel') : 'Issue credit note' }}
         </button>
         <a href="{{ route('fees.cashier') }}"
@@ -51,12 +51,12 @@
     </x-slot:actions>
 
     @if ($showStructures && $canConfigureFees)
-        <div class="mb-4 rounded border border-sand bg-white p-4">
+        <div class="mb-4 rounded border border-border-primary bg-white p-4">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h3 class="text-sm font-semibold text-charcoal">{{ __('opes.fees_screen.structures_title') }}</h3>
                 <div class="flex gap-2">
                     <button type="button" wire:click="toggleCategoryForm"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ $showCategoryForm ? __('opes.ui.cancel') : __('opes.fees_screen.new_category') }}
                     </button>
                     <button type="button" wire:click="toggleStructureForm"
@@ -67,20 +67,20 @@
             </div>
 
             @if ($showCategoryForm)
-                <form wire:submit.prevent="createCategory" class="mb-4 grid grid-cols-1 gap-3 rounded border border-sand bg-cream/40 p-3 sm:grid-cols-3">
+                <form wire:submit.prevent="createCategory" class="mb-4 grid grid-cols-1 gap-3 rounded border border-border-primary bg-cream/40 p-3 sm:grid-cols-3">
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.category_code') }}</span>
-                        <input type="text" wire:model="categoryCode" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="text" wire:model="categoryCode" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('categoryCode') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.category_name') }}</span>
-                        <input type="text" wire:model="categoryName" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="text" wire:model="categoryName" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('categoryName') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.category_name_fr') }}</span>
-                        <input type="text" wire:model="categoryNameFr" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="text" wire:model="categoryNameFr" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('categoryNameFr') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                     <div class="sm:col-span-3">
@@ -92,10 +92,10 @@
             @endif
 
             @if ($showStructureForm)
-                <form wire:submit.prevent="createStructure" class="mb-4 grid grid-cols-1 gap-3 rounded border border-sand bg-cream/40 p-3 sm:grid-cols-3">
+                <form wire:submit.prevent="createStructure" class="mb-4 grid grid-cols-1 gap-3 rounded border border-border-primary bg-cream/40 p-3 sm:grid-cols-3">
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_academic_year') }}</span>
-                        <select wire:model="structureAcademicYearId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <select wire:model="structureAcademicYearId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">-</option>
                             @foreach ($academicYearOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -106,7 +106,7 @@
 
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_school_section') }}</span>
-                        <select wire:model="structureSchoolSectionId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <select wire:model="structureSchoolSectionId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">-</option>
                             @foreach ($schoolSectionOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -117,19 +117,19 @@
 
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_name') }}</span>
-                        <input type="text" wire:model="structureName" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="text" wire:model="structureName" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('structureName') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_effective_from') }}</span>
-                        <input type="date" wire:model="structureEffectiveFrom" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="date" wire:model="structureEffectiveFrom" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('structureEffectiveFrom') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_fee_item') }}</span>
-                        <select wire:model="structureFeeItemId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <select wire:model="structureFeeItemId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">-</option>
                             @foreach ($feeItemOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -140,7 +140,7 @@
 
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_line_amount') }}</span>
-                        <input type="number" min="0" wire:model="structureLineAmount" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <input type="number" min="0" wire:model="structureLineAmount" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('structureLineAmount') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
@@ -161,7 +161,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
-                        <tr class="border-b border-sand text-xs font-semibold uppercase tracking-wide text-charcoal/60">
+                        <tr class="border-b border-border-primary text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                             <th class="px-2 py-2">{{ __('opes.fees_screen.structure_name') }}</th>
                             <th class="px-2 py-2">{{ __('opes.fees_screen.structure_school_section') }}</th>
                             <th class="px-2 py-2">{{ __('opes.fees_screen.column_status') }}</th>
@@ -172,7 +172,7 @@
                     </thead>
                     <tbody>
                         @forelse ($structureRows as $structure)
-                            <tr wire:key="structure-row-{{ $structure['id'] }}" class="border-b border-sand/60">
+                            <tr wire:key="structure-row-{{ $structure['id'] }}" class="border-b border-border-primary/60">
                                 <td class="px-2 py-2 font-medium text-charcoal">{{ $structure['name'] }}</td>
                                 <td class="px-2 py-2 text-charcoal/70">{{ $structure['section'] }}</td>
                                 <td class="px-2 py-2">
@@ -207,12 +207,12 @@
                                         <form wire:submit.prevent="saveStructureEdit" class="flex flex-wrap items-end gap-3">
                                             <label class="flex min-w-[14rem] flex-col gap-1">
                                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_name') }}</span>
-                                                <input type="text" wire:model="editStructureName" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                                <input type="text" wire:model="editStructureName" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                                 @error('editStructureName') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                                             </label>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.structure_effective_to') }}</span>
-                                                <input type="date" wire:model="editStructureEffectiveTo" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                                <input type="date" wire:model="editStructureEffectiveTo" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                             </label>
                                             <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                                                 {{ __('opes.ui.save') }}
@@ -234,12 +234,12 @@
     @endif
 
     @if ($showGenerateForm)
-        <div class="mb-4 rounded border border-sand bg-white p-4">
+        <div class="mb-4 rounded border border-border-primary bg-white p-4">
             <h3 class="mb-3 text-sm font-semibold text-charcoal">Generate invoices</h3>
             <form wire:submit.prevent="generateInvoices" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Academic year</span>
-                    <select wire:model="generateAcademicYearId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="generateAcademicYearId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($academicYearOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -250,7 +250,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Fiscal year</span>
-                    <select wire:model="generateFiscalYearId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="generateFiscalYearId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($fiscalYearOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -261,7 +261,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Term (optional, annual if blank)</span>
-                    <select wire:model="generateTermId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="generateTermId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">Annual</option>
                         @foreach ($generateTermOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -271,7 +271,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Class (optional, all classes if blank)</span>
-                    <select wire:model="generateClassGroupId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="generateClassGroupId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">{{ __('opes.fees_screen.all_classes') }}</option>
                         @foreach ($classOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -282,13 +282,13 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Issue date</span>
-                    <input type="date" wire:model="generateIssueDate" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <input type="date" wire:model="generateIssueDate" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     @error('generateIssueDate') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Due date</span>
-                    <input type="date" wire:model="generateDueDate" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <input type="date" wire:model="generateDueDate" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     @error('generateDueDate') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                 </label>
 
@@ -302,12 +302,12 @@
     @endif
 
     @if ($showIssueForm)
-        <div class="mb-4 rounded border border-sand bg-white p-4">
+        <div class="mb-4 rounded border border-border-primary bg-white p-4">
             <h3 class="mb-3 text-sm font-semibold text-charcoal">Issue invoice</h3>
             <form wire:submit.prevent="issueInvoice" class="flex flex-wrap items-end gap-3">
                 <label class="flex min-w-[16rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Draft invoice</span>
-                    <select wire:model="issueInvoiceId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="issueInvoiceId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($draftInvoiceOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -324,12 +324,12 @@
     @endif
 
     @if ($showCreditForm)
-        <div class="mb-4 rounded border border-sand bg-white p-4">
+        <div class="mb-4 rounded border border-border-primary bg-white p-4">
             <h3 class="mb-3 text-sm font-semibold text-charcoal">Issue credit note</h3>
             <form wire:submit.prevent="issueCreditNote" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Invoice</span>
-                    <select wire:model.live="creditInvoiceId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model.live="creditInvoiceId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($issuedInvoiceOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -340,7 +340,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Invoice line</span>
-                    <select wire:model="creditInvoiceLineId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="creditInvoiceLineId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($creditLineOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -351,13 +351,13 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Amount</span>
-                    <input type="number" min="1" wire:model="creditAmount" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <input type="number" min="1" wire:model="creditAmount" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     @error('creditAmount') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Reason</span>
-                    <select wire:model="creditReasonType" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="creditReasonType" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($creditReasonOptions as $option)
                             <option value="{{ $option }}">{{ $option }}</option>
@@ -368,7 +368,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Settlement mode</span>
-                    <select wire:model="creditSettlementMode" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="creditSettlementMode" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">-</option>
                         @foreach ($creditSettlementOptions as $option)
                             <option value="{{ $option }}">{{ $option }}</option>
@@ -379,13 +379,13 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Issue date</span>
-                    <input type="date" wire:model="creditIssueDate" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <input type="date" wire:model="creditIssueDate" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     @error('creditIssueDate') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1 sm:col-span-3">
                     <span class="text-xs font-medium text-charcoal/70">Reason note</span>
-                    <textarea wire:model="creditReasonNote" rows="2" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
+                    <textarea wire:model="creditReasonNote" rows="2" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
                     @error('creditReasonNote') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                 </label>
 
@@ -427,7 +427,7 @@
         <label for="invoices-filter-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.status_label') }}</span>
             <select id="invoices-filter-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($statusOptions as $statusOption)
                     <option value="{{ $statusOption }}">{{ __('opes.fees_screen.status_'.$statusOption) }}</option>
@@ -438,7 +438,7 @@
         <label for="invoices-filter-class" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.class_label') }}</span>
             <select id="invoices-filter-class" wire:model.live="classGroup"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.fees_screen.all_classes') }}</option>
                 @foreach ($classOptions as $classOption)
                     <option value="{{ $classOption['id'] }}">{{ $classOption['name'] }}</option>
@@ -449,7 +449,7 @@
         <label for="invoices-filter-term" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.term_label') }}</span>
             <select id="invoices-filter-term" wire:model.live="term"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.fees_screen.all_terms') }}</option>
                 @foreach ($termOptions as $termOption)
                     <option value="{{ $termOption['id'] }}">{{ $termOption['name'] }}</option>
@@ -508,7 +508,7 @@
                 @if ($row['status'] === 'issued')
                     <a href="{{ route('fees.invoices.print', ['invoice' => $row['id']]) }}" target="_blank" rel="noopener"
                        title="{{ __('opes.fees_screen.print_invoice') }}"
-                       class="inline-flex items-center rounded border border-sand p-1.5 text-charcoal/60 hover:border-primary/50 hover:text-primary">
+                       class="inline-flex items-center rounded border border-border-primary p-1.5 text-charcoal/60 hover:border-primary/50 hover:text-primary">
                         <span class="sr-only">{{ __('opes.fees_screen.print_invoice') }}</span>
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6v-7z"/></svg>
                     </a>
@@ -519,7 +519,7 @@
 
     <x-slot:cards>
         @foreach ($invoices as $row)
-            <article wire:key="invoice-card-{{ $row['id'] }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="invoice-card-{{ $row['id'] }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <a href="{{ route('fees.students.statement', ['student' => $row['student_id']]) }}"

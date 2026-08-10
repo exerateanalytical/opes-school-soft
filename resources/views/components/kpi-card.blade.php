@@ -23,7 +23,7 @@
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => 'rounded border border-sand bg-white'.($isLink ? ' transition hover:border-primary/50 hover:shadow-sm' : '')]) }}>
+<div {{ $attributes->merge(['class' => 'rounded border border-border-primary bg-white'.($isLink ? ' transition hover:border-primary/50 hover:shadow-sm' : '')]) }}>
     @if ($isLink)
         <a href="{{ $href }}" class="flex items-start gap-3 px-4 py-3">
     @else

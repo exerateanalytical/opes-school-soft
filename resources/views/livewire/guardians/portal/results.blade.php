@@ -18,14 +18,14 @@
                         @if ($card && $card['snapshot_id'] === $period['id']) aria-current="true" @endif
                         class="rounded-full border px-3 py-1 text-xs font-medium {{ $card && $card['snapshot_id'] === $period['id']
                             ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-sand text-charcoal/70 hover:border-primary/40' }}">
+                            : 'border-border-primary text-charcoal/70 hover:border-primary/40' }}">
                     {{ $period['label'] }}
                 </button>
             @endforeach
         </div>
 
         @if ($card)
-            <div class="rounded border border-sand bg-white p-4">
+            <div class="rounded border border-border-primary bg-white p-4">
                 <p class="text-xs text-charcoal/60">
                     {{ __('opes.guardian_portal.results_generation', ['n' => $card['generation']]) }}
                     <span aria-hidden="true"> &middot; </span>
@@ -34,18 +34,18 @@
 
                 @if ($generalAverage !== null)
                     <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                        <div class="rounded border border-sand bg-sand/30 p-3">
+                        <div class="rounded border border-border-primary bg-sand/30 p-3">
                             <p class="text-[11px] uppercase tracking-wide text-charcoal/60">{{ __('opes.guardian_portal.results_average') }}</p>
                             <p class="text-lg font-semibold text-charcoal">{{ $generalAverage['display'] ?? '—' }}</p>
                         </div>
                         @if (isset($payload['mention']))
-                            <div class="rounded border border-sand bg-sand/30 p-3">
+                            <div class="rounded border border-border-primary bg-sand/30 p-3">
                                 <p class="text-[11px] uppercase tracking-wide text-charcoal/60">{{ __('opes.guardian_portal.results_mention') }}</p>
                                 <p class="text-lg font-semibold text-charcoal">{{ $payload['mention'] ?? '—' }}</p>
                             </div>
                         @endif
                         @if ($rank !== null)
-                            <div class="rounded border border-sand bg-sand/30 p-3">
+                            <div class="rounded border border-border-primary bg-sand/30 p-3">
                                 <p class="text-[11px] uppercase tracking-wide text-charcoal/60">{{ __('opes.guardian_portal.results_rank') }}</p>
                                 <p class="text-lg font-semibold text-charcoal">
                                     {{ $rank['is_ranked'] ?? false ? ($rank['position'] ?? '—').' / '.($rank['denominator'] ?? '—') : __('opes.guardian_portal.results_not_ranked') }}
@@ -53,7 +53,7 @@
                             </div>
                         @endif
                         @if (isset($payload['gpa']))
-                            <div class="rounded border border-sand bg-sand/30 p-3">
+                            <div class="rounded border border-border-primary bg-sand/30 p-3">
                                 <p class="text-[11px] uppercase tracking-wide text-charcoal/60">GPA</p>
                                 <p class="text-lg font-semibold text-charcoal">{{ $payload['gpa'] }}</p>
                             </div>
@@ -76,9 +76,9 @@
                 @endif
 
                 @if ($subjects !== [])
-                    <div class="mt-4 min-w-0 overflow-x-auto rounded border border-sand">
+                    <div class="mt-4 min-w-0 overflow-x-auto rounded border border-border-primary">
                         <table class="w-full min-w-[28rem] border-collapse text-sm">
-                            <thead class="border-b border-sand bg-sand/40 text-left">
+                            <thead class="border-b border-border-primary bg-sand/40 text-left">
                                 <tr>
                                     <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.results_subject') }}</th>
                                     <th scope="col" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.results_score') }}</th>
@@ -88,7 +88,7 @@
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.results_appreciation') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-sand">
+                            <tbody class="divide-y divide-border-primary">
                                 @foreach ($subjects as $subject)
                                     <tr>
                                         <td class="px-3 py-2 text-charcoal">{{ $locale === 'fr' ? ($subject['subject_name_fr'] ?? $subject['subject_name'] ?? '') : ($subject['subject_name'] ?? '') }}</td>

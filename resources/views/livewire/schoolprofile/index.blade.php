@@ -82,7 +82,7 @@
         <label for="settings-filter-class" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Class</span>
             <select id="settings-filter-class" wire:model.live="settingClass"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All classes</option>
                 @foreach ($classOptions as $option)
                     <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -93,7 +93,7 @@
         <label for="settings-filter-scope" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Scope</span>
             <select id="settings-filter-scope" wire:model.live="scope"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All scopes</option>
                 @foreach ($scopeOptions as $option)
                     <option value="{{ $option }}">{{ ucfirst($option) }}</option>
@@ -104,7 +104,7 @@
         <label for="settings-filter-locked" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Lock status</span>
             <select id="settings-filter-locked" wire:model.live="locked"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All settings</option>
                 <option value="locked">Locked</option>
                 <option value="unlocked">Unlocked</option>
@@ -115,7 +115,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="settings-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search key..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -144,18 +144,18 @@
                     <form wire:submit="saveEditedSetting" class="flex flex-col gap-1.5">
                         @if ($row->value_type === SettingType::Bool->value)
                             <label class="inline-flex items-center gap-2 text-sm">
-                                <input type="checkbox" wire:model="editValueBool" class="rounded border-sand"/>
+                                <input type="checkbox" wire:model="editValueBool" class="rounded border-border-primary"/>
                                 <span>{{ $editValueBool ? 'True' : 'False' }}</span>
                             </label>
                         @elseif ($row->value_type === SettingType::Int->value)
                             <input type="number" wire:model="editValue"
-                                   class="w-32 rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal"/>
+                                   class="w-32 rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal"/>
                         @elseif ($row->value_type === SettingType::Json->value)
                             <textarea wire:model="editValue" rows="3"
-                                      class="w-64 rounded border border-sand bg-white px-2 py-1 font-mono text-xs text-charcoal"></textarea>
+                                      class="w-64 rounded border border-border-primary bg-white px-2 py-1 font-mono text-xs text-charcoal"></textarea>
                         @else
                             <input type="text" wire:model="editValue"
-                                   class="w-56 rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal"/>
+                                   class="w-56 rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal"/>
                         @endif
                         @error('editValue')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
@@ -166,7 +166,7 @@
                                 Save
                             </button>
                             <button type="button" wire:click="cancelEdit"
-                                    class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-charcoal/70 hover:text-charcoal">
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-charcoal/70 hover:text-charcoal">
                                 Cancel
                             </button>
                         </div>
@@ -207,7 +207,7 @@
     {{-- Mobile cards: key, class, value and lock status. --}}
     <x-slot:cards>
         @foreach ($rows as $row)
-            <article wire:key="setting-card-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="setting-card-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-center justify-between gap-2">
                     <p class="font-medium text-charcoal">{{ $row->key }}</p>
                     @if ($row->locked_at !== null)
@@ -230,7 +230,7 @@
     {{-- Right rail: settings-by-class breakdown. --}}
     <x-slot:rail>
         <div class="space-y-4">
-            <section aria-label="Settings by class" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Settings by class" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Settings by Class</h3>
                 <ul class="space-y-2.5">
                     @foreach ($classOptions as $option)

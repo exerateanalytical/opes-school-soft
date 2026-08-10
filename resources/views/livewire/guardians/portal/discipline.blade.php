@@ -7,7 +7,7 @@
     @else
         <div class="space-y-3">
             @foreach ($cases as $case)
-                <div class="rounded border border-sand bg-white p-4" wire:key="portal-discipline-{{ $case->id }}">
+                <div class="rounded border border-border-primary bg-white p-4" wire:key="portal-discipline-{{ $case->id }}">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">
                             {{ $locale === 'fr' && $case->category_name_fr ? $case->category_name_fr : $case->category_name }}
@@ -22,7 +22,7 @@
                     @endif
 
                     @if (($sanctionsByCase->get($case->id) ?? collect())->isNotEmpty())
-                        <div class="mt-3 border-t border-sand pt-2">
+                        <div class="mt-3 border-t border-border-primary pt-2">
                             <p class="text-xs font-semibold uppercase tracking-wide text-charcoal/60">{{ __('opes.guardian_portal.discipline_sanctions') }}</p>
                             <ul class="mt-1 space-y-1 text-sm">
                                 @foreach ($sanctionsByCase->get($case->id) as $sanction)

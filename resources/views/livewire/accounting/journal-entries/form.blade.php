@@ -32,12 +32,12 @@
     @endif
 
     {{-- Header --}}
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label for="je-journal" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_journal_label') }}</span>
                 <select id="je-journal" wire:model="journalId" @disabled($isLocked)
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
                     <option value="">{{ __('opes.ledger_screen.choose') }}</option>
                     @foreach ($journalOptions as $journal)
                         <option value="{{ $journal->id }}">{{ $journal->code }} — {{ $journal->name }}</option>
@@ -49,26 +49,26 @@
             <label for="je-date" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_date_label') }}</span>
                 <input id="je-date" type="date" wire:model="date" @disabled($isLocked)
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
                 @error('date') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
 
             <label for="je-value-date" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_value_date_label') }}</span>
                 <input id="je-value-date" type="date" wire:model="valueDate" @disabled($isLocked)
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
             </label>
 
             <label for="je-reference" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_reference_label') }}</span>
                 <input id="je-reference" type="text" wire:model="reference" @disabled($isLocked)
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
             </label>
 
             <label for="je-label" class="flex flex-col gap-1 sm:col-span-2 lg:col-span-4">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_label_label') }}</span>
                 <input id="je-label" type="text" wire:model="label" @disabled($isLocked)
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
                 @error('label') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
         </div>
@@ -81,7 +81,7 @@
     </section>
 
     {{-- Lines --}}
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.ledger_screen.je_lines_title') }}</h2>
 
         <div class="mt-3 space-y-3">
@@ -92,20 +92,20 @@
                     $allowedPartnerTypes = $picked?->allowed_partner_types ?? $partnerTypeOptions;
                     $persisted = ($line['id'] ?? null) !== null;
                 @endphp
-                <div class="rounded border border-sand p-3" wire:key="je-line-{{ $index }}">
+                <div class="rounded border border-border-primary p-3" wire:key="je-line-{{ $index }}">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-end">
                         <div class="sm:col-span-4">
                             <label class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_account_label') }}</span>
                                 @if ($persisted)
-                                    <span class="rounded border border-sand bg-sand/30 px-2 py-1.5 text-sm text-charcoal">{{ $line['account_label'] }}</span>
+                                    <span class="rounded border border-border-primary bg-sand/30 px-2 py-1.5 text-sm text-charcoal">{{ $line['account_label'] }}</span>
                                 @else
                                     <input type="text" wire:model.live.debounce.300ms="accountQuery.{{ $index }}"
                                            placeholder="{{ __('opes.ledger_screen.je_line_account_search_placeholder') }}"
                                            value="{{ $line['account_label'] !== '' ? $line['account_label'] : '' }}"
-                                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                           class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                                     @if (($accountQuery[$index] ?? '') !== '')
-                                        <ul class="max-h-40 overflow-y-auto rounded border border-sand bg-white text-sm shadow-sm">
+                                        <ul class="max-h-40 overflow-y-auto rounded border border-border-primary bg-white text-sm shadow-sm">
                                             @forelse ($this->accountMatches($index) as $match)
                                                 <li>
                                                     <button type="button" wire:click="pickAccount({{ $index }}, {{ $match->id }})"
@@ -126,7 +126,7 @@
                             <label class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_label') }}</span>
                                 <input type="text" wire:model="lines.{{ $index }}.label" @disabled($persisted)
-                                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
                             </label>
                         </div>
 
@@ -134,7 +134,7 @@
                             <label class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_debit') }}</span>
                                 <input type="number" min="0" step="1" wire:model.live.debounce.300ms="lines.{{ $index }}.debit" @disabled($persisted)
-                                       class="rounded border border-sand bg-white px-2 py-1.5 text-right text-sm text-charcoal disabled:bg-sand/40"/>
+                                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-right text-sm text-charcoal disabled:bg-sand/40"/>
                             </label>
                         </div>
 
@@ -142,14 +142,14 @@
                             <label class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_credit') }}</span>
                                 <input type="number" min="0" step="1" wire:model.live.debounce.300ms="lines.{{ $index }}.credit" @disabled($persisted)
-                                       class="rounded border border-sand bg-white px-2 py-1.5 text-right text-sm text-charcoal disabled:bg-sand/40"/>
+                                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-right text-sm text-charcoal disabled:bg-sand/40"/>
                             </label>
                         </div>
 
                         <div class="sm:col-span-1">
                             @if (! $persisted)
                                 <button type="button" wire:click="removeLine({{ $index }})"
-                                        class="w-full rounded border border-sand px-2 py-1.5 text-xs font-medium text-heritage-red hover:border-heritage-red/50">
+                                        class="w-full rounded border border-border-primary px-2 py-1.5 text-xs font-medium text-heritage-red hover:border-heritage-red/50">
                                     {{ __('opes.ledger_screen.je_line_remove') }}
                                 </button>
                             @else
@@ -166,7 +166,7 @@
                             <label class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_partner_type') }}</span>
                                 <select wire:model="lines.{{ $index }}.partner_type" @disabled($persisted)
-                                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
+                                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
                                     <option value="">{{ __('opes.ledger_screen.choose') }}</option>
                                     @foreach ($allowedPartnerTypes as $partnerType)
                                         <option value="{{ $partnerType }}">{{ __('opes.ledger_screen.partner_type_'.$partnerType) }}</option>
@@ -177,7 +177,7 @@
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_line_partner_id') }}</span>
                                 <input type="number" min="1" wire:model="lines.{{ $index }}.partner_id" @disabled($persisted)
                                        placeholder="{{ __('opes.ledger_screen.je_line_partner_id_placeholder') }}"
-                                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
                             </label>
                         </div>
                     @endif
@@ -186,7 +186,7 @@
         </div>
 
         <button type="button" wire:click="addLine"
-                class="mt-3 rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="mt-3 rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ __('opes.ledger_screen.je_add_line') }}
         </button>
     </section>
@@ -220,7 +220,7 @@
 
     <div class="flex flex-wrap items-center gap-2">
         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled"
-                class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ __('opes.ledger_screen.je_save_draft') }}
         </button>
 

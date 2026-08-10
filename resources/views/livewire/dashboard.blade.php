@@ -61,7 +61,7 @@
         @endif
 
         @if ($canViewHealth)
-        <div class="flex items-start gap-3 rounded border border-sand bg-white px-4 py-3">
+        <div class="flex items-start gap-3 rounded border border-border-primary bg-white px-4 py-3">
             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-badge-teal text-white">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
             </span>
@@ -124,7 +124,7 @@
         @else
             <ul class="mt-2 space-y-2">
                 @foreach ($alerts as $alert)
-                    <li class="rounded border border-sand bg-white px-4 py-3">
+                    <li class="rounded border border-border-primary bg-white px-4 py-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <x-status-pill :status="$alert->status->value"/>
                             <span class="text-sm font-semibold text-charcoal">{{ $alert->label }}</span>

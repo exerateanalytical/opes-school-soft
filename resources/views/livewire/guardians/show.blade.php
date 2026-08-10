@@ -80,7 +80,7 @@
 
         {{-- ── Left: identity + contact ────────────────────────────────── --}}
         <section class="space-y-4">
-            <div class="rounded border border-sand bg-white p-4 text-center">
+            <div class="rounded border border-border-primary bg-white p-4 text-center">
                 {{-- Initials, not the mockup's portrait: photo_path is a
                      private-disk path (7.1) with no policy-checked serving
                      controller in Phase 2. --}}
@@ -96,7 +96,7 @@
                 <h2 class="mt-2 text-lg font-semibold uppercase text-charcoal">{{ $guardian->fullName() }}</h2>
                 <p class="font-mono text-xs text-charcoal/55">{{ $guardian->guardian_no }}</p>
 
-                <div class="mt-4 border-t border-sand pt-3 text-left">
+                <div class="mt-4 border-t border-border-primary pt-3 text-left">
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         {{ __('opes.guardians_screen.contact_heading') }}
                     </h3>
@@ -113,7 +113,7 @@
         </section>
 
         {{-- ── Centre: guardian details ───────────────────────────────── --}}
-        <section class="rounded border border-sand bg-white p-4 lg:col-span-1">
+        <section class="rounded border border-border-primary bg-white p-4 lg:col-span-1">
             <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                 {{ __('opes.guardians_screen.details_heading') }}
             </h2>
@@ -185,7 +185,7 @@
 
         {{-- ── Right: emergency contact + preferences ─────────────────── --}}
         <section class="space-y-4">
-            <div class="rounded border border-sand bg-white p-4">
+            <div class="rounded border border-border-primary bg-white p-4">
                 <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                     {{ __('opes.guardians_screen.emergency_heading') }}
                 </h2>
@@ -214,7 +214,7 @@
                  decided per child on the link, and is in the Permissions column
                  of the table below. The two are drawn apart deliberately: v1
                  conflated them, which is the defect 7.4 exists to name. --}}
-            <div class="rounded border border-sand bg-white p-4">
+            <div class="rounded border border-border-primary bg-white p-4">
                 <h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                     {{ __('opes.guardians_screen.preferences_heading') }}
                 </h2>
@@ -234,7 +234,7 @@
                             </dd>
                         </div>
                     @endforeach
-                    <div class="flex items-center justify-between gap-3 border-t border-sand pt-2">
+                    <div class="flex items-center justify-between gap-3 border-t border-border-primary pt-2">
                         <dt class="text-charcoal/70">{{ __('opes.guardians_screen.language') }}</dt>
                         <dd class="text-charcoal">{{ __('opes.guardians_screen.language_'.$guardian->language->value) }}</dd>
                     </div>
@@ -244,7 +244,7 @@
     </div>
 
     {{-- ── Tabs ───────────────────────────────────────────────────────── --}}
-    <div class="-mx-4 overflow-x-auto border-b border-sand px-4 sm:mx-0 sm:px-0">
+    <div class="-mx-4 overflow-x-auto border-b border-border-primary px-4 sm:mx-0 sm:px-0">
         <div role="tablist" aria-label="{{ __('opes.guardians_screen.title') }}" class="flex min-w-max items-center gap-1">
             @foreach (GuardianShow::LIVE_TABS as $liveTab)
                 <button type="button" role="tab" wire:click="selectTab('{{ $liveTab }}')"
@@ -279,9 +279,9 @@
             @if ($links->isEmpty())
                 <x-empty-state :message="__('opes.guardians_screen.linked_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[52rem] border-collapse text-sm">
-                        <thead class="border-b border-sand text-left">
+                        <thead class="border-b border-border-primary text-left">
                             <tr class="bg-chrome text-white">
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_student') }}</th>
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_admission_no') }}</th>
@@ -295,7 +295,7 @@
                                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($links as $link)
                                 @php
                                     $row = $studentRows[$link->student_id] ?? null;
@@ -324,7 +324,7 @@
                                         @else
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach ($flags as $flag)
-                                                    <span class="inline-flex items-center rounded-full border border-sand bg-sand/60 px-2 py-0.5 text-xs font-semibold text-charcoal/75">
+                                                    <span class="inline-flex items-center rounded-full border border-border-primary bg-sand/60 px-2 py-0.5 text-xs font-semibold text-charcoal/75">
                                                         {{ __('opes.students_screen.perm_'.$flag) }}
                                                     </span>
                                                 @endforeach
@@ -360,7 +360,7 @@
                                             @if ($canManageGuardians && $linkOpen)
                                                 <button type="button" wire:click="toggleAuthorizationForm({{ $link->id }})"
                                                         title="Edit authorization"
-                                                        class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/50">
+                                                        class="rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/50">
                                                     Edit
                                                 </button>
                                                 <button type="button" wire:click="toggleUnlinkForm({{ $link->id }})"
@@ -380,12 +380,12 @@
                                                 <label class="flex flex-col gap-1">
                                                     <span class="text-xs font-medium text-charcoal/70">Reason for ending this link</span>
                                                     <input type="text" wire:model="unlinkReason"
-                                                           class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                                                           class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                                                     @error('unlinkReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                                                 </label>
                                                 <div class="flex justify-end gap-2">
                                                     <button type="button" wire:click="toggleUnlinkForm"
-                                                            class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
                                                         Cancel
                                                     </button>
                                                     <button type="submit"
@@ -414,7 +414,7 @@
                                                 <label class="flex flex-col gap-1">
                                                     <span class="text-xs font-medium text-charcoal/70">Reason for this change</span>
                                                     <input type="text" wire:model="authorizationReason"
-                                                           class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                                                           class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                                                     @error('authorizationReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                                                 </label>
                                                 <p class="text-xs text-charcoal/55">
@@ -422,7 +422,7 @@
                                                 </p>
                                                 <div class="flex justify-end gap-2">
                                                     <button type="button" wire:click="toggleAuthorizationForm"
-                                                            class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
                                                         Cancel
                                                     </button>
                                                     <button type="submit"
@@ -453,9 +453,9 @@
             @if ($meetings->isEmpty())
                 <x-empty-state :message="__('opes.guardians_screen.meetings_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[40rem] border-collapse text-sm">
-                        <thead class="border-b border-sand text-left">
+                        <thead class="border-b border-border-primary text-left">
                             <tr class="bg-chrome text-white">
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_scheduled_at') }}</th>
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_meeting_type') }}</th>
@@ -463,7 +463,7 @@
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_follow_up') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($meetings as $meeting)
                                 <tr wire:key="guardian-meeting-{{ $meeting->id }}">
                                     <td class="px-4 py-2.5 text-charcoal/80">{{ $meeting->scheduled_at->translatedFormat('d M Y H:i') }}</td>
@@ -489,9 +489,9 @@
             @if ($communications->isEmpty())
                 <x-empty-state :message="__('opes.guardians_screen.communications_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[44rem] border-collapse text-sm">
-                        <thead class="border-b border-sand text-left">
+                        <thead class="border-b border-border-primary text-left">
                             <tr class="bg-chrome text-white">
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_sent_at') }}</th>
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_channel') }}</th>
@@ -500,7 +500,7 @@
                                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.column_delivery_status') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($communications as $communication)
                                 <tr wire:key="guardian-comm-{{ $communication->id }}">
                                     <td class="px-4 py-2.5 text-charcoal/80">{{ $communication->sent_at?->translatedFormat('d M Y H:i') ?? $notRecorded }}</td>
@@ -535,7 +535,7 @@
                 </div>
             @endif
 
-            <div class="rounded border border-sand bg-white p-4">
+            <div class="rounded border border-border-primary bg-white p-4">
                 @if ($guardian->portal_user_id !== null)
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -555,7 +555,7 @@
                         @if ($canManagePortal)
                             <div class="flex items-center gap-2">
                                 <button type="button" wire:click="issuePortalInvitation"
-                                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
                                     {{ __('opes.guardians_screen.portal_reissue_button') }}
                                 </button>
                                 <button type="button" wire:click="revokePortalInvitation({{ $openInvitation->id }})"

@@ -12,11 +12,11 @@
         <p class="rounded border border-heritage-red/40 bg-heritage-red/10 p-3 text-sm text-heritage-red" role="alert">{{ $error }}</p>
     @endif
 
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="flex flex-wrap items-end gap-3">
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.books_screen.fiscal_year') }}</span>
-                <select wire:model="fiscalYearId" class="mt-1 rounded border border-sand p-2">
+                <select wire:model="fiscalYearId" class="mt-1 rounded border border-border-primary p-2">
                     @foreach ($fiscalYears as $year)
                         <option value="{{ $year->id }}">{{ $year->code }}</option>
                     @endforeach
@@ -25,7 +25,7 @@
 
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.books_screen.book_type') }}</span>
-                <select wire:model="bookType" class="mt-1 rounded border border-sand p-2">
+                <select wire:model="bookType" class="mt-1 rounded border border-border-primary p-2">
                     @foreach ($bookTypes as $type)
                         <option value="{{ $type->value }}">{{ $type->label() }}</option>
                     @endforeach
@@ -39,7 +39,7 @@
         </div>
     </section>
 
-    <section class="overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+    <section class="overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
         <table class="min-w-full text-sm">
             <thead class="bg-sand/40">
             <tr>
@@ -55,7 +55,7 @@
             </thead>
             <tbody>
             @forelse ($books as $book)
-                <tr class="border-t border-sand">
+                <tr class="border-t border-border-primary">
                     <td class="p-2">{{ $book->book_type->label() }}</td>
                     <td class="p-2 whitespace-nowrap">{{ $book->period_start?->format('Y-m-d') }} → {{ $book->period_end?->format('Y-m-d') }}</td>
                     <td class="p-2 whitespace-nowrap">{{ $book->generated_at?->format('Y-m-d H:i') }}</td>

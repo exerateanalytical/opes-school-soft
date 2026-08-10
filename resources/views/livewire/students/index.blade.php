@@ -79,7 +79,7 @@
              routes/web.php, so this is an inert control that says so rather
              than a link to a 404. --}}
         <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-              class="cursor-not-allowed rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal/40">
+              class="cursor-not-allowed rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/40">
             {{ __('opes.students_screen.add_student') }}
         </span>
     </x-slot:actions>
@@ -137,7 +137,7 @@
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.students_screen.search_label') }}</span>
             <input id="students-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="{{ __('opes.students_screen.search_placeholder') }}"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         {{-- Class groups of the CURRENT academic year only. A list carrying
@@ -146,7 +146,7 @@
         <label for="students-filter-class" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.students_screen.class_label') }}</span>
             <select id="students-filter-class" wire:model.live="classGroup"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.students_screen.all_classes') }}</option>
                 @foreach ($classGroupOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -157,7 +157,7 @@
         <label for="students-filter-status" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.students_screen.status_label') }}</span>
             <select id="students-filter-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($statusOptions as $statusOption)
                     <option value="{{ $statusOption->value }}">{{ __('opes.students_screen.status_'.$statusOption->value) }}</option>
@@ -244,7 +244,7 @@
 
     <x-slot:cards>
         @foreach ($students as $student)
-            <article wire:key="student-card-{{ $student->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="student-card-{{ $student->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase text-white">
@@ -280,7 +280,7 @@
          a charting dependency is a decision the owner has not made, and the
          Users screen set the precedent of CSS-only chrome for the same reason. --}}
     <x-slot:rail>
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             @if ($classGroupOptions === [])
                 <p class="text-sm text-charcoal/60">{{ __('opes.ui.no_data') }}</p>
             @else

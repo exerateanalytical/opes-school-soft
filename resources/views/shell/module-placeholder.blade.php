@@ -12,7 +12,7 @@
             </ol>
         </nav>
 
-        <div class="mt-6 rounded border border-sand bg-white p-8 text-center">
+        <div class="mt-6 rounded border border-border-primary bg-white p-8 text-center">
             <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-heritage-yellow/15">
                 <svg class="h-7 w-7 text-heritage-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <circle cx="12" cy="12" r="9"/>

@@ -28,13 +28,13 @@
     </header>
 
     @if ($canQueue)
-        <section class="rounded border border-sand bg-white p-4" aria-label="Queue a bulk print">
+        <section class="rounded border border-border-primary bg-white p-4" aria-label="Queue a bulk print">
             <h2 class="mb-3 text-sm font-semibold text-charcoal">Queue a run</h2>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Document</span>
-                    <select wire:model="templateCode" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="templateCode" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         @foreach ($templates as $template)
                             <option value="{{ $template->code }}">{{ $template->code }} — {{ $template->name }}</option>
                         @endforeach
@@ -43,7 +43,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Academic year</span>
-                    <select wire:model.live="academicYearId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model.live="academicYearId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         @foreach ($academicYears as $year)
                             <option value="{{ $year->id }}">{{ $year->name }}</option>
                         @endforeach
@@ -52,7 +52,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Class group</span>
-                    <select wire:model="classGroupId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="classGroupId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="">All classes</option>
                         @foreach ($classGroups as $group)
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
@@ -62,7 +62,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Assessment period</span>
-                    <select wire:model="assessmentPeriodId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="assessmentPeriodId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="">—</option>
                         @foreach ($assessmentPeriods as $period)
                             <option value="{{ $period->id }}">{{ $period->name }}</option>
@@ -72,7 +72,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Mode</span>
-                    <select wire:model="mode" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="mode" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="all">Print all</option>
                         <option value="unprinted">Print unprinted only</option>
                     </select>
@@ -80,7 +80,7 @@
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Language</span>
-                    <select wire:model="language" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="language" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="en">English</option>
                         <option value="fr">Français</option>
                     </select>
@@ -109,8 +109,8 @@
         </section>
     @endif
 
-    <section class="rounded border border-sand bg-white" aria-label="Bulk print jobs">
-        <h2 class="border-b border-sand px-4 py-3 text-sm font-semibold text-charcoal">Recent jobs</h2>
+    <section class="rounded border border-border-primary bg-white" aria-label="Bulk print jobs">
+        <h2 class="border-b border-border-primary px-4 py-3 text-sm font-semibold text-charcoal">Recent jobs</h2>
 
         @if ($jobs->isEmpty())
             <p class="px-4 py-6 text-sm text-charcoal/60">
@@ -132,7 +132,7 @@
                     </thead>
                     <tbody>
                         @foreach ($jobs as $job)
-                            <tr class="border-t border-sand/60">
+                            <tr class="border-t border-border-primary/60">
                                 <td class="px-4 py-2">#{{ $job->id }}</td>
                                 <td class="px-4 py-2">{{ $job->template?->code ?? '—' }} v{{ $job->template_version }}</td>
                                 <td class="px-4 py-2">{{ $job->mode }}</td>
@@ -157,7 +157,7 @@
                             </tr>
 
                             @if ($expandedJobId === $job->id)
-                                <tr class="border-t border-sand/60 bg-sand/20">
+                                <tr class="border-t border-border-primary/60 bg-sand/20">
                                     <td colspan="7" class="px-4 py-3">
                                         @php($documents = $expandedDocuments)
 

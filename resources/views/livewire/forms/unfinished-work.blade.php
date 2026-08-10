@@ -6,7 +6,7 @@
 
     <ul class="space-y-2">
         @forelse ($held as $item)
-            <li class="flex items-center justify-between gap-3 rounded-lg border border-sand bg-white p-4 shadow-sm">
+            <li class="flex items-center justify-between gap-3 rounded-lg border border-border-primary bg-white p-4 shadow-sm">
                 <div>
                     <span class="block font-medium text-charcoal">{{ $item['label'] }}</span>
                     <span class="block text-xs text-slate-500">
@@ -22,13 +22,13 @@
                     @endif
                     <button type="button" wire:click="discard({{ $item['id'] }})"
                             wire:confirm="{{ __('opes.unfinished_work.confirm_discard') }}"
-                            class="rounded border border-sand px-3 py-1.5 text-sm text-slate-600 hover:bg-sand/40">
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-slate-600 hover:bg-sand/40">
                         {{ __('opes.unfinished_work.discard') }}
                     </button>
                 </div>
             </li>
         @empty
-            <li class="rounded-lg border border-dashed border-sand p-8 text-center text-sm text-slate-500">
+            <li class="rounded-lg border border-dashed border-border-primary p-8 text-center text-sm text-slate-500">
                 {{ __('opes.unfinished_work.empty') }}
             </li>
         @endforelse

@@ -53,7 +53,7 @@
     @enderror
 
     {{-- ── Header summary ─────────────────────────────────────────────── --}}
-    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-xl font-semibold text-charcoal">{{ $asset->name }}</h1>
@@ -82,12 +82,12 @@
             @endif
             @if ($canDispose && ! in_array($asset->status->value, ['disposed', 'written_off', 'lost'], true))
                 <button type="button" wire:click="toggleDisposeForm"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-heritage-red/50 hover:text-heritage-red">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-heritage-red/50 hover:text-heritage-red">
                     {{ $showDisposeForm ? 'Cancel dispose' : 'Dispose' }}
                 </button>
             @endif
             <a href="{{ route('assets.index') }}"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Back to register
             </a>
         </div>
@@ -95,7 +95,7 @@
 
     {{-- ── Inline dispose-asset panel ───────────────────────────────────── --}}
     @if ($showDisposeForm)
-        <section aria-label="Dispose asset" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Dispose asset" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Dispose Asset — {{ $asset->tag_number }}</h2>
 
             <form wire:submit="saveDisposeAsset" class="mt-4 space-y-4">
@@ -103,7 +103,7 @@
                     <label for="dispose-type" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Disposal type</span>
                         <select id="dispose-type" wire:model="disposeType"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($disposalTypeOptions as $option)
                                 <option value="{{ $option->value }}">{{ ucfirst(str_replace('_', ' ', $option->value)) }}</option>
                             @endforeach
@@ -113,7 +113,7 @@
                     <label for="dispose-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Disposal date</span>
                         <input id="dispose-date" type="date" wire:model="disposeDate"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('disposeReason')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -122,13 +122,13 @@
                     <label for="dispose-proceeds" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Proceeds (XAF, optional)</span>
                         <input id="dispose-proceeds" type="number" min="0" step="1" wire:model="disposeProceeds"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="dispose-settlement" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Settlement route (required if proceeds &gt; 0)</span>
                         <select id="dispose-settlement" wire:model="disposeSettlement"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">None</option>
                             @foreach ($disposalSettlementOptions as $option)
                                 <option value="{{ $option->value }}">{{ ucfirst(str_replace('_', ' ', $option->value)) }}</option>
@@ -139,13 +139,13 @@
                     <label for="dispose-buyer" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Buyer partner ID (required for a sale)</span>
                         <input id="dispose-buyer" type="number" min="1" step="1" wire:model="disposeBuyerPartnerId"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="dispose-reason" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Reason</span>
                         <textarea id="dispose-reason" wire:model="disposeReason" rows="2"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                     </label>
                 </div>
 
@@ -155,7 +155,7 @@
                         Dispose asset
                     </button>
                     <button type="button" wire:click="toggleDisposeForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -165,7 +165,7 @@
 
     {{-- ── Inline close-maintenance-request panel ───────────────────────── --}}
     @if ($showCloseMaintenanceForm)
-        <section aria-label="Close maintenance request" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Close maintenance request" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Close Maintenance Request</h2>
 
             <form wire:submit="saveCloseMaintenanceRequest" class="mt-4 space-y-4">
@@ -173,7 +173,7 @@
                     <label for="close-maintenance-resolution" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Resolution</span>
                         <select id="close-maintenance-resolution" wire:model="closeMaintenanceResolution"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($maintenanceResolutionOptions as $option)
                                 <option value="{{ $option->value }}">{{ ucfirst($option->value) }}</option>
                             @endforeach
@@ -183,13 +183,13 @@
                     <label for="close-maintenance-actual-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Actual cost (XAF, required if capitalising)</span>
                         <input id="close-maintenance-actual-cost" type="number" min="0" step="1" wire:model="closeMaintenanceActualCost"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="close-maintenance-capitalise-as" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Capitalise as (if capitalising)</span>
                         <select id="close-maintenance-capitalise-as" wire:model="closeMaintenanceCapitaliseAs"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="increase_cost">Increase cost</option>
                             <option value="component">New component</option>
                         </select>
@@ -198,7 +198,7 @@
                     <label for="close-maintenance-justification" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Justification</span>
                         <textarea id="close-maintenance-justification" wire:model="closeMaintenanceJustification" rows="2"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('closeMaintenanceJustification')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -211,7 +211,7 @@
                         Close request
                     </button>
                     <button type="button" wire:click="toggleCloseMaintenanceForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -220,7 +220,7 @@
     @endif
 
     {{-- ── Acquisition details ────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Acquisition details</h2>
         <dl class="mt-3 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-3">
             <div>
@@ -251,10 +251,10 @@
     </section>
 
     {{-- ── Depreciation history ───────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Depreciation history</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Fiscal Year</th>
@@ -264,7 +264,7 @@
                         <th class="px-2 py-2 text-right">Net Book Value</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($depreciationHistory as $row)
                         <tr wire:key="dep-{{ $row->id }}">
                             <td class="px-2 py-2 text-charcoal">{{ $row->fiscal_year_code }}</td>
@@ -282,10 +282,10 @@
     </section>
 
     {{-- ── Maintenance history ────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Maintenance history</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Title</th>
@@ -296,7 +296,7 @@
                         <th class="px-2 py-2">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($maintenanceHistory as $row)
                         <tr wire:key="mnt-{{ $row->id }}">
                             <td class="px-2 py-2 text-charcoal">{{ $row->title }}</td>
@@ -309,7 +309,7 @@
                             <td class="px-2 py-2">
                                 @if ($canManage && ! in_array($row->status, ['done', 'cancelled'], true))
                                     <button type="button" wire:click="toggleCloseMaintenanceForm({{ $row->id }})"
-                                            class="rounded border border-sand px-2 py-1 text-xs font-semibold text-charcoal hover:bg-sand/40">
+                                            class="rounded border border-border-primary px-2 py-1 text-xs font-semibold text-charcoal hover:bg-sand/40">
                                         Close
                                     </button>
                                 @endif
@@ -324,10 +324,10 @@
     </section>
 
     {{-- ── Custody movement history ───────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Custody movement history</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Date</th>
@@ -337,7 +337,7 @@
                         <th class="px-2 py-2">Acknowledged</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($custodyMovements as $row)
                         <tr wire:key="cust-{{ $row->id }}">
                             <td class="px-2 py-2 text-charcoal">{{ $row->moved_on }}</td>
@@ -355,12 +355,12 @@
     </section>
 
     {{-- ── Print Asset Card ───────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="asset-card-section">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="asset-card-section">
         <div class="flex items-center justify-between gap-3 print:hidden">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Print asset card</h2>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="window.print()"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Print
                 </button>
                 <button type="button" wire:click="exportAssetCardPdf"

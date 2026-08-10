@@ -17,11 +17,11 @@
         <h1 class="min-w-0 text-xl font-semibold text-charcoal">{{ __('opes.ledger_screen.tb_title') }}</h1>
     </div>
 
-    <section aria-label="{{ __('opes.ui.filters') }}" class="rounded border border-sand bg-white p-3">
+    <section aria-label="{{ __('opes.ui.filters') }}" class="rounded border border-border-primary bg-white p-3">
         <label for="tb-fiscal-year" class="flex min-w-[12rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.tb_fiscal_year_label') }}</span>
             <select id="tb-fiscal-year" wire:model.live="fiscalYearId"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 @foreach ($fiscalYearOptions as $fiscalYear)
                     <option value="{{ $fiscalYear->id }}">{{ $fiscalYear->code }}</option>
                 @endforeach
@@ -32,9 +32,9 @@
     @if ($rows->isEmpty())
         <x-empty-state :message="__('opes.ledger_screen.tb_empty')"/>
     @else
-        <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+        <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
             <table class="w-full min-w-[36rem] border-collapse text-sm">
-                <thead class="border-b border-sand bg-chrome text-left text-white">
+                <thead class="border-b border-border-primary bg-chrome text-left text-white">
                     <tr>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.ledger_screen.tb_column_code') }}</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.ledger_screen.tb_column_account') }}</th>
@@ -42,7 +42,7 @@
                         <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.ledger_screen.tb_column_credit') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @foreach ($rows as $row)
                         <tr>
                             <td class="px-4 py-2.5 font-mono text-charcoal">{{ $row->code }}</td>

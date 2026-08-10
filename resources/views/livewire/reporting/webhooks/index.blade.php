@@ -25,16 +25,16 @@
         <div class="grid gap-3">
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.webhooks_screen.name') }}</span>
-                <input type="text" wire:model="name" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="text" wire:model="name" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.webhooks_screen.url') }}</span>
-                <input type="text" wire:model="url" placeholder="https://…" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="text" wire:model="url" placeholder="https://…" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.webhooks_screen.events') }}</span>
                 <input type="text" wire:model="eventsInput" placeholder="fee.invoice_issued, fee.payment_received"
-                       class="mt-1 w-full rounded border border-sand p-2">
+                       class="mt-1 w-full rounded border border-border-primary p-2">
                 <span class="mt-1 block text-xs text-slate-500">{{ __('opes.webhooks_screen.events_hint') }}</span>
             </label>
         </div>
@@ -43,13 +43,13 @@
             <button type="button" wire:click="register" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
                 {{ __('opes.webhooks_screen.register') }}
             </button>
-            <button type="button" wire:click="$set('showForm', false)" class="rounded border border-sand px-4 py-2 text-sm">
+            <button type="button" wire:click="$set('showForm', false)" class="rounded border border-border-primary px-4 py-2 text-sm">
                 {{ __('opes.homework_screen.cancel') }}
             </button>
         </div>
     </x-opes-modal-form>
 
-    <section class="overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+    <section class="overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
         <table class="min-w-full text-sm">
             <thead class="bg-sand/40">
             <tr>
@@ -62,7 +62,7 @@
             </thead>
             <tbody>
             @forelse ($endpoints as $endpoint)
-                <tr class="border-t border-sand">
+                <tr class="border-t border-border-primary">
                     <td class="p-2">{{ $endpoint->name }}</td>
                     <td class="p-2 font-mono text-xs">{{ $endpoint->url }}</td>
                     <td class="p-2 text-xs">{{ implode(', ', $endpoint->events) }}</td>
@@ -90,7 +90,7 @@
 
     <section>
         <h2 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.webhooks_screen.recent_deliveries') }}</h2>
-        <div class="overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+        <div class="overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
             <table class="min-w-full text-sm">
                 <thead class="bg-sand/40">
                 <tr>
@@ -103,7 +103,7 @@
                 </thead>
                 <tbody>
                 @forelse ($deliveries as $delivery)
-                    <tr class="border-t border-sand">
+                    <tr class="border-t border-border-primary">
                         <td class="p-2">{{ $delivery->endpoint_name }}</td>
                         <td class="p-2 text-xs">{{ $delivery->event }}</td>
                         <td class="p-2">{{ $delivery->status->value }}</td>

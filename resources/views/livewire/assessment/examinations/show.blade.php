@@ -41,7 +41,7 @@
     </nav>
 
     {{-- ── Header card ────────────────────────────────────────────────── --}}
-    <section aria-label="Exam details" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Exam details" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
                 <h1 class="text-xl font-semibold text-charcoal">{{ $header?->subject_name ?? '—' }}</h1>
@@ -73,13 +73,13 @@
     </section>
 
     {{-- ── Invigilators ───────────────────────────────────────────────── --}}
-    <section aria-label="Invigilators" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Invigilators" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Invigilators</h2>
 
         @if ($invigilators->isEmpty())
             <p class="mt-2 text-sm text-charcoal/60">No invigilators have been assigned to this sitting yet.</p>
         @else
-            <ul class="mt-3 divide-y divide-sand">
+            <ul class="mt-3 divide-y divide-border-primary">
                 @foreach ($invigilators as $invigilator)
                     <li class="flex items-center justify-between gap-3 py-2">
                         <span class="text-sm text-charcoal">{{ trim($invigilator->first_name.' '.$invigilator->last_name) }}</span>
@@ -91,7 +91,7 @@
     </section>
 
     {{-- ── Seating summary ────────────────────────────────────────────── --}}
-    <section aria-label="Seating summary" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Seating summary" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Seating</h2>
 
         @if ($seating->isEmpty())
@@ -106,7 +106,7 @@
                             <th scope="col" class="py-1.5 text-right">Capacity</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($seating as $room)
                             <tr>
                                 <td class="py-1.5 pr-4 text-charcoal">{{ $room->room_code }} &ndash; {{ $room->room_name }}</td>
@@ -126,7 +126,7 @@
          print dialog, `print:hidden` hides the chrome and `print:block` on the
          slip is the only thing left on the printed page (see the
          `@media print` rules below). --}}
-    <section aria-label="Exam slip preview" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5 print:hidden">
+    <section aria-label="Exam slip preview" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5 print:hidden">
         <div class="flex items-center justify-between gap-3">
             <h2 class="text-base font-semibold text-charcoal">Exam Slip / Notice</h2>
             <button type="button" onclick="window.print()"
@@ -135,7 +135,7 @@
             </button>
         </div>
 
-        <div id="exam-slip-preview" class="mt-4 rounded border border-dashed border-sand p-4">
+        <div id="exam-slip-preview" class="mt-4 rounded border border-dashed border-border-primary p-4">
             <p class="text-center text-sm font-semibold uppercase tracking-wide text-charcoal">Exam Slip</p>
             <dl class="mt-3 space-y-1.5 text-sm text-charcoal">
                 <div class="flex justify-between gap-3">

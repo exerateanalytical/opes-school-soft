@@ -24,7 +24,7 @@
         </div>
         <div class="flex items-center gap-2">
             <x-status-pill :status="$tone[$expense->status] ?? 'amber'" :label="ucfirst($expense->status)"/>
-            <button type="button" onclick="window.print()" class="rounded border border-sand px-3 py-1.5 text-sm hover:bg-sand/40">Print / Preview</button>
+            <button type="button" onclick="window.print()" class="rounded border border-border-primary px-3 py-1.5 text-sm hover:bg-sand/40">Print / Preview</button>
             <button type="button" wire:click="exportPdf" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">Export PDF</button>
         </div>
     </header>
@@ -35,7 +35,7 @@
         </p>
     @endif
 
-    <dl class="grid grid-cols-1 gap-x-8 gap-y-2 rounded border border-sand bg-white p-4 text-sm sm:grid-cols-2 print:hidden">
+    <dl class="grid grid-cols-1 gap-x-8 gap-y-2 rounded border border-border-primary bg-white p-4 text-sm sm:grid-cols-2 print:hidden">
         <div class="flex justify-between gap-4"><dt class="text-charcoal/70">Expense date</dt><dd class="font-medium">{{ $expense->expense_date }}</dd></div>
         <div class="flex justify-between gap-4"><dt class="text-charcoal/70">Paid out of</dt><dd class="font-medium font-mono">{{ $expense->treasury_code }} — {{ $expense->treasury_name }}</dd></div>
         <div class="flex justify-between gap-4"><dt class="text-charcoal/70">Payee type</dt><dd class="font-medium">{{ ucfirst($expense->payee_type) }}</dd></div>
@@ -71,7 +71,7 @@
     </dl>
 
     @if ($entryLines->isNotEmpty())
-        <div class="rounded border border-sand bg-white p-4 text-sm print:hidden">
+        <div class="rounded border border-border-primary bg-white p-4 text-sm print:hidden">
             <p class="mb-2 text-xs font-semibold uppercase text-charcoal/60">Ledger entry {{ $expense->piece_no }}</p>
             <table class="min-w-full text-sm">
                 <thead>
@@ -85,7 +85,7 @@
                 </thead>
                 <tbody>
                     @foreach ($entryLines as $entryLine)
-                        <tr class="border-t border-sand/60">
+                        <tr class="border-t border-border-primary/60">
                             <td class="py-1 pr-2">{{ $entryLine->sequence }}</td>
                             <td class="py-1 pr-2 font-mono">{{ $entryLine->account_code }} {{ $entryLine->account_name }}</td>
                             <td class="py-1 pr-2">{{ $entryLine->label }}</td>
@@ -99,8 +99,8 @@
     @endif
 
     {{-- Print-preview voucher --}}
-    <div id="print-area" class="rounded border border-sand bg-white p-8 text-sm shadow-sm print:border-0 print:shadow-none">
-        <div class="mb-6 flex items-start justify-between border-b border-sand pb-4">
+    <div id="print-area" class="rounded border border-border-primary bg-white p-8 text-sm shadow-sm print:border-0 print:shadow-none">
+        <div class="mb-6 flex items-start justify-between border-b border-border-primary pb-4">
             <div>
                 <h2 class="text-lg font-bold text-charcoal">EXPENSE VOUCHER</h2>
                 <p class="font-mono text-charcoal/70">{{ $expense->expense_no }}</p>
@@ -128,7 +128,7 @@
 
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-sand text-left text-xs text-charcoal/60">
+                <tr class="border-b border-border-primary text-left text-xs text-charcoal/60">
                     <th scope="col" class="py-2 pr-2">#</th>
                     <th scope="col" class="py-2 pr-2">Label</th>
                     <th scope="col" class="py-2 pr-2">Account</th>
@@ -139,7 +139,7 @@
             </thead>
             <tbody>
                 @foreach ($lines as $line)
-                    <tr class="border-b border-sand/60">
+                    <tr class="border-b border-border-primary/60">
                         <td class="py-2 pr-2">{{ $line->line_no }}</td>
                         <td class="py-2 pr-2">{{ $line->label }}</td>
                         <td class="py-2 pr-2 font-mono">{{ $line->account_code }} {{ $line->account_name }}</td>
@@ -153,7 +153,7 @@
 
         <div class="mt-4 flex justify-end">
             <dl class="w-72 space-y-1 text-sm">
-                <div class="flex justify-between border-t border-sand pt-1 font-semibold">
+                <div class="flex justify-between border-t border-border-primary pt-1 font-semibold">
                     <dt>Total</dt>
                     <dd class="font-mono">{{ Money::of((int) $expense->total_amount)->format(true) }}</dd>
                 </div>

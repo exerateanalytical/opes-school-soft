@@ -51,7 +51,7 @@
             {{-- Present per the mockup; opens the "not available" notice —
                  auto-generation is out of v1 and silent no-ops are banned. --}}
             <button type="button" wire:click="generate"
-                    class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ __('timetable.generate') }}
             </button>
         </div>
@@ -70,7 +70,7 @@
         <x-empty-state :message="__('timetable.no_year')"/>
     @else
         {{-- ── Tabs: Class · Teacher · Room · Exam ────────────────────── --}}
-        <div class="-mx-4 overflow-x-auto border-b border-sand px-4 sm:mx-0 sm:px-0">
+        <div class="-mx-4 overflow-x-auto border-b border-border-primary px-4 sm:mx-0 sm:px-0">
             <div role="tablist" aria-label="{{ __('timetable.title') }}" class="flex min-w-max items-center gap-1">
                 @foreach (\App\Modules\Academics\Livewire\Timetable\Index::TABS as $timetableTab)
                     <button type="button" role="tab" wire:click="selectTab('{{ $timetableTab }}')"
@@ -85,18 +85,18 @@
         </div>
 
         {{-- ── Filters ────────────────────────────────────────────────── --}}
-        <section class="rounded-lg border border-sand bg-white p-4 shadow-sm">
+        <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm">
             <div class="flex flex-wrap items-end gap-4">
                 <div class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.year_label') }}</span>
-                    <span class="rounded border border-sand bg-ivory px-3 py-1.5 text-sm text-charcoal">{{ $currentYear->code }}</span>
+                    <span class="rounded border border-border-primary bg-ivory px-3 py-1.5 text-sm text-charcoal">{{ $currentYear->code }}</span>
                 </div>
 
                 @if ($tab === 'class')
                     <label for="timetable-class" class="flex min-w-[12rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.class_label') }}</span>
                         <select id="timetable-class" wire:model.live="classGroupId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($classGroups as $group)
                                 <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endforeach
@@ -106,7 +106,7 @@
                     <label for="timetable-teacher" class="flex min-w-[12rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.teacher_label') }}</span>
                         <select id="timetable-teacher" wire:model.live="staffMemberId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('timetable.teacher_placeholder') }}</option>
                             @foreach ($teacherNames as $staffId => $staffName)
                                 <option value="{{ $staffId }}">{{ $staffName }}</option>
@@ -117,7 +117,7 @@
                     <label for="timetable-room" class="flex min-w-[12rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.room_label') }}</span>
                         <select id="timetable-room" wire:model.live="roomId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('timetable.room_placeholder') }}</option>
                             @foreach ($roomOptions as $room)
                                 <option value="{{ $room->id }}">{{ $room->name }}</option>
@@ -131,7 +131,7 @@
         {{-- ── Assign panel ───────────────────────────────────────────── --}}
         @if ($showAssignForm && $canManage && $tab === 'class')
             <section aria-label="{{ __('timetable.assign_subject') }}"
-                     class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+                     class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
                 <h2 class="text-base font-semibold text-charcoal">{{ __('timetable.assign_subject') }}</h2>
 
                 @error('assign')
@@ -145,7 +145,7 @@
                         <label for="assign-day" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.field_day') }}</span>
                             <select id="assign-day" wire:model="assignDay"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">—</option>
                                 @foreach ($dayLabels as $dayNumber => $dayLabel)
                                     <option value="{{ $dayNumber }}">{{ $dayLabel }}</option>
@@ -157,7 +157,7 @@
                         <label for="assign-period" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.field_period') }}</span>
                             <select id="assign-period" wire:model="assignPeriodId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">—</option>
                                 @foreach ($periods->where('is_break', false) as $period)
                                     <option value="{{ $period->id }}">{{ $period->name }} ({{ substr($period->starts_at, 0, 5) }}–{{ substr($period->ends_at, 0, 5) }})</option>
@@ -170,7 +170,7 @@
                         <label for="assign-subject" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.field_subject') }}</span>
                             <select id="assign-subject" wire:model="assignSubjectId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">—</option>
                                 @foreach ($subjectOptions as $subject)
                                     <option value="{{ $subject->id }}">{{ $subject->name }}</option>
@@ -182,7 +182,7 @@
                         <label for="assign-teacher" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.field_teacher') }}</span>
                             <select id="assign-teacher" wire:model="assignStaffId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">—</option>
                                 @foreach ($teacherNames as $staffId => $staffName)
                                     <option value="{{ $staffId }}">{{ $staffName }}</option>
@@ -195,7 +195,7 @@
                         <label for="assign-room" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('timetable.field_room') }}</span>
                             <select id="assign-room" wire:model="assignRoomId"
-                                    class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                 <option value="">{{ __('timetable.room_none') }}</option>
                                 @foreach ($roomOptions as $room)
                                     <option value="{{ $room->id }}">{{ $room->name }}</option>
@@ -205,13 +205,13 @@
                         </label>
                     </div>
 
-                    <div class="flex items-center gap-2 border-t border-sand pt-4">
+                    <div class="flex items-center gap-2 border-t border-border-primary pt-4">
                         <button type="submit"
                                 class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                             {{ __('timetable.save') }}
                         </button>
                         <button type="button" wire:click="cancelAssign"
-                                class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ __('timetable.cancel') }}
                         </button>
                     </div>
@@ -221,8 +221,8 @@
 
         {{-- ── Exam tab: Phase 3 sittings ─────────────────────────────── --}}
         @if ($tab === 'exam')
-            <section class="rounded-lg border border-sand bg-white shadow-sm">
-                <h2 class="border-b border-sand px-4 py-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+            <section class="rounded-lg border border-border-primary bg-white shadow-sm">
+                <h2 class="border-b border-border-primary px-4 py-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                     {{ __('timetable.exam_heading') }}
                 </h2>
 
@@ -241,7 +241,7 @@
                                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('timetable.exam_status') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-sand">
+                            <tbody class="divide-y divide-border-primary">
                                 @foreach ($examSittings as $sitting)
                                     <tr wire:key="exam-{{ $sitting->id }}">
                                         <td class="px-4 py-2.5 text-charcoal">{{ $sitting->scheduled_on }}</td>
@@ -266,8 +266,8 @@
         @else
             <div class="grid grid-cols-1 gap-4 xl:grid-cols-4">
                 {{-- ── The week grid ──────────────────────────────────── --}}
-                <section class="rounded-lg border border-sand bg-white shadow-sm xl:col-span-3">
-                    <h2 class="flex items-center justify-between border-b border-sand px-4 py-3 text-sm font-semibold text-charcoal">
+                <section class="rounded-lg border border-border-primary bg-white shadow-sm xl:col-span-3">
+                    <h2 class="flex items-center justify-between border-b border-border-primary px-4 py-3 text-sm font-semibold text-charcoal">
                         <span>
                             {{ __('timetable.grid_heading') }}
                             @if ($tab === 'class' && $classGroup !== null) — {{ $classGroup->name }} @endif
@@ -285,7 +285,7 @@
                                     @endforeach
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-sand">
+                            <tbody class="divide-y divide-border-primary">
                                 @foreach ($periods as $period)
                                     <tr wire:key="period-row-{{ $period->id }}">
                                         @if ($period->is_break)
@@ -338,7 +338,7 @@
                 {{-- ── Side panel: details + legend ─────────────────────── --}}
                 <div class="space-y-4">
                     @if ($tab === 'class' && $classGroup !== null)
-                        <section class="rounded-lg border border-sand bg-white p-4 shadow-sm">
+                        <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm">
                             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('timetable.details_heading') }}</h2>
                             <dl class="mt-3 space-y-2 text-sm">
                                 <div class="flex justify-between gap-2">
@@ -357,14 +357,14 @@
                         </section>
                     @endif
 
-                    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm">
+                    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm">
                         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                             {{ __('timetable.legend_heading') }} ({{ $gridSlots->unique('subject_id')->count() }})
                         </h2>
                         <ul class="mt-3 space-y-1.5 text-sm">
                             @forelse ($gridSlots->unique('subject_id')->sortBy(fn ($slot) => $slot->subject?->name) as $slot)
                                 <li class="flex items-center gap-2" wire:key="legend-{{ $slot->subject_id }}">
-                                    <span aria-hidden="true" class="inline-block h-3 w-3 rounded-full border border-sand"
+                                    <span aria-hidden="true" class="inline-block h-3 w-3 rounded-full border border-border-primary"
                                           style="background-color: {{ $tint($slot->subject_id) }}"></span>
                                     <span class="text-charcoal/80">{{ $slot->subject?->name ?? '—' }}</span>
                                 </li>

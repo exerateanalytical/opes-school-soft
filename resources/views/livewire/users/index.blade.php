@@ -14,7 +14,7 @@
         'accountant' => 'border-badge-teal/30 bg-badge-teal/10 text-badge-teal',
         'bursar' => 'border-badge-teal/30 bg-badge-teal/10 text-badge-teal',
     ];
-    $defaultRoleTone = 'border-sand bg-sand/60 text-charcoal/70';
+    $defaultRoleTone = 'border-border-primary bg-sand/60 text-charcoal/70';
 
     // This page's fetched rows only - NOT a system-wide split. A true
     // active/suspended split across every user needs a dedicated count query
@@ -91,13 +91,13 @@
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.search_label') }}</span>
             <input id="users-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="{{ __('opes.users.search_placeholder') }}"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         <label for="users-filter-role" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.role_label') }}</span>
             <select id="users-filter-role" wire:model.live="role"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($roleOptions as $roleOption)
                     <option value="{{ $roleOption->value }}">{{ $roleOption->label(app()->getLocale()) }}</option>
@@ -108,7 +108,7 @@
         <label for="users-filter-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.status_label') }}</span>
             <select id="users-filter-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 <option value="active">{{ __('opes.users.status_active') }}</option>
                 <option value="suspended">{{ __('opes.users.status_suspended') }}</option>
@@ -155,19 +155,19 @@
                 <div class="flex flex-wrap items-center justify-end gap-1 text-xs">
                     @can('role.assign')
                         <button type="button" wire:click="toggleRoleForm({{ $user->id }})"
-                                class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                                class="rounded border border-border-primary px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
                             {{ __('opes.users.change_role') }}
                         </button>
                     @endcan
                     @can('user.set_password')
                         <button type="button" wire:click="togglePasswordForm({{ $user->id }})"
-                                class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                                class="rounded border border-border-primary px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
                             {{ __('opes.users.reset_password') }}
                         </button>
                     @endcan
                     @can('api.manage_tokens')
                         <a href="{{ route('users.tokens', $user) }}"
-                           class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                           class="rounded border border-border-primary px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
                             {{ __('opes.users.api_tokens') }}
                         </a>
                     @endcan
@@ -182,7 +182,7 @@
                         <label for="role-select-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.role_field_label') }}</span>
                             <select id="role-select-{{ $user->id }}" wire:model="selectedRole"
-                                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                 <option value="">{{ __('opes.users.role_placeholder') }}</option>
                                 @foreach ($roleOptions as $roleOption)
                                     <option value="{{ $roleOption->value }}">{{ $roleOption->label(app()->getLocale()) }}</option>
@@ -196,7 +196,7 @@
                             {{ __('opes.users.save') }}
                         </button>
                         <button type="button" wire:click="toggleRoleForm({{ $user->id }})"
-                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
+                                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
                             {{ __('opes.users.cancel') }}
                         </button>
                     </form>
@@ -211,7 +211,7 @@
                         <label for="new-password-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.new_password_label') }}</span>
                             <input id="new-password-{{ $user->id }}" type="password" wire:model="newPassword"
-                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                             @error('newPassword')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -219,13 +219,13 @@
                         <label for="new-password-confirm-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.new_password_confirmation_label') }}</span>
                             <input id="new-password-confirm-{{ $user->id }}" type="password" wire:model="newPasswordConfirmation"
-                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                             {{ __('opes.users.save') }}
                         </button>
                         <button type="button" wire:click="togglePasswordForm({{ $user->id }})"
-                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
+                                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
                             {{ __('opes.users.cancel') }}
                         </button>
                     </form>
@@ -236,7 +236,7 @@
 
     <x-slot:cards>
         @foreach ($users as $user)
-            <article class="rounded border border-sand bg-white p-3">
+            <article class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex items-center gap-2.5">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase text-white">
@@ -277,7 +277,7 @@
          for the rows actually on screen (see $pageActive/$pageSuspended
          above) - honestly scoped to "this page", not oversold as system-wide. --}}
     <x-slot:rail>
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <div class="mx-auto flex h-32 w-32 items-center justify-center rounded-full"
                  style="background: conic-gradient(var(--color-primary) 0deg {{ $activeDeg }}deg, var(--color-heritage-red) {{ $activeDeg }}deg 360deg);">
                 <div class="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white text-center">

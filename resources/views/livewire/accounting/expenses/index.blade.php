@@ -41,7 +41,7 @@
                     <span class="text-xs font-medium text-charcoal/70">Reason (recorded on the voucher)</span>
                     <input id="expense-reject-reason" type="text" wire:model="rejectReason"
                            placeholder="e.g. No receipt attached; wrong charge account"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('rejectReason')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -51,7 +51,7 @@
                     Reject
                 </button>
                 <button type="button" wire:click="cancelReject"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -60,7 +60,7 @@
 
     {{-- Record panel with the dynamic line grid. --}}
     @if ($showForm && $canRecord)
-        <section aria-label="Record expense" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record expense" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Expense</h2>
             <p class="mt-1 text-xs text-charcoal/60">
                 For the petty, cash-and-receipt purchase. Where the payee is a registered supplier with an invoice,
@@ -72,13 +72,13 @@
                     <label for="expense-form-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Date</span>
                         <input id="expense-form-date" type="date" wire:model="formDate"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="expense-form-payee-type" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Payee type</span>
                         <select id="expense-form-payee-type" wire:model.live="formPayeeType"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($payeeTypes as $payeeType)
                                 <option value="{{ $payeeType->value }}">{{ $payeeType->label() }}</option>
                             @endforeach
@@ -90,7 +90,7 @@
                             <span class="text-xs font-medium text-charcoal/70">Payee name</span>
                             <input id="expense-form-payee-name" type="text" wire:model="formPayeeName"
                                    placeholder="e.g. Librairie Centrale, Mme Ngo"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('formPayeeName')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -101,7 +101,7 @@
                                 {{ $formPayeeType === 'supplier' ? 'Supplier record id' : 'Staff user id' }}
                             </span>
                             <input id="expense-form-payee-id" type="number" wire:model="formPayeeId"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('formPayeeId')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -112,7 +112,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Description</span>
                         <input id="expense-form-description" type="text" wire:model="formDescription"
                                placeholder="e.g. Library books, cash purchase"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formDescription')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -121,7 +121,7 @@
                     <label for="expense-form-treasury" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Paid out of (class 5)</span>
                         <select id="expense-form-treasury" wire:model="formTreasuryAccountId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Choose a float…</option>
                             @foreach ($treasuryAccounts as $account)
                                 <option value="{{ $account['id'] }}">{{ $account['code'] }} — {{ $account['name'] }}</option>
@@ -136,19 +136,19 @@
                         <span class="text-xs font-medium text-charcoal/70">Receipt reference (required to submit)</span>
                         <input id="expense-form-attachment" type="text" wire:model="formAttachmentRef"
                                placeholder="e.g. RCPT-2026-0417 / photo file name"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="expense-form-notes" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Notes (optional)</span>
                         <input id="expense-form-notes" type="text" wire:model="formNotes"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
                 </div>
 
                 {{-- Charge lines --}}
-                <div class="rounded border border-sand">
-                    <div class="flex items-center justify-between border-b border-sand bg-sand/30 px-3 py-2">
+                <div class="rounded border border-border-primary">
+                    <div class="flex items-center justify-between border-b border-border-primary bg-sand/30 px-3 py-2">
                         <h3 class="text-sm font-semibold text-charcoal">Charge lines</h3>
                         <button type="button" wire:click="addLine"
                                 class="text-sm font-medium text-primary hover:underline">+ Add line</button>
@@ -167,11 +167,11 @@
                             </thead>
                             <tbody>
                                 @foreach ($formLines as $index => $line)
-                                    <tr wire:key="expense-line-{{ $index }}" class="border-t border-sand/60">
+                                    <tr wire:key="expense-line-{{ $index }}" class="border-t border-border-primary/60">
                                         <td class="px-3 py-2">
                                             <select wire:model="formLines.{{ $index }}.account_id"
                                                     aria-label="Charge account for line {{ $index + 1 }}"
-                                                    class="w-full rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                                    class="w-full rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                                 <option value="">Choose…</option>
                                                 @foreach ($chargeAccounts as $account)
                                                     <option value="{{ $account['id'] }}">{{ $account['code'] }} — {{ $account['name'] }}</option>
@@ -182,12 +182,12 @@
                                             <input type="text" wire:model="formLines.{{ $index }}.label"
                                                    aria-label="Label for line {{ $index + 1 }}"
                                                    placeholder="Defaults to the description"
-                                                   class="w-full rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                                   class="w-full rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                                         </td>
                                         <td class="px-3 py-2">
                                             <select wire:model="formLines.{{ $index }}.analytic_value_id"
                                                     aria-label="Analytic value for line {{ $index + 1 }}"
-                                                    class="w-full rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                                    class="w-full rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                                                 <option value="">—</option>
                                                 @foreach ($analyticValues as $value)
                                                     <option value="{{ $value['id'] }}">{{ $value['label'] }}</option>
@@ -198,7 +198,7 @@
                                             <input type="number" min="1" step="1"
                                                    wire:model.live.debounce.400ms="formLines.{{ $index }}.amount"
                                                    aria-label="Amount for line {{ $index + 1 }}"
-                                                   class="w-32 rounded border border-sand bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
+                                                   class="w-32 rounded border border-border-primary bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal"/>
                                             @error('formLines.'.$index.'.amount')
                                                 <span class="block text-xs text-heritage-red">{{ $message }}</span>
                                             @enderror
@@ -213,7 +213,7 @@
                                 @endforeach
                             </tbody>
                             <tfoot>
-                                <tr class="border-t border-sand bg-sand/20">
+                                <tr class="border-t border-border-primary bg-sand/20">
                                     <td colspan="3" class="px-3 py-2 text-right text-xs font-semibold uppercase text-charcoal/60">Total</td>
                                     <td class="px-3 py-2 text-right font-mono font-semibold text-charcoal">
                                         {{ Money::of($formTotal)->format(false) }}
@@ -231,7 +231,7 @@
                         Save draft
                     </button>
                     <button type="button" wire:click="toggleForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -283,13 +283,13 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="expense-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Voucher no., payee, description..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <label for="expense-filter-treasury" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Paid out of</span>
                 <select id="expense-filter-treasury" wire:model.live="treasury"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All floats</option>
                     @foreach ($treasuryAccounts as $account)
                         <option value="{{ $account['id'] }}">{{ $account['code'] }} — {{ $account['name'] }}</option>
@@ -300,17 +300,17 @@
             <label for="expense-filter-from" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">From</span>
                 <input id="expense-filter-from" type="date" wire:model.live="from"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <label for="expense-filter-to" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">To</span>
                 <input id="expense-filter-to" type="date" wire:model.live="to"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <button type="button" wire:click="resetFilters"
-                    class="self-end rounded border border-sand px-3 py-1.5 text-sm text-charcoal/70 hover:text-charcoal">
+                    class="self-end rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal/70 hover:text-charcoal">
                 Reset
             </button>
         </x-slot:filters>
@@ -378,7 +378,7 @@
 
         <x-slot:cards>
             @foreach ($rows as $row)
-                <article wire:key="expense-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="expense-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                     <div class="flex items-center justify-between gap-2">
                         <a href="{{ url('/accounting/expenses/'.$row->id) }}" class="font-mono text-sm text-primary hover:underline">{{ $row->expense_no }}</a>
                         <x-status-pill :status="$row->status->tone()" :label="$row->status->label()"/>
@@ -392,7 +392,7 @@
 
         <x-slot:rail>
             <div class="space-y-4">
-                <section aria-label="Spend by float" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Spend by float" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Spend by Float (90 days)</h3>
                     @if ($spendByFloat === [])
                         <p class="text-sm text-charcoal/60">Nothing posted in the last 90 days.</p>
@@ -415,7 +415,7 @@
                     @endif
                 </section>
 
-                <section aria-label="Spend by account" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Spend by account" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Top Charge Accounts (90 days)</h3>
                     @if ($spendByAccount === [])
                         <p class="text-sm text-charcoal/60">Nothing posted in the last 90 days.</p>

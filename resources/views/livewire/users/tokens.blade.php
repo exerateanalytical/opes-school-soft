@@ -11,7 +11,7 @@
 
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.api_tokens.title') }}</h1>
-        <span class="rounded border border-sand bg-sand/60 px-2 py-1 text-xs text-charcoal/70">
+        <span class="rounded border border-border-primary bg-sand/60 px-2 py-1 text-xs text-charcoal/70">
             {{ $user->name }} &middot; {{ $user->email }}
         </span>
     </div>
@@ -23,11 +23,11 @@
             <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.api_tokens.copy_now_title') }}</h2>
             <p class="mt-1 text-xs text-charcoal/70">{{ __('opes.api_tokens.copy_now_hint') }}</p>
             <code data-testid="plain-token"
-                  class="mt-2 block select-all break-all rounded border border-sand bg-white px-3 py-2 font-mono text-sm text-charcoal">{{ $plainTextToken }}</code>
+                  class="mt-2 block select-all break-all rounded border border-border-primary bg-white px-3 py-2 font-mono text-sm text-charcoal">{{ $plainTextToken }}</code>
         </div>
     @endif
 
-    <form wire:submit="createToken" class="space-y-5 rounded-lg border border-sand bg-white p-6 shadow-sm">
+    <form wire:submit="createToken" class="space-y-5 rounded-lg border border-border-primary bg-white p-6 shadow-sm">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
             {{ __('opes.api_tokens.create_title') }}
         </h2>
@@ -36,7 +36,7 @@
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.api_tokens.name_label') }}</span>
             <input id="token-name" type="text" wire:model="name"
                    placeholder="{{ __('opes.api_tokens.name_placeholder') }}"
-                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
             @error('name')
                 <span class="text-xs text-heritage-red">{{ $message }}</span>
             @enderror
@@ -48,10 +48,10 @@
             <div class="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($abilityOptions as $ability)
                     <label for="ability-{{ $ability->value }}"
-                           class="flex items-center gap-2 rounded border border-sand px-2 py-1.5 text-sm text-charcoal hover:border-primary/50">
+                           class="flex items-center gap-2 rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal hover:border-primary/50">
                         <input id="ability-{{ $ability->value }}" type="checkbox"
                                value="{{ $ability->value }}" wire:model="abilities"
-                               class="rounded border-sand text-primary focus:ring-primary/50"/>
+                               class="rounded border-border-primary text-primary focus:ring-primary/50"/>
                         <span class="flex flex-col">
                             <span>{{ $ability->label(app()->getLocale()) }}</span>
                             <span class="font-mono text-[10px] text-charcoal/50">{{ $ability->value }}</span>
@@ -64,21 +64,21 @@
             @enderror
         </fieldset>
 
-        <div class="flex items-center gap-2 border-t border-sand pt-5">
+        <div class="flex items-center gap-2 border-t border-border-primary pt-5">
             <button type="submit"
                     class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                 {{ __('opes.api_tokens.create_button') }}
             </button>
             <a href="{{ route('users.index') }}"
-               class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 {{ __('opes.users.cancel') }}
             </a>
         </div>
     </form>
 
-    <div class="overflow-hidden rounded-lg border border-sand bg-white shadow-sm">
+    <div class="overflow-hidden rounded-lg border border-border-primary bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <caption class="sr-only">{{ __('opes.api_tokens.table_caption') }}</caption>
                 <thead>
                     <tr class="bg-chrome text-white">
@@ -89,7 +89,7 @@
                         <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.api_tokens.col_actions') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($tokens as $token)
                         <tr wire:key="token-{{ $token->id }}">
                             <td class="px-4 py-2.5 font-medium text-charcoal">{{ $token->name }}</td>

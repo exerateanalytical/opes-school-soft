@@ -80,14 +80,14 @@
          not 124. Each list is derived from the marks this actor may enter
          (§7.5), so the select can never offer a scope the grid refuses. --}}
     <section aria-label="{{ __('opes.ui.filters') }}"
-             class="rounded border border-sand bg-white p-3">
+             class="rounded border border-border-primary bg-white p-3">
         <div class="flex flex-wrap items-end gap-3">
             <label for="marks-class-group" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium uppercase tracking-wide text-charcoal/60">
                     {{ __('opes.assessment_screen.scope_class_group') }}
                 </span>
                 <select id="marks-class-group" wire:model.live="classGroup"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="0">{{ __('opes.assessment_screen.choose') }}</option>
                     @foreach ($classGroupOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -100,7 +100,7 @@
                     {{ __('opes.assessment_screen.scope_allocation') }}
                 </span>
                 <select id="marks-allocation" wire:model.live="allocation"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="0">{{ __('opes.assessment_screen.choose') }}</option>
                     @foreach ($allocationOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -113,7 +113,7 @@
                     {{ __('opes.assessment_screen.scope_period') }}
                 </span>
                 <select id="marks-period" wire:model.live="period"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="0">{{ __('opes.assessment_screen.choose') }}</option>
                     @foreach ($periodOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -126,7 +126,7 @@
                     {{ __('opes.assessment_screen.scope_component') }}
                 </span>
                 <select id="marks-component" wire:model.live="component"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="0">{{ __('opes.assessment_screen.choose') }}</option>
                     @foreach ($componentOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -140,7 +140,7 @@
                     {{ __('opes.ui.filter') }}
                 </button>
                 <button type="button" wire:click="resetFilters"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     {{ __('opes.ui.reset') }}
                 </button>
             </div>
@@ -385,13 +385,13 @@
             @foreach ($stateControls as $control)
                 @if ($control['key'] !== '')
                     <span>
-                        <kbd class="rounded border border-sand bg-sand/60 px-1 font-mono">{{ $control['key'] }}</kbd>
+                        <kbd class="rounded border border-border-primary bg-sand/60 px-1 font-mono">{{ $control['key'] }}</kbd>
                         {{ $control['label'] }}
                     </span>
                 @endif
             @endforeach
-            <span><kbd class="rounded border border-sand bg-sand/60 px-1 font-mono">Del</kbd> {{ __('opes.assessment_screen.state_pending') }}</span>
-            <span><kbd class="rounded border border-sand bg-sand/60 px-1 font-mono">&uarr;&darr;</kbd> {{ __('opes.assessment_screen.keyboard_move') }}</span>
+            <span><kbd class="rounded border border-border-primary bg-sand/60 px-1 font-mono">Del</kbd> {{ __('opes.assessment_screen.state_pending') }}</span>
+            <span><kbd class="rounded border border-border-primary bg-sand/60 px-1 font-mono">&uarr;&darr;</kbd> {{ __('opes.assessment_screen.keyboard_move') }}</span>
         </p>
 
         @if ($grid === [])
@@ -399,9 +399,9 @@
         @else
             {{-- Rule 4 of x-list-screen, honoured by hand: the wide thing
                  scrolls inside ITSELF; the page body never scrolls sideways. --}}
-            <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+            <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                 <table class="w-full min-w-[48rem] border-collapse text-sm">
-                    <thead class="border-b border-sand bg-sand/40 text-left">
+                    <thead class="border-b border-border-primary bg-sand/40 text-left">
                         <tr>
                             <th scope="col" class="px-3 py-2 font-semibold text-charcoal/70">#</th>
                             <th scope="col" class="px-3 py-2 font-semibold text-charcoal/70">{{ __('opes.assessment_screen.col_matricule') }}</th>
@@ -417,7 +417,7 @@
                             <th scope="col" class="px-3 py-2 font-semibold text-charcoal/70">{{ __('opes.assessment_screen.col_workflow') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         <template x-for="(row, index) in rows" :key="row.mark_id">
                             <tr :class="conflicts[row.mark_id] ? 'bg-heritage-yellow/10' : ''">
                                 <td class="px-3 py-1.5 text-charcoal/50" x-text="index + 1"></td>
@@ -435,7 +435,7 @@
                                            @keydown="onKey($event, index, row)"
                                            :class="outOfRange(row)
                                                 ? 'w-20 rounded border border-heritage-red bg-heritage-red/5 px-2 py-1 text-sm font-semibold text-heritage-red'
-                                                : 'w-20 rounded border border-sand px-2 py-1 text-sm text-charcoal'">
+                                                : 'w-20 rounded border border-border-primary px-2 py-1 text-sm text-charcoal'">
                                     <span x-show="outOfRange(row)" class="ml-1 text-xs font-medium text-heritage-red">
                                         {{ __('opes.assessment_screen.out_of_range') }}
                                     </span>
@@ -454,13 +454,13 @@
                                                     :aria-pressed="row.state === '{{ $control['value'] }}'"
                                                     :class="row.state === '{{ $control['value'] }}'
                                                         ? 'rounded border border-primary bg-primary px-1.5 py-0.5 text-xs font-semibold text-white'
-                                                        : 'rounded border border-sand px-1.5 py-0.5 text-xs font-medium text-charcoal/70 hover:border-primary/50'"
+                                                        : 'rounded border border-border-primary px-1.5 py-0.5 text-xs font-medium text-charcoal/70 hover:border-primary/50'"
                                                     title="{{ $control['label'] }}">
                                                 {{ $control['marker'] !== '' ? $control['marker'] : __('opes.assessment_screen.state_short_scored') }}
                                             </button>
                                         @endforeach
                                         <span x-show="row.state === 'pending'"
-                                              class="rounded-full border border-sand bg-sand/60 px-2 py-0.5 text-xs font-medium text-charcoal/60">
+                                              class="rounded-full border border-border-primary bg-sand/60 px-2 py-0.5 text-xs font-medium text-charcoal/60">
                                             {{ __('opes.assessment_screen.state_pending') }}
                                         </span>
                                     </div>
@@ -478,7 +478,7 @@
                                            :disabled="locked(row)"
                                            placeholder="{{ __('opes.assessment_screen.reason_placeholder') }}"
                                            :aria-label="labels.reason + ' — ' + row.student"
-                                           class="w-44 rounded border border-sand px-2 py-1 text-sm text-charcoal">
+                                           class="w-44 rounded border border-border-primary px-2 py-1 text-sm text-charcoal">
                                 </td>
 
                                 <td class="px-3 py-1.5">
@@ -486,7 +486,7 @@
                                             ? 'inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary'
                                             : (row.workflow_state === 'submitted'
                                                 ? 'inline-flex items-center gap-1.5 rounded-full border border-heritage-yellow/60 bg-heritage-yellow/20 px-2.5 py-0.5 text-xs font-semibold text-charcoal'
-                                                : 'inline-flex items-center gap-1.5 rounded-full border border-sand bg-sand/60 px-2.5 py-0.5 text-xs font-semibold text-charcoal/70')">
+                                                : 'inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-sand/60 px-2.5 py-0.5 text-xs font-semibold text-charcoal/70')">
                                         <span x-text="labels[row.workflow_state] ?? row.workflow_state"></span>
                                     </span>
 
@@ -504,7 +504,7 @@
             </div>
 
             {{-- ── The live footer of §17, plus the two explicit actions. ─── --}}
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-sand bg-white px-3 py-2 text-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-border-primary bg-white px-3 py-2 text-sm">
                 <p class="text-charcoal/70">
                     <span x-text="enteredCount"></span> {{ __('opes.assessment_screen.footer_entered') }} ·
                     <span x-text="pendingCount"></span> {{ __('opes.assessment_screen.footer_pending') }} ·
@@ -562,7 +562,7 @@
                     <label for="reject-reason" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Reason for returning these marks</span>
                         <textarea id="reject-reason" wire:model="rejectReason" rows="2" maxlength="500"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('rejectReason')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -574,7 +574,7 @@
                             Confirm return
                         </button>
                         <button type="button" wire:click="toggleRejectForm"
-                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                             Cancel
                         </button>
                     </div>

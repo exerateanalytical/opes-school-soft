@@ -98,8 +98,8 @@
     {{-- ---------------------------------------------------------------
          Header: title, resolved window, axis + period selectors, actions
          --------------------------------------------------------------- --}}
-    <div class="rounded border border-sand bg-white">
-        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-sand px-4 py-3">
+    <div class="rounded border border-border-primary bg-white">
+        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-border-primary px-4 py-3">
             <div class="min-w-0">
                 <nav aria-label="Breadcrumb" class="text-xs text-charcoal/50">
                     Dashboard <span aria-hidden="true">/</span> Ledger <span aria-hidden="true">/</span> Finance Dashboard
@@ -122,7 +122,7 @@
 
             <div class="flex items-center gap-2 no-print">
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -136,7 +136,7 @@
             <label for="fd-axis" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Axis</span>
                 <select id="fd-axis" wire:model.live="axis"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="fiscal_year">Fiscal year</option>
                     <option value="academic_year">Academic year</option>
                 </select>
@@ -150,7 +150,7 @@
                                 @if ($period === $option['value']) aria-pressed="true" @else aria-pressed="false" @endif
                                 class="rounded border px-3 py-1.5 text-sm {{ $period === $option['value']
                                     ? 'border-primary bg-primary text-white'
-                                    : 'border-sand text-charcoal hover:border-primary/50' }}">
+                                    : 'border-border-primary text-charcoal hover:border-primary/50' }}">
                             {{ $option['label'] }}
                         </button>
                     @endforeach
@@ -161,7 +161,7 @@
                 <label for="fd-term" class="flex min-w-[12rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Term</span>
                     <select id="fd-term" wire:model.live="termId"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">Current</option>
                         @foreach ($termOptions as $term)
                             <option value="{{ $term['id'] }}">{{ $term['name'] }}</option>
@@ -174,12 +174,12 @@
                 <label for="fd-from" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">From</span>
                     <input id="fd-from" type="date" wire:model.live="from"
-                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                           class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 </label>
                 <label for="fd-to" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">To</span>
                     <input id="fd-to" type="date" wire:model.live="to"
-                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                           class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 </label>
             @endif
         </div>
@@ -204,8 +204,8 @@
     </div>
 
     {{-- ------------------------- Treasury Position (§11.3) ------------------------- --}}
-    <section aria-labelledby="fd-treasury" class="rounded border border-sand bg-white print-break-inside-avoid">
-        <div class="border-b border-sand px-4 py-3">
+    <section aria-labelledby="fd-treasury" class="rounded border border-border-primary bg-white print-break-inside-avoid">
+        <div class="border-b border-border-primary px-4 py-3">
             <h2 id="fd-treasury" class="text-sm font-semibold text-charcoal">Treasury Position</h2>
             <p class="mt-0.5 text-xs text-charcoal/60">
                 Where the money actually sits, as at {{ \Illuminate\Support\Carbon::parse($window['end'])->format('d/m/Y') }}.
@@ -218,7 +218,7 @@
         @else
             <div class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($treasury as $account)
-                    <div wire:key="treasury-{{ $account['code'] }}" class="rounded border border-sand px-3 py-3">
+                    <div wire:key="treasury-{{ $account['code'] }}" class="rounded border border-border-primary px-3 py-3">
                         <p class="text-xs font-medium uppercase tracking-wide text-charcoal/60">{{ $account['group'] }}</p>
                         <p class="mt-1 font-mono text-lg font-semibold {{ $account['balance'] < 0 ? 'text-heritage-red' : 'text-charcoal' }}">
                             {{ Money::of($account['balance'])->format(false) }}
@@ -230,7 +230,7 @@
                 @endforeach
             </div>
 
-            <div class="flex items-center justify-between border-t border-sand px-4 py-2.5">
+            <div class="flex items-center justify-between border-t border-border-primary px-4 py-2.5">
                 <span class="text-xs font-medium uppercase tracking-wide text-charcoal/60">Total treasury</span>
                 <span class="font-mono text-sm font-semibold text-charcoal">{{ Money::of($treasuryTotal)->format() }}</span>
             </div>
@@ -239,8 +239,8 @@
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {{-- ------------------- Income & Expenses overview (tabbed) ------------------- --}}
-        <section aria-labelledby="fd-overview" class="rounded border border-sand bg-white xl:col-span-2 print-break-inside-avoid">
-            <div class="flex flex-wrap items-start justify-between gap-2 border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-overview" class="rounded border border-border-primary bg-white xl:col-span-2 print-break-inside-avoid">
+            <div class="flex flex-wrap items-start justify-between gap-2 border-b border-border-primary px-4 py-3">
                 <div>
                     <h2 id="fd-overview" class="text-sm font-semibold text-charcoal">Income &amp; Expenses Overview</h2>
                     <p class="mt-0.5 text-xs text-charcoal/60">
@@ -252,7 +252,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-1 border-b border-sand px-4 no-print" role="tablist">
+            <div class="flex flex-wrap gap-1 border-b border-border-primary px-4 no-print" role="tablist">
                 @foreach ($chartTabs as $option)
                     <button type="button" role="tab" wire:click="selectChartTab('{{ $option['value'] }}')"
                             @if ($chartTab === $option['value']) aria-selected="true" @else aria-selected="false" @endif
@@ -325,8 +325,8 @@
         </section>
 
         {{-- ----------------------- Fee Collection Summary donut ----------------------- --}}
-        <section aria-labelledby="fd-donut" class="rounded border border-sand bg-white print-break-inside-avoid">
-            <div class="border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-donut" class="rounded border border-border-primary bg-white print-break-inside-avoid">
+            <div class="border-b border-border-primary px-4 py-3">
                 <h2 id="fd-donut" class="text-sm font-semibold text-charcoal">Fee Collection Summary</h2>
                 <p class="mt-0.5 text-xs text-charcoal/60">
                     All issued invoices raised on or before {{ \Illuminate\Support\Carbon::parse($window['end'])->format('d/m/Y') }}.
@@ -373,7 +373,7 @@
                                 <span class="font-mono text-charcoal">{{ Money::of($slice['value'])->format(false) }}</span>
                             </li>
                         @endforeach
-                        <li class="flex items-center justify-between gap-2 border-t border-sand pt-2 text-sm font-semibold">
+                        <li class="flex items-center justify-between gap-2 border-t border-border-primary pt-2 text-sm font-semibold">
                             <span class="text-charcoal">Total invoiced</span>
                             <span class="font-mono text-charcoal">{{ Money::of($collection['total'])->format(false) }}</span>
                         </li>
@@ -385,8 +385,8 @@
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {{-- --------------------------- Income by Category --------------------------- --}}
-        <section aria-labelledby="fd-income" class="rounded border border-sand bg-white print-break-inside-avoid">
-            <div class="border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-income" class="rounded border border-border-primary bg-white print-break-inside-avoid">
+            <div class="border-b border-border-primary px-4 py-3">
                 <h2 id="fd-income" class="text-sm font-semibold text-charcoal">Income by Category</h2>
                 <p class="mt-0.5 text-xs text-charcoal/60">Billed in {{ $window['label'] }}.</p>
             </div>
@@ -424,8 +424,8 @@
         </section>
 
         {{-- ------------------------- Top Outstanding Invoices ------------------------- --}}
-        <section aria-labelledby="fd-top-outstanding" class="rounded border border-sand bg-white xl:col-span-2 print-break-inside-avoid">
-            <div class="border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-top-outstanding" class="rounded border border-border-primary bg-white xl:col-span-2 print-break-inside-avoid">
+            <div class="border-b border-border-primary px-4 py-3">
                 <h2 id="fd-top-outstanding" class="text-sm font-semibold text-charcoal">Top Outstanding Invoices</h2>
                 <p class="mt-0.5 text-xs text-charcoal/60">
                     Balance as at {{ \Illuminate\Support\Carbon::parse($window['end'])->format('d/m/Y') }}: gross, less allocations, approved adjustments and issued credit notes.
@@ -446,7 +446,7 @@
                                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Outstanding</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($topOutstanding as $invoice)
                                 <tr wire:key="outstanding-{{ $invoice['id'] }}">
                                     <td class="px-4 py-2.5 font-mono text-charcoal">{{ $invoice['invoice_no'] }}</td>
@@ -469,8 +469,8 @@
     </div>
 
     {{-- --------------------------- Recent Transactions --------------------------- --}}
-    <section aria-labelledby="fd-transactions" class="rounded border border-sand bg-white print-break-inside-avoid">
-        <div class="border-b border-sand px-4 py-3">
+    <section aria-labelledby="fd-transactions" class="rounded border border-border-primary bg-white print-break-inside-avoid">
+        <div class="border-b border-border-primary px-4 py-3">
             <h2 id="fd-transactions" class="text-sm font-semibold text-charcoal">Recent Transactions</h2>
             <p class="mt-0.5 text-xs text-charcoal/60">The twelve most recent receipts in {{ $window['label'] }}.</p>
         </div>
@@ -492,7 +492,7 @@
                             <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($transactions as $transaction)
                             <tr wire:key="txn-{{ $transaction['id'] }}">
                                 <td class="px-4 py-2.5 text-charcoal/80">{{ \Illuminate\Support\Carbon::parse($transaction['date'])->format('d/m/Y') }}</td>
@@ -515,8 +515,8 @@
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {{-- ------------------------------ Quick Actions ------------------------------ --}}
-        <section aria-labelledby="fd-actions" class="rounded border border-sand bg-white no-print">
-            <div class="border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-actions" class="rounded border border-border-primary bg-white no-print">
+            <div class="border-b border-border-primary px-4 py-3">
                 <h2 id="fd-actions" class="text-sm font-semibold text-charcoal">Quick Actions</h2>
             </div>
 
@@ -526,7 +526,7 @@
                 <div class="flex flex-wrap gap-2 p-4">
                     @foreach ($quickActions as $action)
                         <a href="{{ $action['url'] }}"
-                           class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                           class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ $action['label'] }}
                         </a>
                     @endforeach
@@ -535,15 +535,15 @@
         </section>
 
         {{-- ------------------------------ Notifications ------------------------------ --}}
-        <section aria-labelledby="fd-notifications" class="rounded border border-sand bg-white print-break-inside-avoid">
-            <div class="border-b border-sand px-4 py-3">
+        <section aria-labelledby="fd-notifications" class="rounded border border-border-primary bg-white print-break-inside-avoid">
+            <div class="border-b border-border-primary px-4 py-3">
                 <h2 id="fd-notifications" class="text-sm font-semibold text-charcoal">Notifications</h2>
             </div>
 
             @if (count($notifications) === 0)
                 <x-empty-state class="m-4" message="Nothing needs attention: no overdue balance, no unallocated receipt, no draft entry." />
             @else
-                <ul class="divide-y divide-sand">
+                <ul class="divide-y divide-border-primary">
                     @foreach ($notifications as $notification)
                         <li class="flex items-start gap-3 px-4 py-3">
                             <x-status-pill :status="$notification['tone']" :label="$notification['tone'] === 'red' ? 'Action' : 'Review'"/>

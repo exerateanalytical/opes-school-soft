@@ -58,7 +58,7 @@
 
 {{-- Inline "Issue Stock" panel. --}}
 @if ($showIssueForm)
-    <section aria-label="Issue stock" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Issue stock" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Issue Stock</h2>
 
         <form wire:submit="saveIssueStock" class="mt-4 space-y-4">
@@ -66,7 +66,7 @@
                 <label for="issue-form-location" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Store location</span>
                     <select id="issue-form-location" wire:model="issueStoreLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -80,7 +80,7 @@
                 <label for="issue-form-item" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Item</span>
                     <select id="issue-form-item" wire:model="issueItemId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an item...</option>
                         @foreach ($itemOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -94,7 +94,7 @@
                 <label for="issue-form-quantity" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Quantity</span>
                     <input id="issue-form-quantity" type="text" wire:model="issueQuantity" placeholder="e.g. 10"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('issueQuantity')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -103,7 +103,7 @@
                 <label for="issue-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Issued on</span>
                     <input id="issue-form-date" type="date" wire:model="issuedOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('issuedOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -112,7 +112,7 @@
                 <label for="issue-form-notes" class="flex flex-col gap-1 sm:col-span-2">
                     <span class="text-xs font-medium text-charcoal/70">Notes (optional)</span>
                     <input id="issue-form-notes" type="text" wire:model="issueNotes"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
@@ -122,7 +122,7 @@
                     Issue stock
                 </button>
                 <button type="button" wire:click="toggleIssueForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -132,7 +132,7 @@
 
 {{-- Inline "New Requisition" panel. --}}
 @if ($showRequisitionForm)
-    <section aria-label="New requisition" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="New requisition" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">New Requisition</h2>
 
         <form wire:submit="saveRequisition" class="mt-4 space-y-4">
@@ -140,7 +140,7 @@
                 <label for="requisition-form-item" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Item</span>
                     <select id="requisition-form-item" wire:model="requisitionItemId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an item...</option>
                         @foreach ($itemOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -154,7 +154,7 @@
                 <label for="requisition-form-quantity" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Quantity</span>
                     <input id="requisition-form-quantity" type="text" wire:model="requisitionQuantity" placeholder="e.g. 5"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('requisitionQuantity')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -163,7 +163,7 @@
                 <label for="requisition-form-department" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Department (optional)</span>
                     <input id="requisition-form-department" type="text" wire:model="requisitionDepartment" placeholder="e.g. Science Lab"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('requisitionDepartment')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -172,7 +172,7 @@
                 <label for="requisition-form-needed-on" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Needed by (optional)</span>
                     <input id="requisition-form-needed-on" type="date" wire:model="requisitionNeededOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('requisitionNeededOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -181,7 +181,7 @@
                 <label for="requisition-form-notes" class="flex flex-col gap-1 sm:col-span-2">
                     <span class="text-xs font-medium text-charcoal/70">Notes (optional)</span>
                     <input id="requisition-form-notes" type="text" wire:model="requisitionNotes"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
@@ -191,7 +191,7 @@
                     Submit requisition
                 </button>
                 <button type="button" wire:click="toggleRequisitionForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -201,7 +201,7 @@
 
 {{-- Inline "Receive Stock" panel. --}}
 @if ($showReceiveForm)
-    <section aria-label="Receive stock" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Receive stock" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Receive Stock</h2>
 
         <form wire:submit="saveReceiveStock" class="mt-4 space-y-4">
@@ -209,7 +209,7 @@
                 <label for="receive-form-location" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Store location</span>
                     <select id="receive-form-location" wire:model="receiveStoreLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -223,7 +223,7 @@
                 <label for="receive-form-item" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Item</span>
                     <select id="receive-form-item" wire:model="receiveItemId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an item...</option>
                         @foreach ($itemOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -237,7 +237,7 @@
                 <label for="receive-form-quantity" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Quantity</span>
                     <input id="receive-form-quantity" type="text" wire:model="receiveQuantity" placeholder="e.g. 10"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('receiveQuantity')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -246,7 +246,7 @@
                 <label for="receive-form-unit-cost" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Unit cost (FCFA)</span>
                     <input id="receive-form-unit-cost" type="text" wire:model="receiveUnitCost" placeholder="e.g. 500"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('receiveUnitCost')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -255,7 +255,7 @@
                 <label for="receive-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Received on</span>
                     <input id="receive-form-date" type="date" wire:model="receivedOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('receivedOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -264,7 +264,7 @@
                 <label for="receive-form-document-ref" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Source/supplier reference (optional)</span>
                     <input id="receive-form-document-ref" type="text" wire:model="receiveDocumentRef" placeholder="e.g. Invoice #123"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
@@ -274,7 +274,7 @@
                     Receive stock
                 </button>
                 <button type="button" wire:click="toggleReceiveForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -284,7 +284,7 @@
 
 {{-- Inline "Transfer Stock" panel. --}}
 @if ($showTransferForm)
-    <section aria-label="Transfer stock" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Transfer stock" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Transfer Stock</h2>
 
         <form wire:submit="saveTransferStock" class="mt-4 space-y-4">
@@ -292,7 +292,7 @@
                 <label for="transfer-form-from" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">From location</span>
                     <select id="transfer-form-from" wire:model="transferFromLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -306,7 +306,7 @@
                 <label for="transfer-form-to" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">To location</span>
                     <select id="transfer-form-to" wire:model="transferToLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -320,7 +320,7 @@
                 <label for="transfer-form-item" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Item</span>
                     <select id="transfer-form-item" wire:model="transferItemId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an item...</option>
                         @foreach ($itemOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -334,7 +334,7 @@
                 <label for="transfer-form-quantity" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Quantity</span>
                     <input id="transfer-form-quantity" type="text" wire:model="transferQuantity" placeholder="e.g. 10"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('transferQuantity')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -343,7 +343,7 @@
                 <label for="transfer-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Transferred on</span>
                     <input id="transfer-form-date" type="date" wire:model="transferredOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('transferredOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -352,7 +352,7 @@
                 <label for="transfer-form-notes" class="flex flex-col gap-1 sm:col-span-2">
                     <span class="text-xs font-medium text-charcoal/70">Notes (optional)</span>
                     <input id="transfer-form-notes" type="text" wire:model="transferNotes"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                 </label>
             </div>
 
@@ -362,7 +362,7 @@
                     Transfer stock
                 </button>
                 <button type="button" wire:click="toggleTransferForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -372,7 +372,7 @@
 
 {{-- Inline "Adjust Stock" panel. --}}
 @if ($showAdjustForm)
-    <section aria-label="Adjust stock" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Adjust stock" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Adjust Stock</h2>
 
         <form wire:submit="saveAdjustStock" class="mt-4 space-y-4">
@@ -380,7 +380,7 @@
                 <label for="adjust-form-location" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Store location</span>
                     <select id="adjust-form-location" wire:model="adjustStoreLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -394,7 +394,7 @@
                 <label for="adjust-form-item" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Item</span>
                     <select id="adjust-form-item" wire:model="adjustItemId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an item...</option>
                         @foreach ($itemOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -408,7 +408,7 @@
                 <label for="adjust-form-direction" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Direction</span>
                     <select id="adjust-form-direction" wire:model="adjustDirection"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="out">Decrease (write-off/damage/loss)</option>
                         <option value="in">Increase (found stock)</option>
                     </select>
@@ -420,7 +420,7 @@
                 <label for="adjust-form-quantity" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Quantity</span>
                     <input id="adjust-form-quantity" type="text" wire:model="adjustQuantity" placeholder="e.g. 2"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('adjustQuantity')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -429,7 +429,7 @@
                 <label for="adjust-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Adjusted on</span>
                     <input id="adjust-form-date" type="date" wire:model="adjustedOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('adjustedOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -438,7 +438,7 @@
                 <label for="adjust-form-total-cost" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Total cost (FCFA, required only for an increase onto an empty bin)</span>
                     <input id="adjust-form-total-cost" type="text" wire:model="adjustTotalCost" placeholder="e.g. 5000"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('adjustTotalCost')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -447,7 +447,7 @@
                 <label for="adjust-form-reason" class="flex flex-col gap-1 sm:col-span-2">
                     <span class="text-xs font-medium text-charcoal/70">Reason (required)</span>
                     <input id="adjust-form-reason" type="text" wire:model="adjustReason" placeholder="e.g. Damaged in storage"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('adjustReason')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -460,7 +460,7 @@
                     Adjust stock
                 </button>
                 <button type="button" wire:click="toggleAdjustForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -470,7 +470,7 @@
 
 {{-- Inline "Start Stock Take" panel. --}}
 @if ($showStockTakeForm)
-    <section aria-label="Start stock take" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Start stock take" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Start Stock Take</h2>
 
         <form wire:submit="saveStartStockTake" class="mt-4 space-y-4">
@@ -478,7 +478,7 @@
                 <label for="stock-take-form-location" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Store location</span>
                     <select id="stock-take-form-location" wire:model="stockTakeLocationId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select a location...</option>
                         @foreach ($locationOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -492,7 +492,7 @@
                 <label for="stock-take-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Count date</span>
                     <input id="stock-take-form-date" type="date" wire:model="stockTakeCountDate"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('stockTakeCountDate')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -507,7 +507,7 @@
                     Start stock take
                 </button>
                 <button type="button" wire:click="toggleStockTakeForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -517,7 +517,7 @@
 
 {{-- Inline "Record Counts" panel for the stock take being counted. --}}
 @if ($recordingStockTakeId !== null)
-    <section aria-label="Record stock take counts" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Record stock take counts" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Record Counts</h2>
 
         @error('stockTakeCounts')
@@ -537,18 +537,18 @@
                     </thead>
                     <tbody>
                         @foreach ($recordingLines as $line)
-                            <tr wire:key="stock-take-line-{{ $line['item_id'] }}" class="border-b border-sand">
+                            <tr wire:key="stock-take-line-{{ $line['item_id'] }}" class="border-b border-border-primary">
                                 <td class="px-3 py-2 font-medium text-charcoal">{{ $line['item_code'] }} · {{ $line['name'] }}</td>
                                 <td class="px-3 py-2 text-right tabular-nums text-charcoal/70">{{ $line['system_quantity'] }}</td>
                                 <td class="px-3 py-2">
                                     <input type="text" wire:model="stockTakeCounts.{{ $line['item_id'] }}.counted_quantity"
                                            placeholder="e.g. 10"
-                                           class="w-28 rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
+                                           class="w-28 rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
                                 </td>
                                 <td class="px-3 py-2">
                                     <input type="text" wire:model="stockTakeCounts.{{ $line['item_id'] }}.reason_code"
                                            placeholder="optional"
-                                           class="w-40 rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
+                                           class="w-40 rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
                                 </td>
                             </tr>
                         @endforeach
@@ -562,7 +562,7 @@
                     Save counts
                 </button>
                 <button type="button" wire:click="cancelRecordingCounts"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -579,25 +579,25 @@
     <x-slot:actions>
         @can(\App\Modules\Inventory\Domain\InventoryPermission::MANAGE)
             <button type="button" wire:click="toggleReceiveForm"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showReceiveForm ? 'Hide receive form' : 'Receive Stock' }}
             </button>
         @endcan
         @can(\App\Modules\Inventory\Domain\InventoryPermission::POST)
             <button type="button" wire:click="toggleIssueForm"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showIssueForm ? 'Hide issue form' : 'Issue Stock' }}
             </button>
             <button type="button" wire:click="toggleTransferForm"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showTransferForm ? 'Hide transfer form' : 'Transfer Stock' }}
             </button>
             <button type="button" wire:click="toggleAdjustForm"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showAdjustForm ? 'Hide adjust form' : 'Adjust Stock' }}
             </button>
             <button type="button" wire:click="toggleStockTakeForm"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showStockTakeForm ? 'Hide stock take form' : 'Start Stock Take' }}
             </button>
         @endcan
@@ -639,7 +639,7 @@
             <label for="inventory-filter-category" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Category</span>
                 <select id="inventory-filter-category" wire:model.live="category"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All categories</option>
                     @foreach ($categoryOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -652,7 +652,7 @@
             <label for="inventory-filter-location" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Location</span>
                 <select id="inventory-filter-location" wire:model.live="location"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All locations</option>
                     @foreach ($locationOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -665,7 +665,7 @@
             <label for="inventory-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="inventory-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -678,7 +678,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="inventory-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search item, code, requisition..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -751,7 +751,7 @@
                 </td>
                 <td class="px-4 py-2.5">
                     <a href="{{ route('inventory.items.show', $row->id) }}"
-                       class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                       class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
                         View
                     </a>
                 </td>
@@ -778,12 +778,12 @@
                             <div class="flex items-center gap-2">
                                 <button type="button" wire:click="approveRequisition({{ $row->id }})"
                                         wire:confirm="Approve requisition {{ $row->requisition_no }}?"
-                                        class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                                        class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
                                     Approve
                                 </button>
                                 <button type="button" wire:click="rejectRequisition({{ $row->id }})"
                                         wire:confirm="Reject requisition {{ $row->requisition_no }}?"
-                                        class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-heritage-red hover:bg-sand/40">
+                                        class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-heritage-red hover:bg-sand/40">
                                     Reject
                                 </button>
                             </div>
@@ -802,19 +802,19 @@
                     <td class="px-4 py-2.5">
                         @if ($row->status === 'counting')
                             <button type="button" wire:click="startRecordingCounts({{ $row->id }})"
-                                    class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
                                 Record Counts
                             </button>
                         @elseif ($row->status === 'counted')
                             <button type="button" wire:click="approveStockTake({{ $row->id }})"
                                     wire:confirm="Approve stock take {{ $row->reference }}?"
-                                    class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
                                 Approve
                             </button>
                         @elseif ($row->status === 'approved')
                             <button type="button" wire:click="postStockTakeVariance({{ $row->id }})"
                                     wire:confirm="Post the variance for stock take {{ $row->reference }}? This adjusts inventory and unfreezes the location."
-                                    class="rounded border border-sand px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
                                 Post Variance
                             </button>
                         @endif
@@ -828,7 +828,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="inventory-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'items')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->name }}</p>

@@ -45,19 +45,19 @@
         </p>
     @endif
 
-    <section class="rounded border border-sand bg-white p-4" aria-label="Backup actions">
+    <section class="rounded border border-border-primary bg-white p-4" aria-label="Backup actions">
         <div class="flex flex-wrap gap-2">
             <button type="button" wire:click="runBackup" wire:loading.attr="disabled"
                     class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">
                 Run backup now
             </button>
             <button type="button" wire:click="prune" wire:loading.attr="disabled"
-                    class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal disabled:opacity-50">
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal disabled:opacity-50">
                 Apply retention policy
             </button>
             @if ($canRestore)
                 <button type="button" wire:click="runDrill" wire:loading.attr="disabled"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal disabled:opacity-50">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal disabled:opacity-50">
                     Run restore drill
                 </button>
             @endif
@@ -68,8 +68,8 @@
         </p>
     </section>
 
-    <section class="rounded border border-sand bg-white" aria-label="Backups">
-        <h2 class="border-b border-sand px-4 py-3 text-sm font-semibold text-charcoal">Backups</h2>
+    <section class="rounded border border-border-primary bg-white" aria-label="Backups">
+        <h2 class="border-b border-border-primary px-4 py-3 text-sm font-semibold text-charcoal">Backups</h2>
 
         @if ($backups->isEmpty())
             <p class="px-4 py-6 text-sm text-charcoal/60">
@@ -91,7 +91,7 @@
                     </thead>
                     <tbody>
                         @foreach ($backups as $backup)
-                            <tr class="border-t border-sand/60">
+                            <tr class="border-t border-border-primary/60">
                                 <td class="px-4 py-2">{{ $backup->completed_at?->diffForHumans() ?? 'running' }}</td>
                                 <td class="px-4 py-2">{{ $backup->kind }}</td>
                                 <td class="px-4 py-2">
@@ -134,7 +134,7 @@
             <label class="mt-3 flex max-w-sm flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Type RESTORE to unlock</span>
                 <input type="text" wire:model="restoreConfirmation"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
             </label>
 
             @if ($restoreCommand !== null)
@@ -145,21 +145,21 @@
             @endif
         </section>
     @else
-        <p class="rounded border border-sand bg-white p-3 text-xs text-charcoal/60">
+        <p class="rounded border border-border-primary bg-white p-3 text-xs text-charcoal/60">
             Restore is withheld from your role by design, including from Administrator. It is granted deliberately,
             to a named person, for the day it is needed.
         </p>
     @endif
 
-    <section class="rounded border border-sand bg-white" aria-label="Restore drills">
-        <h2 class="border-b border-sand px-4 py-3 text-sm font-semibold text-charcoal">Restore drills</h2>
+    <section class="rounded border border-border-primary bg-white" aria-label="Restore drills">
+        <h2 class="border-b border-border-primary px-4 py-3 text-sm font-semibold text-charcoal">Restore drills</h2>
 
         @if ($drills->isEmpty())
             <p class="px-4 py-6 text-sm text-charcoal/60">
                 No restore drill has ever run. Until one passes, “we have backups” is untested.
             </p>
         @else
-            <ul class="divide-y divide-sand/60 text-sm">
+            <ul class="divide-y divide-border-primary/60 text-sm">
                 @foreach ($drills as $drill)
                     <li class="px-4 py-2">
                         <span class="{{ $drill->status === 'passed' ? 'text-charcoal' : 'text-heritage-red' }}">

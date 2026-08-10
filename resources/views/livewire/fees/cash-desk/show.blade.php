@@ -30,17 +30,17 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <span class="rounded-full border px-3 py-1 text-xs font-medium
-                {{ $session['status'] === 'open' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-sand bg-sand/40 text-charcoal/70' }}">
+                {{ $session['status'] === 'open' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border-primary bg-sand/40 text-charcoal/70' }}">
                 {{ ucfirst($session['status']) }}
             </span>
             <button type="button" wire:click="exportPdf"
-                    class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Export PDF
             </button>
         </div>
     </div>
 
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <dl class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
                 <dt class="text-xs uppercase tracking-wide text-charcoal/60">Cash box</dt>
@@ -63,8 +63,8 @@
         </dl>
     </section>
 
-    <section class="rounded border border-sand bg-white">
-        <h2 class="border-b border-sand px-4 py-3 text-sm font-semibold text-primary">
+    <section class="rounded border border-border-primary bg-white">
+        <h2 class="border-b border-border-primary px-4 py-3 text-sm font-semibold text-primary">
             Collections ({{ $session['collections'] }})
         </h2>
 
@@ -82,7 +82,7 @@
                             <th scope="col" class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide">Amount</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($collections as $line)
                             <tr wire:key="cds-line-{{ $loop->index }}">
                                 <td class="px-4 py-2 font-mono text-xs text-charcoal/70">{{ $line['receipt_no'] }}</td>
@@ -98,7 +98,7 @@
         @endif
     </section>
 
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <h2 class="text-sm font-semibold text-primary">Close-out</h2>
         <dl class="mt-3 space-y-2 text-sm">
             <div class="flex justify-between gap-2">
@@ -109,7 +109,7 @@
                 <dt class="text-charcoal/60">Collections</dt>
                 <dd class="font-mono text-charcoal">{{ Money::of($session['collected'])->format() }}</dd>
             </div>
-            <div class="flex justify-between gap-2 border-t border-sand pt-2">
+            <div class="flex justify-between gap-2 border-t border-border-primary pt-2">
                 <dt class="font-medium text-charcoal">Expected in till</dt>
                 <dd class="font-mono font-semibold text-charcoal">{{ Money::of($session['expected'])->format() }}</dd>
             </div>
@@ -119,7 +119,7 @@
                     <dt class="text-charcoal/60">Counted</dt>
                     <dd class="font-mono text-charcoal">{{ Money::of((int) $session['counted_cash'])->format() }}</dd>
                 </div>
-                <div class="flex justify-between gap-2 border-t border-sand pt-2">
+                <div class="flex justify-between gap-2 border-t border-border-primary pt-2">
                     <dt class="font-medium text-charcoal">Variance</dt>
                     <dd class="font-mono font-bold {{ (int) $session['variance'] === 0 ? 'text-charcoal' : 'text-heritage-red' }}">
                         {{ Money::of((int) $session['variance'])->format() }}

@@ -54,7 +54,7 @@
     <div class="mb-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{ $message }}</div>
 @enderror
 
-<div class="mb-4 rounded border border-sand bg-white">
+<div class="mb-4 rounded border border-border-primary bg-white">
     <div class="flex items-center justify-between px-4 py-3">
         <h2 class="text-sm font-semibold text-charcoal">Compute Results</h2>
         <button type="button" wire:click="toggleComputeForm"
@@ -64,11 +64,11 @@
     </div>
 
     @if ($showComputeForm)
-        <form wire:submit.prevent="computeResults" class="flex flex-wrap items-end gap-3 border-t border-sand px-4 py-3">
+        <form wire:submit.prevent="computeResults" class="flex flex-wrap items-end gap-3 border-t border-border-primary px-4 py-3">
             <label for="compute-period" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Period</span>
                 <select id="compute-period" wire:model="computePeriodId"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">Choose a period</option>
                     @foreach ($periodOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -79,7 +79,7 @@
             <label for="compute-class" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Class</span>
                 <select id="compute-class" wire:model="computeClassGroupId"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">Choose a class</option>
                     @foreach ($classGroupOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -128,7 +128,7 @@
         <label for="results-filter-period" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Period</span>
             <select id="results-filter-period" wire:model.live="period"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All periods</option>
                 @foreach ($periodOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -139,7 +139,7 @@
         <label for="results-filter-class" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Class</span>
             <select id="results-filter-class" wire:model.live="classGroup"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All classes</option>
                 @foreach ($classGroupOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -151,7 +151,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="results-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search student, class..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -305,7 +305,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="results-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'results')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>

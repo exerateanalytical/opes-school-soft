@@ -2,13 +2,13 @@
     @include('livewire.guardians.portal._child-tabs', ['studentId' => $studentId, 'childName' => $childName, 'active' => 'documents'])
 
     @if ($canSchoolIssued)
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.guardian_portal.documents_school_issued') }}</h2>
 
             @if ($schoolIssued->isEmpty())
                 <p class="mt-2 text-sm text-charcoal/60">{{ __('opes.guardian_portal.documents_empty') }}</p>
             @else
-                <ul class="mt-2 divide-y divide-sand text-sm">
+                <ul class="mt-2 divide-y divide-border-primary text-sm">
                     @foreach ($schoolIssued as $document)
                         <li class="flex items-center justify-between gap-2 py-1.5">
                             <span class="font-mono text-xs">{{ $document->serial ?? '—' }}</span>
@@ -22,13 +22,13 @@
     @endif
 
     @if ($canGuardianSupplied)
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.guardian_portal.documents_guardian_supplied') }}</h2>
 
             @if ($guardianSupplied->isEmpty())
                 <p class="mt-2 text-sm text-charcoal/60">{{ __('opes.guardian_portal.documents_empty') }}</p>
             @else
-                <ul class="mt-2 divide-y divide-sand text-sm">
+                <ul class="mt-2 divide-y divide-border-primary text-sm">
                     @foreach ($guardianSupplied as $document)
                         <li class="flex items-center justify-between gap-2 py-1.5">
                             <span>{{ $document->title }}</span>

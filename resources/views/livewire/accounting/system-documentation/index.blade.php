@@ -18,7 +18,7 @@
         <p class="rounded border border-heritage-red/40 bg-heritage-red/10 p-3 text-sm text-heritage-red" role="alert">{{ $error }}</p>
     @endif
 
-    <section class="overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+    <section class="overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
         <table class="min-w-full text-sm">
             <thead class="bg-sand/40">
             <tr>
@@ -31,7 +31,7 @@
             </thead>
             <tbody>
             @forelse ($snapshots as $snapshot)
-                <tr class="border-t border-sand">
+                <tr class="border-t border-border-primary">
                     <td class="p-2 whitespace-nowrap">{{ $snapshot->generated_at?->format('Y-m-d H:i') }}</td>
                     <td class="p-2">{{ $snapshot->software_version }}</td>
                     <td class="p-2 font-mono text-xs">{{ mb_substr($snapshot->schema_version, -30) }}</td>

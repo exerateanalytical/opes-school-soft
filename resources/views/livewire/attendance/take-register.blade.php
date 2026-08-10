@@ -41,12 +41,12 @@
     @enderror
 
     {{-- ── Filter bar: class · date · session (· slot in per-lesson) ──── --}}
-    <div class="rounded border border-sand bg-white p-3">
+    <div class="rounded border border-border-primary bg-white p-3">
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block text-xs font-medium text-charcoal/70">
                 {{ __('attendance.filter_class') }}
                 <select wire:model.live="classGroupId"
-                        class="mt-1 w-full rounded border-sand text-sm focus:border-primary focus:ring-primary">
+                        class="mt-1 w-full rounded border-border-primary text-sm focus:border-primary focus:ring-primary">
                     <option value="">{{ __('attendance.select_class') }}</option>
                     @foreach ($classGroups as $group)
                         <option value="{{ $group->id }}">{{ $group->name }}</option>
@@ -57,14 +57,14 @@
             <label class="block text-xs font-medium text-charcoal/70">
                 {{ __('attendance.filter_date') }}
                 <input type="date" wire:model.live="date"
-                       class="mt-1 w-full rounded border-sand text-sm focus:border-primary focus:ring-primary"/>
+                       class="mt-1 w-full rounded border-border-primary text-sm focus:border-primary focus:ring-primary"/>
             </label>
 
             @if (! $perLesson)
                 <label class="block text-xs font-medium text-charcoal/70">
                     {{ __('attendance.filter_session') }}
                     <select wire:model.live="session"
-                            class="mt-1 w-full rounded border-sand text-sm focus:border-primary focus:ring-primary">
+                            class="mt-1 w-full rounded border-border-primary text-sm focus:border-primary focus:ring-primary">
                         <option value="full_day">{{ __('attendance.session.full_day') }}</option>
                         <option value="morning">{{ __('attendance.session.morning') }}</option>
                         <option value="afternoon">{{ __('attendance.session.afternoon') }}</option>
@@ -74,7 +74,7 @@
                 <label class="block text-xs font-medium text-charcoal/70">
                     {{ __('attendance.filter_slot') }}
                     <select wire:model.live="timetableSlotId"
-                            class="mt-1 w-full rounded border-sand text-sm focus:border-primary focus:ring-primary">
+                            class="mt-1 w-full rounded border-border-primary text-sm focus:border-primary focus:ring-primary">
                         <option value="">{{ __('attendance.select_slot') }}</option>
                         @foreach ($slots as $slot)
                             <option value="{{ $slot->id }}">{{ $slot->period_name }} — {{ $slot->subject_name }}</option>
@@ -109,8 +109,8 @@
                  }"
                  x-init="tally()"
                  @change="tally()">
-                <div class="rounded border border-sand bg-white">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-sand px-4 py-3">
+                <div class="rounded border border-border-primary bg-white">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border-primary px-4 py-3">
                         <h2 class="text-sm font-semibold text-charcoal">
                             {{ __('attendance.taking_for', ['class' => $selectedName]) }}
                         </h2>
@@ -131,7 +131,7 @@
                             <p class="text-xs font-medium text-charcoal/60">{{ __('attendance.status.late') }}</p>
                             <p class="text-xl font-semibold text-charcoal" x-text="counts.late"></p>
                         </div>
-                        <div class="rounded border border-sand bg-cream px-3 py-2">
+                        <div class="rounded border border-border-primary bg-cream px-3 py-2">
                             <p class="text-xs font-medium text-charcoal/60">{{ __('attendance.total_students') }}</p>
                             <p class="text-xl font-semibold text-charcoal">{{ count($roster) }}</p>
                         </div>
@@ -144,7 +144,7 @@
                     @endif
 
                     <div class="-mx-px mt-3 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-sand text-sm">
+                        <table class="min-w-full divide-y divide-border-primary text-sm">
                             <thead class="bg-cream text-left text-xs uppercase tracking-wide text-charcoal/60">
                                 <tr>
                                     <th scope="col" class="px-4 py-2">#</th>
@@ -153,7 +153,7 @@
                                     <th scope="col" class="px-4 py-2">{{ __('attendance.col_status') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-sand bg-white">
+                            <tbody class="divide-y divide-border-primary bg-white">
                                 @foreach ($roster as $row)
                                     @php
                                         $enrollmentId = (int) $row->enrollment_id;
@@ -184,14 +184,14 @@
                                                                    value="{{ $option->value }}"
                                                                    wire:model="marks.{{ $enrollmentId }}"
                                                                    @disabled($disabled)
-                                                                   class="h-3.5 w-3.5 border-sand text-primary focus:ring-primary"/>
+                                                                   class="h-3.5 w-3.5 border-border-primary text-primary focus:ring-primary"/>
                                                             {{ $option->label() }}
                                                         </label>
                                                     @endforeach
                                                     @if (($marks[$enrollmentId] ?? '') === 'late')
                                                         <input type="number" min="1" max="480" placeholder="{{ __('attendance.minutes') }}"
                                                                wire:model="minutesLate.{{ $enrollmentId }}"
-                                                               class="w-20 rounded border-sand text-xs focus:border-primary focus:ring-primary"/>
+                                                               class="w-20 rounded border-border-primary text-xs focus:border-primary focus:ring-primary"/>
                                                     @endif
                                                 </div>
                                             @endif
@@ -202,14 +202,14 @@
                         </table>
                     </div>
 
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-t border-sand px-4 py-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-t border-border-primary px-4 py-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <button type="button" wire:click="markAllPresent"
-                                    class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                                 {{ __('attendance.mark_all_present') }}
                             </button>
                             <button type="button" wire:click="clearAll"
-                                    class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                                 {{ __('attendance.clear_all') }}
                             </button>
                         </div>
@@ -223,7 +223,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <input type="text" wire:model="amendReason"
                                        placeholder="{{ __('attendance.amend_reason_placeholder') }}"
-                                       class="w-56 rounded border-sand text-sm focus:border-primary focus:ring-primary"/>
+                                       class="w-56 rounded border-border-primary text-sm focus:border-primary focus:ring-primary"/>
                                 <button type="button" wire:click="amend"
                                         class="rounded border border-chrome bg-chrome px-4 py-1.5 text-sm font-semibold text-white hover:bg-chrome-light">
                                     {{ __('attendance.save_amendment') }}
@@ -239,7 +239,7 @@
 
             {{-- ── Right rail: saved-register summary ─────────────────── --}}
             <div class="min-w-0 space-y-4">
-                <div class="rounded border border-sand bg-white p-4">
+                <div class="rounded border border-border-primary bg-white p-4">
                     <h2 class="text-sm font-semibold text-charcoal">{{ __('attendance.summary_title') }}</h2>
 
                     @if ($register === null)
@@ -272,7 +272,7 @@
                     @endif
                 </div>
 
-                <div class="rounded border border-sand bg-white p-4">
+                <div class="rounded border border-border-primary bg-white p-4">
                     <h2 class="text-sm font-semibold text-charcoal">{{ __('attendance.quick_actions') }}</h2>
                     <ul class="mt-2 space-y-1 text-sm">
                         <li>

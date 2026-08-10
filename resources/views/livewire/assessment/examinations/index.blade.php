@@ -41,7 +41,7 @@
 
 {{-- Inline schedule-exam panel. --}}
 @if ($showScheduleForm)
-    <section aria-label="Schedule exam" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Schedule exam" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Schedule Exam</h2>
 
         <form wire:submit="saveSchedule" class="mt-4 space-y-4">
@@ -49,7 +49,7 @@
                 <label for="schedule-form-exam-type" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Exam type ID</span>
                     <input id="schedule-form-exam-type" type="number" wire:model="formExamTypeId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formExamTypeId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -58,7 +58,7 @@
                 <label for="schedule-form-period" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Assessment period ID</span>
                     <input id="schedule-form-period" type="number" wire:model="formAssessmentPeriodId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formAssessmentPeriodId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -67,7 +67,7 @@
                 <label for="schedule-form-allocation" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Subject allocation ID</span>
                     <input id="schedule-form-allocation" type="number" wire:model="formSubjectAllocationId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formSubjectAllocationId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -76,7 +76,7 @@
                 <label for="schedule-form-class-group" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Class group ID</span>
                     <input id="schedule-form-class-group" type="number" wire:model="formClassGroupId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formClassGroupId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -85,7 +85,7 @@
                 <label for="schedule-form-date" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Date</span>
                     <input id="schedule-form-date" type="date" wire:model="formScheduledOn"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formScheduledOn')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -94,7 +94,7 @@
                 <label for="schedule-form-time" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Start time (HH:MM)</span>
                     <input id="schedule-form-time" type="time" wire:model="formStartsAt"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formStartsAt')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -103,7 +103,7 @@
                 <label for="schedule-form-duration" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Duration (minutes)</span>
                     <input id="schedule-form-duration" type="number" wire:model="formDurationMinutes"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formDurationMinutes')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -113,7 +113,7 @@
                     <span class="text-xs font-medium text-charcoal/70">Max score</span>
                     <input id="schedule-form-max-score" type="text" wire:model="formMaxScore"
                            placeholder="e.g. 20"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formMaxScore')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -122,7 +122,7 @@
                 <label for="schedule-form-room" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Room ID (optional)</span>
                     <input id="schedule-form-room" type="number" wire:model="formRoomId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('formRoomId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -135,7 +135,7 @@
                     Schedule exam
                 </button>
                 <button type="button" wire:click="toggleScheduleForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -145,7 +145,7 @@
 
 {{-- Inline assign-invigilator panel. --}}
 @if ($showInvigilatorForm)
-    <section aria-label="Assign invigilator" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section aria-label="Assign invigilator" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-base font-semibold text-charcoal">Assign Invigilator</h2>
 
         <form wire:submit="saveInvigilator" class="mt-4 space-y-4">
@@ -153,7 +153,7 @@
                 <label for="invigilator-form-exam" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Exam</span>
                     <select id="invigilator-form-exam" wire:model="invExamId"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="">Select an exam...</option>
                         @foreach ($examOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -167,7 +167,7 @@
                 <label for="invigilator-form-staff" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Staff member ID</span>
                     <input id="invigilator-form-staff" type="number" wire:model="invStaffId"
-                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     @error('invStaffId')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -176,7 +176,7 @@
                 <label for="invigilator-form-role" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Role</span>
                     <select id="invigilator-form-role" wire:model="invRole"
-                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                         <option value="chief">Chief</option>
                         <option value="assistant">Assistant</option>
                     </select>
@@ -192,7 +192,7 @@
                     Assign invigilator
                 </button>
                 <button type="button" wire:click="toggleInvigilatorForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                     Cancel
                 </button>
             </div>
@@ -248,7 +248,7 @@
             <label for="examinations-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="examinations-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -261,7 +261,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="examinations-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search subject, class, room..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -359,7 +359,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="examinations-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'exams')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->subject_name }}</p>

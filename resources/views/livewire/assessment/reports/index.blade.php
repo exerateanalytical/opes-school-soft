@@ -30,11 +30,11 @@
     >
         <x-slot:actions>
             <button type="button" wire:click="exportExcel"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary print:hidden">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary print:hidden">
                 Export Excel
             </button>
             <button type="button" wire:click="exportPdf"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary print:hidden">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary print:hidden">
                 Export PDF
             </button>
             <button type="button" onclick="window.print()"
@@ -71,7 +71,7 @@
             <label for="reports-filter-period" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Period</span>
                 <select id="reports-filter-period" wire:model.live="period"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All periods</option>
                     @foreach ($periodOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -82,7 +82,7 @@
             <label for="reports-filter-class" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Class</span>
                 <select id="reports-filter-class" wire:model.live="classGroup"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All classes</option>
                     @foreach ($classGroupOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -94,7 +94,7 @@
                 <label for="reports-filter-subject" class="flex min-w-[11rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Subject</span>
                     <select id="reports-filter-subject" wire:model.live="subject"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All subjects</option>
                         @foreach ($subjectOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -107,7 +107,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="reports-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Search student, matricule, class..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         </x-slot:filters>
 
@@ -206,7 +206,7 @@
         <x-slot:cards>
             @foreach ($rows as $row)
                 <article wire:key="report-card-{{ $tab }}-{{ $row->id }}"
-                         class="rounded border border-sand bg-white p-3">
+                         class="rounded border border-border-primary bg-white p-3">
                     @if ($tab === 'results')
                         <div class="flex items-center justify-between gap-2">
                             <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>

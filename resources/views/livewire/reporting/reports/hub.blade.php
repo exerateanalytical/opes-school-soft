@@ -15,7 +15,7 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @forelse ($categories as $category)
             <a href="{{ route($category['route']) }}" wire:navigate
-               class="group rounded-lg border border-sand bg-white p-5 shadow-sm transition hover:border-primary/50 hover:shadow-md">
+               class="group rounded-lg border border-border-primary bg-white p-5 shadow-sm transition hover:border-primary/50 hover:shadow-md">
                 <div class="flex items-start gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <x-opes-nav-icon :nav-key="$category['icon']" class="h-5 w-5"/>
@@ -27,7 +27,7 @@
                 </div>
             </a>
         @empty
-            <div class="col-span-full rounded-lg border border-dashed border-sand bg-white p-8 text-center text-sm text-charcoal/60">
+            <div class="col-span-full rounded-lg border border-dashed border-border-primary bg-white p-8 text-center text-sm text-charcoal/60">
                 No report screens have shipped yet.
             </div>
         @endforelse

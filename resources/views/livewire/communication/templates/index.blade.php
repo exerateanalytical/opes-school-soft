@@ -19,7 +19,7 @@
     @endif
 
     @if ($showForm)
-        <section aria-label="Message template" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Message template" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">
                 {{ $editingId === null ? 'New Template' : 'Edit Template' }}
             </h2>
@@ -30,7 +30,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Code (case-sensitive)</span>
                         <input id="tpl-code" type="text" wire:model="formCode"
                                placeholder="e.g. FEE-REMINDER"
-                               class="rounded border border-sand bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"/>
                         @error('formCode')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -39,7 +39,7 @@
                     <label for="tpl-channel" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Channel</span>
                         <select id="tpl-channel" wire:model.live="formChannel"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($channels as $channelCase)
                                 <option value="{{ $channelCase->value }}">{{ $channelCase->label() }}</option>
                             @endforeach
@@ -53,7 +53,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Name (English)</span>
                         <input id="tpl-name" type="text" wire:model="formName"
                                placeholder="e.g. Fee reminder"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -63,7 +63,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Name (French)</span>
                         <input id="tpl-name-fr" type="text" wire:model="formNameFr"
                                placeholder="e.g. Rappel de frais"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formNameFr')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -73,7 +73,7 @@
                         <label for="tpl-subject-en" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">Subject (English)</span>
                             <input id="tpl-subject-en" type="text" wire:model="formSubjectEn"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('formSubjectEn')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -82,7 +82,7 @@
                         <label for="tpl-subject-fr" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">Subject (French)</span>
                             <input id="tpl-subject-fr" type="text" wire:model="formSubjectFr"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('formSubjectFr')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -93,7 +93,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Body (English)</span>
                         <textarea id="tpl-body-en" rows="4" wire:model="formBodyEn"
                                   placeholder="Dear {guardian_name}, {student_name} owes {amount_due} FCFA."
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('formBodyEn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -103,7 +103,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Body (French)</span>
                         <textarea id="tpl-body-fr" rows="4" wire:model="formBodyFr"
                                   placeholder="Cher {guardian_name}, {student_name} doit {amount_due} FCFA."
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('formBodyFr')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -115,7 +115,7 @@
                         </span>
                         <input id="tpl-variables" type="text" wire:model="formVariables"
                                placeholder="guardian_name, student_name, amount_due"
-                               class="rounded border border-sand bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"/>
                         @error('formVariables')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -123,7 +123,7 @@
 
                     <label for="tpl-active" class="flex items-center gap-2 sm:col-span-2">
                         <input id="tpl-active" type="checkbox" wire:model="formActive"
-                               class="rounded border-sand text-primary focus:ring-primary"/>
+                               class="rounded border-border-primary text-primary focus:ring-primary"/>
                         <span class="text-sm text-charcoal/80">Active (deactivated templates cannot be sent)</span>
                     </label>
                 </div>
@@ -134,11 +134,11 @@
                         {{ $editingId === null ? 'Create template' : 'Save changes' }}
                     </button>
                     <button type="button" wire:click="detectVariables"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
                         Detect merge fields
                     </button>
                     <button type="button" wire:click="toggleForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -159,7 +159,7 @@
                 {{ $showForm ? 'Hide form' : 'New template' }}
             </button>
             <button type="button" wire:click="exportExcel"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
                 Excel
             </button>
         </x-slot:actions>
@@ -191,7 +191,7 @@
             <label for="tpl-filter-channel" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Channel</span>
                 <select id="tpl-filter-channel" wire:model.live="channel"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All channels</option>
                     @foreach ($channels as $channelCase)
                         <option value="{{ $channelCase->value }}">{{ $channelCase->label() }}</option>
@@ -203,7 +203,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="tpl-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Code or name..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         </x-slot:filters>
 
@@ -261,7 +261,7 @@
 
         <x-slot:cards>
             @foreach ($rows as $row)
-                <article wire:key="tpl-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="tpl-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-mono text-sm font-medium text-charcoal">{{ $row->code }}</p>
                         <x-status-pill :status="$row->is_active ? 'ok' : 'amber'"

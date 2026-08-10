@@ -30,7 +30,7 @@
         <div class="grid gap-3 sm:grid-cols-2">
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.class') }}</span>
-                <select wire:model.live="classGroupId" class="mt-1 w-full rounded border border-sand p-2">
+                <select wire:model.live="classGroupId" class="mt-1 w-full rounded border border-border-primary p-2">
                     <option value=""></option>
                     @foreach ($classGroups as $group)
                         <option value="{{ $group->id }}">{{ $group->name }}</option>
@@ -39,7 +39,7 @@
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.subject') }}</span>
-                <select wire:model.live="subjectId" class="mt-1 w-full rounded border border-sand p-2">
+                <select wire:model.live="subjectId" class="mt-1 w-full rounded border border-border-primary p-2">
                     <option value=""></option>
                     @foreach ($subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
@@ -48,23 +48,23 @@
             </label>
             <label class="text-sm sm:col-span-2">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.title_label') }}</span>
-                <input type="text" wire:model.live.debounce.800ms="title" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="text" wire:model.live.debounce.800ms="title" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
             <label class="text-sm sm:col-span-2">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.instructions') }}</span>
-                <textarea wire:model.live.debounce.800ms="instructions" rows="3" class="mt-1 w-full rounded border border-sand p-2"></textarea>
+                <textarea wire:model.live.debounce.800ms="instructions" rows="3" class="mt-1 w-full rounded border border-border-primary p-2"></textarea>
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.assigned_on') }}</span>
-                <input type="date" wire:model.live="assignedOn" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="date" wire:model.live="assignedOn" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.due_on') }}</span>
-                <input type="date" wire:model.live="dueOn" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="date" wire:model.live="dueOn" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
             <label class="text-sm">
                 <span class="block text-slate-600">{{ __('opes.homework_screen.max_score') }}</span>
-                <input type="number" step="0.01" wire:model.live.debounce.800ms="maxScore" class="mt-1 w-full rounded border border-sand p-2">
+                <input type="number" step="0.01" wire:model.live.debounce.800ms="maxScore" class="mt-1 w-full rounded border border-border-primary p-2">
             </label>
         </div>
 
@@ -75,7 +75,7 @@
             <button type="button" wire:click="hold" class="rounded border border-primary px-4 py-2 text-sm font-semibold text-primary">
                 {{ __('opes.unfinished_work.held') }}
             </button>
-            <button type="button" wire:click="$set('showForm', false)" class="rounded border border-sand px-4 py-2 text-sm">
+            <button type="button" wire:click="$set('showForm', false)" class="rounded border border-border-primary px-4 py-2 text-sm">
                 {{ __('opes.homework_screen.cancel') }}
             </button>
             @if ($lastAutosavedAt !== '')
@@ -87,8 +87,8 @@
     </x-opes-modal-form>
 
     <div class="grid gap-4 lg:grid-cols-3">
-        <section class="rounded-lg border border-sand bg-white shadow-sm">
-            <ul class="max-h-[28rem] divide-y divide-sand overflow-y-auto">
+        <section class="rounded-lg border border-border-primary bg-white shadow-sm">
+            <ul class="max-h-[28rem] divide-y divide-border-primary overflow-y-auto">
                 @forelse ($assignments as $assignment)
                     <li>
                         <button type="button" wire:click="$set('selectedAssignmentId', {{ $assignment->id }})"
@@ -103,11 +103,11 @@
             </ul>
         </section>
 
-        <section class="lg:col-span-2 overflow-x-auto rounded-lg border border-sand bg-white shadow-sm">
+        <section class="lg:col-span-2 overflow-x-auto rounded-lg border border-border-primary bg-white shadow-sm">
             @if ($selected === null)
                 <div class="p-8 text-center text-sm text-slate-500">{{ __('opes.homework_screen.select_an_assignment') }}</div>
             @else
-                <div class="border-b border-sand p-3">
+                <div class="border-b border-border-primary p-3">
                     <h2 class="text-sm font-semibold text-charcoal">{{ $selected->title }}</h2>
                     @if ($selected->instructions)
                         <p class="mt-1 text-sm text-slate-600">{{ $selected->instructions }}</p>
@@ -124,7 +124,7 @@
                     </thead>
                     <tbody>
                     @forelse ($submissions as $submission)
-                        <tr class="border-t border-sand">
+                        <tr class="border-t border-border-primary">
                             <td class="p-2">{{ $submission->first_name }} {{ $submission->last_name }}</td>
                             <td class="p-2">
                                 {{ $submission->submitted_at ?? __('opes.homework_screen.not_submitted') }}
@@ -138,7 +138,7 @@
                                 @elseif ($submission->submitted_at)
                                     <div class="flex items-center gap-1">
                                         <input type="number" step="0.01" wire:model="scoreDrafts.{{ $submission->id }}"
-                                               class="w-20 rounded border border-sand p-1 text-sm">
+                                               class="w-20 rounded border border-border-primary p-1 text-sm">
                                         <button type="button" wire:click="grade({{ $submission->id }})"
                                                 class="rounded bg-primary px-2 py-1 text-xs font-semibold text-white">
                                             {{ __('opes.homework_screen.grade') }}

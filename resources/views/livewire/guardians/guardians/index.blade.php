@@ -22,48 +22,48 @@
 </div>
 
 @if ($showCreateForm)
-    <form wire:submit.prevent="saveGuardian" class="space-y-3 rounded border border-sand bg-white p-4">
+    <form wire:submit.prevent="saveGuardian" class="space-y-3 rounded border border-border-primary bg-white p-4">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">New Guardian</h2>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">First name</span>
-                <input type="text" wire:model="createFirstName" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="createFirstName" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                 @error('createFirstName') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Last name</span>
-                <input type="text" wire:model="createLastName" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="createLastName" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                 @error('createLastName') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Gender</span>
-                <select wire:model="createGender" class="rounded border border-sand px-2 py-1.5 text-sm">
+                <select wire:model="createGender" class="rounded border border-border-primary px-2 py-1.5 text-sm">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                 </select>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Phone</span>
-                <input type="text" wire:model="createPhone" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="createPhone" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                 @error('createPhone') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Alternative phone</span>
-                <input type="text" wire:model="createAlternativePhone" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="createAlternativePhone" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Email</span>
-                <input type="email" wire:model="createEmail" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="email" wire:model="createEmail" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Date of birth</span>
-                <input type="date" wire:model="createDateOfBirth" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="date" wire:model="createDateOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
             </label>
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="toggleCreateForm" class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+            <button type="button" wire:click="toggleCreateForm" class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
                 Cancel
             </button>
             <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90">
@@ -74,7 +74,7 @@
 @endif
 
 @if ($showLinkForm)
-    <form wire:submit.prevent="saveLink" class="space-y-3 rounded border border-sand bg-white p-4">
+    <form wire:submit.prevent="saveLink" class="space-y-3 rounded border border-border-primary bg-white p-4">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
             Link {{ $linkGuardianLabel }} to a Student
         </h2>
@@ -82,12 +82,12 @@
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Student admission no.</span>
-                <input type="text" wire:model="linkStudentAdmissionNo" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="linkStudentAdmissionNo" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                 @error('linkStudentAdmissionNo') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Relationship</span>
-                <select wire:model="linkRelationship" class="rounded border border-sand px-2 py-1.5 text-sm">
+                <select wire:model="linkRelationship" class="rounded border border-border-primary px-2 py-1.5 text-sm">
                     @foreach ($relationshipCases as $case)
                         <option value="{{ $case->value }}">{{ ucwords(str_replace('_', ' ', $case->value)) }}</option>
                     @endforeach
@@ -97,7 +97,7 @@
             @if ($linkRelationship === 'other')
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Describe relationship</span>
-                    <input type="text" wire:model="linkRelationshipOther" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    <input type="text" wire:model="linkRelationshipOther" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
                 </label>
             @endif
         </div>
@@ -113,7 +113,7 @@
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" wire:click="toggleLinkForm" class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+            <button type="button" wire:click="toggleLinkForm" class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
                 Cancel
             </button>
             <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90">
@@ -152,7 +152,7 @@
             <label for="guardians-filter-relationship" class="flex min-w-[11rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Relationship</span>
                 <select id="guardians-filter-relationship" wire:model.live="relationship"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All relationships</option>
                     @foreach ($relationshipOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -165,7 +165,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="guardians-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search name, phone, email, guardian no..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -197,7 +197,7 @@
             <td class="px-4 py-2.5 text-right">
                 <button type="button"
                         wire:click="toggleLinkForm({{ $row->id }}, '{{ addslashes(trim($row->first_name.' '.$row->last_name)) }}')"
-                        class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/50">
+                        class="rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/50">
                     Link to Student
                 </button>
             </td>
@@ -207,7 +207,7 @@
     {{-- Mobile cards. --}}
     <x-slot:cards>
         @foreach ($rows as $row)
-            <article wire:key="guardian-card-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="guardian-card-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                 <a href="{{ route('guardians.show', $row->id) }}" class="flex items-center justify-between gap-2">
                     <p class="font-medium text-primary">{{ trim($row->first_name.' '.$row->last_name) }}</p>
                     <x-status-pill :status="$statusTone[$row->status] ?? 'amber'" :label="ucfirst($row->status)"/>

@@ -30,7 +30,7 @@
 
     {{-- Detail panel: recipient, channel, rendered body, attempts, last error. --}}
     @if ($selected !== null)
-        <section aria-label="Message detail" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Message detail" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-base font-semibold text-charcoal">
@@ -61,7 +61,7 @@
                 <p class="mt-3 text-sm font-medium text-charcoal">Subject: {{ $selected->subject_line }}</p>
             @endif
 
-            <pre class="mt-3 overflow-x-auto whitespace-pre-wrap rounded border border-sand bg-chrome/5 p-3 text-sm text-charcoal">{{ $selected->body }}</pre>
+            <pre class="mt-3 overflow-x-auto whitespace-pre-wrap rounded border border-border-primary bg-chrome/5 p-3 text-sm text-charcoal">{{ $selected->body }}</pre>
 
             <dl class="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
                 <div>
@@ -108,15 +108,15 @@
                 Send queued now
             </button>
             <button type="button" wire:click="retryAll"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
                 Retry all failed
             </button>
             <button type="button" wire:click="exportExcel"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
                 Excel
             </button>
             <button type="button" wire:click="exportPdf"
-                    class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/80 hover:text-charcoal">
                 PDF
             </button>
         </x-slot:actions>
@@ -153,7 +153,7 @@
             <label for="outbox-filter-channel" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Channel</span>
                 <select id="outbox-filter-channel" wire:model.live="channel"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All channels</option>
                     @foreach ($channels as $channelCase)
                         <option value="{{ $channelCase->value }}">{{ $channelCase->label() }}</option>
@@ -164,7 +164,7 @@
             <label for="outbox-filter-template" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Template</span>
                 <select id="outbox-filter-template" wire:model.live="template"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All templates</option>
                     @foreach ($templates as $templateId => $templateCode)
                         <option value="{{ $templateId }}">{{ $templateCode }}</option>
@@ -176,7 +176,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="outbox-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Recipient, subject or body..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         </x-slot:filters>
 
@@ -237,7 +237,7 @@
 
         <x-slot:cards>
             @foreach ($rows as $row)
-                <article wire:key="outbox-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="outbox-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->recipient }}</p>
                         <x-status-pill :status="$statusMeta[$row->status->value]['tone']"

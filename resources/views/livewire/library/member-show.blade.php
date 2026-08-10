@@ -43,7 +43,7 @@
     </nav>
 
     {{-- ── Header summary ─────────────────────────────────────────────── --}}
-    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-xl font-semibold text-charcoal">{{ $displayName }}</h1>
@@ -64,17 +64,17 @@
 
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('library.index') }}"
-               class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+               class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                 Back to library
             </a>
         </div>
     </div>
 
     {{-- ── Active issues ─────────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Active issues</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Issue No.</th>
@@ -86,7 +86,7 @@
                         <th class="px-2 py-2">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($activeIssues as $row)
                         <tr wire:key="active-{{ $row->id }}">
                             <td class="px-2 py-2 font-medium text-charcoal">{{ $row->issue_no }}</td>
@@ -108,10 +108,10 @@
     </section>
 
     {{-- ── Circulation history ──────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Circulation history</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Issue No.</th>
@@ -123,7 +123,7 @@
                         <th class="px-2 py-2">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($circulationHistory as $row)
                         <tr wire:key="hist-{{ $row->id }}">
                             <td class="px-2 py-2 font-medium text-charcoal">{{ $row->issue_no }}</td>
@@ -145,10 +145,10 @@
     </section>
 
     {{-- ── Outstanding fines ────────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Fines</h2>
         <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full divide-y divide-sand text-sm">
+            <table class="min-w-full divide-y divide-border-primary text-sm">
                 <thead>
                     <tr class="text-left text-xs font-semibold uppercase tracking-wide text-charcoal/60">
                         <th class="px-2 py-2">Fine No.</th>
@@ -159,7 +159,7 @@
                         <th class="px-2 py-2">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand/70">
+                <tbody class="divide-y divide-border-primary/70">
                     @forelse ($fines as $row)
                         <tr wire:key="fine-{{ $row->id }}">
                             <td class="px-2 py-2 font-medium text-charcoal">{{ $row->fine_no }}</td>
@@ -180,12 +180,12 @@
     </section>
 
     {{-- ── Print Library Card ───────────────────────────────────────── --}}
-    <section class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="library-card-section">
+    <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5 print:border-0 print:shadow-none" id="library-card-section">
         <div class="flex items-center justify-between gap-3 print:hidden">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">Print library card</h2>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="window.print()"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Print
                 </button>
                 <button type="button" wire:click="exportLibraryCardPdf"

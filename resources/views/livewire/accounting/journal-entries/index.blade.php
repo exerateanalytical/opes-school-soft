@@ -47,7 +47,7 @@
         <label for="je-filter-journal" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_journal_label') }}</span>
             <select id="je-filter-journal" wire:model.live="journalId"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($journalOptions as $journal)
                     <option value="{{ $journal->id }}">{{ $journal->code }} — {{ $journal->name }}</option>
@@ -58,7 +58,7 @@
         <label for="je-filter-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_status_label') }}</span>
             <select id="je-filter-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 <option value="draft">{{ __('opes.ledger_screen.je_status_draft') }}</option>
                 <option value="posted">{{ __('opes.ledger_screen.je_status_posted') }}</option>
@@ -69,13 +69,13 @@
         <label for="je-filter-date-from" class="flex min-w-[9rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_date_from_label') }}</span>
             <input id="je-filter-date-from" type="date" wire:model.live="dateFrom"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         <label for="je-filter-date-to" class="flex min-w-[9rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_date_to_label') }}</span>
             <input id="je-filter-date-to" type="date" wire:model.live="dateTo"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -106,7 +106,7 @@
             <td class="px-4 py-2.5 text-right">
                 @if ($entry->status === \App\Modules\Accounting\Models\JournalEntry::STATUS_DRAFT)
                     <a href="{{ route('ledger.journal-entries.create', ['entry' => $entry->id]) }}"
-                       class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                       class="rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.ledger_screen.je_continue_draft') }}
                     </a>
                 @elseif ($canReverse && $entry->status === \App\Modules\Accounting\Models\JournalEntry::STATUS_POSTED)
@@ -125,7 +125,7 @@
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_reverse_reason_label') }}</span>
                             <input id="je-reverse-reason-{{ $entry->id }}" type="text" wire:model="reverseReason"
                                    placeholder="{{ __('opes.ledger_screen.je_reverse_reason_placeholder') }}"
-                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                             @error('reverseReason') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                         </label>
                         <button type="button" wire:click="reverseEntry"
@@ -134,7 +134,7 @@
                             {{ __('opes.ledger_screen.je_reverse_submit') }}
                         </button>
                         <button type="button" wire:click="cancelReverse"
-                                class="rounded border border-sand px-3 py-1.5 text-xs font-medium text-charcoal/70 hover:text-charcoal">
+                                class="rounded border border-border-primary px-3 py-1.5 text-xs font-medium text-charcoal/70 hover:text-charcoal">
                             {{ __('opes.ledger_screen.cancel') }}
                         </button>
                     </div>
@@ -145,7 +145,7 @@
 
     <x-slot:cards>
         @foreach ($entries as $entry)
-            <article class="rounded border border-sand bg-white p-3">
+            <article class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <div class="font-mono text-sm font-medium text-charcoal">{{ $entry->piece_no ?? __('opes.ledger_screen.je_piece_draft_placeholder') }}</div>

@@ -7,7 +7,7 @@
     @if (! $hasEnrollment)
         <x-empty-state :message="__('opes.guardian_portal.fees_no_enrollment')"/>
     @else
-        <div class="flex flex-wrap gap-1 border-b border-sand">
+        <div class="flex flex-wrap gap-1 border-b border-border-primary">
             @foreach (['statement' => __('opes.guardian_portal.fees_tab_statement'), 'invoices' => __('opes.guardian_portal.fees_tab_invoices'), 'receipts' => __('opes.guardian_portal.fees_tab_receipts')] as $tab => $label)
                 @if ($tab === 'receipts' || $canWide)
                     <button type="button" wire:click="setTab('{{ $tab }}')"
@@ -25,9 +25,9 @@
             @if ($statement === [])
                 <x-empty-state :message="__('opes.guardian_portal.fees_statement_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[32rem] border-collapse text-sm">
-                        <thead class="border-b border-sand bg-sand/40 text-left">
+                        <thead class="border-b border-border-primary bg-sand/40 text-left">
                             <tr>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_date') }}</th>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_description') }}</th>
@@ -36,7 +36,7 @@
                                 <th scope="col" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_running_balance') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($statement as $line)
                                 <tr wire:key="portal-statement-{{ $loop->index }}">
                                     <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">{{ $line['date'] }}</td>
@@ -47,7 +47,7 @@
                                 </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="border-t border-sand bg-sand/30">
+                        <tfoot class="border-t border-border-primary bg-sand/30">
                             <tr>
                                 <th scope="row" colspan="4" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.closing_balance') }}</th>
                                 <td class="px-3 py-2 text-right font-mono font-bold {{ $closingBalance > 0 ? 'text-heritage-red' : 'text-charcoal' }}">{{ Money::of($closingBalance)->format() }}</td>
@@ -62,9 +62,9 @@
             @if ($invoices->isEmpty())
                 <x-empty-state :message="__('opes.guardian_portal.fees_invoices_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[24rem] border-collapse text-sm">
-                        <thead class="border-b border-sand bg-sand/40 text-left">
+                        <thead class="border-b border-border-primary bg-sand/40 text-left">
                             <tr>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_date') }}</th>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">Ref</th>
@@ -72,7 +72,7 @@
                                 <th scope="col" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.fees_amount') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($invoices as $invoice)
                                 <tr>
                                     <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">{{ $invoice->issue_date }}</td>
@@ -91,9 +91,9 @@
             @if ($receipts->isEmpty())
                 <x-empty-state :message="__('opes.guardian_portal.fees_receipts_empty')"/>
             @else
-                <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+                <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
                     <table class="w-full min-w-[28rem] border-collapse text-sm">
-                        <thead class="border-b border-sand bg-sand/40 text-left">
+                        <thead class="border-b border-border-primary bg-sand/40 text-left">
                             <tr>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.fees_screen.column_date') }}</th>
                                 <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.fees_receipt_no') }}</th>
@@ -101,7 +101,7 @@
                                 <th scope="col" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardian_portal.fees_amount') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-sand">
+                        <tbody class="divide-y divide-border-primary">
                             @foreach ($receipts as $receipt)
                                 <tr>
                                     <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">{{ $receipt->value_date }}</td>

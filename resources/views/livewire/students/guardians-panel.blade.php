@@ -24,9 +24,9 @@
     @if ($links->isEmpty())
         <x-empty-state :message="__('opes.students_screen.guardians_empty')"/>
     @else
-        <div class="min-w-0 overflow-x-auto rounded border border-sand bg-white">
+        <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
             <table class="w-full min-w-[44rem] border-collapse text-sm">
-                <thead class="border-b border-sand text-left">
+                <thead class="border-b border-border-primary text-left">
                     <tr class="bg-chrome text-white">
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_guardian') }}</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_relationship') }}</th>
@@ -34,7 +34,7 @@
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_permissions') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sand">
+                <tbody class="divide-y divide-border-primary">
                     @foreach ($links as $link)
                         @php
                             $guardian = $link->guardian;
@@ -82,7 +82,7 @@
                                 @else
                                     <div class="flex flex-wrap gap-1">
                                         @foreach ($flags as $flag)
-                                            <span class="inline-flex items-center rounded-full border border-sand bg-sand/60 px-2 py-0.5 text-xs font-semibold text-charcoal/75">
+                                            <span class="inline-flex items-center rounded-full border border-border-primary bg-sand/60 px-2 py-0.5 text-xs font-semibold text-charcoal/75">
                                                 {{ __('opes.students_screen.perm_'.$flag) }}
                                             </span>
                                         @endforeach

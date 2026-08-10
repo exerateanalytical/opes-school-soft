@@ -61,7 +61,7 @@
     {{-- The numbered progress rail: eleven stations, 0-10. aria-current, not
          colour alone (09-ui 10). --}}
     <ol aria-label="{{ __('rollover.wizard.title') }}"
-        class="flex w-full items-start justify-between gap-1 overflow-x-auto rounded-lg border border-sand bg-white px-4 py-5 shadow-sm">
+        class="flex w-full items-start justify-between gap-1 overflow-x-auto rounded-lg border border-border-primary bg-white px-4 py-5 shadow-sm">
         @foreach ($steps as $stepOption)
             @php $stepDone = $currentStep !== null && ($stepOption->value < $currentStep->value || $isCompleted); @endphp
             <li class="flex min-w-16 flex-1 flex-col items-center gap-2 text-center"
@@ -74,7 +74,7 @@
                                         ? 'border-chrome bg-chrome text-white'
                                         : ($stepDone
                                             ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-sand bg-white text-charcoal/50') }}">
+                                            : 'border-border-primary bg-white text-charcoal/50') }}">
                         {{ $stepOption->value }}
                     </span>
                     <span class="h-px flex-1 {{ $loop->last ? 'bg-transparent' : ($stepDone ? 'bg-primary' : 'bg-sand') }}"></span>
@@ -87,7 +87,7 @@
     </ol>
 
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <section class="rounded-lg border border-sand bg-white p-5 shadow-sm"
+        <section class="rounded-lg border border-border-primary bg-white p-5 shadow-sm"
                  aria-label="{{ $currentStep?->label(app()->getLocale()) ?? RolloverStep::Preflight->label(app()->getLocale()) }}">
 
             {{-- ================= Before a run exists: step 0 ================= --}}
@@ -110,7 +110,7 @@
                     <label for="ro-from-year" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.from_year') }} <span class="text-heritage-red">*</span></span>
                         <select id="ro-from-year" wire:model="fromYearId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('rollover.wizard.choose') }}</option>
                             @foreach ($years as $id => $code)
                                 <option value="{{ $id }}">{{ $code }}</option>
@@ -124,7 +124,7 @@
                     <label for="ro-backup" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.backup') }} <span class="text-heritage-red">*</span></span>
                         <select id="ro-backup" wire:model="backupId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('rollover.wizard.choose') }}</option>
                             @foreach ($backups as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -136,10 +136,10 @@
                     </label>
                 </div>
 
-                <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-sand pt-5">
+                <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-border-primary pt-5">
                     @if ($canTakeBackup)
                         <button type="button" wire:click="takeBackup"
-                                class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                             {{ __('rollover.wizard.take_backup') }}
                         </button>
                     @endif
@@ -156,7 +156,7 @@
                     {{ __('rollover.wizard.completed_note') }}
                 </p>
 
-                <div class="mt-6 flex justify-end border-t border-sand pt-5">
+                <div class="mt-6 flex justify-end border-t border-border-primary pt-5">
                     <button type="button" wire:click="undo" wire:confirm="{{ __('rollover.wizard.undo_confirm') }}"
                             class="rounded border border-heritage-red/50 px-4 py-1.5 text-sm font-medium text-heritage-red hover:bg-heritage-red/5">
                         {{ __('rollover.wizard.undo') }}
@@ -174,17 +174,17 @@
                         <label for="ro-code" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.new_year_code') }} <span class="text-heritage-red">*</span></span>
                             <input id="ro-code" type="text" wire:model="newYearCode"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         </label>
                         <label for="ro-name" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.new_year_name') }} <span class="text-heritage-red">*</span></span>
                             <input id="ro-name" type="text" wire:model="newYearName"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         </label>
                         <label for="ro-ends" class="flex flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.new_year_ends_on') }}</span>
                             <input id="ro-ends" type="date" wire:model="newYearEndsOn"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             <span class="text-xs text-charcoal/50">{{ __('rollover.wizard.new_year_ends_on_hint') }}</span>
                         </label>
                     </div>
@@ -194,13 +194,13 @@
                     <label for="ro-uplift" class="mt-4 flex max-w-xs flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('rollover.wizard.uplift_percent') }}</span>
                         <input id="ro-uplift" type="number" step="0.01" min="0" wire:model="upliftPercent"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         <span class="text-xs text-charcoal/50">{{ __('rollover.wizard.uplift_hint') }}</span>
                     </label>
                 @endif
 
                 @if ($currentStep === RolloverStep::PromoteStudents)
-                    <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                    <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                         {{ __('rollover.wizard.decisions_title') }}
                     </h3>
 
@@ -210,7 +210,7 @@
                         <div class="mt-3 overflow-x-auto">
                             <table class="w-full min-w-[36rem] text-left text-sm">
                                 <thead>
-                                    <tr class="border-b border-sand text-xs uppercase tracking-wide text-charcoal/60">
+                                    <tr class="border-b border-border-primary text-xs uppercase tracking-wide text-charcoal/60">
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.student') }}</th>
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.class_group') }}</th>
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.decision') }}</th>
@@ -220,12 +220,12 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($pendingDecisions as $row)
-                                        <tr class="border-b border-sand/60">
+                                        <tr class="border-b border-border-primary/60">
                                             <td class="py-2 pr-3 font-medium text-charcoal">{{ $row->first_name }} {{ $row->last_name }}</td>
                                             <td class="py-2 pr-3 text-charcoal/70">{{ $row->group_name }}</td>
                                             <td class="py-2 pr-3">
                                                 <select wire:model="decisions.{{ $row->id }}.decision" aria-label="{{ __('rollover.wizard.decision') }}"
-                                                        class="rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
+                                                        class="rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
                                                     <option value="">{{ __('rollover.wizard.choose') }}</option>
                                                     <option value="promoted">{{ __('rollover.wizard.decision_promoted') }}</option>
                                                     <option value="repeat">{{ __('rollover.wizard.decision_repeat') }}</option>
@@ -235,7 +235,7 @@
                                             </td>
                                             <td class="py-2 pr-3">
                                                 <select wire:model="decisions.{{ $row->id }}.target" aria-label="{{ __('rollover.wizard.target_group') }}"
-                                                        class="rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
+                                                        class="rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
                                                     <option value="">{{ __('rollover.wizard.choose') }}</option>
                                                     @foreach ($targetGroups as $name)
                                                         <option value="group:{{ $name }}">{{ $name }}</option>
@@ -257,7 +257,7 @@
                 @endif
 
                 @if ($currentStep === RolloverStep::CarryBalances)
-                    <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                    <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                         {{ __('rollover.wizard.debtors_title') }}
                     </h3>
                     <p class="mt-2 text-xs text-charcoal/60">{{ __('rollover.wizard.debtors_hint') }}</p>
@@ -268,7 +268,7 @@
                         <div class="mt-3 overflow-x-auto">
                             <table class="w-full min-w-[28rem] text-left text-sm">
                                 <thead>
-                                    <tr class="border-b border-sand text-xs uppercase tracking-wide text-charcoal/60">
+                                    <tr class="border-b border-border-primary text-xs uppercase tracking-wide text-charcoal/60">
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.student') }}</th>
                                         <th class="py-2 pr-3 text-right font-medium">{{ __('rollover.wizard.debtor_outstanding') }}</th>
                                         <th class="py-2 font-medium">{{ __('rollover.wizard.decision') }}</th>
@@ -276,14 +276,14 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($debtors as $debtor)
-                                        <tr class="border-b border-sand/60">
+                                        <tr class="border-b border-border-primary/60">
                                             <td class="py-2 pr-3 font-medium text-charcoal">{{ $debtor['name'] }}</td>
                                             <td class="py-2 pr-3 text-right tabular-nums text-charcoal">
                                                 {{ number_format($debtor['outstanding'], 0, ',', ' ') }} FCFA
                                             </td>
                                             <td class="py-2">
                                                 <select wire:model="debtorChoices.{{ $debtor['student_id'] }}" aria-label="{{ __('rollover.wizard.decision') }}"
-                                                        class="rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
+                                                        class="rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50">
                                                     <option value="">{{ __('rollover.wizard.choose') }}</option>
                                                     <option value="debt_carry">{{ __('rollover.wizard.debtor_choice_carry') }}</option>
                                                     <option value="block">{{ __('rollover.wizard.debtor_choice_block') }}</option>
@@ -306,7 +306,7 @@
                         <div class="mt-3 overflow-x-auto">
                             <table class="w-full min-w-[36rem] text-left text-sm">
                                 <thead>
-                                    <tr class="border-b border-sand text-xs uppercase tracking-wide text-charcoal/60">
+                                    <tr class="border-b border-border-primary text-xs uppercase tracking-wide text-charcoal/60">
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.allocation') }}</th>
                                         <th class="py-2 pr-3 font-medium">{{ __('rollover.wizard.inherited') }}</th>
                                         <th class="py-2 font-medium">{{ __('rollover.wizard.override_ids') }}</th>
@@ -314,7 +314,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($allocations as $allocation)
-                                        <tr class="border-b border-sand/60 align-top">
+                                        <tr class="border-b border-border-primary/60 align-top">
                                             <td class="py-2 pr-3 font-medium text-charcoal">{{ $allocation['label'] }}</td>
                                             <td class="py-2 pr-3">
                                                 @forelse ($allocation['inherited'] as $teacher)
@@ -331,7 +331,7 @@
                                             <td class="py-2">
                                                 <input type="text" wire:model="teacherOverrides.{{ $allocation['id'] }}"
                                                        aria-label="{{ __('rollover.wizard.override_ids') }}" placeholder="12, 34"
-                                                       class="w-32 rounded border border-sand bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
+                                                       class="w-32 rounded border border-border-primary bg-white px-2 py-1 text-sm text-charcoal focus:border-primary/50"/>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -344,13 +344,13 @@
                 {{-- ── The preview diff (§6.3): counts + row list under 200,
                      rendered before every Apply. ────────────────────────── --}}
                 @if ($preview !== null)
-                    <h3 class="mt-6 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                    <h3 class="mt-6 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                         {{ __('rollover.wizard.preview_title') }}
                     </h3>
 
                     <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="{{ __('rollover.wizard.preview_counts') }}">
                         @foreach ($preview['counts'] as $entity => $count)
-                            <div class="rounded border border-sand bg-sand/20 p-3">
+                            <div class="rounded border border-border-primary bg-sand/20 p-3">
                                 <dt class="break-words text-xs text-charcoal/60">{{ str_replace('_', ' ', $entity) }}</dt>
                                 <dd class="mt-0.5 text-lg font-semibold tabular-nums text-charcoal">{{ $count }}</dd>
                             </div>
@@ -358,14 +358,14 @@
                     </dl>
 
                     @if ($preview['rows'] !== [])
-                        <details class="mt-3 rounded border border-sand bg-white">
+                        <details class="mt-3 rounded border border-border-primary bg-white">
                             <summary class="cursor-pointer px-3 py-2 text-sm font-medium text-charcoal/80">
                                 {{ __('rollover.wizard.preview_rows') }} ({{ count($preview['rows']) }})
                             </summary>
-                            <div class="overflow-x-auto border-t border-sand px-3 py-2">
+                            <div class="overflow-x-auto border-t border-border-primary px-3 py-2">
                                 <table class="w-full text-left text-xs">
                                     <thead>
-                                        <tr class="border-b border-sand text-charcoal/60">
+                                        <tr class="border-b border-border-primary text-charcoal/60">
                                             @foreach (array_keys($preview['rows'][0]) as $column)
                                                 <th class="py-1 pr-3 font-medium">{{ str_replace('_', ' ', (string) $column) }}</th>
                                             @endforeach
@@ -373,7 +373,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($preview['rows'] as $row)
-                                            <tr class="border-b border-sand/50">
+                                            <tr class="border-b border-border-primary/50">
                                                 @foreach ($row as $value)
                                                     <td class="py-1 pr-3 text-charcoal">
                                                         {{ is_bool($value) ? ($value ? 'yes' : 'no') : (is_scalar($value) ? $value : '—') }}
@@ -390,7 +390,7 @@
                     @endif
                 @endif
 
-                <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-sand pt-5">
+                <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-border-primary pt-5">
                     <button type="button" wire:click="undo" wire:confirm="{{ __('rollover.wizard.undo_confirm') }}"
                             class="rounded border border-heritage-red/50 px-4 py-1.5 text-sm font-medium text-heritage-red hover:bg-heritage-red/5">
                         {{ __('rollover.wizard.undo') }}
@@ -407,28 +407,28 @@
         </section>
 
         {{-- ── Run summary aside, mirroring the Admission Summary panel ── --}}
-        <aside class="h-fit rounded-lg border border-sand bg-ivory p-5 shadow-sm"
+        <aside class="h-fit rounded-lg border border-border-primary bg-ivory p-5 shadow-sm"
                aria-label="{{ __('rollover.wizard.run_label', ['id' => $run?->getKey() ?? '—']) }}">
-            <h2 class="border-b border-sand pb-2 text-sm font-semibold text-chrome">
+            <h2 class="border-b border-border-primary pb-2 text-sm font-semibold text-chrome">
                 {{ $run === null ? __('rollover.wizard.title') : __('rollover.wizard.run_label', ['id' => $run->getKey()]) }}
             </h2>
 
             <dl class="mt-4 space-y-2 text-sm">
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('rollover.wizard.status') }}</dt>
                     <dd class="font-medium text-charcoal">
                         {{ $run === null ? __('opes.ui.no_data') : __('rollover.run_status.'.$run->status) }}
                     </dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('rollover.wizard.from_year') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $fromYear?->code ?? __('opes.ui.no_data') }}</dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('rollover.wizard.new_year_name') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $toYear?->code ?? __('opes.ui.no_data') }}</dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('rollover.wizard.backup') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $run?->backup_id !== null ? '#'.$run?->backup_id : __('opes.ui.no_data') }}</dd>
                 </div>

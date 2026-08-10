@@ -12,13 +12,13 @@
     </header>
 
     <section aria-label="{{ __('verify.token_label') }}"
-             class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+             class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <form wire:submit="check" class="space-y-3">
             <label for="verify-token" class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('verify.token_label') }}</span>
                 <textarea id="verify-token" rows="3" wire:model="token"
                           placeholder="{{ __('verify.token_placeholder') }}"
-                          class="rounded border border-sand bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"></textarea>
+                          class="rounded border border-border-primary bg-white px-3 py-1.5 font-mono text-sm text-charcoal focus:border-primary/50"></textarea>
                 @error('token')
                     <span class="text-xs text-heritage-red">{{ $message }}</span>
                 @enderror
@@ -37,7 +37,7 @@
         <p class="text-sm text-charcoal/50">{{ __('verify.empty_hint') }}</p>
     @elseif ($result !== null && $result['status'] === 'not_found')
         <section aria-label="{{ __('verify.status_not_found') }}"
-                 class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+                 class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <x-status-pill status="red" :label="__('verify.status_not_found')"/>
             <p class="mt-3 text-sm text-charcoal/70">{{ __('verify.not_found_help') }}</p>
         </section>
@@ -52,7 +52,7 @@
         @endphp
 
         <section aria-label="{{ $label }}"
-                 class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+                 class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <div class="flex items-center justify-between gap-3">
                 <x-status-pill :status="$tone" :label="$label"/>
                 <span class="font-mono text-sm text-charcoal">{{ $result['serial'] }}</span>

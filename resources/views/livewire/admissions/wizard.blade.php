@@ -52,7 +52,7 @@
          09-ui 10 requires the current step to be announced, not merely
          painted green. --}}
     <ol aria-label="{{ __('opes.admissions_screen.title') }}"
-        class="flex w-full items-start justify-between gap-1 overflow-x-auto rounded-lg border border-sand bg-white px-4 py-5 shadow-sm">
+        class="flex w-full items-start justify-between gap-1 overflow-x-auto rounded-lg border border-border-primary bg-white px-4 py-5 shadow-sm">
         @foreach ($steps as $stepOption)
             <li class="flex min-w-24 flex-1 flex-col items-center gap-2 text-center"
                 @if ($stepOption->value === $currentStep->value) aria-current="step" @endif>
@@ -64,7 +64,7 @@
                                         ? 'border-chrome bg-chrome text-white'
                                         : ($stepOption->value < $currentStep->value
                                             ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-sand bg-white text-charcoal/50') }}">
+                                            : 'border-border-primary bg-white text-charcoal/50') }}">
                         {{ $stepOption->value }}
                     </span>
                     <span class="h-px flex-1 {{ $loop->last ? 'bg-transparent' : ($stepOption->value < $currentStep->value ? 'bg-primary' : 'bg-sand') }}"></span>
@@ -77,7 +77,7 @@
     </ol>
 
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <section class="rounded-lg border border-sand bg-white p-5 shadow-sm"
+        <section class="rounded-lg border border-border-primary bg-white p-5 shadow-sm"
                  aria-label="{{ $currentStep->label(app()->getLocale()) }}">
             <h2 class="text-base font-semibold text-charcoal">
                 {{ __('opes.admissions_screen.step_counter', ['current' => $currentStep->value, 'total' => $lastStep]) }}:
@@ -86,7 +86,7 @@
 
             {{-- ================= Step 1: Basic Information ================= --}}
             @if ($currentStep->value === 1)
-                <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_personal') }}
                 </h3>
 
@@ -94,35 +94,35 @@
                     <label for="adm-first-name" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.first_name') }} <span class="text-heritage-red">*</span></span>
                         <input id="adm-first-name" type="text" wire:model="first_name" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('first_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-middle-name" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.middle_name') }}</span>
                         <input id="adm-middle-name" type="text" wire:model="middle_name" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('middle_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-last-name" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.last_name') }} <span class="text-heritage-red">*</span></span>
                         <input id="adm-last-name" type="text" wire:model="last_name" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('last_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-dob" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.date_of_birth') }} <span class="text-heritage-red">*</span></span>
                         <input id="adm-dob" type="date" wire:model="date_of_birth" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('date_of_birth') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-gender" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.gender') }} <span class="text-heritage-red">*</span></span>
                         <select id="adm-gender" wire:model="gender" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                             <option value="male">{{ __('opes.admissions_screen.gender_male') }}</option>
                             <option value="female">{{ __('opes.admissions_screen.gender_female') }}</option>
@@ -133,42 +133,42 @@
                     <label for="adm-nationality" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.nationality') }} <span class="text-heritage-red">*</span></span>
                         <input id="adm-nationality" type="text" maxlength="2" wire:model="nationality" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm uppercase text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm uppercase text-charcoal focus:border-primary/50"/>
                         @error('nationality') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-place-of-birth" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.place_of_birth') }}</span>
                         <input id="adm-place-of-birth" type="text" wire:model="place_of_birth" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('place_of_birth') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-state-of-origin" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.state_of_origin') }}</span>
                         <input id="adm-state-of-origin" type="text" wire:model="state_of_origin" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('state_of_origin') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-religion" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.religion') }}</span>
                         <input id="adm-religion" type="text" wire:model="religion" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('religion') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-blood-group" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.blood_group') }}</span>
                         <input id="adm-blood-group" type="text" maxlength="5" wire:model="blood_group" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('blood_group') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-genotype" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.genotype') }}</span>
                         <input id="adm-genotype" type="text" maxlength="5" wire:model="genotype" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('genotype') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                 </div>
@@ -176,7 +176,7 @@
 
             {{-- ================= Step 2: Academic Details ================= --}}
             @if ($currentStep->value === 2)
-                <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_admission') }}
                 </h3>
 
@@ -184,7 +184,7 @@
                     <label for="adm-year" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.academic_year') }} <span class="text-heritage-red">*</span></span>
                         <select id="adm-year" wire:model.live="academic_year_id" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                             @foreach ($academicYears as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -196,7 +196,7 @@
                     <label for="adm-term" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.admission_term') }}</span>
                         <select id="adm-term" wire:model="admission_term_id" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.none') }}</option>
                             @foreach ($terms as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -208,7 +208,7 @@
                     <label for="adm-section" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.school_section') }}</span>
                         <select id="adm-section" wire:model="school_section_id" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.none') }}</option>
                             @foreach ($sections as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -220,7 +220,7 @@
                     <label for="adm-level" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.class_level') }} <span class="text-heritage-red">*</span></span>
                         <select id="adm-level" wire:model.live="class_level_id" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                             @foreach ($classLevels as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -232,7 +232,7 @@
                     <label for="adm-stream" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.stream') }}</span>
                         <select id="adm-stream" wire:model="stream_id" @disabled($locked)
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.none') }}</option>
                             @foreach ($streams as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -244,21 +244,21 @@
                     <label for="adm-category" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.category') }}</span>
                         <input id="adm-category" type="text" wire:model="category" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('category') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.admission_date') }} <span class="text-heritage-red">*</span></span>
                         <input id="adm-date" type="date" wire:model="admission_date" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('admission_date') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-roll" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.proposed_roll_number') }}</span>
                         <input id="adm-roll" type="number" min="1" wire:model="proposed_roll_number" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('proposed_roll_number') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                 </div>
@@ -266,14 +266,14 @@
 
             {{-- ================= Step 3: Parent / Guardian ================= --}}
             @if ($currentStep->value === 3)
-                <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_guardians') }}
                 </h3>
 
                 @error('guardians') <p class="mt-3 text-xs text-heritage-red">{{ $message }}</p> @enderror
 
                 @foreach ($guardians as $index => $guardian)
-                    <fieldset class="mt-4 rounded border border-sand p-4">
+                    <fieldset class="mt-4 rounded border border-border-primary p-4">
                         <legend class="px-1 text-xs font-semibold text-charcoal/70">
                             {{ __('opes.admissions_screen.guardian_number', ['position' => $index + 1]) }}
                         </legend>
@@ -282,21 +282,21 @@
                             <label for="adm-g{{ $index }}-first" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.guardian_first_name') }} <span class="text-heritage-red">*</span></span>
                                 <input id="adm-g{{ $index }}-first" type="text" wire:model="guardians.{{ $index }}.first_name" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.first_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-last" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.guardian_last_name') }} <span class="text-heritage-red">*</span></span>
                                 <input id="adm-g{{ $index }}-last" type="text" wire:model="guardians.{{ $index }}.last_name" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.last_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-gender" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.guardian_gender') }} <span class="text-heritage-red">*</span></span>
                                 <select id="adm-g{{ $index }}-gender" wire:model="guardians.{{ $index }}.gender" @disabled($locked)
-                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                     <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                                     <option value="male">{{ __('opes.admissions_screen.gender_male') }}</option>
                                     <option value="female">{{ __('opes.admissions_screen.gender_female') }}</option>
@@ -307,7 +307,7 @@
                             <label for="adm-g{{ $index }}-relationship" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.relationship') }} <span class="text-heritage-red">*</span></span>
                                 <select id="adm-g{{ $index }}-relationship" wire:model.live="guardians.{{ $index }}.relationship" @disabled($locked)
-                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                        class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                                     <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                                     @foreach ($relationships as $relationship)
                                         <option value="{{ $relationship->value }}">{{ $relationship->label(app()->getLocale()) }}</option>
@@ -320,7 +320,7 @@
                                 <label for="adm-g{{ $index }}-relationship-other" class="flex flex-col gap-1">
                                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.relationship_other') }} <span class="text-heritage-red">*</span></span>
                                     <input id="adm-g{{ $index }}-relationship-other" type="text" wire:model="guardians.{{ $index }}.relationship_other" @disabled($locked)
-                                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                     @error('guardians.'.$index.'.relationship_other') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                                 </label>
                             @endif
@@ -328,40 +328,40 @@
                             <label for="adm-g{{ $index }}-phone" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.phone') }} <span class="text-heritage-red">*</span></span>
                                 <input id="adm-g{{ $index }}-phone" type="tel" wire:model="guardians.{{ $index }}.phone" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.phone') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-email" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.email') }}</span>
                                 <input id="adm-g{{ $index }}-email" type="email" wire:model="guardians.{{ $index }}.email" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.email') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-occupation" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.occupation') }}</span>
                                 <input id="adm-g{{ $index }}-occupation" type="text" wire:model="guardians.{{ $index }}.occupation" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.occupation') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-id-number" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.id_number') }}</span>
                                 <input id="adm-g{{ $index }}-id-number" type="text" wire:model="guardians.{{ $index }}.id_number" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.id_number') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
 
                             <label for="adm-g{{ $index }}-address" class="flex flex-col gap-1">
                                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.address_line') }}</span>
                                 <input id="adm-g{{ $index }}-address" type="text" wire:model="guardians.{{ $index }}.address_line" @disabled($locked)
-                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                       class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                                 @error('guardians.'.$index.'.address_line') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                             </label>
                         </div>
 
-                        <fieldset class="mt-4 border-t border-sand pt-3">
+                        <fieldset class="mt-4 border-t border-border-primary pt-3">
                             <legend class="sr-only">{{ __('opes.admissions_screen.authorisations') }}</legend>
                             <p class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.authorisations') }}</p>
 
@@ -378,7 +378,7 @@
                                     <label for="adm-g{{ $index }}-{{ str_replace('_', '-', $flag) }}" class="flex items-center gap-2">
                                         <input id="adm-g{{ $index }}-{{ str_replace('_', '-', $flag) }}" type="checkbox"
                                                wire:model="guardians.{{ $index }}.{{ $flag }}" @disabled($locked)
-                                               class="rounded border-sand text-primary"/>
+                                               class="rounded border-border-primary text-primary"/>
                                         <span class="text-xs text-charcoal/80">{{ $flagLabel }}</span>
                                     </label>
                                 @endforeach
@@ -389,7 +389,7 @@
 
                         @unless ($locked)
                             <button type="button" wire:click="removeGuardian({{ $index }})"
-                                    class="mt-3 rounded border border-sand px-3 py-1 text-xs font-medium text-charcoal hover:border-heritage-red/50 hover:text-heritage-red">
+                                    class="mt-3 rounded border border-border-primary px-3 py-1 text-xs font-medium text-charcoal hover:border-heritage-red/50 hover:text-heritage-red">
                                 {{ __('opes.admissions_screen.remove_guardian') }}
                             </button>
                         @endunless
@@ -406,7 +406,7 @@
 
             {{-- ================= Step 4: Other Information ================= --}}
             @if ($currentStep->value === 4)
-                <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_previous_school') }}
                 </h3>
 
@@ -414,28 +414,28 @@
                     <label for="adm-prev-school" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.previous_school_name') }}</span>
                         <input id="adm-prev-school" type="text" wire:model="previous_school_name" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('previous_school_name') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-last-class" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.last_class_completed') }}</span>
                         <input id="adm-last-class" type="text" wire:model="last_class_completed" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('last_class_completed') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-year-completed" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.year_completed') }}</span>
                         <input id="adm-year-completed" type="number" wire:model="year_completed" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('year_completed') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
                     <label for="adm-reason-leaving" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.reason_for_leaving') }}</span>
                         <input id="adm-reason-leaving" type="text" wire:model="reason_for_leaving" @disabled($locked)
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('reason_for_leaving') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
 
@@ -443,7 +443,7 @@
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.special_information') }}</span>
                         <textarea id="adm-special-info" rows="3" wire:model="special_information" @disabled($locked)
                                   placeholder="{{ __('opes.admissions_screen.special_information_placeholder') }}"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('special_information') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                 </div>
@@ -451,7 +451,7 @@
 
             {{-- ============= Step 5: Documents & Review ============= --}}
             @if ($currentStep->value === 5)
-                <h3 class="mt-5 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_review') }}
                 </h3>
 
@@ -472,7 +472,7 @@
                         __('opes.admissions_screen.blood_group') => $blood_group,
                         __('opes.admissions_screen.genotype') => $genotype,
                     ] as $reviewLabel => $reviewValue)
-                        <div class="flex justify-between gap-4 border-b border-sand/70 py-1 text-sm">
+                        <div class="flex justify-between gap-4 border-b border-border-primary/70 py-1 text-sm">
                             <dt class="text-charcoal/60">{{ $reviewLabel }}</dt>
                             <dd class="text-right font-medium text-charcoal">{{ $reviewValue !== '' ? $reviewValue : __('opes.admissions_screen.review_not_provided') }}</dd>
                         </div>
@@ -490,7 +490,7 @@
                         __('opes.admissions_screen.admission_date') => $admission_date,
                         __('opes.admissions_screen.proposed_roll_number') => $proposed_roll_number,
                     ] as $reviewLabel => $reviewValue)
-                        <div class="flex justify-between gap-4 border-b border-sand/70 py-1 text-sm">
+                        <div class="flex justify-between gap-4 border-b border-border-primary/70 py-1 text-sm">
                             <dt class="text-charcoal/60">{{ $reviewLabel }}</dt>
                             <dd class="text-right font-medium text-charcoal">{{ $reviewValue !== '' ? $reviewValue : __('opes.admissions_screen.review_not_provided') }}</dd>
                         </div>
@@ -506,7 +506,7 @@
                         __('opes.admissions_screen.reason_for_leaving') => $reason_for_leaving,
                         __('opes.admissions_screen.special_information') => $special_information,
                     ] as $reviewLabel => $reviewValue)
-                        <div class="flex justify-between gap-4 border-b border-sand/70 py-1 text-sm">
+                        <div class="flex justify-between gap-4 border-b border-border-primary/70 py-1 text-sm">
                             <dt class="text-charcoal/60">{{ $reviewLabel }}</dt>
                             <dd class="text-right font-medium text-charcoal">{{ $reviewValue !== '' ? $reviewValue : __('opes.admissions_screen.review_not_provided') }}</dd>
                         </div>
@@ -518,7 +518,7 @@
                 </h4>
                 <ul class="mt-2 space-y-1">
                     @forelse ($guardians as $guardian)
-                        <li class="flex flex-wrap items-center gap-2 border-b border-sand/70 py-1 text-sm text-charcoal">
+                        <li class="flex flex-wrap items-center gap-2 border-b border-border-primary/70 py-1 text-sm text-charcoal">
                             <span class="font-medium">{{ trim(($guardian['first_name'] ?? '').' '.($guardian['last_name'] ?? '')) }}</span>
                             <span class="text-charcoal/60">{{ $guardian['relationship'] ?? '' }}</span>
                             <span class="text-charcoal/60">{{ $guardian['phone'] ?? '' }}</span>
@@ -538,21 +538,21 @@
                 </h4>
                 <ul class="mt-2 space-y-1">
                     @forelse ($application?->documents ?? [] as $document)
-                        <li class="border-b border-sand/70 py-1 text-sm text-charcoal">{{ $document->original_name }}</li>
+                        <li class="border-b border-border-primary/70 py-1 text-sm text-charcoal">{{ $document->original_name }}</li>
                     @empty
                         <li class="py-1 text-sm text-charcoal/60">{{ __('opes.admissions_screen.no_documents') }}</li>
                     @endforelse
                 </ul>
 
                 @if ($application !== null && $application->status->isConvertible())
-                    <h4 class="mt-6 border-b border-sand pb-2 text-sm font-semibold text-primary">
+                    <h4 class="mt-6 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                         {{ __('opes.admissions_screen.section_enrolment') }}
                     </h4>
 
                     <label for="adm-class-group" class="mt-4 flex max-w-sm flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.class_group') }} <span class="text-heritage-red">*</span></span>
                         <select id="adm-class-group" wire:model="class_group_id"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">{{ __('opes.admissions_screen.choose') }}</option>
                             @foreach ($classGroups as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
@@ -565,7 +565,7 @@
                     <label for="adm-rejection-reason" class="mt-4 flex max-w-sm flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.admissions_screen.rejection_reason') }}</span>
                         <input id="adm-rejection-reason" type="text" wire:model="rejection_reason"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('decision_reason') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
                 @endif
@@ -575,15 +575,15 @@
             @endif
 
             {{-- Cancel + green Next, bottom-right, exactly as the mockup. --}}
-            <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-sand pt-5">
+            <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-border-primary pt-5">
                 <a href="{{ route('dashboard') }}"
-                   class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                   class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     {{ __('opes.admissions_screen.cancel') }}
                 </a>
 
                 @if ($currentStep->value > 1)
                     <button type="button" wire:click="back"
-                            class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.admissions_screen.back') }}
                     </button>
                 @endif
@@ -619,9 +619,9 @@
         {{-- Admission Summary panel: re-rendered from the partially saved row,
              per 6.2. Blank fields say so rather than being hidden - the panel's
              job is to show what is still missing. --}}
-        <aside class="h-fit rounded-lg border border-sand bg-ivory p-5 shadow-sm"
+        <aside class="h-fit rounded-lg border border-border-primary bg-ivory p-5 shadow-sm"
                aria-label="{{ __('opes.admissions_screen.summary_title') }}">
-            <h2 class="border-b border-sand pb-2 text-sm font-semibold text-chrome">
+            <h2 class="border-b border-border-primary pb-2 text-sm font-semibold text-chrome">
                 {{ __('opes.admissions_screen.summary_title') }}
             </h2>
 
@@ -640,24 +640,24 @@
             @endif
 
             <dl class="mt-4 space-y-2 text-sm">
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('opes.admissions_screen.date_of_birth') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $date_of_birth !== '' ? $date_of_birth : __('opes.ui.no_data') }}</dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('opes.admissions_screen.gender') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $gender !== '' ? $gender : __('opes.ui.no_data') }}</dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('opes.admissions_screen.class_level') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $classLevels[(int) $class_level_id] ?? __('opes.ui.no_data') }}</dd>
                 </div>
-                <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                     <dt class="text-charcoal/60">{{ __('opes.admissions_screen.academic_year') }}</dt>
                     <dd class="font-medium text-charcoal">{{ $academicYears[(int) $academic_year_id] ?? __('opes.ui.no_data') }}</dd>
                 </div>
                 @if ($application !== null)
-                    <div class="flex justify-between gap-3 border-b border-sand pb-1">
+                    <div class="flex justify-between gap-3 border-b border-border-primary pb-1">
                         <dt class="text-charcoal/60">{{ __('opes.users.status_label') }}</dt>
                         <dd class="font-medium text-charcoal">{{ $application->status->label(app()->getLocale()) }}</dd>
                     </div>
