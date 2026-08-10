@@ -73,8 +73,30 @@ final class RecordPayment
         ?array $targets = null,
         ?string $idempotencyKey = null,
         ?string $notes = null,
+        ?int $treasuryAccountId = null,
+        // 04-fees §11.7: the cash-desk shift this collection belongs to.
+        // OPTIONAL in the signature and NULLABLE in the row, deliberately -
+        // the demo seeder, the guardian portal and the test suite have no
+        // till, and §17.2's "no session, no cash collection" rule is enforced
+        // at the Cashier screen where a human can be told to open one. This
+        // Action must never start throwing for callers that predate sessions.
+        ?int $cashDeskSessionId = null,
     ): Payment {
         Gate::authorize(Permission::FeeCollect->value);
+
+        // 02-accounting §2 + §11.3: a payment must name the float it landed
+        // in. Optional in the SIGNATURE (every pre-existing caller - demo
+        // seeder, tests, guardian portal - keeps working), mandatory in the
+        // stored ROW: when the caller does not name one, the method's own
+        // class-5 family resolves it, and a school with no such account at
+        // all is a configuration refusal, not a silent hardcoded 57.
+        $treasuryAccountId = $this->resolveTreasuryAccount($treasuryAccountId, $method);
+
+        // A named session must be OPEN and must be the session of the very
+        // box the money is landing in - "collected into the MTN float, filed
+        // under the cash-desk shift" is exactly the confusion §11.7 exists to
+        // end. Null stays null, silently.
+        $this->assertSessionAccepts($cashDeskSessionId, $treasuryAccountId);
 
         $feeAmount ??= Money::zero();
 
@@ -102,7 +124,8 @@ final class RecordPayment
         return DB::transaction(function () use (
             $studentId, $academicYearId, $fiscalYearId, $method, $amount, $payerName,
             $valueDate, $actor, $feeAmount, $feeBearer, $reference, $payerPhone,
-            $enrollmentId, $targets, $idempotencyKey, $notes,
+            $enrollmentId, $targets, $idempotencyKey, $notes, $treasuryAccountId,
+            $cashDeskSessionId,
         ): Payment {
             // The double-clicked Collect button: same key -> same payment,
             // never a second receipt (§11.1).
@@ -148,6 +171,8 @@ final class RecordPayment
                 'academic_year_id' => $academicYearId,
                 'fiscal_year_id' => $fiscalYearId,
                 'payment_method' => $method,
+                'treasury_account_id' => $treasuryAccountId,
+                'cash_desk_session_id' => $cashDeskSessionId,
                 'amount' => $amount->amount(),
                 'fee_amount' => $feeAmount->amount(),
                 'fee_bearer' => $feeBearer,
@@ -185,8 +210,16 @@ final class RecordPayment
                         'partner' => ['type' => 'student', 'id' => $studentId],
                         'partner_label' => $partnerLabel,
                         'invoice_reference' => $this->firstInvoiceReference($payment),
+                        // 02-accounting §7 names `payment.method.treasury_account_id`
+                        // as THE account_path example for an AccountSource::PayloadPath
+                        // rule line: the engine could already route the debit
+                        // to the real float; the payload simply never carried
+                        // one. It does now (both here and at payment root, so
+                        // an existing rule can address either path).
+                        'treasury_account_id' => $treasuryAccountId,
                         'method' => [
                             'fee_bearer_is_school' => $feeBearer === FeeBearer::School,
+                            'treasury_account_id' => $treasuryAccountId,
                         ],
                     ],
                 ],
@@ -228,6 +261,135 @@ final class RecordPayment
             return $payment->refresh();
         });
     }
+
+    /**
+     * 04-fees §11.7 - a collection may only be filed under a session that is
+     * still OPEN and that runs on the same cash box the money landed in.
+     *
+     * Cross-module-safe plain query-builder read; no refusal at all when the
+     * caller names no session, which is what keeps every pre-session caller
+     * working.
+     */
+    private function assertSessionAccepts(?int $cashDeskSessionId, int $treasuryAccountId): void
+    {
+        if ($cashDeskSessionId === null) {
+            return;
+        }
+
+        /** @var object{session_no: string, status: string, treasury_account_id: int|string}|null $session */
+        $session = DB::table('cash_desk_sessions')
+            ->where('id', $cashDeskSessionId)
+            ->first(['session_no', 'status', 'treasury_account_id']);
+
+        if ($session === null) {
+            throw ValidationException::withMessages([
+                'cash_desk_session_id' => 'The cash-desk session does not exist.',
+            ]);
+        }
+
+        if ($session->status !== 'open') {
+            throw ValidationException::withMessages([
+                'cash_desk_session_id' => sprintf(
+                    'Cash-desk session %s is %s; a closed session cannot take another collection.',
+                    $session->session_no,
+                    $session->status,
+                ),
+            ]);
+        }
+
+        if ((int) $session->treasury_account_id !== $treasuryAccountId) {
+            throw ValidationException::withMessages([
+                'cash_desk_session_id' => sprintf(
+                    'Cash-desk session %s runs on a different cash box than the account this payment landed in.',
+                    $session->session_no,
+                ),
+            ]);
+        }
+    }
+
+    /**
+     * The class-5 treasury account this payment landed in.
+     *
+     * Mirrors `RecordSupplierPayment`'s treatment of its own
+     * `treasury_account_id` (a plain FK into `chart_of_accounts` - in
+     * SYSCOHADA the treasury account IS the class-5 ledger account), with one
+     * addition Procurement does not need: fee collection has legacy callers,
+     * so a null resolves to the default float of the method's own family
+     * (cash -> 57…, mobile money -> 55…, bank -> 52…) rather than refusing.
+     *
+     * Cross-module read through the query builder, never Accounting\Models
+     * (00-core §6.2).
+     */
+    private function resolveTreasuryAccount(?int $given, PaymentMethod $method): int
+    {
+        if ($given !== null) {
+            /** @var object{account_class: int, is_postable: int, is_archived: int, code: string}|null $account */
+            $account = DB::table('chart_of_accounts')
+                ->where('id', $given)
+                ->first(['account_class', 'is_postable', 'is_archived', 'code']);
+
+            if ($account === null) {
+                throw ValidationException::withMessages([
+                    'treasury_account_id' => 'The selected treasury account does not exist.',
+                ]);
+            }
+
+            if ((int) $account->account_class !== 5) {
+                throw ValidationException::withMessages([
+                    'treasury_account_id' => sprintf(
+                        'Account %s is not a treasury (class 5) account (02-accounting §2).',
+                        $account->code,
+                    ),
+                ]);
+            }
+
+            if ((bool) $account->is_archived || ! (bool) $account->is_postable) {
+                throw ValidationException::withMessages([
+                    'treasury_account_id' => sprintf(
+                        'Account %s is archived or not postable; money cannot land in it.',
+                        $account->code,
+                    ),
+                ]);
+            }
+
+            return $given;
+        }
+
+        $prefix = self::TREASURY_FAMILY[$method->value];
+
+        $resolved = DB::table('chart_of_accounts')
+            ->where('account_class', 5)
+            ->where('is_postable', true)
+            ->where('is_archived', false)
+            ->where('code', 'like', $prefix.'%')
+            ->orderBy('code')
+            ->value('id');
+
+        if ($resolved === null) {
+            throw ValidationException::withMessages([
+                'treasury_account_id' => sprintf(
+                    'No postable treasury account exists for %s payments (expected a %s… class-5 account); '
+                    .'open one on the Chart of Accounts screen first (02-accounting §2).',
+                    $method->value,
+                    $prefix,
+                ),
+            ]);
+        }
+
+        return (int) $resolved;
+    }
+
+    /**
+     * The class-5 family each payment method's money lands in (02-accounting
+     * §2): 57 Cash, 55 Electronic money (552 Mobile phone), 52 Banks.
+     *
+     * @var array<string, string>
+     */
+    private const TREASURY_FAMILY = [
+        'cash' => '57',
+        'mobile_money' => '55',
+        'bank' => '52',
+    ];
 
     /**
      * The receipt's "against invoice" label for the ledger line: the

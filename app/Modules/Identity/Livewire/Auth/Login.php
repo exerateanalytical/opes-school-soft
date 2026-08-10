@@ -6,11 +6,13 @@ namespace App\Modules\Identity\Livewire\Auth;
 
 use App\Modules\Identity\Actions\AuthenticateUser;
 use App\Modules\Identity\Domain\AuditAction;
+use App\Modules\Identity\Domain\Permission;
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Identity\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -50,7 +52,95 @@ final class Login extends Component
 
         RateLimiter::clear($key);
 
-        return $this->redirect('/dashboard', navigate: true);
+        $signedIn = Auth::user();
+
+        return $this->redirect(
+            $this->landingFor($signedIn instanceof User ? $signedIn : null),
+            navigate: true,
+        );
+    }
+
+    /**
+     * Where a freshly signed-in principal should land.
+     *
+     * The money offices spend their day in the finance dashboard, so send
+     * them there rather than to a general landing screen whose tiles they are
+     * mostly not permitted to see. Guarded three ways, because the finance
+     * dashboard is being built alongside this and its route may not exist
+     * yet: the route must be registered, and the user must actually hold the
+     * permission behind it - never redirect anyone into a guaranteed 403.
+     */
+    private function landingFor(?User $user): string
+    {
+        if ($user === null || ! Route::has('finance.dashboard')) {
+            return '/dashboard';
+        }
+
+        $financeRoles = [Role::Accountant->value, Role::Bursar->value];
+
+        if (! $user->hasAnyRole($financeRoles)) {
+            return '/dashboard';
+        }
+
+        if (! $user->can(Permission::FeeView->value) && ! $user->can(Permission::LedgerView->value)) {
+            return '/dashboard';
+        }
+
+        return route('finance.dashboard', absolute: false);
+    }
+
+    /**
+     * The demo identities on offer, in the order the page shows them.
+     *
+     * Read from config rather than hardcoded here so a demo box can change
+     * the cast without a code change, and so an identity naming a role this
+     * build does not have is dropped rather than fataling on the click.
+     *
+     * @return list<array{key: string, role: Role, email: string, name: string, label: string}>
+     */
+    public function demoIdentities(): array
+    {
+        if (! $this->demoLoginAvailable()) {
+            return [];
+        }
+
+        $configured = config('opes.demo_login.identities');
+
+        if (! is_array($configured)) {
+            return [];
+        }
+
+        $identities = [];
+
+        foreach ($configured as $identity) {
+            if (! is_array($identity)) {
+                continue;
+            }
+
+            $roleValue = $identity['role'] ?? null;
+            $email = $identity['email'] ?? null;
+            $name = $identity['name'] ?? null;
+
+            if (! is_string($roleValue) || ! is_string($email) || ! is_string($name)) {
+                continue;
+            }
+
+            $role = Role::tryFrom($roleValue);
+
+            if ($role === null) {
+                continue;
+            }
+
+            $identities[] = [
+                'key' => $role->value,
+                'role' => $role,
+                'email' => $email,
+                'name' => $name,
+                'label' => $role->label(),
+            ];
+        }
+
+        return $identities;
     }
 
     /**
@@ -68,22 +158,42 @@ final class Login extends Component
     }
 
     /**
-     * Sign in as the demo administrator with no credential.
+     * Sign in as one of the demo identities with no credential.
      *
      * Deliberately NOT routed through AuthenticateUser: that action's contract
      * is "verify a password", and giving it a bypass path would put a hole in
      * the one place the rest of the system trusts to check credentials.
+     *
+     * The chosen role is matched against the CONFIGURED identities, never
+     * taken from the request directly - otherwise a replayed Livewire call
+     * could name `super_admin` and mint itself an account the demo page never
+     * offered. The role is then granted through Spatie exactly as it would be
+     * for a real user, so every permission check downstream is the real one.
      */
-    public function demoLogin(\App\Modules\Identity\Actions\WriteAuditEntry $audit): mixed
+    public function demoLogin(\App\Modules\Identity\Actions\WriteAuditEntry $audit, string $roleKey = 'administrator'): mixed
     {
         abort_unless($this->demoLoginAvailable(), 403);
 
-        /** @var string $email */
-        $email = config('opes.demo_login.email');
-        /** @var string $name */
-        $name = config('opes.demo_login.name');
+        $identity = null;
 
-        $user = DB::transaction(function () use ($email, $name): User {
+        foreach ($this->demoIdentities() as $candidate) {
+            if ($candidate['key'] === $roleKey) {
+                $identity = $candidate;
+                break;
+            }
+        }
+
+        if ($identity === null) {
+            // A role the demo page never offered - a replayed or hand-crafted
+            // call. Refuse rather than mint an account for it.
+            abort(403);
+        }
+
+        $email = $identity['email'];
+        $name = $identity['name'];
+        $role = $identity['role'];
+
+        $user = DB::transaction(function () use ($email, $name, $role): User {
             $user = User::query()->where('email', $email)->first();
 
             if ($user === null) {
@@ -98,8 +208,8 @@ final class Login extends Component
                 ]);
             }
 
-            if (! $user->hasRole(Role::Administrator->value)) {
-                $user->assignRole(Role::Administrator->value);
+            if (! $user->hasRole($role->value)) {
+                $user->assignRole($role->value);
             }
 
             return $user;
@@ -115,11 +225,11 @@ final class Login extends Component
             module: 'Identity',
             auditableType: User::class,
             auditableId: (int) $user->getKey(),
-            after: ['method' => 'demo_login'],
+            after: ['method' => 'demo_login', 'role' => $role->value],
             actor: $user->toAuditActor(),
         );
 
-        return $this->redirect('/dashboard', navigate: true);
+        return $this->redirect($this->landingFor($user), navigate: true);
     }
 
     private function throttleKey(): string

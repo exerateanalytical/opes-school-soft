@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Procurement\Livewire\SupplierInvoices;
 
+use App\Modules\Procurement\Actions\CancelSupplierInvoice;
+use App\Modules\Procurement\Actions\IssueSupplierCreditNote;
+use App\Modules\Procurement\Domain\SupplierCreditNoteReasonType;
 use App\Modules\Procurement\Domain\SupplierInvoicePermission;
+use DomainException;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -32,6 +38,27 @@ final class Index extends Component
 
     public int $perPage = 25;
 
+    // ── Cancel row ──────────────────────────────────────────────────────
+    public ?int $cancellingId = null;
+
+    public string $cancelReason = '';
+
+    // ── Credit-note form ────────────────────────────────────────────────
+    public bool $showCreditNoteForm = false;
+
+    public ?int $creditNoteInvoiceId = null;
+
+    public ?int $creditNoteSupplierId = null;
+
+    public string $creditNoteDate = '';
+
+    public string $creditNoteReasonType = 'return';
+
+    public string $creditNoteReasonNote = '';
+
+    /** @var list<array{description: string, quantity: string, unit_price_ht: int, tax_code_id: ?int, expense_account_id: ?int, supplier_invoice_line_id: ?int}> */
+    public array $creditNoteLines = [];
+
     public function mount(): void
     {
         Gate::authorize(SupplierInvoicePermission::VIEW);
@@ -51,6 +78,155 @@ final class Index extends Component
     public function updatedStatus(): void
     {
         $this->page = 1;
+    }
+
+    public function startCancel(int $invoiceId): void
+    {
+        Gate::authorize(SupplierInvoicePermission::CREATE);
+
+        $this->cancellingId = $invoiceId;
+        $this->cancelReason = '';
+    }
+
+    public function cancelCancel(): void
+    {
+        $this->reset(['cancellingId', 'cancelReason']);
+    }
+
+    public function confirmCancel(CancelSupplierInvoice $cancel): void
+    {
+        Gate::authorize(SupplierInvoicePermission::CREATE);
+
+        $user = Auth::user();
+
+        if ($user === null || $this->cancellingId === null) {
+            return;
+        }
+
+        $invoiceId = $this->cancellingId;
+
+        try {
+            $cancel->handle($invoiceId, $this->cancelReason, $user->toAuditActor());
+        } catch (ValidationException $e) {
+            $this->addError('cancelReason', (string) collect($e->errors())->flatten()->first());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('cancelReason', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['cancellingId', 'cancelReason']);
+        session()->flash('status', 'Supplier invoice cancelled.');
+    }
+
+    public function toggleCreditNoteForm(): void
+    {
+        Gate::authorize(SupplierInvoicePermission::CREATE);
+
+        $this->showCreditNoteForm = ! $this->showCreditNoteForm;
+
+        if ($this->showCreditNoteForm) {
+            if ($this->creditNoteDate === '') {
+                $this->creditNoteDate = now()->toDateString();
+            }
+
+            if ($this->creditNoteLines === []) {
+                $this->addCreditNoteLine();
+            }
+        }
+    }
+
+    public function updatedCreditNoteInvoiceId(): void
+    {
+        if ($this->creditNoteInvoiceId === null) {
+            return;
+        }
+
+        /** @var object{supplier_id: int}|null $invoice */
+        $invoice = DB::table('supplier_invoices')->whereKey($this->creditNoteInvoiceId)->first(['supplier_id']);
+
+        if ($invoice !== null) {
+            $this->creditNoteSupplierId = (int) $invoice->supplier_id;
+        }
+    }
+
+    public function addCreditNoteLine(): void
+    {
+        $this->creditNoteLines[] = [
+            'description' => '',
+            'quantity' => '1',
+            'unit_price_ht' => 0,
+            'tax_code_id' => null,
+            'expense_account_id' => null,
+            'supplier_invoice_line_id' => null,
+        ];
+    }
+
+    public function removeCreditNoteLine(int $index): void
+    {
+        unset($this->creditNoteLines[$index]);
+        $this->creditNoteLines = array_values($this->creditNoteLines);
+    }
+
+    public function saveCreditNote(IssueSupplierCreditNote $issue): void
+    {
+        Gate::authorize(SupplierInvoicePermission::CREATE);
+
+        $user = Auth::user();
+
+        if ($user === null) {
+            return;
+        }
+
+        $lines = [];
+
+        foreach ($this->creditNoteLines as $line) {
+            $description = trim((string) $line['description']);
+
+            if ($description === '') {
+                continue;
+            }
+
+            $lines[] = [
+                'description' => $description,
+                'quantity' => (string) $line['quantity'],
+                'unit_price_ht' => (int) $line['unit_price_ht'],
+                'tax_code_id' => $line['tax_code_id'] !== null ? (int) $line['tax_code_id'] : null,
+                'expense_account_id' => $line['expense_account_id'] !== null ? (int) $line['expense_account_id'] : null,
+                'supplier_invoice_line_id' => $line['supplier_invoice_line_id'] !== null ? (int) $line['supplier_invoice_line_id'] : null,
+            ];
+        }
+
+        $header = [
+            'credit_note_date' => $this->creditNoteDate,
+            'reason_type' => $this->creditNoteReasonType,
+            'reason_note' => $this->creditNoteReasonNote,
+        ];
+
+        if ($this->creditNoteInvoiceId !== null) {
+            $header['original_invoice_id'] = $this->creditNoteInvoiceId;
+        }
+
+        if ($this->creditNoteSupplierId !== null) {
+            $header['supplier_id'] = $this->creditNoteSupplierId;
+        }
+
+        try {
+            $issue->handle($header, $lines, $user->toAuditActor());
+        } catch (DomainException $e) {
+            $this->addError('creditNote', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showCreditNoteForm', 'creditNoteInvoiceId', 'creditNoteSupplierId', 'creditNoteDate',
+            'creditNoteReasonType', 'creditNoteReasonNote', 'creditNoteLines',
+        ]);
+        $this->page = 1;
+        session()->flash('status', 'Supplier credit note issued.');
     }
 
     private function baseQuery(): QueryBuilder
@@ -96,9 +272,47 @@ final class Index extends Component
             'posted' => DB::table('supplier_invoices')->where('status', 'posted')->count(),
         ];
 
+        $postedInvoices = DB::table('supplier_invoices')
+            ->whereIn('status', ['posted', 'partially_paid', 'paid'])
+            ->orderByDesc('invoice_date')
+            ->limit(200)
+            ->get(['id', 'internal_no', 'supplier_id']);
+
+        $creditNoteInvoiceLines = $this->creditNoteInvoiceId !== null
+            ? DB::table('supplier_invoice_lines')
+                ->where('supplier_invoice_id', $this->creditNoteInvoiceId)
+                ->orderBy('line_no')
+                ->get(['id', 'line_no', 'description'])
+            : collect();
+
+        $suppliers = DB::table('suppliers')
+            ->where('is_active', true)
+            ->where('is_archived', false)
+            ->orderBy('name')
+            ->limit(200)
+            ->get(['id', 'code', 'name']);
+
+        $taxCodes = DB::table('tax_codes')->orderBy('code')->limit(100)->get(['id', 'code', 'rate_bp']);
+
+        $expenseAccounts = DB::table('chart_of_accounts')
+            ->where('is_postable', true)
+            ->where(function ($query): void {
+                $query->where('code', 'like', '6%')->orWhere('code', 'like', '2%');
+            })
+            ->orderBy('code')
+            ->limit(400)
+            ->get(['id', 'code', 'name']);
+
         return view('livewire.procurement.supplier-invoices.index', [
             'invoices' => $paginator,
             'kpis' => $kpis,
+            'canManageInvoices' => Gate::allows(SupplierInvoicePermission::CREATE),
+            'postedInvoices' => $postedInvoices,
+            'creditNoteInvoiceLines' => $creditNoteInvoiceLines,
+            'suppliers' => $suppliers,
+            'taxCodes' => $taxCodes,
+            'expenseAccounts' => $expenseAccounts,
+            'creditNoteReasonTypes' => array_map(static fn (SupplierCreditNoteReasonType $r): string => $r->value, SupplierCreditNoteReasonType::cases()),
         ]);
     }
 }

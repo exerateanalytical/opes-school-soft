@@ -84,7 +84,7 @@ enum Role: string
                 Permission::UserView, Permission::AuditView,
                 Permission::SettingView, Permission::FeeView, Permission::LedgerView,
                 Permission::AcademicsView, Permission::StudentsView,
-                Permission::ReportsPublish,
+                Permission::ReportsPublish, Permission::ReportsView,
                 // Phase 8: the Proviseur oversees the timetable and calendar,
                 // reads attendance and discipline, and owns promotion - both
                 // the evaluation and the irreversible apply (07-students
@@ -118,7 +118,7 @@ enum Role: string
                 Permission::AcademicsView, Permission::AcademicsManage,
                 Permission::StudentsView,
                 Permission::MarksValidate, Permission::AssessmentConfigure,
-                Permission::ReportsPublish,
+                Permission::ReportsPublish, Permission::ReportsView,
                 // Phase 8: the Censeur builds the timetable, runs the
                 // attendance operation day to day (take, amend, justify) and
                 // manages discipline alongside the Surveillant Général. He
@@ -134,6 +134,11 @@ enum Role: string
             // never edits it - 07-students 7.5 keeps money and identity apart.
             self::Bursar => [
                 Permission::FeeView, Permission::FeeCollect, Permission::StudentsView,
+                Permission::ReportsView,
+                // 02-accounting §21.3: the bursar RECORDS petty spend but
+                // deliberately cannot approve it - maker and checker must be
+                // two people, so ExpenseApprove lives on Accountant/Principal.
+                Permission::ExpenseRecord,
                 // Phase 13 (10-documents §19): reprinting a receipt or other
                 // money document is reserved to the money offices, mirroring
                 // the payment-void segregation in 04-fees.
@@ -153,7 +158,11 @@ enum Role: string
 
             self::Accountant => [
                 Permission::FeeView, Permission::LedgerView, Permission::LedgerPost,
-                Permission::LedgerConfigure, Permission::FeeVoid,
+                Permission::LedgerConfigure, Permission::FeeVoid, Permission::ReportsView,
+                // Checker to the Bursar's maker (02-accounting §21.3): the
+                // accountant approves and posts petty spend but does not
+                // record it, so no one person can both raise and release cash.
+                Permission::ExpenseApprove,
                 // 04-fees: the accountant shapes the fee catalogue; the
                 // bursar (who handles the cash) deliberately does not.
                 Permission::FeeConfigure,
@@ -226,7 +235,7 @@ enum Role: string
             self::ExamsOfficer => [
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter, Permission::MarksValidate,
-                Permission::AssessmentConfigure, Permission::ReportsPublish,
+                Permission::AssessmentConfigure, Permission::ReportsPublish, Permission::ReportsView,
             ],
 
             // Phase 8: the Surveillant Général polices attendance and owns
@@ -238,9 +247,42 @@ enum Role: string
                 Permission::DisciplineView, Permission::DisciplineManage,
             ],
 
-            self::HrOfficer, self::PayrollOfficer,
-            self::Librarian, self::StoreKeeper,
-            self::Nurse, self::WelfareOfficer, self::FrontDesk => [],
+            self::HrOfficer => [
+                Permission::StaffView, Permission::StaffManage,
+                Permission::LeaveApprove, Permission::TimesheetValidate,
+            ],
+
+            self::PayrollOfficer => [
+                Permission::StaffView,
+                Permission::PayrollView, Permission::PayrollRun,
+                Permission::PayrollPay, Permission::DeclarationFile,
+            ],
+
+            self::Librarian => [
+                Permission::LibraryView, Permission::LibraryManage,
+                Permission::LibraryCirculate, Permission::LibraryWaiveFine,
+            ],
+
+            self::StoreKeeper => [
+                Permission::InventoryView, Permission::InventoryManage,
+                Permission::InventoryPost,
+                Permission::AssetView, Permission::AssetManage,
+            ],
+
+            self::Nurse => [
+                Permission::MedicalView, Permission::MedicalManage,
+            ],
+
+            self::WelfareOfficer => [
+                Permission::TransportView, Permission::TransportManage,
+                Permission::HostelView, Permission::HostelManage,
+                Permission::VisitorManage,
+                Permission::InsuranceView, Permission::InsuranceManage,
+            ],
+
+            self::FrontDesk => [
+                Permission::VisitorManage,
+            ],
 
             // Phase 12: portal roles hold exactly one permission - the outer
             // portal gate. Everything a guardian may actually SEE per child

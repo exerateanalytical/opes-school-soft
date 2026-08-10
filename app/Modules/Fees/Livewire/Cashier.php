@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Fees\Livewire;
 
+use App\Modules\Fees\Actions\CloseCashDeskSession;
+use App\Modules\Fees\Actions\OpenCashDeskSession;
 use App\Modules\Fees\Actions\RecordPayment;
+use App\Modules\Fees\Actions\VoidPayment;
 use App\Modules\Fees\Domain\PaymentMethod;
+use App\Modules\Fees\Domain\PaymentVoidReason;
+use App\Modules\Fees\Models\Payment;
 use App\Modules\Identity\Domain\Permission;
 use App\Support\Audit\Actor;
 use App\Support\Clock\BusinessDate;
@@ -13,6 +18,7 @@ use App\Support\Money\Money;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -42,6 +48,16 @@ final class Cashier extends Component
 
     public string $method = 'cash';
 
+    /**
+     * 02-accounting §2 + §11.3 - "Received into": the class-5 account the
+     * money actually landed in (57x cash box, 552x MTN/Orange float, 52x
+     * bank). Defaulted from the chosen method, overridable by the cashier -
+     * a school with two MoMo floats must be able to say WHICH one took the
+     * note, which is the whole reason the bursar could never reconcile the
+     * MTN balance before.
+     */
+    public string $treasuryAccountId = '';
+
     public string $reference = '';
 
     public string $receiptNo = '';
@@ -53,6 +69,46 @@ final class Cashier extends Component
 
     public string $errorMessage = '';
 
+    // Void-a-payment toggle form (04-fees §11.5). The cashier screen has no
+    // payments list to attach a per-row action to (only the invoice
+    // breakdown is shown here), so voiding is a standalone lookup-by-receipt
+    // form, same shape as the payment-details panel it sits beside.
+    public bool $showVoidForm = false;
+
+    public string $voidReceiptNo = '';
+
+    public string $voidReasonType = '';
+
+    public string $voidReasonNote = '';
+
+    public string $voidStatus = '';
+
+    // ── Cash desk (04-fees §11.7 / §17.2) ──────────────────────────────
+    // The shift. §17.2: "If the user has no open cash_desk_session for
+    // business_date(), the first collection of the day prompts to open one
+    // with an opening float. Collect is blocked until a session exists for
+    // cash-method payments." That block lives HERE, on the screen, and
+    // deliberately not inside RecordPayment - the demo seeder, the guardian
+    // portal and the test suite all call that Action and none of them has a
+    // till. A human at a counter can be told to open one; a seeder cannot.
+
+    public bool $showOpenSessionForm = false;
+
+    public string $openingFloat = '';
+
+    /** The 57x cash box the session runs on. Defaulted to the first one. */
+    public string $sessionTreasuryAccountId = '';
+
+    public bool $showCloseSessionForm = false;
+
+    public string $countedCash = '';
+
+    public string $varianceReason = '';
+
+    public string $sessionMessage = '';
+
+    public string $sessionError = '';
+
     public function mount(): void
     {
         // The SCREEN is readable under fee.view (nav/route agreement - the
@@ -60,11 +116,392 @@ final class Cashier extends Component
         // requires fee.collect: checked in collect() below, re-authorized
         // inside RecordPayment, and the view disables the button without it.
         Gate::authorize(Permission::FeeView->value);
+
+        $this->treasuryAccountId = $this->defaultTreasuryAccountId($this->method);
+        $this->sessionTreasuryAccountId = $this->defaultCashBoxId();
+    }
+
+    /**
+     * Changing the method re-defaults the float, because "mobile money into
+     * the cash box" is never what the cashier meant; an explicit override
+     * afterwards is still theirs to make.
+     */
+    public function updatedMethod(): void
+    {
+        $this->treasuryAccountId = $this->defaultTreasuryAccountId($this->method);
+    }
+
+    /**
+     * The first postable, non-archived class-5 account of the method's own
+     * family - cash -> 57…, mobile money -> 55… (552x), bank -> 52….
+     * Cross-module read via the query builder (00-core §6.2).
+     */
+    private function defaultTreasuryAccountId(string $method): string
+    {
+        $prefix = match ($method) {
+            'mobile_money' => '55',
+            'bank' => '52',
+            default => '57',
+        };
+
+        $id = DB::table('chart_of_accounts')
+            ->where('account_class', 5)
+            ->where('is_postable', true)
+            ->where('is_archived', false)
+            ->where('code', 'like', $prefix.'%')
+            ->orderBy('code')
+            ->value('id');
+
+        return $id === null ? '' : (string) $id;
+    }
+
+    /**
+     * Every place money can land: class-5, postable, not archived.
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function treasuryOptions(): array
+    {
+        $rows = DB::table('chart_of_accounts')
+            ->where('account_class', 5)
+            ->where('is_postable', true)
+            ->where('is_archived', false)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, code: string, name: string} $row */
+            $options[] = [
+                'id' => (int) $row->id,
+                'label' => $row->code.' · '.$row->name,
+            ];
+        }
+
+        return $options;
+    }
+
+    /**
+     * The first postable, non-archived 57x *Caisse* account - what a cash
+     * desk actually is (02-accounting §2). Cross-module read via the query
+     * builder (00-core §6.2).
+     */
+    private function defaultCashBoxId(): string
+    {
+        $id = DB::table('chart_of_accounts')
+            ->where('account_class', 5)
+            ->where('is_postable', true)
+            ->where('is_archived', false)
+            ->where('code', 'like', '57%')
+            ->orderBy('code')
+            ->value('id');
+
+        return $id === null ? '' : (string) $id;
+    }
+
+    /**
+     * Every cash box a session may run on.
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function cashBoxOptions(): array
+    {
+        $rows = DB::table('chart_of_accounts')
+            ->where('account_class', 5)
+            ->where('is_postable', true)
+            ->where('is_archived', false)
+            ->where('code', 'like', '57%')
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, code: string, name: string} $row */
+            $options[] = [
+                'id' => (int) $row->id,
+                'label' => $row->code.' · '.$row->name,
+            ];
+        }
+
+        return $options;
+    }
+
+    /**
+     * THIS cashier's open session, with its live running total - the two
+     * numbers the counter needs all day. Expected is recomputed here exactly
+     * as CloseCashDeskSession recomputes it, so the panel never disagrees
+     * with the close-out sheet.
+     *
+     * @return array{id: int, session_no: string, business_date: string, opened_at: string, opening_float: int, treasury_account_id: int, treasury_label: string, collected: int, expected: int, collections: int}|null
+     */
+    private function openSession(): ?array
+    {
+        $userId = auth()->id();
+
+        if ($userId === null) {
+            return null;
+        }
+
+        /** @var object{id: int|string, session_no: string, business_date: string, opened_at: string, opening_float: int|string, treasury_account_id: int|string, code: string, name: string}|null $row */
+        $row = DB::table('cash_desk_sessions as s')
+            ->join('chart_of_accounts as a', 'a.id', '=', 's.treasury_account_id')
+            ->where('s.opened_by', $userId)
+            ->where('s.status', 'open')
+            ->first([
+                's.id', 's.session_no', 's.business_date', 's.opened_at',
+                's.opening_float', 's.treasury_account_id', 'a.code', 'a.name',
+            ]);
+
+        if ($row === null) {
+            return null;
+        }
+
+        $live = DB::table('payments as p')
+            ->where('p.cash_desk_session_id', $row->id)
+            ->where('p.clearing_state', '<>', 'bounced')
+            ->whereNotExists(function ($query): void {
+                $query->selectRaw('1')
+                    ->from('payment_voids as v')
+                    ->whereColumn('v.payment_id', 'p.id')
+                    ->where('v.status', 'confirmed');
+            });
+
+        $collected = (int) (clone $live)->sum('p.amount');
+        $count = (int) (clone $live)->count();
+
+        return [
+            'id' => (int) $row->id,
+            'session_no' => (string) $row->session_no,
+            'business_date' => (string) $row->business_date,
+            'opened_at' => (string) $row->opened_at,
+            'opening_float' => (int) $row->opening_float,
+            'treasury_account_id' => (int) $row->treasury_account_id,
+            'treasury_label' => $row->code.' · '.$row->name,
+            'collected' => $collected,
+            'collections' => $count,
+            'expected' => (int) $row->opening_float + $collected,
+        ];
+    }
+
+    public function toggleOpenSessionForm(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->showOpenSessionForm = ! $this->showOpenSessionForm;
+        $this->sessionError = '';
+        $this->resetErrorBag();
+
+        if (! $this->showOpenSessionForm) {
+            $this->reset(['openingFloat']);
+        }
+    }
+
+    public function toggleCloseSessionForm(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->showCloseSessionForm = ! $this->showCloseSessionForm;
+        $this->sessionError = '';
+        $this->resetErrorBag();
+
+        if (! $this->showCloseSessionForm) {
+            $this->reset(['countedCash', 'varianceReason']);
+        }
+    }
+
+    public function openSessionAction(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->sessionError = '';
+        $this->sessionMessage = '';
+        $this->resetErrorBag();
+
+        $this->validate([
+            'openingFloat' => ['required', 'integer', 'min:0'],
+            'sessionTreasuryAccountId' => ['required', 'integer'],
+        ], [
+            'openingFloat.required' => 'Declare the opening float, even if it is zero.',
+            'openingFloat.integer' => 'The opening float must be a whole number of FCFA.',
+            'openingFloat.min' => 'An opening float cannot be negative.',
+            'sessionTreasuryAccountId.required' => 'Choose the cash box this session runs on.',
+        ]);
+
+        $user = auth()->user();
+        $actor = new Actor($user?->id, $user->name ?? 'system');
+
+        try {
+            $session = app(OpenCashDeskSession::class)->handle(
+                treasuryAccountId: (int) $this->sessionTreasuryAccountId,
+                openingFloat: Money::of((int) $this->openingFloat),
+                actor: $actor,
+            );
+
+            $this->sessionMessage = 'Cash-desk session '.$session->session_no.' is open.';
+            $this->reset(['showOpenSessionForm', 'openingFloat']);
+        } catch (ValidationException $exception) {
+            $this->sessionError = $this->firstMessage($exception);
+        } catch (DomainException $exception) {
+            $this->sessionError = $exception->getMessage();
+        }
+    }
+
+    public function closeSessionAction(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->sessionError = '';
+        $this->sessionMessage = '';
+        $this->resetErrorBag();
+
+        $session = $this->openSession();
+
+        if ($session === null) {
+            $this->sessionError = 'You have no open cash-desk session to close.';
+
+            return;
+        }
+
+        $this->validate([
+            'countedCash' => ['required', 'integer', 'min:0'],
+            'varianceReason' => ['nullable', 'string', 'max:400'],
+        ], [
+            'countedCash.required' => 'Count the till and declare the amount.',
+            'countedCash.integer' => 'The counted cash must be a whole number of FCFA.',
+            'countedCash.min' => 'A counted till cannot be negative.',
+        ]);
+
+        $user = auth()->user();
+        $actor = new Actor($user?->id, $user->name ?? 'system');
+
+        try {
+            $closed = app(CloseCashDeskSession::class)->handle(
+                sessionId: $session['id'],
+                countedCash: Money::of((int) $this->countedCash),
+                actor: $actor,
+                varianceReason: $this->varianceReason !== '' ? $this->varianceReason : null,
+            );
+
+            $variance = (int) ($closed->variance ?? 0);
+
+            $this->sessionMessage = $variance === 0
+                ? 'Session '.$closed->session_no.' closed; the till balanced.'
+                : sprintf(
+                    'Session %s closed with a %s of %s (journal entry #%s).',
+                    $closed->session_no,
+                    $variance < 0 ? 'shortage' : 'overage',
+                    Money::of(abs($variance))->format(),
+                    $closed->journal_entry_id ?? '—',
+                );
+
+            $this->reset(['showCloseSessionForm', 'countedCash', 'varianceReason']);
+        } catch (ValidationException $exception) {
+            // A missing reason belongs on its own field; everything else is a
+            // banner.
+            foreach ($exception->errors() as $field => $messages) {
+                $message = (string) ($messages[0] ?? $exception->getMessage());
+
+                if ($field === 'variance_reason') {
+                    $this->addError('varianceReason', $message);
+
+                    continue;
+                }
+
+                $this->sessionError = $message;
+            }
+        } catch (DomainException $exception) {
+            // The 02-accounting §11.5 blocking gate: no configured
+            // shortage/overage posting rule means NOTHING was written and the
+            // session is still open. The operator reads why.
+            $this->sessionError = $exception->getMessage();
+        }
+    }
+
+    private function firstMessage(ValidationException $exception): string
+    {
+        foreach ($exception->errors() as $messages) {
+            return (string) ($messages[0] ?? $exception->getMessage());
+        }
+
+        return $exception->getMessage();
     }
 
     public function canCollect(): bool
     {
         return Gate::allows(Permission::FeeCollect->value);
+    }
+
+    public function canVoid(): bool
+    {
+        return Gate::allows(Permission::FeeVoid->value);
+    }
+
+    public function toggleVoidForm(): void
+    {
+        Gate::authorize(Permission::FeeVoid->value);
+
+        $this->showVoidForm = ! $this->showVoidForm;
+
+        if (! $this->showVoidForm) {
+            $this->reset(['voidReceiptNo', 'voidReasonType', 'voidReasonNote']);
+            $this->resetErrorBag();
+        }
+    }
+
+    public function voidPayment(): void
+    {
+        Gate::authorize(Permission::FeeVoid->value);
+
+        $this->voidStatus = '';
+        $this->resetErrorBag();
+
+        $this->validate([
+            'voidReceiptNo' => ['required', 'string', 'max:120'],
+            'voidReasonType' => ['required', 'string', 'in:'.implode(',', array_map(
+                static fn (PaymentVoidReason $r): string => $r->value,
+                PaymentVoidReason::cases(),
+            ))],
+            'voidReasonNote' => ['required', 'string', 'min:10', 'max:500'],
+        ], [
+            'voidReceiptNo.required' => 'Enter the receipt number of the payment to void.',
+            'voidReasonType.required' => 'Select a void reason.',
+            'voidReasonType.in' => 'Select a void reason.',
+            'voidReasonNote.required' => 'A void reason note is required.',
+            'voidReasonNote.min' => 'The void reason note must be at least 10 characters.',
+        ]);
+
+        $paymentId = Payment::query()->where('receipt_no', trim($this->voidReceiptNo))->value('id');
+
+        if ($paymentId === null) {
+            $this->addError('voidReceiptNo', 'No payment carries this receipt number.');
+
+            return;
+        }
+
+        $user = auth()->user();
+        $actor = new Actor($user?->id, $user->name ?? 'system');
+
+        try {
+            $void = app(VoidPayment::class)->handle(
+                paymentId: (int) $paymentId,
+                reason: PaymentVoidReason::from($this->voidReasonType),
+                reasonNote: $this->voidReasonNote,
+                actor: $actor,
+            );
+
+            $this->voidStatus = 'Payment '.$this->voidReceiptNo.' voided.';
+            session()->flash('status', $this->voidStatus);
+            $this->reset(['showVoidForm', 'voidReceiptNo', 'voidReasonType', 'voidReasonNote']);
+            unset($void);
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError('void'.str($field)->studly()->toString(), (string) ($messages[0] ?? $exception->getMessage()));
+            }
+        } catch (DomainException $exception) {
+            $this->addError('voidReceiptNo', $exception->getMessage());
+        }
     }
 
     public function updatedSearch(): void
@@ -107,14 +544,48 @@ final class Cashier extends Component
         $this->validate([
             'amount' => ['required', 'integer', 'min:1'],
             'method' => ['required', 'in:cash,mobile_money,bank'],
+            // Required for all three v1 methods (02-accounting §2): every one
+            // of them lands somewhere real. Enforced here AND in the Action -
+            // never as a DB CHECK, which cannot dereference the FK to see
+            // that the account is class 5 and postable.
+            'treasuryAccountId' => ['required', 'integer'],
             'reference' => ['nullable', 'string', 'max:120'],
         ], [
             'amount.required' => __('opes.fees_screen.amount_invalid'),
             'amount.integer' => __('opes.fees_screen.amount_invalid'),
             'amount.min' => __('opes.fees_screen.amount_invalid'),
+            'treasuryAccountId.required' => __('opes.fees_screen.treasury_account_required'),
+            'treasuryAccountId.integer' => __('opes.fees_screen.treasury_account_required'),
         ]);
 
         $method = PaymentMethod::from($this->method);
+
+        // 04-fees §17.2 - "Collect is blocked until a session exists for
+        // cash-method payments." Only CASH: a MoMo or bank receipt does not
+        // pass through the till and blocking it would be theatre.
+        $session = $this->openSession();
+        $cashDeskSessionId = null;
+
+        if ($method === PaymentMethod::Cash) {
+            if ($session === null) {
+                $this->errorMessage = 'No cash-desk session is open. Open one with its opening float before collecting cash (04-fees §17.2).';
+                $this->showOpenSessionForm = true;
+
+                return;
+            }
+
+            if ($session['treasury_account_id'] !== (int) $this->treasuryAccountId) {
+                $this->errorMessage = sprintf(
+                    'Your open session %s runs on %s. Collect cash into that box, or close the session first.',
+                    $session['session_no'],
+                    $session['treasury_label'],
+                );
+
+                return;
+            }
+
+            $cashDeskSessionId = $session['id'];
+        }
 
         $academicYearId = DB::table('academic_years')->where('is_current', true)->value('id');
         $fiscalYearId = DB::table('fiscal_years')->where('status', 'open')->value('id');
@@ -152,11 +623,31 @@ final class Cashier extends Component
                 actor: $actor,
                 reference: $this->reference !== '' ? $this->reference : null,
                 enrollmentId: $this->latestEnrollmentId($studentId),
+                treasuryAccountId: (int) $this->treasuryAccountId,
+                // §11.7: file the collection under the shift that took it -
+                // set above for cash only, and only once a session was found
+                // to be open on the very box the money is landing in.
+                cashDeskSessionId: $cashDeskSessionId,
             );
 
             $this->receiptNo = $payment->receipt_no;
             $this->lastPaymentId = (int) $payment->getKey();
             $this->reset(['amount', 'reference']);
+        } catch (ValidationException $exception) {
+            // The Action's own refusals (an archived or non-class-5 float,
+            // a school with no treasury account at all) land on the field
+            // that names them, verbatim - they are written for operators.
+            foreach ($exception->errors() as $field => $messages) {
+                $message = (string) ($messages[0] ?? $exception->getMessage());
+
+                if ($field === 'treasury_account_id') {
+                    $this->addError('treasuryAccountId', $message);
+
+                    continue;
+                }
+
+                $this->errorMessage = $message;
+            }
         } catch (DomainException $exception) {
             $this->errorMessage = $exception->getMessage();
         }
@@ -347,8 +838,13 @@ final class Cashier extends Component
             'selected' => $this->selected(),
             'breakdown' => $breakdown,
             'totals' => $this->totals($breakdown),
+            'treasuryOptions' => $this->treasuryOptions(),
+            'cashBoxOptions' => $this->cashBoxOptions(),
+            'session' => $this->openSession(),
             'methodOptions' => array_map(static fn (PaymentMethod $m): string => $m->value, PaymentMethod::cases()),
             'canCollect' => $this->canCollect(),
+            'canVoid' => $this->canVoid(),
+            'voidReasonOptions' => array_map(static fn (PaymentVoidReason $r): string => $r->value, PaymentVoidReason::cases()),
         ]);
     }
 }

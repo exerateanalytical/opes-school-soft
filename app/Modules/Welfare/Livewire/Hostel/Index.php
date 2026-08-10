@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace App\Modules\Welfare\Livewire\Hostel;
 
+use App\Modules\Welfare\Actions\AllocateBed;
+use App\Modules\Welfare\Actions\EndHostelAllocation;
+use App\Modules\Welfare\Actions\RecordInspection;
+use App\Modules\Welfare\Actions\SaveBeds;
+use App\Modules\Welfare\Actions\SaveHostel;
+use App\Modules\Welfare\Actions\SaveRoom;
 use App\Modules\Welfare\Domain\HostelGender;
 use App\Modules\Welfare\Domain\HostelPermission;
+use App\Modules\Welfare\Domain\InspectionRating;
+use App\Support\Audit\Actor;
+use DomainException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -47,6 +58,53 @@ final class Index extends Component
     public int $page = 1;
 
     public int $perPage = 25;
+
+    // ── Allocate-bed form ────────────────────────────────────────────────
+    public bool $showAllocateForm = false;
+
+    public string $allocMatricule = '';
+
+    public string $allocBedId = '';
+
+    public string $allocStartsOn = '';
+
+    // ── Record-inspection form ──────────────────────────────────────────
+    public bool $showInspectionForm = false;
+
+    public string $inspHostelId = '';
+
+    public string $inspRoomId = '';
+
+    public string $inspInspectedOn = '';
+
+    public string $inspRating = 'good';
+
+    public string $inspFindings = '';
+
+    // ── Add-hostel form ──────────────────────────────────────────────────
+    public bool $showHostelForm = false;
+
+    public string $hostelCode = '';
+
+    public string $hostelName = '';
+
+    public string $hostelGender = 'boys';
+
+    // ── Add-room form ────────────────────────────────────────────────────
+    public bool $showRoomForm = false;
+
+    public string $roomHostelId = '';
+
+    public string $roomName = '';
+
+    public string $roomCapacity = '';
+
+    // ── Add-beds form ────────────────────────────────────────────────────
+    public bool $showBedsForm = false;
+
+    public string $bedsRoomId = '';
+
+    public string $bedsLabels = '';
 
     public function mount(): void
     {
@@ -91,6 +149,255 @@ final class Index extends Component
     private function resetPage(): void
     {
         $this->page = 1;
+    }
+
+    public function toggleAllocateForm(): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $this->showAllocateForm = ! $this->showAllocateForm;
+
+        if ($this->showAllocateForm && $this->allocStartsOn === '') {
+            $this->allocStartsOn = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveAllocation(AllocateBed $allocate): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $matricule = trim($this->allocMatricule);
+
+        if ($matricule === '') {
+            $this->addError('allocMatricule', 'Enter the student\'s matricule.');
+
+            return;
+        }
+
+        $enrollmentId = DB::table('enrollments as e')
+            ->join('students as s', 's.id', '=', 'e.student_id')
+            ->where('s.matricule', $matricule)
+            ->where('e.status', 'active')
+            ->value('e.id');
+
+        if ($enrollmentId === null) {
+            $this->addError('allocMatricule', 'No active enrollment carries this matricule.');
+
+            return;
+        }
+
+        if ($this->allocBedId === '') {
+            $this->addError('allocBedId', 'Choose a bed to allocate.');
+
+            return;
+        }
+
+        try {
+            $allocate->handle(
+                (int) $enrollmentId,
+                (int) $this->allocBedId,
+                $this->allocStartsOn === '' ? Carbon::today() : Carbon::parse($this->allocStartsOn),
+                $this->actor(),
+            );
+        } catch (DomainException $e) {
+            $this->addError('allocBedId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showAllocateForm', 'allocMatricule', 'allocBedId', 'allocStartsOn']);
+        $this->tab = 'allocations';
+        $this->resetPage();
+        session()->flash('status', 'Bed allocated.');
+    }
+
+    public function toggleInspectionForm(): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $this->showInspectionForm = ! $this->showInspectionForm;
+
+        if ($this->showInspectionForm && $this->inspInspectedOn === '') {
+            $this->inspInspectedOn = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveInspection(RecordInspection $record): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        if ($this->inspHostelId === '') {
+            $this->addError('inspHostelId', 'Choose a hostel.');
+
+            return;
+        }
+
+        $rating = InspectionRating::tryFrom($this->inspRating) ?? InspectionRating::Good;
+
+        try {
+            $record->handle(
+                (int) $this->inspHostelId,
+                $this->inspInspectedOn === '' ? Carbon::today() : Carbon::parse($this->inspInspectedOn),
+                $rating,
+                [
+                    'room_id' => $this->inspRoomId === '' ? null : (int) $this->inspRoomId,
+                    'findings' => $this->inspFindings === '' ? null : $this->inspFindings,
+                ],
+                $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('inspHostelId', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('inspRoomId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showInspectionForm', 'inspHostelId', 'inspRoomId', 'inspInspectedOn', 'inspRating', 'inspFindings',
+        ]);
+        $this->tab = 'inspections';
+        $this->resetPage();
+        session()->flash('status', 'Inspection recorded.');
+    }
+
+    public function toggleHostelForm(): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $this->showHostelForm = ! $this->showHostelForm;
+    }
+
+    public function saveHostel(SaveHostel $save): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        try {
+            $save->handle(null, [
+                'code' => trim($this->hostelCode),
+                'name' => trim($this->hostelName),
+                'gender' => $this->hostelGender,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('hostel'.ucfirst($field), (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('hostelCode', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showHostelForm', 'hostelCode', 'hostelName', 'hostelGender']);
+        $this->hostelGender = 'boys';
+        $this->tab = 'occupancy';
+        $this->resetPage();
+        session()->flash('status', 'Hostel added.');
+    }
+
+    public function toggleRoomForm(): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $this->showRoomForm = ! $this->showRoomForm;
+    }
+
+    public function saveRoom(SaveRoom $save): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        try {
+            $save->handle(null, [
+                'hostel_id' => $this->roomHostelId === '' ? null : (int) $this->roomHostelId,
+                'name' => trim($this->roomName),
+                'capacity' => $this->roomCapacity === '' ? null : (int) $this->roomCapacity,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('room'.ucfirst($field === 'hostel_id' ? 'HostelId' : $field), (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('roomName', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showRoomForm', 'roomHostelId', 'roomName', 'roomCapacity']);
+        $this->tab = 'rooms';
+        $this->resetPage();
+        session()->flash('status', 'Room added.');
+    }
+
+    public function toggleBedsForm(): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        $this->showBedsForm = ! $this->showBedsForm;
+    }
+
+    public function saveBeds(SaveBeds $save): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        if ($this->bedsRoomId === '') {
+            $this->addError('bedsRoomId', 'Choose a room.');
+
+            return;
+        }
+
+        $labels = array_values(array_filter(array_map(
+            static fn (string $l): string => trim($l),
+            explode(',', $this->bedsLabels),
+        ), static fn (string $l): bool => $l !== ''));
+
+        try {
+            $save->handle((int) $this->bedsRoomId, $labels, $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('bedsLabels', (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('bedsLabels', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showBedsForm', 'bedsRoomId', 'bedsLabels']);
+        $this->tab = 'rooms';
+        $this->resetPage();
+        session()->flash('status', 'Beds updated.');
+    }
+
+    public function endAllocation(int $allocationId, EndHostelAllocation $end): void
+    {
+        Gate::authorize(HostelPermission::MANAGE);
+
+        try {
+            $end->handle($allocationId, Carbon::today(), $this->actor());
+        } catch (DomainException $e) {
+            session()->flash('status', $e->getMessage());
+
+            return;
+        }
+
+        $this->resetPage();
+        session()->flash('status', 'Allocation ended.');
+    }
+
+    private function actor(): Actor
+    {
+        /** @var \App\Modules\Identity\Models\User $user */
+        $user = auth()->user();
+
+        return $user->toAuditActor();
     }
 
     /**
@@ -394,6 +701,65 @@ final class Index extends Component
     }
 
     /**
+     * Free (unoccupied, active) beds in active hostels - the Allocate Bed
+     * form's dropdown, labeled so the operator can see hostel/room/bed at a
+     * glance without a cascading select.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function availableBedOptions(): array
+    {
+        $rows = DB::table('hostel_beds as b')
+            ->join('hostel_rooms as r', 'r.id', '=', 'b.room_id')
+            ->join('hostels as h', 'h.id', '=', 'r.hostel_id')
+            ->where('b.is_active', true)
+            ->where('h.is_active', true)
+            ->whereNotExists(function ($q): void {
+                $q->select(DB::raw(1))
+                    ->from('hostel_allocations as a')
+                    ->whereColumn('a.bed_id', 'b.id')
+                    ->where('a.status', 'active');
+            })
+            ->orderBy('h.code')->orderBy('r.name')->orderBy('b.label')
+            ->get(['b.id', 'h.code as hostel_code', 'r.name as room_name', 'b.label as bed_label']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, hostel_code: string, room_name: string, bed_label: string} $row */
+            $options[] = [
+                'id' => (int) $row->id,
+                'name' => $row->hostel_code.' - '.$row->room_name.' - Bed '.$row->bed_label,
+            ];
+        }
+
+        return $options;
+    }
+
+    /**
+     * All rooms, labeled with their hostel - the Record Inspection form's
+     * optional room dropdown.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function roomOptions(): array
+    {
+        $rows = DB::table('hostel_rooms as r')
+            ->join('hostels as h', 'h.id', '=', 'r.hostel_id')
+            ->orderBy('h.code')->orderBy('r.name')
+            ->get(['r.id', 'h.code as hostel_code', 'r.name as room_name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, hostel_code: string, room_name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => $row->hostel_code.' - '.$row->room_name];
+        }
+
+        return $options;
+    }
+
+    /**
      * Per-tab status filter choices (the WORD carries the meaning, 09-ui 10).
      *
      * @return list<array{value: string, label: string}>
@@ -438,6 +804,9 @@ final class Index extends Component
             'statusOptions' => $this->statusOptions(),
             'hostelSummary' => $this->hostelSummary(),
             'openInspections' => $this->openInspections(),
+            'availableBedOptions' => $this->availableBedOptions(),
+            'roomOptions' => $this->roomOptions(),
+            'canManage' => Gate::allows(HostelPermission::MANAGE),
         ]);
     }
 }

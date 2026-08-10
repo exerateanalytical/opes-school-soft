@@ -196,25 +196,90 @@ final class Dashboard extends Component
         return $visible;
     }
 
+    /**
+     * "Signed in as {name} · {role}".
+     *
+     * Purely informational, but it is what makes a role demonstration
+     * legible: the audience can see WHICH identity is producing the filtered
+     * screen in front of them. Falls back to the raw role name if a role is
+     * present that the enum does not know (a hand-granted custom role).
+     *
+     * @return array{name: string, role: string|null}|null
+     */
+    private function signedInAs(): ?array
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return null;
+        }
+
+        $roleName = null;
+        $first = $user->getRoleNames()->first();
+
+        if (is_string($first)) {
+            $roleName = Role::tryFrom($first)?->label() ?? $first;
+        }
+
+        $name = $user->getAttribute('name');
+
+        return [
+            'name' => is_string($name) ? $name : '',
+            'role' => $roleName,
+        ];
+    }
+
     public function render(
         CollectHealth $health,
         CountActiveUsers $countUsers,
         CountConfiguredRoles $countRoles,
     ): mixed {
         $canViewAttendance = Gate::allows(Permission::AttendanceView->value);
+        // The identity tiles (active users, roles configured) are identity
+        // data, so they ride the same permission as the /users screen they
+        // summarise. A Teacher or an Accountant has no business reading the
+        // size and shape of the staff account list.
+        $canViewUsers = Gate::allows(Permission::UserView->value);
+        // System health and the backup clock are operator facts. Gated on the
+        // permissions that let someone ACT on them - a red light nobody in
+        // the room can act on is noise, the same reasoning the alert filter
+        // above already uses.
+        $canViewHealth = Gate::allows(Permission::SettingView->value);
+        $canViewBackup = Gate::allows(Permission::BackupRun->value);
+
+        $tileCount = ($canViewUsers ? 2 : 0)
+            + ($canViewHealth ? 1 : 0)
+            + ($canViewBackup ? 1 : 0)
+            + ($canViewAttendance ? 1 : 0);
 
         return view('livewire.dashboard', [
-            'activeUsers' => $countUsers->handle(),
-            'roleCount' => $countRoles->handle(),
-            'healthSummary' => $health->summary(),
-            'lastBackupAge' => $this->lastBackupAge(),
+            // Only computed for someone who may actually see it - never
+            // query a figure the view is about to hide anyway.
+            'activeUsers' => $canViewUsers ? $countUsers->handle() : null,
+            'roleCount' => $canViewUsers ? $countRoles->handle() : null,
+            'healthSummary' => $canViewHealth ? $health->summary() : null,
+            'lastBackupAge' => $canViewBackup ? $this->lastBackupAge() : null,
             'alerts' => $this->alerts($health),
             'quickActions' => $this->quickActions(),
-            'canViewUsers' => Gate::allows(Permission::UserView->value),
+            'canViewUsers' => $canViewUsers,
+            'canViewHealth' => $canViewHealth,
+            'canViewBackup' => $canViewBackup,
             'canViewAttendance' => $canViewAttendance,
             // Only queried for someone who may actually see it - never
             // compute a figure the view is about to hide anyway.
             'todaysAttendanceRate' => $canViewAttendance ? $this->todaysAttendanceRate() : null,
+            // Raw, not clamped: zero tiles means the whole strip is hidden
+            // rather than rendering an empty grid with a stray gap.
+            'tileCount' => $tileCount,
+            'signedInAs' => $this->signedInAs(),
+            // Built by another module and possibly not routed yet, so the
+            // link only appears once the route genuinely exists AND the
+            // viewer holds a finance read permission - never offer a
+            // shortcut that lands on a 403.
+            'financeDashboardUrl' => \Illuminate\Support\Facades\Route::has('finance.dashboard')
+                && (Gate::allows(Permission::LedgerView->value) || Gate::allows(Permission::FeeView->value))
+                    ? route('finance.dashboard', absolute: false)
+                    : null,
         ]);
     }
 }

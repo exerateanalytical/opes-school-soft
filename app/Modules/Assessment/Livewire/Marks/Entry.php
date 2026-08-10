@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Assessment\Livewire\Marks;
 
+use App\Modules\Assessment\Actions\RejectMarks;
 use App\Modules\Assessment\Actions\SaveMarkBatch;
 use App\Modules\Assessment\Actions\SubmitMarksForValidation;
+use App\Modules\Assessment\Actions\ValidateMarks;
 use App\Modules\Assessment\Domain\MarkState;
 use App\Modules\Assessment\Models\Mark;
 use App\Modules\Identity\Domain\Permission;
@@ -94,6 +96,14 @@ final class Entry extends Component
     public string $problem = '';
 
     public int $savedCount = 0;
+
+    /**
+     * The "return to teacher" (RejectMarks) toggle panel — §7.4's reason-
+     * required round-trip from validator back to draft.
+     */
+    public bool $showRejectForm = false;
+
+    public string $rejectReason = '';
 
     public function mount(): void
     {
@@ -268,6 +278,88 @@ final class Entry extends Component
             'submitted' => $result['submitted'],
             'pending' => $result['still_pending'],
         ]);
+    }
+
+    public function toggleRejectForm(): void
+    {
+        Gate::authorize(Permission::MarksValidate->value);
+
+        $this->showRejectForm = ! $this->showRejectForm;
+        $this->rejectReason = '';
+    }
+
+    /**
+     * §7.2's missing "approve" counterpart to `rejectMarks()`: the head of
+     * department validates a submitted grid instead of returning it.
+     * `ValidateMarks` re-checks its own `marks.validate` gate internally; the
+     * check here only keeps the button from ever rendering for an actor who
+     * could not use it (rule 17: enforced in the Action, not the menu).
+     */
+    public function approveMarks(): void
+    {
+        Gate::authorize(Permission::MarksValidate->value);
+        $this->resetGridMessages();
+
+        if ($this->allocation <= 0 || $this->period <= 0 || $this->classGroup <= 0) {
+            $this->problem = __('opes.assessment_screen.errors.no_scope');
+
+            return;
+        }
+
+        try {
+            $result = app(ValidateMarks::class)->handle(
+                subjectAllocationId: $this->allocation,
+                assessmentPeriodId: $this->period,
+                classGroupId: $this->classGroup,
+            );
+        } catch (AuthorizationException|DomainException $e) {
+            $this->problem = $e->getMessage();
+
+            return;
+        }
+
+        $this->notice = __('opes.assessment_screen.approved', [
+            'validated' => $result['validated'],
+        ]);
+    }
+
+    /**
+     * §7.4: the validator sends a submitted grid back to the teacher with a
+     * mandatory reason. `RejectMarks` re-checks its own `marks.validate` gate
+     * internally; the check here only keeps the button from ever rendering
+     * for an actor who could not use it.
+     */
+    public function rejectMarks(): void
+    {
+        Gate::authorize(Permission::MarksValidate->value);
+        $this->resetGridMessages();
+
+        if ($this->allocation <= 0 || $this->period <= 0 || $this->classGroup <= 0) {
+            $this->problem = __('opes.assessment_screen.errors.no_scope');
+
+            return;
+        }
+
+        $this->validate([
+            'rejectReason' => ['required', 'string', 'max:500'],
+        ]);
+
+        try {
+            $result = app(RejectMarks::class)->handle(
+                subjectAllocationId: $this->allocation,
+                assessmentPeriodId: $this->period,
+                classGroupId: $this->classGroup,
+                reason: $this->rejectReason,
+            );
+        } catch (AuthorizationException|DomainException $e) {
+            $this->problem = $e->getMessage();
+
+            return;
+        }
+
+        $this->showRejectForm = false;
+        $this->rejectReason = '';
+        $this->notice = 'Returned '.$result['returned'].' mark(s) to the teacher for correction.';
     }
 
     /**
@@ -655,6 +747,8 @@ final class Entry extends Component
             'componentOptions' => $this->componentOptions(),
             'stateControls' => $this->stateControls(),
             'canSubmit' => Gate::allows(Permission::MarksEnter->value)
+                && $this->allocation > 0 && $this->period > 0 && $this->classGroup > 0,
+            'canReject' => Gate::allows(Permission::MarksValidate->value)
                 && $this->allocation > 0 && $this->period > 0 && $this->classGroup > 0,
         ]);
     }

@@ -33,12 +33,14 @@ final class Navigation
             ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true, 'built' => true],
             ['key' => 'admissions', 'route' => '/admissions', 'permission' => Permission::AdmissionsManage, 'enabled' => true, 'built' => true],
             ['key' => 'students', 'route' => '/students', 'permission' => Permission::StudentsView, 'enabled' => true, 'built' => true],
-            // Guardian RECORDS exist (Phase 2) and are reached through a
-            // student's profile; what is missing is the guardian LIST screen.
-            // The placeholder at /guardians says exactly that, and the real
-            // list will take over the same URL when it ships.
-            ['key' => 'guardians', 'route' => '/guardians', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'staff', 'route' => '/staff', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Wiring pass: the guardian directory/list screen now lives at
+            // this URL (guardian RECORDS have existed since Phase 2, reached
+            // through a student's profile; what was missing was this list).
+            ['key' => 'guardians', 'route' => '/guardians', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
+            // Phase 11 F1/wiring pass: staff directory.
+            ['key' => 'staff', 'route' => '/staff', 'permission' => Permission::StaffView, 'enabled' => true, 'built' => true],
+            // Phase 11 F2/wiring pass: payroll runs.
+            ['key' => 'payroll', 'route' => '/payroll', 'permission' => Permission::PayrollView, 'enabled' => true, 'built' => true],
             // Gated on manage, not view: the route behind it is
             // `can:academics.manage`, and this file's contract is that the nav
             // and the route agree by construction. A Teacher with only
@@ -55,11 +57,13 @@ final class Navigation
             // /attendance is the sidebar's target, matching its route's
             // `can:attendance.view` gate.
             ['key' => 'attendance', 'route' => '/attendance', 'permission' => Permission::AttendanceView, 'enabled' => true, 'built' => true],
-            // Exam SCHEDULING (sittings, invigilators, seating) shipped with
-            // Phase 3's Actions; marks entry lives at /marks. What these two
-            // placeholders await is their dedicated screens.
-            ['key' => 'examinations', 'route' => '/examinations', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'results', 'route' => '/results', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Wiring pass: exam SCHEDULING (sittings, invigilators, seating)
+            // shipped with Phase 3's Actions; marks entry lives separately at
+            // /marks. This screen now exists at /examinations.
+            ['key' => 'examinations', 'route' => '/examinations', 'permission' => Permission::AssessmentConfigure, 'enabled' => true, 'built' => true],
+            // Wiring pass: computed period results/class statistics browse
+            // screen now lives at /results.
+            ['key' => 'results', 'route' => '/results', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
             // Fees (Phase 6): the finance item lands on the invoices list;
             // the cashier and per-student statements hang off it. Gated on
             // fee.view, matching its route, per this file's nav-and-route-
@@ -73,7 +77,22 @@ final class Navigation
             // ships: chart of accounts, journal entries, trial balance. Gated
             // on ledger.view so the sidebar and the routes below agree by
             // construction, per this file's documented contract.
+            // The accountant's overview, deliberately ABOVE the ledger detail:
+            // 02-accounting §21.3's dashboard is where a bursar starts the
+            // day, and the treasury panel there is the one place cash, bank,
+            // MTN and Orange are shown as four separate balances.
+            ['key' => 'finance_dashboard', 'route' => '/finance/dashboard', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // Expense capture (02-accounting §21.3): the petty cash-and-receipt
+            // spend that never becomes a supplier invoice.
+            ['key' => 'expenses', 'route' => '/accounting/expenses', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // Bilan / Compte de resultat / Flux, with comparatives.
+            ['key' => 'statements', 'route' => '/reports/statements', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // 02-accounting §13: each treasury float against its own
+            // operator statement (MTN and Orange reconcile separately).
+            ['key' => 'reconciliation', 'route' => '/accounting/reconciliation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // 02-accounting §16: budget and budget-vs-actual.
+            ['key' => 'budgets', 'route' => '/accounting/budgets', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // Procurement (Phase 5): lands on the supplier register; the
             // rest of the P2P chain (requisitions, orders, receipts,
             // invoices, payments) hangs off it. Gated on procurement.view,
@@ -87,11 +106,31 @@ final class Navigation
             // and Actions. The tax CONFIGURATION cockpit lives under
             // /settings/tax behind ledger.configure.
             ['key' => 'tax', 'route' => '/tax', 'permission' => Permission::TaxView, 'enabled' => true, 'built' => true],
-            ['key' => 'library', 'route' => '/library', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'inventory', 'route' => '/inventory', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'transport', 'route' => '/transport', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'hostel', 'route' => '/hostel', 'permission' => null, 'enabled' => true, 'built' => false],
-            ['key' => 'reports', 'route' => '/reports', 'permission' => null, 'enabled' => true, 'built' => false],
+            // Phase 9 F4/wiring pass: the library catalogue/circulation
+            // screen now lives at this URL.
+            ['key' => 'library', 'route' => '/library', 'permission' => Permission::LibraryView, 'enabled' => true, 'built' => true],
+            // Phase 9 F1/wiring pass: stores/stock screen.
+            ['key' => 'inventory', 'route' => '/inventory', 'permission' => Permission::InventoryView, 'enabled' => true, 'built' => true],
+            // Phase 9 F1-F2/wiring pass: the asset register + depreciation
+            // screen.
+            ['key' => 'assets', 'route' => '/assets', 'permission' => Permission::AssetView, 'enabled' => true, 'built' => true],
+            // Phase 10 W1/W5: the Transport Management screen now lives at
+            // this URL, so the nav flips to built => true with the
+            // permission that gates the route above - nav and route agree by
+            // construction, per this file's documented contract.
+            ['key' => 'transport', 'route' => '/transport', 'permission' => Permission::TransportView, 'enabled' => true, 'built' => true],
+            // Phase 10 W2/W5: same flip - Hostel Management.
+            ['key' => 'hostel', 'route' => '/hostel', 'permission' => Permission::HostelView, 'enabled' => true, 'built' => true],
+            // Phase 10 W3/W5: Medical (consultations + referrals).
+            ['key' => 'medical', 'route' => '/medical', 'permission' => Permission::MedicalView, 'enabled' => true, 'built' => true],
+            // Phase 10 W4/W5: the visitor gate register.
+            ['key' => 'visitors', 'route' => '/visitors', 'permission' => Permission::VisitorManage, 'enabled' => true, 'built' => true],
+            // Phase 10 W5/W5: insurance (policies, enrolment, claims).
+            ['key' => 'insurance', 'route' => '/insurance', 'permission' => Permission::InsuranceView, 'enabled' => true, 'built' => true],
+            // Reports hub (2026-08 build): a categorised catalogue of every
+            // report screen (financial, academic, HR, procurement, welfare,
+            // assets, library, tax, students) with Excel/PDF/print export.
+            ['key' => 'reports', 'route' => '/reports', 'permission' => Permission::ReportsView, 'enabled' => true, 'built' => true],
             // Operations (Phase 7): the year-rollover wizard. The mockups'
             // sidebars carry operations entries (Backup & Restore, Database
             // Maintenance in flow wizards.png 10/12), and 08-operations §6.1
@@ -103,7 +142,23 @@ final class Navigation
             // reached from Settings, not the sidebar.
             ['key' => 'operations', 'route' => '/operations/rollover', 'permission' => Permission::RolloverRun, 'enabled' => true, 'built' => true],
             ['key' => 'users', 'route' => '/users', 'permission' => Permission::UserView, 'enabled' => true, 'built' => true],
-            ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => false],
+            // 09-ui §8.11: the hash-chained audit trail, now viewable and
+            // verifiable from the UI rather than only from code.
+            ['key' => 'audit_log', 'route' => '/audit-log', 'permission' => Permission::AuditView, 'enabled' => true, 'built' => true],
+            // 08-operations §3.8: backups were CLI-only until now. Restore
+            // stays behind backup.restore, which even Administrator lacks.
+            ['key' => 'backups', 'route' => '/operations/backups', 'permission' => Permission::BackupRun, 'enabled' => true, 'built' => true],
+            // 10-documents §18: batch document runs.
+            ['key' => 'bulk_prints', 'route' => '/documents/bulk-prints', 'permission' => Permission::DocumentsBulkPrint, 'enabled' => true, 'built' => true],
+            // 08-operations §11.1: the queued outbox and its templates. The
+            // SMS gateway itself is still deferred; this is the queue.
+            ['key' => 'outbox', 'route' => '/communication/outbox', 'permission' => Permission::CommunicationView, 'enabled' => true, 'built' => true],
+            ['key' => 'message_templates', 'route' => '/communication/templates', 'permission' => Permission::CommunicationView, 'enabled' => true, 'built' => true],
+            // Wiring pass: a read-only browser for SchoolProfile's generic
+            // engine-configuration key/value store now lives at /settings.
+            // /settings/tax, /settings/fiscal-identity and /settings/licence
+            // remain separate screens for their own modules, unaffected.
+            ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => true],
         ];
     }
 

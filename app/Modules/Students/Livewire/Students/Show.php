@@ -5,12 +5,23 @@ declare(strict_types=1);
 namespace App\Modules\Students\Livewire\Students;
 
 use App\Modules\Identity\Domain\Permission;
+use App\Modules\Students\Actions\ReinstateEnrollment;
+use App\Modules\Students\Actions\SuspendEnrollment;
+use App\Modules\Students\Actions\TransferStudentClass;
+use App\Modules\Students\Actions\UpdateStudent;
+use App\Modules\Students\Actions\WithdrawStudent;
+use App\Modules\Students\Domain\EnrollmentStatus;
+use App\Modules\Students\Domain\SegmentReason;
+use App\Modules\Students\Models\Enrollment;
 use App\Modules\Students\Models\Student;
 use App\Modules\Students\Models\StudentDocument;
 use App\Modules\Students\Models\StudentMedicalRecord;
+use DomainException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -87,6 +98,49 @@ final class Show extends Component
         'activity_log',
     ];
 
+    // ── Edit profile (UpdateStudent) ──────────────────────────────────────
+    public bool $showEditForm = false;
+
+    public string $edit_first_name = '';
+
+    public string $edit_middle_name = '';
+
+    public string $edit_last_name = '';
+
+    public string $edit_date_of_birth = '';
+
+    public string $edit_gender = '';
+
+    public string $edit_phone = '';
+
+    public string $edit_email = '';
+
+    // ── Withdraw (WithdrawStudent) ────────────────────────────────────────
+    public bool $showWithdrawForm = false;
+
+    public string $withdraw_on = '';
+
+    public string $withdraw_reason = '';
+
+    public string $withdraw_to = 'withdrawn';
+
+    // ── Suspend (SuspendEnrollment) ───────────────────────────────────────
+    public bool $showSuspendForm = false;
+
+    public string $suspend_reason = '';
+
+    // ── Reinstate (ReinstateEnrollment) ───────────────────────────────────
+    public bool $showReinstateForm = false;
+
+    public string $reinstate_reason = '';
+
+    // ── Transfer class (TransferStudentClass) ─────────────────────────────
+    public bool $showTransferForm = false;
+
+    public string $transfer_class_group_id = '';
+
+    public string $transfer_effective_on = '';
+
     public function mount(Student $student): void
     {
         // Mirrors routes/web.php: the route already requires students.view,
@@ -99,6 +153,301 @@ final class Show extends Component
     public function selectTab(string $tab): void
     {
         $this->tab = in_array($tab, self::LIVE_TABS, true) ? $tab : 'general';
+    }
+
+    // ---------------------------------------------------------- lifecycle UI
+
+    /** True when the caller may edit core identity fields (UpdateStudent's own gate). */
+    public function canEditStudent(): bool
+    {
+        return Gate::allows(Permission::StudentsManage->value);
+    }
+
+    /**
+     * True when the caller may suspend/reinstate an enrollment - mirrors
+     * SuspendEnrollment/ReinstateEnrollment's own Gate::any check, which
+     * additionally admits discipline.manage holders.
+     */
+    public function canManageEnrollmentLifecycle(): bool
+    {
+        return Gate::any([
+            Permission::StudentsManage->value,
+            Permission::DisciplineManage->value,
+        ]);
+    }
+
+    /** Mirrors SuspendEnrollment/ReinstateEnrollment's own Gate::any check. */
+    private function authorizeEnrollmentLifecycle(): void
+    {
+        if (! $this->canManageEnrollmentLifecycle()) {
+            throw new AuthorizationException();
+        }
+    }
+
+    public function toggleEditForm(): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        $this->showEditForm = ! $this->showEditForm;
+
+        if ($this->showEditForm) {
+            $this->edit_first_name = $this->student->first_name;
+            $this->edit_middle_name = (string) ($this->student->middle_name ?? '');
+            $this->edit_last_name = $this->student->last_name;
+            $this->edit_date_of_birth = $this->student->date_of_birth?->toDateString() ?? '';
+            $this->edit_gender = $this->student->gender->value;
+            $this->edit_phone = (string) ($this->student->phone ?? '');
+            $this->edit_email = (string) ($this->student->email ?? '');
+        }
+    }
+
+    public function saveEdit(UpdateStudent $updateStudent): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        try {
+            $updateStudent->handle((int) $this->student->getKey(), [
+                'first_name' => $this->edit_first_name,
+                'middle_name' => $this->edit_middle_name === '' ? null : $this->edit_middle_name,
+                'last_name' => $this->edit_last_name,
+                'date_of_birth' => $this->edit_date_of_birth === '' ? null : $this->edit_date_of_birth,
+                'gender' => $this->edit_gender,
+                'phone' => $this->edit_phone === '' ? null : $this->edit_phone,
+                'email' => $this->edit_email === '' ? null : $this->edit_email,
+            ]);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                $this->addError('edit_'.$key, (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('showEditForm', $e->getMessage());
+
+            return;
+        }
+
+        $this->student->refresh();
+        $this->showEditForm = false;
+        session()->flash('status', 'Student profile updated.');
+    }
+
+    public function toggleWithdrawForm(): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        $this->showWithdrawForm = ! $this->showWithdrawForm;
+
+        if ($this->showWithdrawForm && $this->withdraw_on === '') {
+            $this->withdraw_on = now()->toDateString();
+        }
+    }
+
+    public function saveWithdraw(WithdrawStudent $withdrawStudent): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        $enrollment = $this->currentEnrollment();
+
+        if ($enrollment === null) {
+            $this->addError('showWithdrawForm', 'This student has no live enrollment to withdraw.');
+
+            return;
+        }
+
+        $to = EnrollmentStatus::tryFrom($this->withdraw_to) ?? EnrollmentStatus::Withdrawn;
+
+        try {
+            $withdrawStudent->handle(
+                (int) $enrollment->getKey(),
+                $this->withdraw_on,
+                $this->withdraw_reason,
+                $to,
+            );
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                $this->addError('withdraw_'.$key, (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('showWithdrawForm', $e->getMessage());
+
+            return;
+        }
+
+        $this->student->refresh();
+        $this->reset(['showWithdrawForm', 'withdraw_on', 'withdraw_reason']);
+        $this->withdraw_to = 'withdrawn';
+        session()->flash('status', 'Enrollment withdrawn.');
+    }
+
+    public function toggleSuspendForm(): void
+    {
+        $this->authorizeEnrollmentLifecycle();
+
+        $this->showSuspendForm = ! $this->showSuspendForm;
+    }
+
+    public function saveSuspend(SuspendEnrollment $suspendEnrollment): void
+    {
+        $this->authorizeEnrollmentLifecycle();
+
+        $enrollment = $this->currentEnrollment();
+
+        if ($enrollment === null) {
+            $this->addError('showSuspendForm', 'This student has no active enrollment to suspend.');
+
+            return;
+        }
+
+        try {
+            $suspendEnrollment->handle((int) $enrollment->getKey(), $this->suspend_reason);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                $this->addError('suspend_'.$key, (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('showSuspendForm', $e->getMessage());
+
+            return;
+        }
+
+        $this->student->refresh();
+        $this->reset(['showSuspendForm', 'suspend_reason']);
+        session()->flash('status', 'Enrollment suspended.');
+    }
+
+    public function toggleReinstateForm(): void
+    {
+        $this->authorizeEnrollmentLifecycle();
+
+        $this->showReinstateForm = ! $this->showReinstateForm;
+    }
+
+    public function saveReinstate(ReinstateEnrollment $reinstateEnrollment): void
+    {
+        $this->authorizeEnrollmentLifecycle();
+
+        $enrollment = $this->currentEnrollment();
+
+        if ($enrollment === null) {
+            $this->addError('showReinstateForm', 'This student has no suspended enrollment to reinstate.');
+
+            return;
+        }
+
+        try {
+            $reinstateEnrollment->handle((int) $enrollment->getKey(), $this->reinstate_reason);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                $this->addError('reinstate_'.$key, (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('showReinstateForm', $e->getMessage());
+
+            return;
+        }
+
+        $this->student->refresh();
+        $this->reset(['showReinstateForm', 'reinstate_reason']);
+        session()->flash('status', 'Enrollment reinstated.');
+    }
+
+    public function toggleTransferForm(): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        $this->showTransferForm = ! $this->showTransferForm;
+
+        if ($this->showTransferForm && $this->transfer_effective_on === '') {
+            $this->transfer_effective_on = now()->toDateString();
+        }
+    }
+
+    public function saveTransfer(TransferStudentClass $transferStudentClass): void
+    {
+        Gate::authorize(Permission::StudentsManage->value);
+
+        $enrollment = $this->currentEnrollment();
+
+        if ($enrollment === null) {
+            $this->addError('showTransferForm', 'This student has no live enrollment to transfer.');
+
+            return;
+        }
+
+        if ($this->transfer_class_group_id === '') {
+            $this->addError('transfer_class_group_id', 'Choose a target class group.');
+
+            return;
+        }
+
+        try {
+            $transferStudentClass->handle(
+                (int) $enrollment->getKey(),
+                (int) $this->transfer_class_group_id,
+                $this->transfer_effective_on,
+                SegmentReason::ClassTransfer,
+            );
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                $this->addError('transfer_'.$key, (string) ($messages[0] ?? $e->getMessage()));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('showTransferForm', $e->getMessage());
+
+            return;
+        }
+
+        $this->student->refresh();
+        $this->reset(['showTransferForm', 'transfer_class_group_id', 'transfer_effective_on']);
+        session()->flash('status', 'Student transferred to the new class group.');
+    }
+
+    /**
+     * The enrollment lifecycle buttons all act on the student's one LIVE
+     * enrollment (pending/active/suspended - 4.2 invariant "no second live
+     * enrollment in one year", C1). Eloquent, not the query builder: Enrollment
+     * is a Students-owned model, so no module-boundary rule is in play here.
+     */
+    private function currentEnrollment(): ?Enrollment
+    {
+        return Enrollment::query()
+            ->where('student_id', $this->student->id)
+            ->whereIn('status', array_map(
+                static fn (EnrollmentStatus $status): string => $status->value,
+                EnrollmentStatus::live(),
+            ))
+            ->orderByDesc('enrolled_on')
+            ->first();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function transferClassGroupOptions(?Enrollment $enrollment): array
+    {
+        if ($enrollment === null) {
+            return [];
+        }
+
+        /** @var array<int, string> $rows */
+        $rows = DB::table('class_groups')
+            ->where('academic_year_id', $enrollment->academic_year_id)
+            ->where('class_level_id', $enrollment->class_level_id)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->map(static fn (mixed $label): string => (string) $label)
+            ->all();
+
+        return $rows;
     }
 
     private function activeTab(): string
@@ -165,6 +514,7 @@ final class Show extends Component
     public function render(): mixed
     {
         $tab = $this->activeTab();
+        $enrollment = $this->currentEnrollment();
 
         return view('livewire.students.show', [
             'tab' => $tab,
@@ -177,6 +527,10 @@ final class Show extends Component
             'medicalRecords' => $tab === 'medical' ? $this->medicalRecords() : new Collection(),
             'medicalTotal' => $tab === 'medical' ? $this->student->medicalRecords()->count() : 0,
             'listLimit' => self::TAB_LIST_LIMIT,
+            'currentEnrollment' => $enrollment,
+            'canEditStudent' => $this->canEditStudent(),
+            'canManageEnrollmentLifecycle' => $this->canManageEnrollmentLifecycle(),
+            'transferClassGroupOptions' => $this->showTransferForm ? $this->transferClassGroupOptions($enrollment) : [],
         ]);
     }
 }

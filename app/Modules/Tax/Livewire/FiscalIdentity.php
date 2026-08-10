@@ -6,6 +6,7 @@ namespace App\Modules\Tax\Livewire;
 
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Tax\Actions\ConfirmFiscalIdentity;
+use App\Modules\Tax\Actions\CorrectFiscalIdentity;
 use App\Modules\Tax\Domain\LegalForm;
 use App\Modules\Tax\Domain\TaxCentreType;
 use App\Modules\Tax\Domain\TaxRegime;
@@ -75,6 +76,15 @@ final class FiscalIdentity extends Component
     public string $errorMessage = '';
 
     public string $successMessage = '';
+
+    // ── Correction form (03-tax-procurement §2.2 invariant 1) ──────────
+    public bool $showCorrectionForm = false;
+
+    public string $correctionNiu = '';
+
+    public string $correctionReason = '';
+
+    public string $correctionSupportingDocumentReference = '';
 
     public function mount(): void
     {
@@ -147,6 +157,43 @@ final class FiscalIdentity extends Component
 
             $this->successMessage = 'Fiscal identity confirmed.';
             $this->confirmChecked = false;
+        } catch (DomainException $exception) {
+            $this->errorMessage = $exception->getMessage();
+        }
+    }
+
+    public function toggleCorrectionForm(): void
+    {
+        Gate::authorize(CorrectFiscalIdentity::PERMISSION);
+
+        $this->showCorrectionForm = ! $this->showCorrectionForm;
+
+        if ($this->showCorrectionForm) {
+            $this->correctionNiu = (string) FiscalIdentityModel::current()?->niu;
+        }
+    }
+
+    public function correct(CorrectFiscalIdentity $correct): void
+    {
+        $this->errorMessage = '';
+        $this->successMessage = '';
+
+        $user = Auth::user();
+
+        if ($user === null) {
+            abort(403);
+        }
+
+        try {
+            $correct->handle(
+                ['niu' => $this->correctionNiu],
+                $this->correctionReason,
+                $this->correctionSupportingDocumentReference,
+                new Actor((int) $user->getAuthIdentifier(), (string) $user->getAttribute('name')),
+            );
+
+            $this->successMessage = 'Fiscal identity corrected.';
+            $this->reset(['showCorrectionForm', 'correctionNiu', 'correctionReason', 'correctionSupportingDocumentReference']);
         } catch (DomainException $exception) {
             $this->errorMessage = $exception->getMessage();
         }

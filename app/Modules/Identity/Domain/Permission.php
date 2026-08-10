@@ -63,6 +63,7 @@ enum Permission: string
     case MarksValidate = 'marks.validate';
     case AssessmentConfigure = 'assessment.configure';
     case ReportsPublish = 'reports.publish';
+    case ReportsView = 'reports.view';
 
     case FeeView = 'fee.view';
     case FeeCollect = 'fee.collect';
@@ -199,6 +200,73 @@ enum Permission: string
     case DocumentsRevoke = 'documents.revoke';
     case DocumentsTemplateManage = 'documents.template_manage';
     case DocumentsOverrideGate = 'documents.override_gate';
+
+    // Phase 9: assets, inventory/stores, and library. Mirrors the string
+    // constants each module's Actions already gate on
+    // (Assets\Domain\AssetPermission, Inventory\Domain\InventoryPermission,
+    // Library\Domain\LibraryPermission) - this enum is their compile-time
+    // face, added by the nav/screen wiring pass. Two segments only.
+    case AssetView = 'asset.view';
+    case AssetManage = 'asset.manage';
+    case AssetDepreciate = 'asset.depreciate';
+    case AssetDispose = 'asset.dispose';
+
+    case InventoryView = 'inventory.view';
+    case InventoryManage = 'inventory.manage';
+    case InventoryPost = 'inventory.post';
+
+    case LibraryView = 'library.view';
+    case LibraryManage = 'library.manage';
+    case LibraryCirculate = 'library.circulate';
+    case LibraryWaiveFine = 'library.waive_fine';
+
+    // Phase 10 (Welfare): transport, hostel, medical, visitors, insurance.
+    // Mirrors Welfare\Domain\{Transport,Hostel,Medical,Visitor,Insurance}
+    // Permission string constants, same pattern as Phase 9 above.
+    case TransportView = 'transport.view';
+    case TransportManage = 'transport.manage';
+
+    case HostelView = 'hostel.view';
+    case HostelManage = 'hostel.manage';
+
+    case MedicalView = 'medical.view';
+    case MedicalManage = 'medical.manage';
+
+    case VisitorManage = 'visitor.manage';
+
+    case InsuranceView = 'insurance.view';
+    case InsuranceManage = 'insurance.manage';
+
+    // Phase 11 (HR/Payroll). Mirrors HR\Domain\HrPermission and
+    // Payroll\Domain\PayrollPermission string constants.
+    case StaffView = 'staff.view';
+    case StaffManage = 'staff.manage';
+    case LeaveApprove = 'leave.approve';
+    case TimesheetValidate = 'timesheet.validate';
+
+    case PayrollView = 'payroll.view';
+    case PayrollRun = 'payroll.run';
+    case PayrollApprove = 'payroll.approve';
+    case PayrollReverse = 'payroll.reverse';
+    case PayrollConfigure = 'payroll.configure';
+    case PayrollPay = 'payroll.pay';
+    case PayrollOverrideRiskClass = 'payroll.override_risk_class';
+    case PayrollClassifyNonEmployee = 'payroll.classify_non_employee';
+    case DeclarationFile = 'declaration.file';
+
+    // 02-accounting §21.3 expense capture. Mirrors
+    // Accounting\Domain\ExpensePermission's string constants, same pattern
+    // as the Procurement/Welfare blocks above. Only TWO cases: posting an
+    // approved expense reuses the existing `ledger.post`, and reading the
+    // register reuses `ledger.view` - putting an expense in the ledger is
+    // the same act, and the same hands, as posting any other entry.
+    //
+    // The pair is deliberate and is the maker-checker of §21.3: the clerk
+    // who records petty cash holds `expense.record`, the bursar who signs it
+    // off holds `expense.approve`, and ApproveExpense refuses submitter ==
+    // approver at runtime even for someone holding both.
+    case ExpenseRecord = 'expense.record';
+    case ExpenseApprove = 'expense.approve';
 
     public function label(string $locale = 'en'): string
     {

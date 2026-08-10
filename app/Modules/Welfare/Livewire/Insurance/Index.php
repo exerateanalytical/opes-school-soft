@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Welfare\Livewire\Insurance;
 
+use App\Modules\Welfare\Actions\EnrollStudentsInPolicy;
+use App\Modules\Welfare\Actions\RecordClaim;
+use App\Modules\Welfare\Actions\SavePolicy;
+use App\Modules\Welfare\Actions\SettleClaim;
+use App\Modules\Welfare\Domain\ClaimStatus;
+use App\Modules\Welfare\Domain\InsuranceCoverType;
 use App\Modules\Welfare\Domain\InsurancePermission;
+use App\Support\Audit\Actor;
+use DomainException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -45,6 +55,56 @@ final class Index extends Component
     public int $page = 1;
 
     public int $perPage = 25;
+
+    // ── Enroll students form ────────────────────────────────────────────
+    public bool $showEnrollForm = false;
+
+    public string $enrollPolicyId = '';
+
+    public string $enrollEnrollmentIds = '';
+
+    public string $enrollEnrolledOn = '';
+
+    // ── Record claim form ───────────────────────────────────────────────
+    public bool $showClaimForm = false;
+
+    public string $claimPolicyId = '';
+
+    public string $claimStudentInsuranceId = '';
+
+    public string $claimIncidentDate = '';
+
+    public string $claimDescription = '';
+
+    public string $claimAmount = '';
+
+    // ── Save policy form ────────────────────────────────────────────────
+    public bool $showPolicyForm = false;
+
+    public string $policyProvider = '';
+
+    public string $policyNo = '';
+
+    public string $policyCoverType = 'student';
+
+    public string $policyPremiumPerStudent = '';
+
+    public string $policyCoverageStart = '';
+
+    public string $policyCoverageEnd = '';
+
+    public string $policyAcademicYearId = '';
+
+    // ── Settle claim form ───────────────────────────────────────────────
+    public bool $showSettleForm = false;
+
+    public int $settleClaimId = 0;
+
+    public string $settleOutcome = 'settled';
+
+    public string $settleAmount = '';
+
+    public string $settleDecidedOn = '';
 
     public function mount(): void
     {
@@ -89,6 +149,267 @@ final class Index extends Component
     private function resetPage(): void
     {
         $this->page = 1;
+    }
+
+    private function actor(): Actor
+    {
+        /** @var \App\Modules\Identity\Models\User $user */
+        $user = auth()->user();
+
+        return $user->toAuditActor();
+    }
+
+    public function toggleEnrollForm(): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->showEnrollForm = ! $this->showEnrollForm;
+
+        if ($this->showEnrollForm && $this->enrollEnrolledOn === '') {
+            $this->enrollEnrolledOn = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveEnrollment(EnrollStudentsInPolicy $enroll): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->validate([
+            'enrollPolicyId' => ['required', 'integer', 'min:1'],
+            'enrollEnrollmentIds' => ['required', 'string'],
+            'enrollEnrolledOn' => ['required', 'date'],
+        ], [], [
+            'enrollPolicyId' => 'policy',
+            'enrollEnrollmentIds' => 'enrollment ids',
+            'enrollEnrolledOn' => 'enrolled on',
+        ]);
+
+        $enrollmentIds = array_values(array_filter(array_map(
+            static fn (string $id): int => (int) trim($id),
+            explode(',', $this->enrollEnrollmentIds)
+        ), static fn (int $id): bool => $id > 0));
+
+        if ($enrollmentIds === []) {
+            $this->addError('enrollEnrollmentIds', 'Enter at least one valid enrollment ID.');
+
+            return;
+        }
+
+        try {
+            $summary = $enroll->handle(
+                (int) $this->enrollPolicyId,
+                $enrollmentIds,
+                Carbon::parse($this->enrollEnrolledOn),
+                $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('enrollEnrollmentIds', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('enrollPolicyId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showEnrollForm', 'enrollPolicyId', 'enrollEnrollmentIds', 'enrollEnrolledOn']);
+        $this->tab = 'insured';
+        $this->resetPage();
+        session()->flash(
+            'status',
+            "Enrollment complete: {$summary['enrolled']} enrolled, {$summary['already_covered']} already covered, {$summary['skipped']} skipped."
+        );
+    }
+
+    public function toggleClaimForm(): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->showClaimForm = ! $this->showClaimForm;
+
+        if ($this->showClaimForm && $this->claimIncidentDate === '') {
+            $this->claimIncidentDate = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveClaim(RecordClaim $recordClaim): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->validate([
+            'claimPolicyId' => ['required', 'integer', 'min:1'],
+            'claimStudentInsuranceId' => ['nullable', 'integer', 'min:1'],
+            'claimIncidentDate' => ['required', 'date'],
+            'claimDescription' => ['required', 'string', 'min:1'],
+            'claimAmount' => ['required', 'integer', 'min:1'],
+        ], [], [
+            'claimPolicyId' => 'policy',
+            'claimStudentInsuranceId' => 'certificate',
+            'claimIncidentDate' => 'incident date',
+            'claimDescription' => 'description',
+            'claimAmount' => 'amount claimed',
+        ]);
+
+        try {
+            $recordClaim->handle(
+                (int) $this->claimPolicyId,
+                Carbon::parse($this->claimIncidentDate),
+                $this->claimDescription,
+                (int) $this->claimAmount,
+                $this->actor(),
+                $this->claimStudentInsuranceId === '' ? null : (int) $this->claimStudentInsuranceId,
+            );
+        } catch (ValidationException $e) {
+            $this->addError('claimDescription', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('claimPolicyId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showClaimForm', 'claimPolicyId', 'claimStudentInsuranceId',
+            'claimIncidentDate', 'claimDescription', 'claimAmount',
+        ]);
+        $this->tab = 'claims';
+        $this->resetPage();
+        session()->flash('status', 'Claim recorded.');
+    }
+
+    public function togglePolicyForm(): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->showPolicyForm = ! $this->showPolicyForm;
+
+        if ($this->showPolicyForm && $this->policyCoverageStart === '') {
+            $this->policyCoverageStart = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function savePolicy(SavePolicy $savePolicy): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->validate([
+            'policyProvider' => ['required', 'string', 'min:1'],
+            'policyNo' => ['required', 'string', 'min:1'],
+            'policyCoverType' => ['required', 'string'],
+            'policyPremiumPerStudent' => ['nullable', 'integer', 'min:0'],
+            'policyCoverageStart' => ['required', 'date'],
+            'policyCoverageEnd' => ['required', 'date'],
+            'policyAcademicYearId' => ['required', 'integer', 'min:1'],
+        ], [], [
+            'policyProvider' => 'provider',
+            'policyNo' => 'policy number',
+            'policyCoverType' => 'cover type',
+            'policyPremiumPerStudent' => 'premium per student',
+            'policyCoverageStart' => 'coverage start',
+            'policyCoverageEnd' => 'coverage end',
+            'policyAcademicYearId' => 'academic year',
+        ]);
+
+        $coverType = InsuranceCoverType::tryFrom($this->policyCoverType);
+
+        if ($coverType === null) {
+            $this->addError('policyCoverType', 'Unknown cover type; expected student or asset.');
+
+            return;
+        }
+
+        try {
+            $savePolicy->handle(null, [
+                'provider' => $this->policyProvider,
+                'policy_no' => $this->policyNo,
+                'cover_type' => $coverType,
+                'premium_per_student' => $this->policyPremiumPerStudent === '' ? null : (int) $this->policyPremiumPerStudent,
+                'coverage_start' => Carbon::parse($this->policyCoverageStart),
+                'coverage_end' => Carbon::parse($this->policyCoverageEnd),
+                'academic_year_id' => (int) $this->policyAcademicYearId,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            $this->addError('policyNo', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('policyProvider', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showPolicyForm', 'policyProvider', 'policyNo', 'policyCoverType',
+            'policyPremiumPerStudent', 'policyCoverageStart', 'policyCoverageEnd', 'policyAcademicYearId',
+        ]);
+        $this->policyCoverType = 'student';
+        $this->tab = 'policies';
+        $this->resetPage();
+        session()->flash('status', 'Policy saved.');
+    }
+
+    public function toggleSettleForm(int $claimId): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        if ($this->showSettleForm && $this->settleClaimId === $claimId) {
+            $this->reset(['showSettleForm', 'settleClaimId', 'settleOutcome', 'settleAmount', 'settleDecidedOn']);
+
+            return;
+        }
+
+        $this->showSettleForm = true;
+        $this->settleClaimId = $claimId;
+        $this->settleOutcome = 'settled';
+        $this->settleAmount = '';
+        $this->settleDecidedOn = Carbon::now()->format('Y-m-d');
+    }
+
+    public function settleClaim(SettleClaim $settleClaim): void
+    {
+        Gate::authorize(InsurancePermission::MANAGE);
+
+        $this->validate([
+            'settleClaimId' => ['required', 'integer', 'min:1'],
+            'settleOutcome' => ['required', 'in:settled,rejected'],
+            'settleAmount' => ['nullable', 'integer', 'min:1'],
+            'settleDecidedOn' => ['required', 'date'],
+        ], [], [
+            'settleOutcome' => 'outcome',
+            'settleAmount' => 'settled amount',
+            'settleDecidedOn' => 'decision date',
+        ]);
+
+        $outcome = ClaimStatus::tryFrom($this->settleOutcome);
+
+        if ($outcome === null) {
+            $this->addError('settleOutcome', 'Unknown outcome; expected settled or rejected.');
+
+            return;
+        }
+
+        try {
+            $settleClaim->handle(
+                $this->settleClaimId,
+                $outcome,
+                $this->settleAmount === '' ? null : (int) $this->settleAmount,
+                Carbon::parse($this->settleDecidedOn),
+                $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('settleAmount', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('settleOutcome', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showSettleForm', 'settleClaimId', 'settleOutcome', 'settleAmount', 'settleDecidedOn']);
+        $this->resetPage();
+        session()->flash('status', 'Claim decision recorded.');
     }
 
     /**
@@ -360,6 +681,21 @@ final class Index extends Component
     }
 
     /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function academicYearOptions(): array
+    {
+        $options = [];
+
+        foreach (DB::table('academic_years')->orderByDesc('starts_on')->get(['id', 'name']) as $row) {
+            /** @var object{id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => $row->name];
+        }
+
+        return $options;
+    }
+
+    /**
      * Per-tab status filter choices (the WORD carries the meaning, 09-ui 10).
      *
      * @return list<array{value: string, label: string}>
@@ -403,6 +739,7 @@ final class Index extends Component
             'kpis' => $kpis,
             'tabCounts' => $tabCounts,
             'policyOptions' => $this->policyOptions(),
+            'academicYearOptions' => $this->academicYearOptions(),
             'statusOptions' => $this->statusOptions(),
             'claimsSummary' => $this->claimsSummary(),
             'expiringPolicies' => $this->expiringPolicies(),

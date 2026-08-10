@@ -4,12 +4,24 @@ declare(strict_types=1);
 
 namespace App\Modules\Fees\Livewire\Invoices;
 
+use App\Modules\Fees\Actions\CreateFeeCategory;
+use App\Modules\Fees\Actions\CreateFeeStructure;
+use App\Modules\Fees\Actions\GenerateInvoices;
+use App\Modules\Fees\Actions\IssueCreditNote;
+use App\Modules\Fees\Actions\IssueInvoice;
+use App\Modules\Fees\Actions\UpdateFeeStructure;
+use App\Modules\Fees\Domain\CreditNoteReasonType;
+use App\Modules\Fees\Domain\CreditNoteSettlementMode;
+use App\Modules\Fees\Domain\FeeStructureStatus;
 use App\Modules\Fees\Domain\InvoiceStatus;
 use App\Modules\Identity\Domain\Permission;
+use App\Support\Audit\Actor;
+use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -47,6 +59,82 @@ final class Index extends Component
     public int $page = 1;
 
     public int $perPage = 25;
+
+    // ── Generate invoices form (GenerateInvoices) ──────────────────────
+    public bool $showGenerateForm = false;
+
+    public string $generateAcademicYearId = '';
+
+    public string $generateFiscalYearId = '';
+
+    public string $generateTermId = '';
+
+    public string $generateClassGroupId = '';
+
+    public string $generateIssueDate = '';
+
+    public string $generateDueDate = '';
+
+    // ── Issue invoice form (IssueInvoice) ───────────────────────────────
+    public bool $showIssueForm = false;
+
+    public string $issueInvoiceId = '';
+
+    // ── Issue credit note form (IssueCreditNote) ────────────────────────
+    public bool $showCreditForm = false;
+
+    public string $creditInvoiceId = '';
+
+    public string $creditInvoiceLineId = '';
+
+    public string $creditAmount = '';
+
+    public string $creditReasonType = '';
+
+    public string $creditReasonNote = '';
+
+    public string $creditSettlementMode = '';
+
+    public string $creditIssueDate = '';
+
+    // ── Structures section toggle ───────────────────────────────────────
+    public bool $showStructures = false;
+
+    // ── Create fee category (CreateFeeCategory) ─────────────────────────
+    public bool $showCategoryForm = false;
+
+    public string $categoryCode = '';
+
+    public string $categoryName = '';
+
+    public string $categoryNameFr = '';
+
+    // ── Create fee structure (CreateFeeStructure) ───────────────────────
+    // Simplified for the demo: a single line item per structure, and the
+    // class level / stream / enrollment-status / boarding discriminators
+    // stay at "any" - the full multi-line, fully-scoped form is future work.
+    public bool $showStructureForm = false;
+
+    public string $structureAcademicYearId = '';
+
+    public string $structureSchoolSectionId = '';
+
+    public string $structureName = '';
+
+    public string $structureEffectiveFrom = '';
+
+    public string $structureFeeItemId = '';
+
+    public string $structureLineAmount = '';
+
+    // ── Edit fee structure (UpdateFeeStructure) ─────────────────────────
+    public bool $showEditForm = false;
+
+    public string $editStructureId = '';
+
+    public string $editStructureName = '';
+
+    public string $editStructureEffectiveTo = '';
 
     public function mount(): void
     {
@@ -88,6 +176,546 @@ final class Index extends Component
     private function resetPage(): void
     {
         $this->page = 1;
+    }
+
+    // ── Generate invoices (GenerateInvoices) ────────────────────────────
+
+    public function toggleGenerateForm(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->showGenerateForm = ! $this->showGenerateForm;
+    }
+
+    public function generateInvoices(GenerateInvoices $action): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->validate([
+            'generateAcademicYearId' => ['required', 'integer'],
+            'generateFiscalYearId' => ['required', 'integer'],
+            'generateTermId' => ['nullable', 'integer'],
+            'generateClassGroupId' => ['nullable', 'integer'],
+            'generateIssueDate' => ['required', 'date'],
+            'generateDueDate' => ['required', 'date', 'after_or_equal:generateIssueDate'],
+        ], [], [
+            'generateAcademicYearId' => 'academic year',
+            'generateFiscalYearId' => 'fiscal year',
+            'generateIssueDate' => 'issue date',
+            'generateDueDate' => 'due date',
+        ]);
+
+        $enrollmentIds = $this->enrollmentIdsForGenerate();
+
+        if ($enrollmentIds === []) {
+            $this->addError('generateClassGroupId', 'No active enrolments match this academic year / class scope.');
+
+            return;
+        }
+
+        $options = [
+            'academic_year_id' => (int) $this->generateAcademicYearId,
+            'fiscal_year_id' => (int) $this->generateFiscalYearId,
+            'term_id' => $this->generateTermId === '' ? null : (int) $this->generateTermId,
+            'issue_date' => $this->generateIssueDate,
+            'due_date' => $this->generateDueDate,
+        ];
+
+        try {
+            $result = $action->forEnrollments($enrollmentIds, $options, $this->actor());
+        } catch (ValidationException $e) {
+            $this->addError('generateIssueDate', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('generateIssueDate', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showGenerateForm', 'generateAcademicYearId', 'generateFiscalYearId', 'generateTermId',
+            'generateClassGroupId', 'generateIssueDate', 'generateDueDate',
+        ]);
+        $this->resetPage();
+
+        session()->flash('status', sprintf(
+            'Invoice run complete: %d created, %d skipped (already invoiced), %d rejected.',
+            count($result['created']),
+            count($result['skipped']),
+            count($result['rejected']),
+        ));
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function enrollmentIdsForGenerate(): array
+    {
+        $query = DB::table('enrollments')
+            ->where('academic_year_id', (int) $this->generateAcademicYearId)
+            ->where('status', 'active');
+
+        if ($this->generateClassGroupId !== '') {
+            $classGroupId = (int) $this->generateClassGroupId;
+            $query->whereExists(function (QueryBuilder $inner) use ($classGroupId): void {
+                $inner->selectRaw('1')
+                    ->from('enrollment_segments as seg')
+                    ->whereColumn('seg.enrollment_id', 'enrollments.id')
+                    ->whereNull('seg.ends_on')
+                    ->where('seg.class_group_id', $classGroupId);
+            });
+        }
+
+        return array_map(static fn (int|string $id): int => (int) $id, $query->pluck('id')->all());
+    }
+
+    // ── Issue invoice (IssueInvoice) ─────────────────────────────────────
+
+    public function toggleIssueForm(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->showIssueForm = ! $this->showIssueForm;
+    }
+
+    public function issueInvoice(IssueInvoice $action): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->validate([
+            'issueInvoiceId' => ['required', 'integer'],
+        ], [], [
+            'issueInvoiceId' => 'invoice',
+        ]);
+
+        try {
+            $action->handle([(int) $this->issueInvoiceId], $this->actor());
+        } catch (ValidationException $e) {
+            $this->addError('issueInvoiceId', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('issueInvoiceId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showIssueForm', 'issueInvoiceId']);
+        $this->resetPage();
+        session()->flash('status', 'Invoice issued.');
+    }
+
+    // ── Issue credit note (IssueCreditNote) ─────────────────────────────
+
+    public function toggleCreditForm(): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->showCreditForm = ! $this->showCreditForm;
+    }
+
+    public function updatedCreditInvoiceId(): void
+    {
+        $this->creditInvoiceLineId = '';
+    }
+
+    public function issueCreditNote(IssueCreditNote $action): void
+    {
+        Gate::authorize(Permission::FeeCollect->value);
+
+        $this->validate([
+            'creditInvoiceId' => ['required', 'integer'],
+            'creditInvoiceLineId' => ['required', 'integer'],
+            'creditAmount' => ['required', 'integer', 'min:1'],
+            'creditReasonType' => ['required', 'string'],
+            'creditReasonNote' => ['required', 'string', 'min:5'],
+            'creditSettlementMode' => ['required', 'string'],
+            'creditIssueDate' => ['required', 'date'],
+        ], [], [
+            'creditInvoiceId' => 'invoice',
+            'creditInvoiceLineId' => 'invoice line',
+            'creditAmount' => 'amount',
+            'creditReasonType' => 'reason',
+            'creditReasonNote' => 'reason note',
+            'creditSettlementMode' => 'settlement mode',
+            'creditIssueDate' => 'issue date',
+        ]);
+
+        $reasonType = CreditNoteReasonType::tryFrom($this->creditReasonType);
+        $settlementMode = CreditNoteSettlementMode::tryFrom($this->creditSettlementMode);
+
+        if ($reasonType === null) {
+            $this->addError('creditReasonType', 'Choose a valid reason.');
+
+            return;
+        }
+
+        if ($settlementMode === null) {
+            $this->addError('creditSettlementMode', 'Choose a valid settlement mode.');
+
+            return;
+        }
+
+        try {
+            $action->handle(
+                (int) $this->creditInvoiceId,
+                [['invoice_line_id' => (int) $this->creditInvoiceLineId, 'amount' => (int) $this->creditAmount]],
+                $reasonType,
+                $this->creditReasonNote,
+                $settlementMode,
+                $this->creditIssueDate,
+                $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('creditAmount', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('creditAmount', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showCreditForm', 'creditInvoiceId', 'creditInvoiceLineId', 'creditAmount',
+            'creditReasonType', 'creditReasonNote', 'creditSettlementMode', 'creditIssueDate',
+        ]);
+        $this->resetPage();
+        session()->flash('status', 'Credit note issued.');
+    }
+
+    // ── Structures section ──────────────────────────────────────────────
+
+    public function toggleStructures(): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->showStructures = ! $this->showStructures;
+    }
+
+    // ── Create fee category (CreateFeeCategory) ─────────────────────────
+
+    public function toggleCategoryForm(): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->showCategoryForm = ! $this->showCategoryForm;
+    }
+
+    public function createCategory(CreateFeeCategory $action): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->validate([
+            'categoryCode' => ['required', 'string', 'max:30'],
+            'categoryName' => ['required', 'string', 'max:160'],
+            'categoryNameFr' => ['required', 'string', 'max:160'],
+        ], [], [
+            'categoryCode' => 'code',
+            'categoryName' => 'name',
+            'categoryNameFr' => 'French name',
+        ]);
+
+        try {
+            $action->handle($this->categoryCode, $this->categoryName, $this->categoryNameFr, 0, $this->actor());
+        } catch (ValidationException $e) {
+            $this->addError('categoryCode', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('categoryCode', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showCategoryForm', 'categoryCode', 'categoryName', 'categoryNameFr']);
+        session()->flash('status', 'Fee category created.');
+    }
+
+    // ── Create fee structure (CreateFeeStructure) ───────────────────────
+
+    public function toggleStructureForm(): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->showStructureForm = ! $this->showStructureForm;
+    }
+
+    public function createStructure(CreateFeeStructure $action): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->validate([
+            'structureAcademicYearId' => ['required', 'integer'],
+            'structureSchoolSectionId' => ['required', 'integer'],
+            'structureName' => ['required', 'string', 'max:160'],
+            'structureEffectiveFrom' => ['required', 'date'],
+            'structureFeeItemId' => ['required', 'integer'],
+            'structureLineAmount' => ['required', 'integer', 'min:0'],
+        ], [], [
+            'structureAcademicYearId' => 'academic year',
+            'structureSchoolSectionId' => 'school section',
+            'structureName' => 'name',
+            'structureEffectiveFrom' => 'effective from',
+            'structureFeeItemId' => 'fee item',
+            'structureLineAmount' => 'amount',
+        ]);
+
+        try {
+            $action->handle(
+                academicYearId: (int) $this->structureAcademicYearId,
+                schoolSectionId: (int) $this->structureSchoolSectionId,
+                name: $this->structureName,
+                effectiveFrom: $this->structureEffectiveFrom,
+                lines: [[
+                    'fee_item_id' => (int) $this->structureFeeItemId,
+                    'amount' => (int) $this->structureLineAmount,
+                ]],
+                actor: $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('structureName', $e->getMessage());
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('structureName', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showStructureForm', 'structureAcademicYearId', 'structureSchoolSectionId',
+            'structureName', 'structureEffectiveFrom', 'structureFeeItemId', 'structureLineAmount',
+        ]);
+        session()->flash('status', 'Fee structure created as a draft.');
+    }
+
+    // ── Edit / publish / archive fee structure (UpdateFeeStructure) ─────
+
+    public function toggleEditStructure(int $structureId): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        if ($this->showEditForm && $this->editStructureId === (string) $structureId) {
+            $this->reset(['showEditForm', 'editStructureId', 'editStructureName', 'editStructureEffectiveTo']);
+
+            return;
+        }
+
+        $row = DB::table('fee_structures')->where('id', $structureId)->first(['id', 'name', 'effective_to']);
+
+        if ($row === null) {
+            return;
+        }
+
+        /** @var object{id: int|string, name: string, effective_to: string|null} $row */
+        $this->editStructureId = (string) $row->id;
+        $this->editStructureName = $row->name;
+        $this->editStructureEffectiveTo = (string) ($row->effective_to ?? '');
+        $this->showEditForm = true;
+    }
+
+    public function saveStructureEdit(UpdateFeeStructure $action): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        $this->validate([
+            'editStructureId' => ['required', 'integer'],
+            'editStructureName' => ['required', 'string', 'max:160'],
+        ], [], [
+            'editStructureName' => 'name',
+        ]);
+
+        try {
+            $action->handle(
+                feeStructureId: (int) $this->editStructureId,
+                name: $this->editStructureName,
+                effectiveTo: $this->editStructureEffectiveTo === '' ? null : $this->editStructureEffectiveTo,
+                actor: $this->actor(),
+            );
+        } catch (DomainException $e) {
+            $this->addError('editStructureName', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showEditForm', 'editStructureId', 'editStructureName', 'editStructureEffectiveTo']);
+        session()->flash('status', 'Fee structure updated.');
+    }
+
+    public function publishStructure(int $structureId, UpdateFeeStructure $action): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        try {
+            $action->handle(feeStructureId: $structureId, status: FeeStructureStatus::Active, actor: $this->actor());
+        } catch (DomainException $e) {
+            $this->addError('structures', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', 'Fee structure published.');
+    }
+
+    public function archiveStructure(int $structureId, UpdateFeeStructure $action): void
+    {
+        Gate::authorize(Permission::FeeConfigure->value);
+
+        try {
+            $action->handle(feeStructureId: $structureId, status: FeeStructureStatus::Archived, actor: $this->actor());
+        } catch (DomainException $e) {
+            $this->addError('structures', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', 'Fee structure archived.');
+    }
+
+    private function actor(): Actor
+    {
+        /** @var \App\Modules\Identity\Models\User $user */
+        $user = auth()->user();
+
+        return $user->toAuditActor();
+    }
+
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function academicYearOptions(): array
+    {
+        $rows = DB::table('academic_years')->orderByDesc('starts_on')->get(['id', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => (string) $row->name];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function fiscalYearOptions(): array
+    {
+        $rows = DB::table('fiscal_years')->orderByDesc('starts_on')->get(['id', 'code']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, code: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => (string) $row->code];
+        }
+
+        return $options;
+    }
+
+    /**
+     * All assessment periods of type "term", regardless of whether an
+     * invoice references them yet - unlike termOptions() (the list filter),
+     * the generate form must offer a brand-new term.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function generateTermOptions(): array
+    {
+        $rows = DB::table('assessment_periods')
+            ->where('type', 'term')
+            ->orderBy('starts_on')
+            ->get(['id', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => (string) $row->name];
+        }
+
+        return $options;
+    }
+
+    /**
+     * Draft invoices, offered to the "Issue invoice" form.
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function draftInvoiceOptions(): array
+    {
+        $rows = DB::table('invoices as i')
+            ->join('students as s', 's.id', '=', 'i.student_id')
+            ->where('i.status', InvoiceStatus::Draft->value)
+            ->orderByDesc('i.id')
+            ->limit(200)
+            ->get(['i.id', DB::raw("CONCAT(s.first_name, ' ', s.last_name) as student_name"), 's.matricule']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, student_name: string, matricule: string} $row */
+            $options[] = ['id' => (int) $row->id, 'label' => sprintf('#%d - %s (%s)', (int) $row->id, $row->student_name, $row->matricule)];
+        }
+
+        return $options;
+    }
+
+    /**
+     * Issued invoices, offered to the "Issue credit note" form.
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function issuedInvoiceOptions(): array
+    {
+        $rows = DB::table('invoices as i')
+            ->join('students as s', 's.id', '=', 'i.student_id')
+            ->where('i.status', InvoiceStatus::Issued->value)
+            ->orderByDesc('i.id')
+            ->limit(200)
+            ->get(['i.id', 'i.invoice_no', DB::raw("CONCAT(s.first_name, ' ', s.last_name) as student_name")]);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, invoice_no: string|null, student_name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'label' => sprintf('%s - %s', (string) ($row->invoice_no ?? ('#'.$row->id)), $row->student_name)];
+        }
+
+        return $options;
+    }
+
+    /**
+     * Lines of the currently selected credit-note invoice - populated only
+     * once an invoice is chosen in the form.
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function creditLineOptions(): array
+    {
+        if ($this->creditInvoiceId === '') {
+            return [];
+        }
+
+        $rows = DB::table('invoice_lines')
+            ->where('invoice_id', (int) $this->creditInvoiceId)
+            ->orderBy('line_no')
+            ->get(['id', 'description', 'amount', 'tax_amount']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, description: string, amount: int|string, tax_amount: int|string} $row */
+            $options[] = [
+                'id' => (int) $row->id,
+                'label' => sprintf('%s (%d)', $row->description, (int) $row->amount + (int) $row->tax_amount),
+            ];
+        }
+
+        return $options;
     }
 
     /**
@@ -286,6 +914,88 @@ final class Index extends Component
         return $options;
     }
 
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function schoolSectionOptions(): array
+    {
+        $rows = DB::table('school_sections')->orderBy('display_order')->get(['id', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => (string) $row->name];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function feeItemOptions(): array
+    {
+        $rows = DB::table('fee_items')->where('is_archived', false)->orderBy('name')->get(['id', 'code', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, code: string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => sprintf('%s - %s', $row->code, $row->name)];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    private function categoryOptions(): array
+    {
+        $rows = DB::table('fee_categories')->where('is_archived', false)->orderBy('display_order')->get(['id', 'name']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => (string) $row->name];
+        }
+
+        return $options;
+    }
+
+    /**
+     * Fee structures for the Structures section, newest first.
+     *
+     * @return list<array{id: int, name: string, section: string, status: string, version: int, effective_from: string, effective_to: string}>
+     */
+    private function structureRows(): array
+    {
+        $rows = DB::table('fee_structures as fs')
+            ->join('school_sections as ss', 'ss.id', '=', 'fs.school_section_id')
+            ->orderByDesc('fs.id')
+            ->limit(200)
+            ->get(['fs.id', 'fs.name', 'ss.name as section_name', 'fs.status', 'fs.version', 'fs.effective_from', 'fs.effective_to']);
+
+        $structures = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string, section_name: string, status: string, version: int|string, effective_from: string, effective_to: string|null} $row */
+            $structures[] = [
+                'id' => (int) $row->id,
+                'name' => (string) $row->name,
+                'section' => (string) $row->section_name,
+                'status' => (string) $row->status,
+                'version' => (int) $row->version,
+                'effective_from' => (string) $row->effective_from,
+                'effective_to' => (string) ($row->effective_to ?? ''),
+            ];
+        }
+
+        return $structures;
+    }
+
     public function render(): mixed
     {
         $paginator = $this->invoices();
@@ -312,6 +1022,19 @@ final class Index extends Component
             'statusOptions' => array_map(static fn (InvoiceStatus $s): string => $s->value, InvoiceStatus::cases()),
             'classOptions' => $this->classOptions(),
             'termOptions' => $this->termOptions(),
+            'academicYearOptions' => $this->academicYearOptions(),
+            'fiscalYearOptions' => $this->fiscalYearOptions(),
+            'generateTermOptions' => $this->generateTermOptions(),
+            'draftInvoiceOptions' => $this->draftInvoiceOptions(),
+            'issuedInvoiceOptions' => $this->issuedInvoiceOptions(),
+            'creditLineOptions' => $this->creditLineOptions(),
+            'creditReasonOptions' => array_map(static fn (CreditNoteReasonType $r): string => $r->value, CreditNoteReasonType::cases()),
+            'creditSettlementOptions' => array_map(static fn (CreditNoteSettlementMode $m): string => $m->value, CreditNoteSettlementMode::cases()),
+            'canConfigureFees' => Gate::allows(Permission::FeeConfigure->value),
+            'schoolSectionOptions' => $this->schoolSectionOptions(),
+            'feeItemOptions' => $this->feeItemOptions(),
+            'categoryOptions' => $this->categoryOptions(),
+            'structureRows' => $this->structureRows(),
         ]);
     }
 }

@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Modules\Academics\Livewire\Subjects;
 
 use App\Modules\Academics\Actions\CreateSubject;
+use App\Modules\Academics\Actions\UpdateAllocation;
 use App\Modules\Academics\Actions\UpdateSubject;
+use App\Modules\Academics\Models\AcademicYear;
 use App\Modules\Academics\Models\Department;
 use App\Modules\Academics\Models\Subject;
+use App\Modules\Academics\Models\SubjectAllocation;
 use App\Modules\Identity\Domain\Permission;
+use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -54,6 +59,19 @@ final class Index extends Component
     public string $departmentId = '';
 
     public bool $subjectActive = true;
+
+    // ── Allocation panel (per-subject, current academic year) ────────────
+    public ?int $allocationsForSubjectId = null;
+
+    public ?int $editingAllocationId = null;
+
+    public string $allocCoefficient = '';
+
+    public bool $allocIsOptional = false;
+
+    public bool $allocCountsTowardAverage = true;
+
+    public bool $allocIsActive = true;
 
     public function mount(): void
     {
@@ -175,6 +193,100 @@ final class Index extends Component
         $this->resetErrorBag();
     }
 
+    public function toggleAllocations(int $subjectId): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        $this->allocationsForSubjectId = $this->allocationsForSubjectId === $subjectId ? null : $subjectId;
+        $this->editingAllocationId = null;
+        $this->resetErrorBag();
+    }
+
+    public function startEditAllocation(int $allocationId): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        /** @var SubjectAllocation $allocation */
+        $allocation = SubjectAllocation::query()->findOrFail($allocationId);
+
+        $this->editingAllocationId = (int) $allocation->getKey();
+        $this->allocCoefficient = (string) $allocation->coefficient;
+        $this->allocIsOptional = $allocation->is_optional;
+        $this->allocCountsTowardAverage = $allocation->counts_toward_average;
+        $this->allocIsActive = $allocation->is_active;
+        $this->resetErrorBag();
+    }
+
+    public function cancelAllocationForm(): void
+    {
+        $this->editingAllocationId = null;
+        $this->resetErrorBag();
+    }
+
+    public function saveAllocation(UpdateAllocation $updateAllocation): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        if ($this->editingAllocationId === null) {
+            return;
+        }
+
+        $validated = $this->validate([
+            'allocCoefficient' => ['required', 'numeric', 'min:0', 'max:99.99'],
+            'allocIsOptional' => ['boolean'],
+            'allocCountsTowardAverage' => ['boolean'],
+            'allocIsActive' => ['boolean'],
+        ], [], [
+            'allocCoefficient' => 'coefficient',
+        ]);
+
+        /** @var SubjectAllocation $allocation */
+        $allocation = SubjectAllocation::query()->findOrFail($this->editingAllocationId);
+
+        try {
+            $updateAllocation->handle($allocation, [
+                'coefficient' => (string) $validated['allocCoefficient'],
+                'is_optional' => $this->allocIsOptional,
+                'counts_toward_average' => $this->allocCountsTowardAverage,
+                'is_active' => $this->allocIsActive,
+            ]);
+        } catch (DomainException $exception) {
+            $this->addError('allocCoefficient', $exception->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', __('opes.subjects_screen.allocation_updated'));
+        $this->editingAllocationId = null;
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Allocations for the subject currently expanded, in the current
+     * academic year - the only scope with live coefficients to edit.
+     *
+     * @return Collection<int, SubjectAllocation>
+     */
+    private function allocationsForExpandedSubject(): Collection
+    {
+        if ($this->allocationsForSubjectId === null) {
+            return collect();
+        }
+
+        $year = AcademicYear::query()->where('is_current', true)->first();
+
+        if ($year === null) {
+            return collect();
+        }
+
+        return SubjectAllocation::query()
+            ->with('classLevel')
+            ->where('subject_id', $this->allocationsForSubjectId)
+            ->where('academic_year_id', $year->getKey())
+            ->orderBy('class_level_id')
+            ->get();
+    }
+
     /**
      * @return LengthAwarePaginator<int, Subject>
      */
@@ -206,6 +318,7 @@ final class Index extends Component
             'departmentNames' => Department::query()->orderBy('name')->pluck('name', 'id'),
             'totalSubjects' => Subject::query()->count(),
             'canManage' => Gate::allows(Permission::AcademicsManage->value),
+            'expandedAllocations' => $this->allocationsForExpandedSubject(),
         ]);
     }
 }

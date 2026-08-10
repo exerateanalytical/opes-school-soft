@@ -6,6 +6,8 @@ namespace App\Modules\Guardians\Livewire\Guardians;
 
 use App\Modules\Guardians\Actions\IssuePortalInvitation;
 use App\Modules\Guardians\Actions\RevokePortalInvitation;
+use App\Modules\Guardians\Actions\SetGuardianAuthorization;
+use App\Modules\Guardians\Actions\UnlinkGuardian;
 use App\Modules\Guardians\Domain\PortalSubjectType;
 use App\Modules\Guardians\Models\Guardian;
 use App\Modules\Guardians\Models\GuardianCommunication;
@@ -13,9 +15,11 @@ use App\Modules\Guardians\Models\GuardianMeeting;
 use App\Modules\Guardians\Models\PortalInvitation;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Identity\Domain\Permission;
+use App\Support\Audit\Actor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -46,12 +50,18 @@ use Livewire\Component;
  * query-builder statement, and its authorization column from the links
  * themselves - the flags never leave the module that owns the rule.
  *
- * ── Read-only ─────────────────────────────────────────────────────────────
+ * ── Linked Students is no longer read-only ────────────────────────────────
  *
- * 7.6 makes every authorization change a close-and-succeed Action with its own
- * permission and an immediate portal-session revocation. A pencil icon here
- * that did not do all of that would break the audit trail 7.6 exists to
- * protect, so there is none.
+ * Two write actions now live on the Linked Students table, and both go
+ * through their Action rather than an in-place edit, exactly as 7.6
+ * requires: `unlinkGuardian()` calls UnlinkGuardian (`valid_to =
+ * business_date()` + mandatory reason, no hard delete), and
+ * `setAuthorization()` calls SetGuardianAuthorization (close-and-succeed:
+ * the current row is closed today and a successor with the new flags starts
+ * tomorrow, both written to the audit log). Neither method mutates a
+ * StudentGuardian column directly - both re-gate on `guardians.manage`
+ * before calling into the module's own Action, which is what keeps the
+ * audit trail 7.6 exists to protect intact.
  */
 #[Layout('layouts.app')]
 final class Show extends Component
@@ -76,6 +86,34 @@ final class Show extends Component
 
     #[Url]
     public string $tab = 'linked_students';
+
+    // ── Unlink form (opened per row) ─────────────────────────────────────
+    public bool $showUnlinkForm = false;
+
+    public ?int $unlinkLinkId = null;
+
+    public string $unlinkReason = '';
+
+    // ── Set Authorization form (opened per row) ──────────────────────────
+    public bool $showAuthorizationForm = false;
+
+    public ?int $authorizationLinkId = null;
+
+    public bool $authIsPrimary = false;
+
+    public bool $authHasCustody = false;
+
+    public bool $authReceivesReports = false;
+
+    public bool $authReceivesInvoices = false;
+
+    public bool $authIsEmergencyContact = false;
+
+    public bool $authIsAuthorisedForPickup = false;
+
+    public bool $authIsFeePayer = false;
+
+    public string $authorizationReason = '';
 
     public function mount(Guardian $guardian): void
     {
@@ -258,6 +296,133 @@ final class Show extends Component
             ->get();
     }
 
+    // ── Unlink ────────────────────────────────────────────────────────────
+
+    public function toggleUnlinkForm(?int $linkId = null): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        $this->showUnlinkForm = ! $this->showUnlinkForm || $this->unlinkLinkId !== $linkId;
+        $this->unlinkLinkId = $this->showUnlinkForm ? $linkId : null;
+        $this->unlinkReason = '';
+
+        if ($this->showUnlinkForm) {
+            $this->showAuthorizationForm = false;
+            $this->authorizationLinkId = null;
+        }
+    }
+
+    public function unlinkGuardian(UnlinkGuardian $unlinkGuardian): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        if ($this->unlinkLinkId === null) {
+            $this->addError('unlinkReason', 'No link was selected to unlink.');
+
+            return;
+        }
+
+        $link = StudentGuardian::query()->find($this->unlinkLinkId);
+
+        if ($link === null) {
+            $this->addError('unlinkReason', 'This guardian link no longer exists.');
+
+            return;
+        }
+
+        try {
+            $unlinkGuardian->handle($link, $this->unlinkReason, $this->actor());
+        } catch (ValidationException $e) {
+            $this->addError('unlinkReason', $e->getMessage());
+
+            return;
+        }
+
+        $this->showUnlinkForm = false;
+        $this->unlinkLinkId = null;
+        $this->unlinkReason = '';
+        session()->flash('status', 'Guardian link ended.');
+    }
+
+    // ── Set Authorization ────────────────────────────────────────────────
+
+    public function toggleAuthorizationForm(?int $linkId = null): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        $this->showAuthorizationForm = ! $this->showAuthorizationForm || $this->authorizationLinkId !== $linkId;
+        $this->authorizationLinkId = $this->showAuthorizationForm ? $linkId : null;
+        $this->authorizationReason = '';
+
+        if ($this->showAuthorizationForm) {
+            $this->showUnlinkForm = false;
+            $this->unlinkLinkId = null;
+
+            $link = $linkId === null ? null : StudentGuardian::query()->find($linkId);
+
+            $this->authIsPrimary = (bool) ($link?->is_primary ?? false);
+            $this->authHasCustody = (bool) ($link?->has_custody ?? false);
+            $this->authReceivesReports = (bool) ($link?->receives_reports ?? false);
+            $this->authReceivesInvoices = (bool) ($link?->receives_invoices ?? false);
+            $this->authIsEmergencyContact = (bool) ($link?->is_emergency_contact ?? false);
+            $this->authIsAuthorisedForPickup = (bool) ($link?->is_authorised_for_pickup ?? false);
+            $this->authIsFeePayer = (bool) ($link?->is_fee_payer ?? false);
+        }
+    }
+
+    public function setAuthorization(SetGuardianAuthorization $setGuardianAuthorization): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        if ($this->authorizationLinkId === null) {
+            $this->addError('authorizationReason', 'No link was selected.');
+
+            return;
+        }
+
+        $link = StudentGuardian::query()->find($this->authorizationLinkId);
+
+        if ($link === null) {
+            $this->addError('authorizationReason', 'This guardian link no longer exists.');
+
+            return;
+        }
+
+        try {
+            $setGuardianAuthorization->handle(
+                $link,
+                [
+                    'is_primary' => $this->authIsPrimary,
+                    'has_custody' => $this->authHasCustody,
+                    'receives_reports' => $this->authReceivesReports,
+                    'receives_invoices' => $this->authReceivesInvoices,
+                    'is_emergency_contact' => $this->authIsEmergencyContact,
+                    'is_authorised_for_pickup' => $this->authIsAuthorisedForPickup,
+                    'is_fee_payer' => $this->authIsFeePayer,
+                ],
+                $this->authorizationReason,
+                $this->actor(),
+            );
+        } catch (ValidationException $e) {
+            $this->addError('authorizationReason', $e->getMessage());
+
+            return;
+        }
+
+        $this->showAuthorizationForm = false;
+        $this->authorizationLinkId = null;
+        $this->authorizationReason = '';
+        session()->flash('status', 'Authorization updated. The change takes effect tomorrow, unless the link had not started yet.');
+    }
+
+    private function actor(): Actor
+    {
+        /** @var \App\Modules\Identity\Models\User $user */
+        $user = auth()->user();
+
+        return $user->toAuditActor();
+    }
+
     public function render(): mixed
     {
         $tab = $this->activeTab();
@@ -278,6 +443,7 @@ final class Show extends Component
             'openInvitation' => $tab === 'portal' ? $this->openInvitation() : null,
             'portalUserEmail' => $tab === 'portal' ? $this->portalUserEmail() : null,
             'canManagePortal' => Gate::allows(Permission::PortalManage->value),
+            'canManageGuardians' => Gate::allows(Permission::GuardiansManage->value),
         ]);
     }
 }

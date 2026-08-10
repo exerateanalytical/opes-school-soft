@@ -41,6 +41,8 @@ use RuntimeException;
  * @property int $academic_year_id
  * @property int $fiscal_year_id
  * @property PaymentMethod $payment_method
+ * @property int|null $treasury_account_id
+ * @property int|null $cash_desk_session_id
  * @property int $amount
  * @property int $fee_amount
  * @property FeeBearer $fee_bearer
@@ -87,6 +89,19 @@ final class Payment extends Model
         'academic_year_id',
         'fiscal_year_id',
         'payment_method',
+        // 02-accounting §2/§11.3: WHICH float the money landed in - a
+        // class-5 chart_of_accounts row, same convention (and same target
+        // table) as supplier_payments.treasury_account_id. Deliberately NOT
+        // in MUTABLE_AFTER_INSERT: where the money landed is as financial as
+        // the amount, so it is frozen with everything else at insert.
+        'treasury_account_id',
+        // 04-fees §11.7: the cash-desk shift that took this collection.
+        // Nullable (every payment predating sessions), and - like
+        // treasury_account_id above - deliberately NOT in
+        // MUTABLE_AFTER_INSERT: which shift held the money is a financial
+        // fact, frozen at insert. Re-filing a receipt into another till is
+        // precisely the edit a close-out sheet must not survive.
+        'cash_desk_session_id',
         'amount',
         'fee_amount',
         'fee_bearer',

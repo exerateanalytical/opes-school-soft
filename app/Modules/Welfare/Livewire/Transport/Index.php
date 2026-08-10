@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace App\Modules\Welfare\Livewire\Transport;
 
+use App\Modules\Welfare\Actions\AllocateTransport;
+use App\Modules\Welfare\Actions\CreateRoute;
+use App\Modules\Welfare\Actions\EndTransportAllocation;
+use App\Modules\Welfare\Actions\RecordFuelLog;
+use App\Modules\Welfare\Actions\RecordMaintenanceLog;
+use App\Modules\Welfare\Actions\RecordTripLog;
+use App\Modules\Welfare\Actions\SaveVehicle;
+use App\Modules\Welfare\Domain\TransportDirection;
 use App\Modules\Welfare\Domain\TransportPermission;
+use App\Modules\Welfare\Domain\VehicleMaintenanceType;
 use App\Modules\Welfare\Domain\VehicleStatus;
+use DomainException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -54,6 +65,82 @@ final class Index extends Component
     public int $page = 1;
 
     public int $perPage = 25;
+
+    // ── Add Route form ──────────────────────────────────────────────────
+    public bool $showRouteForm = false;
+
+    public string $routeFormCode = '';
+
+    public string $routeFormName = '';
+
+    public bool $routeFormActive = true;
+
+    // ── Allocate Student form ───────────────────────────────────────────
+    public bool $showAllocationForm = false;
+
+    public string $allocationFormEnrollmentId = '';
+
+    public string $allocationFormRouteId = '';
+
+    public string $allocationFormStopId = '';
+
+    public string $allocationFormDirection = 'both';
+
+    public string $allocationFormStartsOn = '';
+
+    // ── Add/Edit Vehicle form ───────────────────────────────────────────
+    public bool $showVehicleForm = false;
+
+    public string $vehicleFormRegistrationNo = '';
+
+    public string $vehicleFormMake = '';
+
+    public string $vehicleFormModel = '';
+
+    public string $vehicleFormCapacity = '';
+
+    public string $vehicleFormStatus = 'operational';
+
+    // ── Record Trip Log form ────────────────────────────────────────────
+    public bool $showTripLogForm = false;
+
+    public string $tripLogFormVehicleId = '';
+
+    public string $tripLogFormDriverId = '';
+
+    public string $tripLogFormRouteId = '';
+
+    public string $tripLogFormDate = '';
+
+    public string $tripLogFormOdometerStart = '';
+
+    public string $tripLogFormOdometerEnd = '';
+
+    public string $tripLogFormNotes = '';
+
+    // ── Record Fuel Log form ────────────────────────────────────────────
+    public bool $showFuelLogForm = false;
+
+    public string $fuelLogFormVehicleId = '';
+
+    public string $fuelLogFormDate = '';
+
+    public string $fuelLogFormLitres = '';
+
+    public string $fuelLogFormCostAmount = '';
+
+    public string $fuelLogFormOdometer = '';
+
+    // ── Record Maintenance Log form ─────────────────────────────────────
+    public bool $showMaintenanceLogForm = false;
+
+    public string $maintenanceLogFormVehicleId = '';
+
+    public string $maintenanceLogFormType = 'service';
+
+    public string $maintenanceLogFormDescription = '';
+
+    public string $maintenanceLogFormCostAmount = '';
 
     public function mount(): void
     {
@@ -106,6 +193,375 @@ final class Index extends Component
     public function updatedPerPage(): void
     {
         $this->resetPage();
+    }
+
+    public function toggleRouteForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showRouteForm = ! $this->showRouteForm;
+    }
+
+    public function saveRoute(CreateRoute $createRoute): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'routeFormCode' => ['required', 'string', 'max:20'],
+            'routeFormName' => ['required', 'string', 'max:100'],
+        ], [], [
+            'routeFormCode' => 'code',
+            'routeFormName' => 'name',
+        ]);
+
+        try {
+            $createRoute->handle(null, [
+                'code' => $this->routeFormCode,
+                'name' => $this->routeFormName,
+                'is_active' => $this->routeFormActive,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('routeForm'.ucfirst($field), (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('routeFormCode', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset(['showRouteForm', 'routeFormCode', 'routeFormName', 'routeFormActive']);
+        $this->routeFormActive = true;
+        $this->tab = 'routes';
+        $this->resetPage();
+        session()->flash('status', 'Route created.');
+    }
+
+    public function toggleAllocationForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showAllocationForm = ! $this->showAllocationForm;
+
+        if ($this->showAllocationForm && $this->allocationFormStartsOn === '') {
+            $this->allocationFormStartsOn = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveAllocation(AllocateTransport $allocateTransport): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'allocationFormEnrollmentId' => ['required', 'integer', 'min:1'],
+            'allocationFormRouteId' => ['required', 'integer', 'min:1'],
+            'allocationFormStopId' => ['required', 'integer', 'min:1'],
+            'allocationFormDirection' => ['required', 'string', 'in:both,pickup,dropoff'],
+            'allocationFormStartsOn' => ['required', 'date'],
+        ], [], [
+            'allocationFormEnrollmentId' => 'enrollment',
+            'allocationFormRouteId' => 'route',
+            'allocationFormStopId' => 'stop',
+            'allocationFormDirection' => 'direction',
+            'allocationFormStartsOn' => 'start date',
+        ]);
+
+        try {
+            $allocateTransport->handle(
+                (int) $this->allocationFormEnrollmentId,
+                (int) $this->allocationFormRouteId,
+                (int) $this->allocationFormStopId,
+                TransportDirection::from($this->allocationFormDirection),
+                Carbon::parse($this->allocationFormStartsOn),
+                $this->actor(),
+            );
+        } catch (DomainException $e) {
+            $this->addError('allocationFormStopId', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showAllocationForm', 'allocationFormEnrollmentId', 'allocationFormRouteId',
+            'allocationFormStopId', 'allocationFormDirection', 'allocationFormStartsOn',
+        ]);
+        $this->allocationFormDirection = 'both';
+        $this->tab = 'allocations';
+        $this->resetPage();
+        session()->flash('status', 'Student allocated to route.');
+    }
+
+    public function toggleVehicleForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showVehicleForm = ! $this->showVehicleForm;
+    }
+
+    public function saveVehicle(SaveVehicle $saveVehicle): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'vehicleFormRegistrationNo' => ['required', 'string', 'max:20'],
+            'vehicleFormMake' => ['nullable', 'string', 'max:100'],
+            'vehicleFormModel' => ['nullable', 'string', 'max:100'],
+            'vehicleFormCapacity' => ['required', 'integer', 'min:1'],
+            'vehicleFormStatus' => ['required', 'string', 'in:operational,under_maintenance,out_of_service'],
+        ], [], [
+            'vehicleFormRegistrationNo' => 'registration number',
+            'vehicleFormMake' => 'make',
+            'vehicleFormModel' => 'model',
+            'vehicleFormCapacity' => 'capacity',
+            'vehicleFormStatus' => 'status',
+        ]);
+
+        try {
+            $saveVehicle->handle(null, [
+                'registration_no' => $this->vehicleFormRegistrationNo,
+                'make' => $this->vehicleFormMake !== '' ? $this->vehicleFormMake : null,
+                'model' => $this->vehicleFormModel !== '' ? $this->vehicleFormModel : null,
+                'capacity' => (int) $this->vehicleFormCapacity,
+                'status' => VehicleStatus::from($this->vehicleFormStatus),
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('vehicleForm'.str_replace(' ', '', ucwords(str_replace('_', ' ', $field))), (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('vehicleFormRegistrationNo', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showVehicleForm', 'vehicleFormRegistrationNo', 'vehicleFormMake',
+            'vehicleFormModel', 'vehicleFormCapacity', 'vehicleFormStatus',
+        ]);
+        $this->vehicleFormStatus = 'operational';
+        $this->tab = 'vehicles';
+        $this->resetPage();
+        session()->flash('status', 'Vehicle saved.');
+    }
+
+    public function endAllocation(int $allocationId, EndTransportAllocation $endTransportAllocation): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        try {
+            $endTransportAllocation->handle($allocationId, Carbon::now(), $this->actor());
+        } catch (DomainException $e) {
+            session()->flash('status', $e->getMessage());
+
+            return;
+        }
+
+        $this->resetPage();
+        session()->flash('status', 'Allocation ended.');
+    }
+
+    public function toggleTripLogForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showTripLogForm = ! $this->showTripLogForm;
+
+        if ($this->showTripLogForm && $this->tripLogFormDate === '') {
+            $this->tripLogFormDate = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveTripLog(RecordTripLog $recordTripLog): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'tripLogFormVehicleId' => ['required', 'integer', 'min:1'],
+            'tripLogFormDriverId' => ['nullable', 'integer', 'min:1'],
+            'tripLogFormRouteId' => ['nullable', 'integer', 'min:1'],
+            'tripLogFormDate' => ['required', 'date'],
+            'tripLogFormOdometerStart' => ['required', 'integer', 'min:0'],
+            'tripLogFormOdometerEnd' => ['required', 'integer', 'min:0'],
+            'tripLogFormNotes' => ['nullable', 'string', 'max:500'],
+        ], [], [
+            'tripLogFormVehicleId' => 'vehicle',
+            'tripLogFormDriverId' => 'driver',
+            'tripLogFormRouteId' => 'route',
+            'tripLogFormDate' => 'date',
+            'tripLogFormOdometerStart' => 'odometer start',
+            'tripLogFormOdometerEnd' => 'odometer end',
+            'tripLogFormNotes' => 'notes',
+        ]);
+
+        try {
+            $recordTripLog->handle([
+                'vehicle_id' => (int) $this->tripLogFormVehicleId,
+                'driver_id' => $this->tripLogFormDriverId !== '' ? (int) $this->tripLogFormDriverId : null,
+                'route_id' => $this->tripLogFormRouteId !== '' ? (int) $this->tripLogFormRouteId : null,
+                'date' => $this->tripLogFormDate,
+                'odometer_start' => (int) $this->tripLogFormOdometerStart,
+                'odometer_end' => (int) $this->tripLogFormOdometerEnd,
+                'notes' => $this->tripLogFormNotes !== '' ? $this->tripLogFormNotes : null,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('tripLogForm'.str_replace(' ', '', ucwords(str_replace('_', ' ', $field))), (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('tripLogFormOdometerEnd', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showTripLogForm', 'tripLogFormVehicleId', 'tripLogFormDriverId', 'tripLogFormRouteId',
+            'tripLogFormDate', 'tripLogFormOdometerStart', 'tripLogFormOdometerEnd', 'tripLogFormNotes',
+        ]);
+        $this->tab = 'logs';
+        $this->logType = 'trips';
+        $this->resetPage();
+        session()->flash('status', 'Trip log recorded.');
+    }
+
+    public function toggleFuelLogForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showFuelLogForm = ! $this->showFuelLogForm;
+
+        if ($this->showFuelLogForm && $this->fuelLogFormDate === '') {
+            $this->fuelLogFormDate = Carbon::now()->format('Y-m-d');
+        }
+    }
+
+    public function saveFuelLog(RecordFuelLog $recordFuelLog): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'fuelLogFormVehicleId' => ['required', 'integer', 'min:1'],
+            'fuelLogFormDate' => ['required', 'date'],
+            'fuelLogFormLitres' => ['required', 'numeric', 'gt:0'],
+            'fuelLogFormCostAmount' => ['required', 'integer', 'min:0'],
+            'fuelLogFormOdometer' => ['nullable', 'integer', 'min:0'],
+        ], [], [
+            'fuelLogFormVehicleId' => 'vehicle',
+            'fuelLogFormDate' => 'date',
+            'fuelLogFormLitres' => 'litres',
+            'fuelLogFormCostAmount' => 'cost',
+            'fuelLogFormOdometer' => 'odometer',
+        ]);
+
+        try {
+            $recordFuelLog->handle([
+                'vehicle_id' => (int) $this->fuelLogFormVehicleId,
+                'date' => $this->fuelLogFormDate,
+                'litres' => $this->fuelLogFormLitres,
+                'cost_amount' => (int) $this->fuelLogFormCostAmount,
+                'odometer' => $this->fuelLogFormOdometer !== '' ? (int) $this->fuelLogFormOdometer : null,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('fuelLogForm'.str_replace(' ', '', ucwords(str_replace('_', ' ', $field))), (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('fuelLogFormLitres', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showFuelLogForm', 'fuelLogFormVehicleId', 'fuelLogFormDate',
+            'fuelLogFormLitres', 'fuelLogFormCostAmount', 'fuelLogFormOdometer',
+        ]);
+        $this->tab = 'logs';
+        $this->logType = 'fuel';
+        $this->resetPage();
+        session()->flash('status', 'Fuel log recorded.');
+    }
+
+    public function toggleMaintenanceLogForm(): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->showMaintenanceLogForm = ! $this->showMaintenanceLogForm;
+    }
+
+    public function saveMaintenanceLog(RecordMaintenanceLog $recordMaintenanceLog): void
+    {
+        Gate::authorize(TransportPermission::MANAGE);
+
+        $this->validate([
+            'maintenanceLogFormVehicleId' => ['required', 'integer', 'min:1'],
+            'maintenanceLogFormType' => ['required', 'string', 'in:service,repair,inspection,other'],
+            'maintenanceLogFormDescription' => ['required', 'string', 'max:500'],
+            'maintenanceLogFormCostAmount' => ['nullable', 'integer', 'min:0'],
+        ], [], [
+            'maintenanceLogFormVehicleId' => 'vehicle',
+            'maintenanceLogFormType' => 'type',
+            'maintenanceLogFormDescription' => 'description',
+            'maintenanceLogFormCostAmount' => 'cost',
+        ]);
+
+        try {
+            $recordMaintenanceLog->handle([
+                'vehicle_id' => (int) $this->maintenanceLogFormVehicleId,
+                'type' => VehicleMaintenanceType::from($this->maintenanceLogFormType),
+                'description' => $this->maintenanceLogFormDescription,
+                'cost_amount' => $this->maintenanceLogFormCostAmount !== '' ? (int) $this->maintenanceLogFormCostAmount : null,
+            ], $this->actor());
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('maintenanceLogForm'.str_replace(' ', '', ucwords(str_replace('_', ' ', $field))), (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        } catch (DomainException $e) {
+            $this->addError('maintenanceLogFormDescription', $e->getMessage());
+
+            return;
+        }
+
+        $this->reset([
+            'showMaintenanceLogForm', 'maintenanceLogFormVehicleId', 'maintenanceLogFormType',
+            'maintenanceLogFormDescription', 'maintenanceLogFormCostAmount',
+        ]);
+        $this->maintenanceLogFormType = 'service';
+        $this->tab = 'logs';
+        $this->logType = 'maintenance';
+        $this->resetPage();
+        session()->flash('status', 'Maintenance log recorded.');
+    }
+
+    private function actor(): \App\Support\Audit\Actor
+    {
+        /** @var \App\Modules\Identity\Models\User $user */
+        $user = auth()->user();
+
+        return $user->toAuditActor();
+    }
+
+    /**
+     * @return list<array{id: int, route_id: int, name: string}>
+     */
+    private function stopOptions(): array
+    {
+        $options = [];
+
+        foreach (DB::table('transport_stops')->orderBy('route_id')->orderBy('sequence')->get(['id', 'route_id', 'name']) as $row) {
+            /** @var object{id: int|string, route_id: int|string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'route_id' => (int) $row->route_id, 'name' => $row->name];
+        }
+
+        return $options;
     }
 
     private function resetPage(): void
@@ -446,6 +902,7 @@ final class Index extends Component
             'tabCounts' => $tabCounts,
             'routeOptions' => $this->routeOptions(),
             'vehicleOptions' => $this->vehicleOptions(),
+            'stopOptions' => $this->stopOptions(),
             'statusOptions' => $this->statusOptions(),
             'vehicleStatusBreakdown' => $this->vehicleStatusBreakdown(),
             'upcomingMaintenance' => $this->upcomingMaintenance(),
