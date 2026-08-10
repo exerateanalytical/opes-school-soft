@@ -56,3 +56,12 @@ Schedule::command('opes:outbox:dispatch')
     ->everyFiveMinutes()
     ->withoutOverlapping()
     ->name('opes-outbox-dispatch');
+
+// A held draft ("hold this admission, attend to someone else") that nobody
+// returns to for an hour surfaces as a notification. Safe to overlap in
+// principle (each run only reads/writes rows it owns), withoutOverlapping
+// kept anyway for the same belt-and-braces reason as the outbox above.
+Schedule::command('opes:forms:sweep-unfinished-work')
+    ->hourly()
+    ->withoutOverlapping()
+    ->name('opes-forms-sweep-unfinished-work');

@@ -18,59 +18,73 @@
         <p class="rounded border border-heritage-red/40 bg-heritage-red/10 p-3 text-sm text-heritage-red" role="alert">{{ $error }}</p>
     @endif
 
-    @if ($showForm)
-        <section class="rounded-lg border border-primary/40 bg-primary/5 p-4">
-            <div class="grid gap-3 sm:grid-cols-2">
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.class') }}</span>
-                    <select wire:model="classGroupId" class="mt-1 w-full rounded border border-sand p-2">
-                        <option value=""></option>
-                        @foreach ($classGroups as $group)
-                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.subject') }}</span>
-                    <select wire:model="subjectId" class="mt-1 w-full rounded border border-sand p-2">
-                        <option value=""></option>
-                        @foreach ($subjects as $subject)
-                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="text-sm sm:col-span-2">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.title_label') }}</span>
-                    <input type="text" wire:model="title" class="mt-1 w-full rounded border border-sand p-2">
-                </label>
-                <label class="text-sm sm:col-span-2">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.instructions') }}</span>
-                    <textarea wire:model="instructions" rows="3" class="mt-1 w-full rounded border border-sand p-2"></textarea>
-                </label>
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.assigned_on') }}</span>
-                    <input type="date" wire:model="assignedOn" class="mt-1 w-full rounded border border-sand p-2">
-                </label>
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.due_on') }}</span>
-                    <input type="date" wire:model="dueOn" class="mt-1 w-full rounded border border-sand p-2">
-                </label>
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.homework_screen.max_score') }}</span>
-                    <input type="number" step="0.01" wire:model="maxScore" class="mt-1 w-full rounded border border-sand p-2">
-                </label>
-            </div>
+    {{-- The universal popup-form pattern: a real modal, autosaved on every
+         field change, and hold-able mid-fill onto /unfinished-work. --}}
+    <x-opes-modal-form wire-model="showForm" :open="$showForm" title="{{ __('opes.homework_screen.set_assignment') }}">
+        @if ($resumedFromDraft)
+            <p class="mb-3 rounded border border-primary/40 bg-primary/10 p-2 text-xs text-primary">
+                {{ __('opes.unfinished_work.resume') }} — {{ __('opes.homework_screen.intro') }}
+            </p>
+        @endif
 
-            <div class="mt-3 flex gap-2">
-                <button type="button" wire:click="create" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
-                    {{ __('opes.homework_screen.save') }}
-                </button>
-                <button type="button" wire:click="$set('showForm', false)" class="rounded border border-sand px-4 py-2 text-sm">
-                    {{ __('opes.homework_screen.cancel') }}
-                </button>
-            </div>
-        </section>
-    @endif
+        <div class="grid gap-3 sm:grid-cols-2">
+            <label class="text-sm">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.class') }}</span>
+                <select wire:model.live="classGroupId" class="mt-1 w-full rounded border border-sand p-2">
+                    <option value=""></option>
+                    @foreach ($classGroups as $group)
+                        <option value="{{ $group->id }}">{{ $group->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="text-sm">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.subject') }}</span>
+                <select wire:model.live="subjectId" class="mt-1 w-full rounded border border-sand p-2">
+                    <option value=""></option>
+                    @foreach ($subjects as $subject)
+                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="text-sm sm:col-span-2">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.title_label') }}</span>
+                <input type="text" wire:model.live.debounce.800ms="title" class="mt-1 w-full rounded border border-sand p-2">
+            </label>
+            <label class="text-sm sm:col-span-2">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.instructions') }}</span>
+                <textarea wire:model.live.debounce.800ms="instructions" rows="3" class="mt-1 w-full rounded border border-sand p-2"></textarea>
+            </label>
+            <label class="text-sm">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.assigned_on') }}</span>
+                <input type="date" wire:model.live="assignedOn" class="mt-1 w-full rounded border border-sand p-2">
+            </label>
+            <label class="text-sm">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.due_on') }}</span>
+                <input type="date" wire:model.live="dueOn" class="mt-1 w-full rounded border border-sand p-2">
+            </label>
+            <label class="text-sm">
+                <span class="block text-slate-600">{{ __('opes.homework_screen.max_score') }}</span>
+                <input type="number" step="0.01" wire:model.live.debounce.800ms="maxScore" class="mt-1 w-full rounded border border-sand p-2">
+            </label>
+        </div>
+
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" wire:click="create" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
+                {{ __('opes.homework_screen.save') }}
+            </button>
+            <button type="button" wire:click="hold" class="rounded border border-primary px-4 py-2 text-sm font-semibold text-primary">
+                {{ __('opes.unfinished_work.held') }}
+            </button>
+            <button type="button" wire:click="$set('showForm', false)" class="rounded border border-sand px-4 py-2 text-sm">
+                {{ __('opes.homework_screen.cancel') }}
+            </button>
+            @if ($lastAutosavedAt !== '')
+                <span class="ml-auto text-xs text-slate-400" wire:loading.remove>
+                    {{ __('opes.notifications.autosaved') }}: {{ $lastAutosavedAt }}
+                </span>
+            @endif
+        </div>
+    </x-opes-modal-form>
 
     <div class="grid gap-4 lg:grid-cols-3">
         <section class="rounded-lg border border-sand bg-white shadow-sm">

@@ -7,6 +7,7 @@ namespace App\Modules\Assessment\Livewire\Homework;
 use App\Modules\Assessment\Actions\Homework\GradeAssignmentSubmission;
 use App\Modules\Assessment\Actions\Homework\SetAssignment;
 use App\Modules\Assessment\Models\Assignment;
+use App\Modules\Forms\Concerns\AutosavesDraft;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -15,9 +16,17 @@ use Livewire\Component;
 /**
  * The teacher's homework screen: set an assignment for a class/subject,
  * then grade submissions as students turn work in.
+ *
+ * The "set an assignment" form is this session's flagship for the
+ * universal popup-form pattern: a real modal (x-opes-modal-form), autosaved
+ * on every field change, and hold-able mid-fill via AutosavesDraft - set up
+ * a homework assignment, get pulled away, hold it, and it surfaces on
+ * /unfinished-work until resumed or discarded.
  */
 final class Index extends Component
 {
+    use AutosavesDraft;
+
     public ?int $selectedAssignmentId = null;
 
     public bool $showForm = false;
@@ -46,6 +55,50 @@ final class Index extends Component
     {
         $this->assignedOn = now()->toDateString();
         $this->dueOn = now()->addWeek()->toDateString();
+        $this->initializeAutosave();
+
+        if ($this->resumedFromDraft) {
+            $this->showForm = true;
+        }
+    }
+
+    public function updated($property): void
+    {
+        if ($this->showForm) {
+            $this->autosave();
+        }
+    }
+
+    public function formKey(): string
+    {
+        return 'assessment.homework.create';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function draftableState(): array
+    {
+        return [
+            'classGroupId' => $this->classGroupId,
+            'subjectId' => $this->subjectId,
+            'title' => $this->title,
+            'instructions' => $this->instructions,
+            'assignedOn' => $this->assignedOn,
+            'dueOn' => $this->dueOn,
+            'maxScore' => $this->maxScore,
+        ];
+    }
+
+    public function hold(): void
+    {
+        $label = $this->title !== ''
+            ? __('opes.homework_screen.title_label').': '.$this->title
+            : null;
+
+        $this->holdCurrentDraft($label);
+        $this->showForm = false;
+        $this->message = __('opes.unfinished_work.title').' ✓';
     }
 
     public function create(): void
@@ -66,6 +119,8 @@ final class Index extends Component
                 $this->instructions !== '' ? $this->instructions : null,
                 $this->maxScore !== '' ? (float) $this->maxScore : null,
             );
+
+            $this->clearDraft();
 
             $this->selectedAssignmentId = (int) $assignment->getKey();
             $this->showForm = false;
