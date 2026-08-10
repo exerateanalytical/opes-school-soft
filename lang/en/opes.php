@@ -2146,4 +2146,17 @@ return [
         'response' => 'Response',
         'no_deliveries' => 'No deliveries yet.',
     ],
+
+    /*
+     * The shell header's global search. Was disabled with an honest
+     * tooltip; this is the real implementation.
+     */
+    'global_search' => [
+        'group_students' => 'Student',
+        'group_staff' => 'Staff',
+        'group_guardians' => 'Guardian',
+        'group_suppliers' => 'Supplier',
+        'group_invoices' => 'Invoice',
+        'no_results' => 'No matches.',
+    ],
 ];

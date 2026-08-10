@@ -149,22 +149,13 @@
                 <span class="hidden text-[11px] text-charcoal/50 sm:block">School Management System</span>
             </div>
 
-            {{-- Disabled on purpose, and it says so. A search box that quietly
-                 swallows every query is worse than no search box at all. --}}
+            {{-- Was disabled on purpose, with a tooltip explaining why - "a
+                 search box that quietly swallows every query is worse than
+                 no search box at all." Real now: Reporting\GlobalSearch. --}}
             <div class="mx-auto hidden w-full min-w-0 max-w-sm lg:block">
-                <label for="opes-search" class="sr-only">{{ __('opes.shell.search') }}</label>
-                <div class="relative">
-                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal/40"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
-                    </svg>
-                    <input id="opes-search" type="search" disabled
-                           placeholder="{{ __('opes.shell.search') }}"
-                           title="{{ __('opes.shell.search_disabled') }}"
-                           aria-disabled="true"
-                           class="w-full cursor-not-allowed rounded-full border border-sand bg-sand/40 py-1.5 pl-9 pr-3 text-sm text-charcoal/50 placeholder:text-charcoal/40">
-                </div>
+                @if ($shellUser !== null)
+                    @livewire('reporting.global-search.index')
+                @endif
             </div>
 
             <div class="ml-auto flex items-center gap-2 sm:gap-3">

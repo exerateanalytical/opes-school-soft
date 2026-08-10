@@ -2132,4 +2132,16 @@ return [
         'response' => 'Réponse',
         'no_deliveries' => 'Aucun envoi pour le moment.',
     ],
+
+    /*
+     * La recherche globale de l'en-tête.
+     */
+    'global_search' => [
+        'group_students' => 'Élève',
+        'group_staff' => 'Personnel',
+        'group_guardians' => 'Parent / Tuteur',
+        'group_suppliers' => 'Fournisseur',
+        'group_invoices' => 'Facture',
+        'no_results' => 'Aucun résultat.',
+    ],
 ];
