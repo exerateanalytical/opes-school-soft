@@ -30,6 +30,7 @@ return [
     // disabled item still has to say what it is.
     'nav' => [
         'dashboard' => 'Dashboard',
+        'unfinished_work' => 'My unfinished work',
         'messages' => 'Messages',
         'homework' => 'Homework',
         'admissions' => 'Admissions',
@@ -55,6 +56,7 @@ return [
         'statements' => 'Financial statements',
         'reconciliation' => 'Bank reconciliation',
         'books' => 'Statutory books',
+        'system_documentation' => 'System documentation',
         'budgets' => 'Budgets',
         'procurement' => 'Procurement',
         'tax' => 'Tax & declarations',
@@ -2071,5 +2073,52 @@ return [
         'scheduled' => 'Meeting scheduled.',
         'recorded' => 'Minutes recorded.',
         'appointed' => 'Officer appointed.',
+    ],
+
+    'modal' => [
+        'close' => 'Close',
+    ],
+
+    /*
+     * The bell icon in the shell header, present on every authenticated
+     * screen. Not Laravel's stock notifications channel - a real table with
+     * its own bell, list screen and Web Push delivery.
+     */
+    'notifications' => [
+        'bell_label' => 'Notifications',
+        'autosaved' => 'Autosaved',
+        'title' => 'Notifications',
+        'mark_all_read' => 'Mark all read',
+        'empty' => 'Nothing yet.',
+        'unfinished_work_title' => 'You have unfinished work',
+    ],
+
+    /*
+     * The hold/resume worklist: "hold this admission, attend to someone
+     * else, come back later" - the POS-style hold-order this is modelled on.
+     */
+    'unfinished_work' => [
+        'title' => 'My unfinished work',
+        'intro' => 'Forms you held to attend to something else. Resume any of them, or discard it if it is no longer needed.',
+        'held' => 'Held',
+        'resume' => 'Resume',
+        'discard' => 'Discard',
+        'confirm_discard' => 'Discard this held work? This cannot be undone.',
+        'empty' => 'Nothing held right now.',
+    ],
+
+    /*
+     * AUDCIF §14.4 - documentation du système comptable, generated from
+     * live configuration so it cannot drift.
+     */
+    'system_doc_screen' => [
+        'title' => 'System documentation',
+        'intro' => 'The AUDCIF-required description of this accounting system, generated from live configuration so it can never drift from the software.',
+        'generate' => 'Generate',
+        'generated' => 'Generated',
+        'software_version' => 'Software version',
+        'schema_version' => 'Schema version',
+        'hash' => 'SHA-256',
+        'empty' => 'Nothing generated yet.',
     ],
 ];

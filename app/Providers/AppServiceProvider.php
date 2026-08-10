@@ -70,9 +70,12 @@ use App\Modules\Procurement\Livewire\SupplierInvoices\Show as SupplierInvoicesSh
 use App\Modules\Procurement\Livewire\Suppliers\Index as SuppliersIndex;
 use App\Modules\Procurement\Livewire\Suppliers\Show as SuppliersShow;
 use App\Modules\Accounting\Livewire\Books\Index as AccountingBooksIndex;
+use App\Modules\Accounting\Livewire\SystemDocumentation\Index as AccountingSystemDocumentationIndex;
 use App\Modules\Accounting\Livewire\Budgets\Index as AccountingBudgetsIndex;
 use App\Modules\Accounting\Livewire\Reconciliation\Index as AccountingReconciliationIndex;
 use App\Modules\Communication\Livewire\Messages\Index as CommunicationMessagesIndex;
+use App\Modules\Notifications\Livewire\Bell as NotificationsBell;
+use App\Modules\Forms\Livewire\UnfinishedWork as FormsUnfinishedWork;
 use App\Modules\Communication\Livewire\Outbox\Index as CommunicationOutboxIndex;
 use App\Modules\Communication\Livewire\Templates\Index as CommunicationTemplatesIndex;
 use App\Modules\Operations\Livewire\Backups\Index as OperationsBackupsIndex;
@@ -256,9 +259,12 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('guardians.pta.index', GuardianPtaIndex::class);
         Livewire::component('assessment.homework.index', AssessmentHomeworkIndex::class);
         Livewire::component('communication.messages.index', CommunicationMessagesIndex::class);
+        Livewire::component('notifications.bell', NotificationsBell::class);
+        Livewire::component('forms.unfinished-work', FormsUnfinishedWork::class);
         Livewire::component('operations.setup.index', OperationsSetupIndex::class);
         Livewire::component('students.import.index', StudentsImportIndex::class);
         Livewire::component('accounting.books.index', AccountingBooksIndex::class);
+        Livewire::component('accounting.system-documentation.index', AccountingSystemDocumentationIndex::class);
         Livewire::component('accounting.budgets.index', AccountingBudgetsIndex::class);
         Livewire::component('accounting.reconciliation.index', AccountingReconciliationIndex::class);
         Livewire::component('accounting.finance-dashboard', FinanceDashboard::class);

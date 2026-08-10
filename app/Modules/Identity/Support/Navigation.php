@@ -31,6 +31,9 @@ final class Navigation
     {
         return [
             ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true, 'built' => true],
+            // The hold/resume worklist behind the popup-form system:
+            // POS-style hold-order for any long form.
+            ['key' => 'unfinished_work', 'route' => '/unfinished-work', 'permission' => null, 'enabled' => true, 'built' => true],
             // In-platform messaging: open to any authenticated user,
             // membership-gated rather than RBAC-gated (00-core §6.2).
             ['key' => 'messages', 'route' => '/messages', 'permission' => null, 'enabled' => true, 'built' => true],
@@ -105,6 +108,8 @@ final class Navigation
             ['key' => 'statements', 'route' => '/reports/statements', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // 02-accounting §14: the four AUDCIF Art. 19 statutory books.
             ['key' => 'books', 'route' => '/accounting/books', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // AUDCIF §14.4: the generated system documentation.
+            ['key' => 'system_documentation', 'route' => '/accounting/system-documentation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // 02-accounting §13: each treasury float against its own
             // operator statement (MTN and Orange reconcile separately).
             ['key' => 'reconciliation', 'route' => '/accounting/reconciliation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],

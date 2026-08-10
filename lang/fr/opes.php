@@ -32,6 +32,7 @@ return [
     // désactivés, et un élément désactivé doit tout de même se nommer.
     'nav' => [
         'dashboard' => 'Tableau de bord',
+        'unfinished_work' => 'Mon travail en attente',
         'messages' => 'Messages',
         'homework' => 'Devoirs',
         'admissions' => 'Admissions',
@@ -56,6 +57,7 @@ return [
         'statements' => 'États financiers',
         'reconciliation' => 'Rapprochement bancaire',
         'books' => 'Livres obligatoires',
+        'system_documentation' => 'Documentation du système',
         'budgets' => 'Budgets',
         'procurement' => 'Achats & fournisseurs',
         'tax' => 'Impôts & déclarations',
@@ -2061,5 +2063,48 @@ return [
         'scheduled' => 'Assemblée planifiée.',
         'recorded' => 'Procès-verbal enregistré.',
         'appointed' => 'Membre du bureau nommé.',
+    ],
+
+    'modal' => [
+        'close' => 'Fermer',
+    ],
+
+    /*
+     * La cloche de notifications, présente sur chaque écran authentifié.
+     */
+    'notifications' => [
+        'bell_label' => 'Notifications',
+        'autosaved' => 'Enregistré automatiquement',
+        'title' => 'Notifications',
+        'mark_all_read' => 'Tout marquer comme lu',
+        'empty' => 'Rien pour le moment.',
+        'unfinished_work_title' => 'Vous avez un travail en attente',
+    ],
+
+    /*
+     * La liste de reprise (mise en attente à la manière d'une caisse POS).
+     */
+    'unfinished_work' => [
+        'title' => 'Mon travail en attente',
+        'intro' => "Formulaires mis en attente pour vous occuper d'autre chose. Reprenez-les, ou abandonnez-les s'ils ne sont plus nécessaires.",
+        'held' => 'Mis en attente',
+        'resume' => 'Reprendre',
+        'discard' => 'Abandonner',
+        'confirm_discard' => 'Abandonner ce travail en attente ? Cette action est irréversible.',
+        'empty' => "Rien en attente pour l'instant.",
+    ],
+
+    /*
+     * AUDCIF §14.4 - documentation du système comptable.
+     */
+    'system_doc_screen' => [
+        'title' => 'Documentation du système comptable',
+        'intro' => "La description du système comptable exigée par l'AUDCIF, générée à partir de la configuration en vigueur afin qu'elle ne puisse jamais diverger du logiciel.",
+        'generate' => 'Générer',
+        'generated' => 'Généré le',
+        'software_version' => 'Version du logiciel',
+        'schema_version' => 'Version du schéma',
+        'hash' => 'SHA-256',
+        'empty' => "Rien n'a encore été généré.",
     ],
 ];

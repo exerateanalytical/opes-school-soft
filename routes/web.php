@@ -250,6 +250,25 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/homework', \App\Modules\Assessment\Livewire\Homework\Index::class)
         ->middleware('can:marks.enter')->name('assessment.homework');
 
+    /*
+     * "My unfinished work" - held drafts (the POS-style hold-order this
+     * whole subsystem is modelled on) waiting for the operator to come
+     * back to them.
+     */
+    Route::get('/unfinished-work', \App\Modules\Forms\Livewire\UnfinishedWork::class)
+        ->name('forms.unfinished_work');
+
+    /*
+     * Web Push subscription endpoints - plain JSON, called by
+     * PushManager.subscribe() in the browser, not by Livewire.
+     */
+    Route::get('/push/vapid-public-key', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'vapidPublicKey'])
+        ->name('push.vapid_public_key');
+    Route::post('/push/subscribe', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'subscribe'])
+        ->name('push.subscribe');
+    Route::post('/push/unsubscribe', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'unsubscribe'])
+        ->name('push.unsubscribe');
+
     Route::get('/messages', \App\Modules\Communication\Livewire\Messages\Index::class)
         ->name('communication.messages');
 
@@ -623,6 +642,13 @@ Route::middleware('auth')->group(function (): void {
      * reports: each generation is hashed and immutable, and a correction
      * produces a new book that supersedes its predecessor.
      */
+    /*
+     * AUDCIF §14.4 - the generated documentation du systeme
+     * comptable. Cannot drift because nobody hand-writes it.
+     */
+    Route::get('/accounting/system-documentation', \App\Modules\Accounting\Livewire\SystemDocumentation\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.system_documentation');
+
     Route::get('/accounting/books', \App\Modules\Accounting\Livewire\Books\Index::class)
         ->middleware('can:ledger.view')->name('accounting.books');
 
