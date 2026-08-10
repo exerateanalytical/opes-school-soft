@@ -3,30 +3,92 @@
 namespace App\Providers;
 
 use App\Modules\Academics\Livewire\ClassGroups\Index as ClassGroupsIndex;
+use App\Modules\Academics\Livewire\Reports\Index as AcademicReportsIndex;
 use App\Modules\Academics\Livewire\Timetable\Index as TimetableIndex;
 use App\Modules\Accounting\Livewire\ChartOfAccounts\Index as ChartOfAccountsIndex;
 use App\Modules\Accounting\Livewire\JournalEntries\Form as JournalEntryForm;
 use App\Modules\Accounting\Livewire\JournalEntries\Index as JournalEntriesIndex;
+use App\Modules\Accounting\Livewire\Expenses\Index as ExpensesIndex;
+use App\Modules\Accounting\Livewire\FinanceDashboard;
+use App\Modules\Accounting\Livewire\Expenses\Show as ExpensesShow;
+use App\Modules\Accounting\Livewire\Reports\Index as AccountingReportsIndex;
+use App\Modules\Accounting\Livewire\Statements\Index as AccountingStatementsIndex;
 use App\Modules\Accounting\Livewire\Reports\TrialBalance as TrialBalanceReport;
+use App\Modules\Admissions\Livewire\Index as AdmissionsIndex;
 use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
+use App\Modules\Identity\Livewire\AuditLog\Index as AuditLogIndex;
+use App\Modules\Assets\Livewire\Index as AssetsIndex;
+use App\Modules\Assets\Livewire\Reports\Index as AssetsReportsIndex;
+use App\Modules\Assets\Livewire\Show as AssetsShow;
+use App\Modules\Tax\Livewire\Declarations\Index as TaxDeclarationsIndex;
+use App\Modules\Tax\Livewire\Reports\Index as TaxReportsIndex;
+use App\Modules\Assessment\Livewire\Examinations\Index as ExaminationsIndex;
+use App\Modules\Assessment\Livewire\Examinations\Show as ExaminationsShow;
 use App\Modules\Assessment\Livewire\Marks\Entry as MarksEntry;
+use App\Modules\Assessment\Livewire\Results\Index as ResultsIndex;
 use App\Modules\Academics\Livewire\Settings\AcademicSettings;
 use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
 use App\Modules\Attendance\Livewire\CoverageReport as AttendanceCoverageReport;
 use App\Modules\Attendance\Livewire\Index as AttendanceIndex;
 use App\Modules\Attendance\Livewire\TakeRegister as AttendanceTakeRegister;
+use App\Modules\Fees\Livewire\CashDesk\Show as FeesCashDeskShow;
 use App\Modules\Fees\Livewire\Cashier as FeesCashier;
 use App\Modules\Fees\Livewire\Invoices\Index as FeesInvoicesIndex;
+use App\Modules\Fees\Livewire\Reports\Index as FeesReportsIndex;
 use App\Modules\Fees\Livewire\Statement as FeesStatement;
+use App\Modules\Guardians\Livewire\Guardians\Index as GuardiansIndex;
 use App\Modules\Guardians\Livewire\Guardians\Show as GuardiansShow;
 use App\Modules\Guardians\Livewire\Students\GuardiansPanel as StudentGuardiansPanel;
+use App\Modules\HR\Livewire\Index as HrIndex;
+use App\Modules\HR\Livewire\Reports\Index as HrReportsIndex;
+use App\Modules\Procurement\Livewire\Reports\Index as ProcurementReportsIndex;
 use App\Modules\Identity\Livewire\Users\Index as UsersIndex;
 use App\Modules\Identity\Livewire\Users\Tokens as UserTokens;
+use App\Modules\Inventory\Livewire\Index as InventoryIndex;
+use App\Modules\Inventory\Livewire\Show as InventoryShow;
+use App\Modules\Library\Livewire\BookShow as LibraryBookShow;
+use App\Modules\Library\Livewire\Index as LibraryIndex;
+use App\Modules\Library\Livewire\MemberShow as LibraryMemberShow;
+use App\Modules\Library\Livewire\Reports\Index as LibraryReportsIndex;
+use App\Modules\Payroll\Livewire\Index as PayrollIndex;
+use App\Modules\Payroll\Livewire\Show as PayrollShow;
+use App\Modules\Procurement\Livewire\GoodsReceipts\Index as GoodsReceiptsIndex;
+use App\Modules\Procurement\Livewire\PayablesDashboard;
+use App\Modules\Procurement\Livewire\Payments\Index as ProcurementPaymentsIndex;
+use App\Modules\Procurement\Livewire\Payments\Pay as ProcurementPaymentsPay;
+use App\Modules\Procurement\Livewire\Payments\Show as ProcurementPaymentsShow;
+use App\Modules\Procurement\Livewire\PurchaseOrders\Edit as PurchaseOrdersEdit;
+use App\Modules\Procurement\Livewire\PurchaseOrders\Index as PurchaseOrdersIndex;
+use App\Modules\Procurement\Livewire\PurchaseOrders\Show as PurchaseOrdersShow;
+use App\Modules\Procurement\Livewire\Requisitions\Index as RequisitionsIndex;
+use App\Modules\Procurement\Livewire\SupplierInvoices\Capture as SupplierInvoicesCapture;
+use App\Modules\Procurement\Livewire\SupplierInvoices\Index as SupplierInvoicesIndex;
+use App\Modules\Procurement\Livewire\SupplierInvoices\Show as SupplierInvoicesShow;
+use App\Modules\Procurement\Livewire\Suppliers\Index as SuppliersIndex;
+use App\Modules\Procurement\Livewire\Suppliers\Show as SuppliersShow;
+use App\Modules\Accounting\Livewire\Budgets\Index as AccountingBudgetsIndex;
+use App\Modules\Accounting\Livewire\Reconciliation\Index as AccountingReconciliationIndex;
+use App\Modules\Communication\Livewire\Outbox\Index as CommunicationOutboxIndex;
+use App\Modules\Communication\Livewire\Templates\Index as CommunicationTemplatesIndex;
+use App\Modules\Operations\Livewire\Backups\Index as OperationsBackupsIndex;
+use App\Modules\Reporting\Livewire\BulkPrints\Index as BulkPrintsIndex;
+use App\Modules\Reporting\Livewire\Reports\Hub as ReportsHub;
+use App\Modules\SchoolProfile\Livewire\Index as SettingsIndex;
 use App\Modules\Students\Livewire\Promotion\Wizard as PromotionWizard;
+use App\Modules\Students\Livewire\Reports\Index as StudentsReportsIndex;
+use App\Modules\Welfare\Livewire\Reports\Index as WelfareReportsIndex;
 use App\Modules\Students\Livewire\Students\Index as StudentsIndex;
 use App\Modules\Students\Livewire\Students\Show as StudentsShow;
 use App\Modules\Welfare\Livewire\Discipline\CaseShow as DisciplineCaseShow;
 use App\Modules\Welfare\Livewire\Discipline\Index as DisciplineIndex;
+use App\Modules\Welfare\Livewire\Hostel\Index as HostelIndex;
+use App\Modules\Welfare\Livewire\Hostel\RoomShow as HostelRoomShow;
+use App\Modules\Welfare\Livewire\Insurance\Index as InsuranceIndex;
+use App\Modules\Welfare\Livewire\Insurance\PolicyShow as InsurancePolicyShow;
+use App\Modules\Welfare\Livewire\Medical\Index as MedicalIndex;
+use App\Modules\Welfare\Livewire\Transport\Index as TransportIndex;
+use App\Modules\Welfare\Livewire\Transport\VehicleShow as TransportVehicleShow;
+use App\Modules\Welfare\Livewire\Visitors\Index as VisitorsIndex;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -98,6 +160,8 @@ class AppServiceProvider extends ServiceProvider
         // through one mechanism, so a future rename cannot quietly change how
         // one of them is found.
         Livewire::component('admissions.wizard', AdmissionsWizard::class);
+        Livewire::component('admissions.index', AdmissionsIndex::class);
+        Livewire::component('identity.audit-log.index', AuditLogIndex::class);
 
         // People (07-students 11). `students.index` needs the explicit name
         // for the ".index"-stripping reason above; the other two routed
@@ -107,6 +171,7 @@ class AppServiceProvider extends ServiceProvider
         // tests/Architecture/ModuleBoundaryTest.php.
         Livewire::component('students.index', StudentsIndex::class);
         Livewire::component('students.show', StudentsShow::class);
+        Livewire::component('guardians.index', GuardiansIndex::class);
         Livewire::component('guardians.show', GuardiansShow::class);
         Livewire::component('students.guardians-panel', StudentGuardiansPanel::class);
 
@@ -114,6 +179,8 @@ class AppServiceProvider extends ServiceProvider
         // as every routed component above: one mechanism finds all of them, so
         // a future rename cannot quietly change how one is resolved.
         Livewire::component('assessment.marks-entry', MarksEntry::class);
+        Livewire::component('assessment.examinations.index', ExaminationsIndex::class);
+        Livewire::component('assessment.results.index', ResultsIndex::class);
 
         // Ledger, docs/specs/02-accounting.md, routed at /ledger/* in
         // routes/web.php. Both list screens end in ".index" (the stripping
@@ -131,6 +198,7 @@ class AppServiceProvider extends ServiceProvider
         // stripping reason above; Cashier and Statement are aliased for the
         // same one-mechanism symmetry as every routed component here.
         Livewire::component('fees.cashier', FeesCashier::class);
+        Livewire::component('fees.cashdesk.show', FeesCashDeskShow::class);
         Livewire::component('fees.invoices.index', FeesInvoicesIndex::class);
         Livewire::component('fees.statement', FeesStatement::class);
 
@@ -147,6 +215,69 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('attendance.coverage', AttendanceCoverageReport::class);
         Livewire::component('welfare.discipline.index', DisciplineIndex::class);
         Livewire::component('welfare.discipline.show', DisciplineCaseShow::class);
+        Livewire::component('welfare.transport.index', TransportIndex::class);
+        Livewire::component('welfare.hostel.index', HostelIndex::class);
+        Livewire::component('welfare.medical.index', MedicalIndex::class);
+        Livewire::component('welfare.visitors.index', VisitorsIndex::class);
+        Livewire::component('welfare.insurance.index', InsuranceIndex::class);
+        Livewire::component('assets.index', AssetsIndex::class);
+        Livewire::component('inventory.index', InventoryIndex::class);
+        Livewire::component('library.index', LibraryIndex::class);
+        Livewire::component('hr.index', HrIndex::class);
+        Livewire::component('payroll.index', PayrollIndex::class);
+        Livewire::component('procurement.suppliers.index', SuppliersIndex::class);
+        Livewire::component('procurement.suppliers.show', SuppliersShow::class);
+        Livewire::component('procurement.requisitions.index', RequisitionsIndex::class);
+        Livewire::component('procurement.purchase-orders.index', PurchaseOrdersIndex::class);
+        Livewire::component('procurement.purchase-orders.edit', PurchaseOrdersEdit::class);
+        Livewire::component('procurement.goods-receipts.index', GoodsReceiptsIndex::class);
+        Livewire::component('procurement.supplier-invoices.index', SupplierInvoicesIndex::class);
+        Livewire::component('procurement.supplier-invoices.capture', SupplierInvoicesCapture::class);
+        Livewire::component('procurement.payments.index', ProcurementPaymentsIndex::class);
+        Livewire::component('procurement.payments.pay', ProcurementPaymentsPay::class);
+        Livewire::component('procurement.payables-dashboard', PayablesDashboard::class);
+        Livewire::component('reports.hub', ReportsHub::class);
+        Livewire::component('operations.backups.index', OperationsBackupsIndex::class);
+        Livewire::component('reporting.bulk-prints.index', BulkPrintsIndex::class);
+        Livewire::component('communication.outbox.index', CommunicationOutboxIndex::class);
+        Livewire::component('communication.templates.index', CommunicationTemplatesIndex::class);
+        Livewire::component('reports.academic', AcademicReportsIndex::class);
+        Livewire::component('reports.financial', AccountingReportsIndex::class);
+        Livewire::component('accounting.statements.index', AccountingStatementsIndex::class);
+        Livewire::component('accounting.year-end.console', YearEndConsole::class);
+        Livewire::component('accounting.budgets.index', AccountingBudgetsIndex::class);
+        Livewire::component('accounting.reconciliation.index', AccountingReconciliationIndex::class);
+        Livewire::component('accounting.finance-dashboard', FinanceDashboard::class);
+        Livewire::component('accounting.expenses.index', ExpensesIndex::class);
+        Livewire::component('accounting.expenses.show', ExpensesShow::class);
+        Livewire::component('reports.assessment', \App\Modules\Assessment\Livewire\Reports\Index::class);
+        Livewire::component('reports.fees', FeesReportsIndex::class);
+        Livewire::component('reports.hr', HrReportsIndex::class);
+        Livewire::component('reports.procurement', ProcurementReportsIndex::class);
+        Livewire::component('reports.library', LibraryReportsIndex::class);
+        Livewire::component('reports.students-guardians', StudentsReportsIndex::class);
+        Livewire::component('reports.welfare', WelfareReportsIndex::class);
+        Livewire::component('reports.assets-inventory', AssetsReportsIndex::class);
+        Livewire::component('assets.show', AssetsShow::class);
+        Livewire::component('payroll.runs.show', PayrollShow::class);
+        Livewire::component('procurement.purchase-orders.show', PurchaseOrdersShow::class);
+        Livewire::component('procurement.supplier-invoices.show', SupplierInvoicesShow::class);
+        Livewire::component('procurement.payments.show', ProcurementPaymentsShow::class);
+        Livewire::component('inventory.items.show', InventoryShow::class);
+        Livewire::component('transport.vehicles.show', TransportVehicleShow::class);
+        Livewire::component('hostel.rooms.show', HostelRoomShow::class);
+        Livewire::component('insurance.policies.show', InsurancePolicyShow::class);
+        Livewire::component('library.books.show', LibraryBookShow::class);
+        Livewire::component('library.members.show', LibraryMemberShow::class);
+        Livewire::component('assessment.examinations.show', ExaminationsShow::class);
+        Livewire::component('reports.tax', TaxReportsIndex::class);
+        // Without this the route 500s: Livewire's implicit name for a class
+        // ending in `Index` collapses to its parent namespace
+        // (`...tax.livewire.declarations`), which resolves to nothing. Only
+        // an explicit alias fixes it - and Livewire::test() never exercises
+        // that path, which is how this shipped looking verified.
+        Livewire::component('tax.declarations.index', TaxDeclarationsIndex::class);
+        Livewire::component('schoolprofile.index', SettingsIndex::class);
         Livewire::component('students.promotion', PromotionWizard::class);
     }
 }

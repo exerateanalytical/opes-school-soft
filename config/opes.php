@@ -66,6 +66,55 @@ return [
         'enabled' => filter_var(env('OPES_DEMO_LOGIN', false), FILTER_VALIDATE_BOOL),
         'email' => env('OPES_DEMO_LOGIN_EMAIL') ?: 'demo@opeschool.test',
         'name' => env('OPES_DEMO_LOGIN_NAME') ?: 'Demo Administrator',
+
+        /*
+         * The demo identities offered on the login page, keyed by the
+         * Identity\Domain\Role enum VALUE. The point of offering several is
+         * that a demo can show RBAC working live: sign in as the accountant,
+         * see the finance view and nothing else; sign in as the teacher, see
+         * neither the ledger nor the operations tiles.
+         *
+         * Each identity is a REAL user carrying a REAL Spatie role, so every
+         * permission check in the product applies to it unchanged. There is
+         * no bypass here beyond the credential itself, and that bypass is
+         * still behind the two guards documented above.
+         *
+         * The `administrator` entry deliberately reuses the `email`/`name`
+         * keys above so the original single-identity configuration keeps
+         * working and the existing demo account is not duplicated.
+         */
+        'identities' => [
+            [
+                'role' => 'administrator',
+                'email' => env('OPES_DEMO_LOGIN_EMAIL') ?: 'demo@opeschool.test',
+                'name' => env('OPES_DEMO_LOGIN_NAME') ?: 'Demo Administrator',
+            ],
+            [
+                'role' => 'principal',
+                'email' => 'demo.principal@opeschool.test',
+                'name' => 'Demo Principal',
+            ],
+            [
+                'role' => 'accountant',
+                'email' => 'demo.accountant@opeschool.test',
+                'name' => 'Demo Accountant',
+            ],
+            [
+                'role' => 'bursar',
+                'email' => 'demo.bursar@opeschool.test',
+                'name' => 'Demo Bursar',
+            ],
+            [
+                'role' => 'registrar',
+                'email' => 'demo.registrar@opeschool.test',
+                'name' => 'Demo Registrar',
+            ],
+            [
+                'role' => 'teacher',
+                'email' => 'demo.teacher@opeschool.test',
+                'name' => 'Demo Teacher',
+            ],
+        ],
     ],
 
     /*
