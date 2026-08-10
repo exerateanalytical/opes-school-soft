@@ -168,6 +168,22 @@ Route::middleware('auth')->group(function (): void {
      * further down does. MUST be registered before `/guardians/{guardian}`
      * below, same ordering reason as `/students/promotion` above.
      */
+    /*
+     * Individual guardian meetings (07-students §7.8) - schema shipped
+     * in Phase 2 with no UI. MUST precede /guardians/{guardian} below,
+     * same ordering reason as /students/promotion.
+     */
+    Route::get('/guardians/meetings', \App\Modules\Guardians\Livewire\Meetings\Index::class)
+        ->middleware('can:guardians.manage')->name('guardians.meetings');
+
+    /*
+     * The Parent-Teacher Association - officers and general meetings, a
+     * body distinct from an individual guardian's meeting with the
+     * school. Not in docs/specs.
+     */
+    Route::get('/guardians/pta', \App\Modules\Guardians\Livewire\Pta\Index::class)
+        ->middleware('can:guardians.manage')->name('guardians.pta');
+
     Route::get('/guardians', \App\Modules\Guardians\Livewire\Guardians\Index::class)
         ->middleware('can:guardians.manage')->name('guardians.index');
 
@@ -219,6 +235,24 @@ Route::middleware('auth')->group(function (): void {
      * outbox" promise in the specs degraded to nothing. The SMS gateway
      * itself stays deferred - this is the outbox and its log driver.
      */
+    /*
+     * In-platform messaging - teacher <-> parent, staff <-> staff. Open
+     * to any authenticated user; who may see/post a thread is controlled
+     * by membership, not RBAC (00-core §6.2).
+     */
+    /*
+     * Homework/assignments. Not in docs/specs - the spec set is
+     * compliance-first and silent on this; the mockup catalogue lists
+     * "Homework Log" as MOCKUP-ONLY with no schema anywhere. Gated on
+     * marks.enter, the permission a teacher already holds for the
+     * classes assigned to them.
+     */
+    Route::get('/homework', \App\Modules\Assessment\Livewire\Homework\Index::class)
+        ->middleware('can:marks.enter')->name('assessment.homework');
+
+    Route::get('/messages', \App\Modules\Communication\Livewire\Messages\Index::class)
+        ->name('communication.messages');
+
     Route::get('/communication/outbox', \App\Modules\Communication\Livewire\Outbox\Index::class)
         ->middleware('can:communication.view')->name('communication.outbox');
 

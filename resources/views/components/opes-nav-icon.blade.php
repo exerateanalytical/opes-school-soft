@@ -13,6 +13,14 @@
 @php
     $paths = [
         'dashboard' => '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/>',
+        // Messages: a speech bubble.
+        'messages' => '<path d="M4 5h16v11H8l-4 4V5z"/>',
+        // Homework: a pencil over a page.
+        'homework' => '<path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M9 13l6-6 2 2-6 6H9v-2z"/>',
+        // Guardian meetings: two people at a table.
+        'guardian_meetings' => '<circle cx="7" cy="9" r="2.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19h18M7 15v4M17 15v4"/>',
+        // PTA: a group under a roof.
+        'pta' => '<path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/>',
         'admissions' => '<path d="M3 12l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/>',
         'students' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
         'guardians' => '<circle cx="8" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M2 21c0-3.3 2.7-6 6-6s6 2.7 6 6M12 21c0-3.3 2.7-6 6-6"/>',

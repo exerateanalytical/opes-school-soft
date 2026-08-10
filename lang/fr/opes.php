@@ -32,10 +32,14 @@ return [
     // désactivés, et un élément désactivé doit tout de même se nommer.
     'nav' => [
         'dashboard' => 'Tableau de bord',
+        'messages' => 'Messages',
+        'homework' => 'Devoirs',
         'admissions' => 'Admissions',
         'students' => 'Élèves',
         'import' => 'Import de données',
         'guardians' => 'Parents / Tuteurs',
+        'guardian_meetings' => 'Rencontres avec les parents',
+        'pta' => 'Association des parents (APEE)',
         'staff' => 'Personnel',
         'payroll' => 'Paie',
         'academics' => 'Paramètres académiques',
@@ -1955,5 +1959,107 @@ return [
         'ready' => "Aucun point bloquant. Le produit est suffisamment configuré pour la mise en service.",
         'not_ready' => ':count point(s) bloquent la mise en service. Chacun indique ce qui refuse déjà de fonctionner.',
         'owner' => 'À traiter par',
+    ],
+
+    /*
+     * Messagerie interne : enseignant <-> parent, personnel <-> personnel.
+     */
+    'messages_screen' => [
+        'title' => 'Messages',
+        'intro' => "Écrivez directement à un enseignant, un parent ou un collègue - sans configuration d'e-mail ni de SMS.",
+        'new_conversation' => 'Nouvelle conversation',
+        'empty' => 'Aucune conversation pour le moment.',
+        'select_a_conversation' => 'Sélectionnez une conversation pour la lire.',
+        'write_a_reply' => 'Écrire une réponse…',
+        'send' => 'Envoyer',
+        'cancel' => 'Annuler',
+        'title_label' => 'Objet',
+        'recipient_email' => 'E-mail du destinataire',
+        'message' => 'Message',
+        'default_title' => 'Conversation',
+        'not_a_participant' => "Vous ne faites pas partie de cette conversation.",
+        'recipient_not_found' => "Aucun utilisateur ne correspond à cet e-mail.",
+    ],
+
+    /*
+     * Devoirs / travaux à faire.
+     */
+    'homework_screen' => [
+        'title' => 'Devoirs',
+        'intro' => "Donnez un devoir pour une classe et une matière, puis corrigez les copies au fur et à mesure.",
+        'set_assignment' => 'Donner un devoir',
+        'class' => 'Classe',
+        'subject' => 'Matière',
+        'title_label' => 'Titre',
+        'instructions' => 'Consignes',
+        'assigned_on' => 'Donné le',
+        'due_on' => 'À rendre le',
+        'max_score' => 'Note maximale (facultatif)',
+        'save' => 'Enregistrer',
+        'cancel' => 'Annuler',
+        'due' => 'À rendre',
+        'empty' => 'Aucun devoir donné pour le moment.',
+        'select_an_assignment' => 'Sélectionnez un devoir pour voir les copies.',
+        'student' => 'Élève',
+        'submitted' => 'Rendu',
+        'score' => 'Note',
+        'not_submitted' => 'Non rendu',
+        'late' => 'En retard',
+        'grade' => 'Noter',
+        'no_submissions' => 'Aucune copie rendue.',
+        'created' => 'Devoir créé.',
+        'graded' => 'Copie notée.',
+        'not_staff' => "Seul un membre du personnel peut faire ceci.",
+    ],
+
+    /*
+     * Rencontres individuelles avec les parents (07-students §7.8).
+     */
+    'meetings_screen' => [
+        'title' => 'Rencontres avec les parents',
+        'intro' => "Planifiez et consignez les rencontres parent-enseignant, disciplinaires, financières et d'admission.",
+        'schedule' => 'Planifier une rencontre',
+        'guardian' => 'Parent / Tuteur',
+        'type' => 'Type',
+        'when' => 'Date et heure',
+        'location' => 'Lieu',
+        'agenda' => 'Ordre du jour',
+        'save' => 'Enregistrer',
+        'cancel' => 'Annuler',
+        'status' => 'Statut',
+        'minutes' => 'Compte-rendu',
+        'mark_held' => 'Marquer comme tenue',
+        'empty' => 'Aucune rencontre planifiée.',
+        'scheduled' => 'Rencontre planifiée.',
+        'recorded' => 'Compte-rendu enregistré.',
+    ],
+
+    /*
+     * L'Association des Parents d'Élèves et Enseignants (APEE).
+     */
+    'pta_screen' => [
+        'title' => 'Association des parents (APEE)',
+        'intro' => "Assemblées générales et bureau permanent de l'APEE.",
+        'tab_meetings' => 'Réunions',
+        'tab_officers' => 'Bureau',
+        'schedule_meeting' => 'Planifier une assemblée',
+        'meeting_title' => 'Titre',
+        'date' => 'Date',
+        'location' => 'Lieu',
+        'agenda' => "Ordre du jour",
+        'save' => 'Enregistrer',
+        'cancel' => 'Annuler',
+        'minutes' => 'Procès-verbal',
+        'attendees' => 'Participants',
+        'mark_held' => 'Marquer comme tenue',
+        'no_meetings' => "Aucune assemblée de l'APEE planifiée.",
+        'appoint_officer' => 'Nommer un membre du bureau',
+        'guardian' => 'Parent / Tuteur',
+        'office' => 'Fonction',
+        'term_starts' => 'Début du mandat',
+        'no_officers' => 'Aucun membre du bureau nommé.',
+        'scheduled' => 'Assemblée planifiée.',
+        'recorded' => 'Procès-verbal enregistré.',
+        'appointed' => 'Membre du bureau nommé.',
     ],
 ];

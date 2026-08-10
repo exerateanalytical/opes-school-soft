@@ -31,12 +31,25 @@ final class Navigation
     {
         return [
             ['key' => 'dashboard', 'route' => '/dashboard', 'permission' => null, 'enabled' => true, 'built' => true],
+            // In-platform messaging: open to any authenticated user,
+            // membership-gated rather than RBAC-gated (00-core §6.2).
+            ['key' => 'messages', 'route' => '/messages', 'permission' => null, 'enabled' => true, 'built' => true],
+            // Homework/assignments - not in the spec set, which is
+            // compliance-first; gated on the same marks.enter a teacher
+            // already holds.
+            ['key' => 'homework', 'route' => '/homework', 'permission' => Permission::MarksEnter, 'enabled' => true, 'built' => true],
             ['key' => 'admissions', 'route' => '/admissions', 'permission' => Permission::AdmissionsManage, 'enabled' => true, 'built' => true],
             ['key' => 'students', 'route' => '/students', 'permission' => Permission::StudentsView, 'enabled' => true, 'built' => true],
             // Wiring pass: the guardian directory/list screen now lives at
             // this URL (guardian RECORDS have existed since Phase 2, reached
             // through a student's profile; what was missing was this list).
             ['key' => 'guardians', 'route' => '/guardians', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
+            // 07-students §7.8: individual guardian meetings - schema
+            // shipped Phase 2 with no UI.
+            ['key' => 'guardian_meetings', 'route' => '/guardians/meetings', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
+            // The Parent-Teacher Association - officers and general
+            // meetings, not in docs/specs.
+            ['key' => 'pta', 'route' => '/guardians/pta', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
             // 00-core §15 Phase 2: bulk onboarding from a CSV.
             ['key' => 'import', 'route' => '/students/import', 'permission' => Permission::StudentsManage, 'enabled' => true, 'built' => true],
             // Phase 11 F1/wiring pass: staff directory.

@@ -30,10 +30,14 @@ return [
     // disabled item still has to say what it is.
     'nav' => [
         'dashboard' => 'Dashboard',
+        'messages' => 'Messages',
+        'homework' => 'Homework',
         'admissions' => 'Admissions',
         'students' => 'Students',
         'import' => 'Data import',
         'guardians' => 'Guardians',
+        'guardian_meetings' => 'Guardian meetings',
+        'pta' => 'Parent-Teacher Association',
         'staff' => 'Staff',
         'payroll' => 'Payroll',
         'assets' => 'Assets',
@@ -1962,5 +1966,110 @@ return [
         'ready' => 'No blocking gate is open. The product is configured well enough to go live.',
         'not_ready' => ':count check(s) block go-live. Each one names what already refuses to run.',
         'owner' => 'Answered by',
+    ],
+
+    /*
+     * In-platform messaging: teacher <-> parent, staff <-> staff. Not the
+     * outbox - a real two-way conversation that never leaves the product.
+     */
+    'messages_screen' => [
+        'title' => 'Messages',
+        'intro' => 'Message a teacher, a parent, or a colleague directly - no email or SMS setup needed.',
+        'new_conversation' => 'New conversation',
+        'empty' => 'No conversations yet.',
+        'select_a_conversation' => 'Select a conversation to read it.',
+        'write_a_reply' => 'Write a reply…',
+        'send' => 'Send',
+        'cancel' => 'Cancel',
+        'title_label' => 'Subject',
+        'recipient_email' => 'Recipient email',
+        'message' => 'Message',
+        'default_title' => 'Conversation',
+        'not_a_participant' => 'You are not part of that conversation.',
+        'recipient_not_found' => 'No user was found with that email address.',
+    ],
+
+    /*
+     * Homework/assignments. Not in the spec set - see routes/web.php.
+     */
+    'homework_screen' => [
+        'title' => 'Homework',
+        'intro' => 'Set an assignment for a class and subject, then grade submissions as students turn work in.',
+        'set_assignment' => 'Set an assignment',
+        'class' => 'Class',
+        'subject' => 'Subject',
+        'title_label' => 'Title',
+        'instructions' => 'Instructions',
+        'assigned_on' => 'Assigned on',
+        'due_on' => 'Due on',
+        'max_score' => 'Max score (optional)',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'due' => 'Due',
+        'empty' => 'No assignments set yet.',
+        'select_an_assignment' => 'Select an assignment to see submissions.',
+        'student' => 'Student',
+        'submitted' => 'Submitted',
+        'score' => 'Score',
+        'not_submitted' => 'Not submitted',
+        'late' => 'Late',
+        'grade' => 'Grade',
+        'no_submissions' => 'No submissions yet.',
+        'created' => 'Assignment created.',
+        'graded' => 'Submission graded.',
+        'not_staff' => 'Only a staff member may do this.',
+    ],
+
+    /*
+     * Individual guardian meetings (07-students §7.8). Schema shipped in
+     * Phase 2 with no UI.
+     */
+    'meetings_screen' => [
+        'title' => 'Guardian meetings',
+        'intro' => 'Schedule and record parent-teacher, disciplinary, financial and admission meetings.',
+        'schedule' => 'Schedule a meeting',
+        'guardian' => 'Guardian',
+        'type' => 'Type',
+        'when' => 'When',
+        'location' => 'Location',
+        'agenda' => 'Agenda',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'status' => 'Status',
+        'minutes' => 'Minutes',
+        'mark_held' => 'Mark held',
+        'empty' => 'No meetings scheduled yet.',
+        'scheduled' => 'Meeting scheduled.',
+        'recorded' => 'Outcome recorded.',
+    ],
+
+    /*
+     * The Parent-Teacher Association: officers and general meetings, not in
+     * docs/specs - the spec set never mentions the PTA as an institution.
+     */
+    'pta_screen' => [
+        'title' => 'Parent-Teacher Association',
+        'intro' => 'General meetings and standing officers of the PTA.',
+        'tab_meetings' => 'Meetings',
+        'tab_officers' => 'Officers',
+        'schedule_meeting' => 'Schedule a general meeting',
+        'meeting_title' => 'Title',
+        'date' => 'Date',
+        'location' => 'Location',
+        'agenda' => 'Agenda',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'minutes' => 'Minutes',
+        'attendees' => 'Attendees',
+        'mark_held' => 'Record as held',
+        'no_meetings' => 'No PTA meetings scheduled yet.',
+        'appoint_officer' => 'Appoint an officer',
+        'guardian' => 'Guardian',
+        'office' => 'Office',
+        'term_starts' => 'Term starts',
+        'no_officers' => 'No officers appointed yet.',
+        'scheduled' => 'Meeting scheduled.',
+        'recorded' => 'Minutes recorded.',
+        'appointed' => 'Officer appointed.',
     ],
 ];
