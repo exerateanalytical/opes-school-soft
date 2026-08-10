@@ -63,6 +63,41 @@
     --shadow-heritage-md: 0 6px 20px rgba(1, 60, 31, 0.08);
     --shadow-heritage-lg: 0 16px 40px rgba(1, 60, 31, 0.14);
 
+    /* Heritage type scale. The platform is dominated by text-xs (2 680 uses)
+       and text-sm (2 334) - at Tailwind's stock scale that renders body copy
+       at 12-14px, which is what made the product feel cramped rather than
+       premium. Redefining the SCALE lifts every screen at once instead of
+       editing ~5 000 utility occurrences by hand. Combined with the 17px
+       root below, text-sm now lands at ~16px and text-base at 17px, which is
+       the 16-18px body target. text-xs stays genuinely small (~14px) because
+       it is legitimately used for captions, table meta and field labels. */
+    --text-xs: 0.8125rem;    /* ~13.8px - captions, labels, table meta */
+    --text-sm: 0.9375rem;    /* ~15.9px - dominant body size */
+    --text-base: 1rem;       /* 17px - body */
+    --text-lg: 1.125rem;     /* ~19.1px - card titles */
+    --text-xl: 1.3125rem;    /* ~22.3px - section titles */
+    --text-2xl: 1.5rem;      /* ~25.5px - page titles */
+    --text-3xl: 1.875rem;    /* ~31.9px - hero metrics */
+
+    /* Radius. Stock rounded-lg is 0.5rem (~8.5px here) and carries 171 of the
+       platform's 289 rounded-* uses across both cards and controls; 12px is
+       the design system's "standard control" value and reads far less boxy.
+       Cards/hero surfaces use rounded-xl/2xl explicitly as screens migrate. */
+    --radius-sm: 0.5rem;     /* ~8.5px  - compact controls */
+    --radius-md: 0.625rem;   /* ~10.6px - small buttons */
+    --radius-lg: 0.75rem;    /* ~12.75px - standard controls (was ~8.5px) */
+    --radius-xl: 1rem;       /* 17px    - cards */
+    --radius-2xl: 1.25rem;   /* ~21px   - large cards */
+    --radius-3xl: 1.5rem;    /* ~25.5px - hero cards */
+
+    /* Remap Tailwind's stock shadows to the green-tinted Heritage scale, so
+       the 143 existing shadow-sm uses stop rendering a neutral grey drop and
+       pick up the brand's restrained elevation without per-file edits. */
+    --shadow-sm: 0 2px 8px rgba(1, 60, 31, 0.05);
+    --shadow-md: 0 6px 20px rgba(1, 60, 31, 0.08);
+    --shadow-lg: 0 16px 40px rgba(1, 60, 31, 0.14);
+    --shadow-xl: 0 16px 40px rgba(1, 60, 31, 0.14);
+
     /* Mockup-sampled accents for role pills and KPI icon-circles ONLY (page
        chrome - header/sidebar/large fills - stays within the core tokens
        above; these are the "legitimate colour-coding" carve-out noted in
