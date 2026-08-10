@@ -67,16 +67,28 @@ Expected: `diff=0`, always. Last known-good count: en=1788 fr=1788 (will drift u
 
 ## 5. What's NOT done — in priority order for the next session
 
-1. **Refunds / write-offs.** No schema exists. Touches live financial posting — build carefully, one Action at a time, test the ledger effect against `postedLedger()` before trusting it.
-2. **Revenue recognition.** Not started. Also touches financial posting.
-3. **Remaining ~44 of 58 documents** (`docs/specs/10-documents.md` §20 has the full catalogue and provenance table).
-4. **Full platform-wide popup-form rollout.** The infrastructure (`AutosavesDraft`, `<x-opes-modal-form>`) is proven on two forms. Every other form in the platform is still its pre-existing self. This is a form-by-form conversion, not a single task — pick one module at a time.
-5. **Livre d'inventaire** (4th statutory book) — genuinely blocked until year-end close is built; do not half-build it.
-6. **DSF line mapping** (0 of 94 accounts) — genuinely blocked on real DGI numbers; do not invent them (rule #11).
-7. **9 of 12 blocking gates** in the readiness console — same block as #6, needs real external numbers (MINESEC specimens, CNPS rates, IRPP brackets).
+> Revised 2026-08-11 after a full 4-agent platform audit (Students/Guardians/Academics/Assessment; Fees/Accounting/Tax/Procurement; Identity/HR/Payroll/Welfare; Communication/Notifications/Documents/Reporting). Items 1-5 below are new/reordered findings from that audit — do these FIRST, they're cheap and safe. Items 6+ are the pre-existing backlog.
+
+1. **Verify and likely fix: HR staff self-service portal may 500.** Route `/portal/staff` → `HR\Livewire\Portal\Show` — no confirmed `Livewire::component()` registration found in `AppServiceProvider.php` during the audit. Register it if missing, then confirm with `RouteSmokeTest`.
+2. **Nav-reachability gaps — feature-complete screens invisible in the sidebar.** Add `Navigation.php` entries for: Students Promotion wizard (route exists, no `Livewire::component()` registration either — check that too), Academic Reports (`reports.academic`, already registered in ASP, just missing nav), Assessment Reports (`reports.assessment`, same), Welfare Medical/Visitors screens (routed and registered, no confirmed nav entry). Each is a ~5-minute fix per the 5-part wiring rule (§1 rule 5) but must include the lang-parity check.
+3. **Document catalogue: 8 of 58 built.** Next five highest-value, in this order: `ADM-FORM` (Admission Form, spec §7.1), `TRANSFER-CERT` (§7.6), `LEAVING-CERT` (§7.7), `ID-STU` (Student ID Card, §12.1 — note the mockup deviation clause in spec §3, must not ship as literally drawn), `LEAVE-APP` (§11.3) or `GATE-PASS` (§12.4). Follow the existing pattern: seed a `document_templates` row + Blade view under `resources/views/documents/`, wire through the existing `RenderDocument` action — do not build a parallel rendering path.
+4. **Popup-form rollout is narrow** — only ~2 Livewire consumers use `AutosavesDraft`/`<x-opes-modal-form>` so far (homework, marks entry). Pick one more form per run, per the existing rollout item below.
+5. **Accounting module has no discoverable test files**, despite being the ledger's core and the only caller of `PostFromEvent`. Add tests for existing behavior (chart of accounts, journal entries, trial balance, statutory books) — do NOT modify `PostFromEvent` or any posting logic while doing this, tests only.
+6. **Refunds / write-offs.** Confirmed still read-only (reporting screens read `refunds`/`write_off_lines` tables, no creation Action or UI exists). Touches live financial posting — **do not build this autonomously**, it's in §6 "needs a human" below.
+7. **Revenue recognition.** Not started. Also touches financial posting — needs a human.
+8. **Remaining documents** beyond the top-5 in item 3 (`docs/specs/10-documents.md` §20 has the full catalogue and provenance table).
+9. **Livre d'inventaire** (4th statutory book) — genuinely blocked until year-end close is built; do not half-build it.
+10. **DSF line mapping** (0 of 94 accounts) — genuinely blocked on real DGI numbers; do not invent them (rule #11).
+11. **9 of 12 blocking gates** in the readiness console — same block as #10, needs real external numbers (MINESEC specimens, CNPS rates, IRPP brackets).
+
+## 6a. Night log (autonomous scheduled runs)
+
+> Each unattended run appends ONE line here: `- YYYY-MM-DD HH:MM — <what happened>`. Read the last few entries first so consecutive runs don't repeat each other's work.
 
 ## 6. Known-safe things to build unattended, and things that need a human
 
-**Safe for autonomous/unattended work** (no live-money posting, low blast radius, easy to verify): documents catalogue expansion, more tests for existing code, bug fixes surfaced by tests, UI polish, further popup-form conversions on read-heavy forms, accessibility passes.
+**Safe for autonomous/unattended work** (no live-money posting, low blast radius, easy to verify): nav-reachability fixes (§5 items 1-2), documents catalogue expansion, more tests for existing code (including closing the Accounting test gap, §5 item 5 — tests only, never touch `PostFromEvent`), bug fixes surfaced by tests, UI polish, further popup-form conversions on read-heavy forms, accessibility passes.
 
-**Needs a human in the loop before shipping:** anything in §5 items 1–2 (refunds/write-offs, revenue recognition — real money movement), anything that changes `PostFromEvent` or a posting rule, anything that would need `OPENSSL_CONF` set (rule #10 — cannot even be tested without the user's OS-level change), and obviously: `git push`.
+**Needs a human in the loop before shipping:** anything in §5 items 6–7 (refunds/write-offs, revenue recognition — real money movement), anything that changes `PostFromEvent` or a posting rule, anything that would need `OPENSSL_CONF` set (rule #10 — cannot even be tested without the user's OS-level change), and obviously: `git push`.
+
+**Leave alone — parked for human review, not autonomous work:** the two stray worktrees under `.claude/worktrees/` from 2026-08-10 (`agent-a746d99bcdcd921e2` — Guardian popup-form conversion, has a couple of stray debug artifacts to eyeball before any merge; `agent-a22b256b841ecf39d` — webhook/notification tests, uncommitted, this is the agent that caused the `--env=testing` incident). Do not merge or build on top of either without the user reviewing them first. Build fresh on `main` instead.
