@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §13.1/§13.3. The five money columns are the
@@ -35,6 +36,7 @@ use Illuminate\Support\Carbon;
  */
 final class ReconciliationSession extends Model
 {
+    use Immutable10Year;
     protected $table = 'reconciliation_sessions';
 
     protected $guarded = [];

@@ -9,6 +9,7 @@ use Database\Factories\JournalEntryLineFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §4.2. Persistence only. L1 (one-sided) and L3
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class JournalEntryLine extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<JournalEntryLineFactory> */
     use HasFactory;
 

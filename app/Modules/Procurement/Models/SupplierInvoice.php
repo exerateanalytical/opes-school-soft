@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use RuntimeException;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/03-tax-procurement.md §4.5 - the facture fournisseur: the one
@@ -77,6 +78,7 @@ use RuntimeException;
  */
 final class SupplierInvoice extends Model
 {
+    use Immutable10Year;
     /**
      * Lifecycle columns the observer lets move after posting; everything
      * else is the commercial substance of the invoice and frozen.

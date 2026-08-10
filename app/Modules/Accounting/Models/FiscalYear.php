@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 02-accounting §6. Persistence only. Deliberately carries NO relationship
@@ -34,6 +35,7 @@ use Illuminate\Support\Carbon;
  */
 final class FiscalYear extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<FiscalYearFactory> */
     use HasFactory;
 

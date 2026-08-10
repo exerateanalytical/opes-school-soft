@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §11.1. Persistence only - versioning,
@@ -34,6 +35,7 @@ use Illuminate\Support\Carbon;
  */
 final class PostingRule extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<PostingRuleFactory> */
     use HasFactory;
 

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use RuntimeException;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/04-fees.md §11.1 - conceptually immutable (A3).
@@ -65,6 +66,7 @@ use RuntimeException;
  */
 final class Payment extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
 

@@ -7,6 +7,7 @@ namespace App\Modules\Identity\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use RuntimeException;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * Append-only, hash-chained audit trail (docs/specs/00-core.md 14).
@@ -32,6 +33,7 @@ use RuntimeException;
  */
 class AuditLog extends Model
 {
+    use Immutable10Year;
     public const GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 
     public $timestamps = false;

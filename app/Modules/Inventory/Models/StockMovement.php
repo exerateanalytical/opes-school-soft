@@ -8,6 +8,7 @@ use App\Modules\Inventory\Domain\StockMovementType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/06-assets-stores.md §7.6 - APPEND-ONLY (I11): BEFORE
@@ -44,6 +45,7 @@ use Illuminate\Support\Carbon;
  */
 final class StockMovement extends Model
 {
+    use Immutable10Year;
     /** Append-only: created_at is written explicitly on insert. */
     public $timestamps = false;
 

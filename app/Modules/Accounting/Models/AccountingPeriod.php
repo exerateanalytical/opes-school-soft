@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 02-accounting §5, the clôture informatique. This model carries the
@@ -65,6 +66,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class AccountingPeriod extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<AccountingPeriodFactory> */
     use HasFactory;
 

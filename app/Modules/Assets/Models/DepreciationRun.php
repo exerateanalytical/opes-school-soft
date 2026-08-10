@@ -7,6 +7,7 @@ namespace App\Modules\Assets\Models;
 use App\Modules\Assets\Domain\DepreciationRunStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 06-assets-stores.md §4.1. UNIQUE(fiscal_year_id, period_month) makes the
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class DepreciationRun extends Model
 {
+    use Immutable10Year;
     /** @var list<string> */
     protected $fillable = [
         'fiscal_year_id', 'period_month', 'status', 'run_by', 'run_at',

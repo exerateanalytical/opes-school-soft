@@ -7,6 +7,7 @@ namespace App\Modules\Assets\Models;
 use App\Modules\Assets\Domain\DepreciationBasis;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 06-assets-stores.md §4.2 - one row per asset per period per basis.
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class DepreciationSchedule extends Model
 {
+    use Immutable10Year;
     /** @var list<string> */
     protected $fillable = [
         'asset_id', 'depreciation_run_id', 'fiscal_year_id', 'period_month',

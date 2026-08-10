@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §4.1. Persistence and the ONE permitted read
@@ -51,6 +52,7 @@ use Illuminate\Support\Carbon;
  */
 final class JournalEntry extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<JournalEntryFactory> */
     use HasFactory;
 

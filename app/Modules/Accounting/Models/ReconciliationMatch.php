@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §13.1. The two sides live in the join tables
@@ -26,6 +27,7 @@ use Illuminate\Support\Carbon;
  */
 final class ReconciliationMatch extends Model
 {
+    use Immutable10Year;
     protected $table = 'reconciliation_matches';
 
     protected $guarded = [];

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 06-assets-stores.md §2.2 - the fixed-asset register row. Depreciation
@@ -58,6 +59,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class Asset extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<AssetFactory> */
     use HasFactory;
 

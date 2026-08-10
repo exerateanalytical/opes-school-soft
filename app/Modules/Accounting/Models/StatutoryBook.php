@@ -7,6 +7,7 @@ namespace App\Modules\Accounting\Models;
 use App\Modules\Accounting\Domain\StatutoryBookType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * A generated statutory book (02-accounting §14.1).
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class StatutoryBook extends Model
 {
+    use Immutable10Year;
     protected $table = 'statutory_books';
 
     /** @var list<string> */

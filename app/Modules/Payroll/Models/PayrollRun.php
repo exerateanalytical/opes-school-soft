@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * A payroll run (docs/specs/05-hr-payroll.md 8) - EMPLOYER-WIDE, once per
@@ -47,6 +48,7 @@ use Illuminate\Support\Carbon;
  */
 final class PayrollRun extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<PayrollRunFactory> */
     use HasFactory;
 

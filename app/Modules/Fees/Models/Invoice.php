@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/04-fees.md §3. Persistence only - status transitions, locking
@@ -49,6 +50,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class Invoice extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<InvoiceFactory> */
     use HasFactory;
 

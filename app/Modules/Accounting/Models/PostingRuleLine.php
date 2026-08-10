@@ -10,6 +10,7 @@ use Database\Factories\PostingRuleLineFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §11.1.
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class PostingRuleLine extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<PostingRuleLineFactory> */
     use HasFactory;
 

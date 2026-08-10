@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/04-fees.md §9 - C7. A facture d'avoir: its own legal identity,
@@ -39,6 +40,7 @@ use Illuminate\Support\Carbon;
  */
 final class CreditNote extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<CreditNoteFactory> */
     use HasFactory;
 

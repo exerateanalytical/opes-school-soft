@@ -8,6 +8,7 @@ use App\Modules\Accounting\Domain\StatementLineStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §13.1.
@@ -33,6 +34,7 @@ use Illuminate\Support\Carbon;
  */
 final class BankStatementLine extends Model
 {
+    use Immutable10Year;
     protected $table = 'bank_statement_lines';
 
     protected $guarded = [];

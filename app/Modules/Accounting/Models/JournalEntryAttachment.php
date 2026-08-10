@@ -7,6 +7,7 @@ namespace App\Modules\Accounting\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §4.4 - pièces justificatives (AUDCIF Art. 17).
@@ -34,6 +35,7 @@ use Illuminate\Support\Carbon;
  */
 final class JournalEntryAttachment extends Model
 {
+    use Immutable10Year;
     /** @var list<string> */
     protected $fillable = [
         'journal_entry_id',

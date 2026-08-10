@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use RuntimeException;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/03-tax-procurement.md §4.7 - the paiement fournisseur, series
@@ -57,6 +58,7 @@ use RuntimeException;
  */
 final class SupplierPayment extends Model
 {
+    use Immutable10Year;
     /**
      * Columns the observer lets move once the payment is PAID: the void
      * lifecycle and housekeeping - never the money.

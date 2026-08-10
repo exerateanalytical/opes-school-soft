@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * SYSCOHADA revise chart of accounts (02-accounting.md 2.1).
@@ -55,6 +56,7 @@ use Illuminate\Support\Carbon;
  */
 final class ChartOfAccount extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<ChartOfAccountFactory> */
     use HasFactory;
 

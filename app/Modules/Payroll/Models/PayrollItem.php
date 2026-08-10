@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * One staff member's month (docs/specs/05-hr-payroll.md 10.2) - the live
@@ -44,6 +45,7 @@ use Illuminate\Support\Carbon;
  */
 final class PayrollItem extends Model
 {
+    use Immutable10Year;
     /** @var list<string> */
     protected $fillable = [
         'payroll_run_id',

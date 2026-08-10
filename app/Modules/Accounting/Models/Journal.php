@@ -8,6 +8,7 @@ use App\Modules\Accounting\Domain\JournalType;
 use Database\Factories\JournalFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * 02-accounting §3. Persistence only - the "AN/CL are is_system and
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 final class Journal extends Model
 {
+    use Immutable10Year;
     /** @use HasFactory<JournalFactory> */
     use HasFactory;
 

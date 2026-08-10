@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use RuntimeException;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/10-documents.md 4.4 / 00-core 14 - EVERY render leaves a row
@@ -39,6 +40,7 @@ use RuntimeException;
  */
 final class DocumentPrintLog extends Model
 {
+    use Immutable10Year;
     /** @var list<string> */
     protected $fillable = [
         'document_template_id', 'template_version', 'issued_document_id',

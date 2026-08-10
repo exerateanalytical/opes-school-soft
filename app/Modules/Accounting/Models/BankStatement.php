@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Support\Retention\Immutable10Year;
 
 /**
  * docs/specs/02-accounting.md §13.1. Persistence only - every invariant that
@@ -29,6 +30,7 @@ use Illuminate\Support\Carbon;
  */
 final class BankStatement extends Model
 {
+    use Immutable10Year;
     protected $table = 'bank_statements';
 
     protected $guarded = [];
