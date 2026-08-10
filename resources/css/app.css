@@ -4,29 +4,81 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* docs/specs/00-core.md section 8. Red and yellow are ACCENTS only - never
-       large fills, never adjacent as blocks. Red keeps one meaning (money owed,
-       destructive, error) so it never loses urgency. */
-    --color-chrome: #0B4A36;
-    --color-chrome-light: #11614A;
-    --color-primary: #0B7A4B;
-    --color-heritage-red: #CE1126;
-    --color-heritage-yellow: #FCD116;
-    --color-ivory: #FBFAF6;
-    --color-sand: #F2EEE2;
-    --color-charcoal: #26211A;
+    /* Heritage design system (docs/specs/00-core.md section 8 superseded by
+       docs/superpowers/PROGRESS.md "Heritage Design System" - see that file
+       for the full token rationale). Existing token NAMES are kept so every
+       screen already using bg-chrome/text-primary/text-heritage-yellow etc.
+       re-skins automatically; only the VALUES changed brand. Red and gold
+       stay accents only - never large fills - same discipline as before,
+       new palette. */
+    --color-chrome: #002D17;         /* was Cameroon green -> Heritage Dark Green (sidebar) */
+    --color-chrome-light: #064A2B;   /* -> Heritage Forest Green (cards, active states) */
+    --color-primary: #0B5A32;        /* -> Heritage Green (buttons, links) */
+    --color-heritage-red: #D64545;   /* -> Danger (was Cameroon flag red) */
+    --color-heritage-yellow: #D9A829;/* -> Heritage Gold (was Cameroon flag yellow) */
+    --color-ivory: #FDFEFE;          /* -> Warm White (main background) */
+    --color-sand: #F5F7F6;           /* -> Soft Surface (secondary background) */
+    --color-charcoal: #14201A;       /* -> primary text, green-tinted near-black */
+
+    /* Full Heritage scale - additive, for new/updated screens. */
+    --color-heritage-950: #002D17;
+    --color-heritage-900: #013C1F;
+    --color-heritage-800: #064A2B;
+    --color-heritage-700: #0B5A32;
+    --color-heritage-600: #198754;
+
+    --color-gold-700: #B98A20;
+    --color-gold-600: #C99A27;
+    --color-gold-500: #D9A829;
+    --color-gold-300: #E8C86A;
+    --color-gold-100: #FFF7DE;
+
+    --color-surface-white: #FFFFFF;
+    --color-surface-primary: #FDFEFE;
+    --color-surface-secondary: #F5F7F6;
+    --color-surface-green: #EEF6F1;
+    --color-surface-panel: #EEF3F0;
+
+    --color-text-primary: #14201A;
+    --color-text-secondary: #52615A;
+    --color-text-muted: #7A8780;
+    --color-text-disabled: #A5AEA9;
+
+    --color-border-primary: #DCE5DF;
+    --color-border-secondary: #E7ECE9;
+
+    --color-success: #198754;
+    --color-success-bg: #EAF6EF;
+    --color-warning: #D99A20;
+    --color-warning-bg: #FFF5D9;
+    --color-danger: #D64545;
+    --color-danger-bg: #FDECEC;
+    --color-info: #2878C8;
+    --color-info-bg: #EDF5FC;
+
+    --shadow-heritage-sm: 0 2px 8px rgba(1, 60, 31, 0.05);
+    --shadow-heritage-md: 0 6px 20px rgba(1, 60, 31, 0.08);
+    --shadow-heritage-lg: 0 16px 40px rgba(1, 60, 31, 0.14);
 
     /* Mockup-sampled accents for role pills and KPI icon-circles ONLY (page
-       chrome - header/sidebar/large fills - stays within the 8 core tokens
+       chrome - header/sidebar/large fills - stays within the core tokens
        above; these are the "legitimate colour-coding" carve-out noted in
        docs/specs/00-core.md section 8 for badges, not a relaxation of it). */
     --color-badge-blue: #2563EB;   /* "Administrator" role pill; "Active Users" / "Total Invoices" icon circle */
     --color-badge-purple: #7C3AED; /* "Super Admin" role pill; "Teachers" / "Total Payments" icon circle */
     --color-badge-orange: #F97316; /* "Administrators" KPI icon circle; "Librarian" role pill */
     --color-badge-teal: #0D9488;   /* "Students" / "Collection Rate" KPI icon circle; "Accountant" role pill */
+}
+
+/* Heritage baseline: 16-18px body text platform-wide, not the 12-14px a raw
+   Tailwind text-sm/text-xs default produces. Screens should still use
+   text-base/text-lg utilities deliberately, but the root scale itself moves
+   up so anything left un-migrated reads properly rather than cramped. */
+html {
+    font-size: 17px;
 }
 
 /* Alpine hides these until it has booted. Without it the user menu and the
