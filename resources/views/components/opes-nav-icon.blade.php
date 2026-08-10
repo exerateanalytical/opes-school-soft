@@ -31,6 +31,8 @@
         'ledger' => '<path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/><path d="M8 12h8M8 15.5h8M8 8.5h3"/>',
         'expenses' => '<path d="M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/><circle cx="12" cy="12" r="2.5"/><path d="M7 12h.01M17 12h.01"/>',
         'statements' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+        // Statutory books: a bound ledger.
+        'books' => '<path d="M4 5a2 2 0 012-2h13v18H6a2 2 0 01-2-2z"/><path d="M9 3v18"/>',
         // Reconciliation: two arrows tying back to each other.
         'reconciliation' => '<path d="M4 8h12l-3-3M20 16H8l3 3"/>',
         // Budgets: a target, for planned-vs-actual.

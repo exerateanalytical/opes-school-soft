@@ -50,6 +50,7 @@ return [
         'expenses' => 'Dépenses',
         'statements' => 'États financiers',
         'reconciliation' => 'Rapprochement bancaire',
+        'books' => 'Livres obligatoires',
         'budgets' => 'Budgets',
         'procurement' => 'Achats & fournisseurs',
         'tax' => 'Impôts & déclarations',
@@ -1893,5 +1894,26 @@ return [
         'actual' => 'Réalisé',
         'variance' => 'Écart',
         'variance_pct' => 'Écart %',
+    ],
+
+    /*
+     * Les quatre livres de l'article 19 de l'AUDCIF (02-accounting §14).
+     */
+    'books_screen' => [
+        'title' => 'Livres obligatoires',
+        'intro' => "Les quatre livres exigés par l'article 19 de l'AUDCIF. Chaque génération est hachée et immuable ; une régénération remplace par substitution, jamais sur place.",
+        'fiscal_year' => 'Exercice',
+        'book_type' => 'Livre',
+        'generate' => 'Générer',
+        'book' => 'Livre',
+        'period' => 'Période',
+        'generated' => 'Généré le',
+        'lines' => 'Lignes',
+        'debit' => 'Débit',
+        'credit' => 'Crédit',
+        'hash' => 'SHA-256',
+        'supersedes' => 'Remplace',
+        'empty' => "Aucun livre n'a encore été généré pour cet exercice.",
+        'select_year' => "Sélectionnez d'abord un exercice.",
     ],
 ];

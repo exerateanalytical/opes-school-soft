@@ -49,6 +49,7 @@ return [
         'expenses' => 'Expenses',
         'statements' => 'Financial statements',
         'reconciliation' => 'Bank reconciliation',
+        'books' => 'Statutory books',
         'budgets' => 'Budgets',
         'procurement' => 'Procurement',
         'tax' => 'Tax & declarations',
@@ -1898,5 +1899,28 @@ return [
         'actual' => 'Actual',
         'variance' => 'Variance',
         'variance_pct' => 'Variance %',
+    ],
+
+    /*
+     * The four books of AUDCIF Art. 19 (02-accounting §14). Their names stay
+     * French in BOTH locales below where they are the artefact's own name -
+     * an accountant asks for the "livre-journal", not a translation of it.
+     */
+    'books_screen' => [
+        'title' => 'Statutory books',
+        'intro' => 'The four books required by AUDCIF Art. 19. Each generation is hashed and immutable; regenerating supersedes its predecessor rather than replacing it.',
+        'fiscal_year' => 'Fiscal year',
+        'book_type' => 'Book',
+        'generate' => 'Generate',
+        'book' => 'Book',
+        'period' => 'Period',
+        'generated' => 'Generated',
+        'lines' => 'Lines',
+        'debit' => 'Debit',
+        'credit' => 'Credit',
+        'hash' => 'SHA-256',
+        'supersedes' => 'Supersedes',
+        'empty' => 'No book has been generated for this fiscal year yet.',
+        'select_year' => 'Select a fiscal year first.',
     ],
 ];

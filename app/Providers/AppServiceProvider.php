@@ -66,6 +66,7 @@ use App\Modules\Procurement\Livewire\SupplierInvoices\Index as SupplierInvoicesI
 use App\Modules\Procurement\Livewire\SupplierInvoices\Show as SupplierInvoicesShow;
 use App\Modules\Procurement\Livewire\Suppliers\Index as SuppliersIndex;
 use App\Modules\Procurement\Livewire\Suppliers\Show as SuppliersShow;
+use App\Modules\Accounting\Livewire\Books\Index as AccountingBooksIndex;
 use App\Modules\Accounting\Livewire\Budgets\Index as AccountingBudgetsIndex;
 use App\Modules\Accounting\Livewire\Reconciliation\Index as AccountingReconciliationIndex;
 use App\Modules\Communication\Livewire\Outbox\Index as CommunicationOutboxIndex;
@@ -245,6 +246,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('reports.financial', AccountingReportsIndex::class);
         Livewire::component('accounting.statements.index', AccountingStatementsIndex::class);
         Livewire::component('accounting.year-end.console', YearEndConsole::class);
+        Livewire::component('accounting.books.index', AccountingBooksIndex::class);
         Livewire::component('accounting.budgets.index', AccountingBudgetsIndex::class);
         Livewire::component('accounting.reconciliation.index', AccountingReconciliationIndex::class);
         Livewire::component('accounting.finance-dashboard', FinanceDashboard::class);

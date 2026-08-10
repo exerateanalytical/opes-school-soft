@@ -88,6 +88,8 @@ final class Navigation
             ['key' => 'expenses', 'route' => '/accounting/expenses', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // Bilan / Compte de resultat / Flux, with comparatives.
             ['key' => 'statements', 'route' => '/reports/statements', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // 02-accounting §14: the four AUDCIF Art. 19 statutory books.
+            ['key' => 'books', 'route' => '/accounting/books', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // 02-accounting §13: each treasury float against its own
             // operator statement (MTN and Orange reconcile separately).
             ['key' => 'reconciliation', 'route' => '/accounting/reconciliation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],

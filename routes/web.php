@@ -563,6 +563,14 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:ledger.view')->name('accounting.year-end');
 
     /*
+     * The four AUDCIF Art. 19 books (02-accounting §14). Legal registers, not
+     * reports: each generation is hashed and immutable, and a correction
+     * produces a new book that supersedes its predecessor.
+     */
+    Route::get('/accounting/books', \App\Modules\Accounting\Livewire\Books\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.books');
+
+    /*
      * Bank / mobile-money reconciliation (02-accounting §13). Each float
      * reconciles against its own operator statement - which is the whole
      * point of having split MTN 5521 from Orange 5522 in the first place.
