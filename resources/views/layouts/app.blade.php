@@ -180,23 +180,21 @@
                     </span>
                 </div>
 
-                {{-- No real notification/mail counts exist yet, so these are
-                     icons WITHOUT a fabricated badge (09-ui / this task's
-                     brief: never invent an unread count). --}}
-                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand lg:inline-flex">
-                    <span class="sr-only">Notifications</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 8a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/>
-                        <path stroke-linecap="round" d="M9.5 20a2.5 2.5 0 005 0"/>
-                    </svg>
-                </button>
-                <button type="button" title="{{ __('opes.shell.status_strip') }}" class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand lg:inline-flex">
-                    <span class="sr-only">Mail</span>
+                {{-- The real notification engine (Notifications module):
+                     a genuine unread count from the notifications table,
+                     not a fabricated badge on a dead button. --}}
+                @if ($shellUser !== null)
+                    @livewire('notifications.bell')
+                @endif
+
+                <a href="{{ route('communication.messages') }}" title="{{ __('opes.messages_screen.title') }}"
+                   class="hidden rounded-full p-2 text-charcoal/60 hover:bg-sand lg:inline-flex">
+                    <span class="sr-only">{{ __('opes.messages_screen.title') }}</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <rect x="3" y="5" width="18" height="14" rx="2"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
                     </svg>
-                </button>
+                </a>
 
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                     <button type="button"
@@ -298,5 +296,15 @@
 </div>
 
 @livewireScripts
+
+@if ($shellUser !== null)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.opesInitPushNotifications) {
+                window.opesInitPushNotifications();
+            }
+        });
+    </script>
+@endif
 </body>
 </html>
