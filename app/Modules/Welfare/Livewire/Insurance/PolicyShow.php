@@ -48,11 +48,15 @@ final class PolicyShow extends Component
         /** @var stdClass $row */
         $row = DB::table('insurance_policies as p')
             ->join('academic_years as y', 'y.id', '=', 'p.academic_year_id')
+            ->leftJoin('fee_items as fi', 'fi.id', '=', 'p.fee_item_id')
             ->where('p.id', $this->policyId)
             ->select([
                 'p.id', 'p.provider', 'p.policy_no', 'p.cover_type',
                 'p.premium_per_student', 'p.coverage_start', 'p.coverage_end',
-                'p.status', 'y.name as year_name',
+                'p.status', 'p.asset_id', 'p.created_at', 'p.updated_at',
+                'y.name as year_name',
+                'fi.id as fee_item_id', 'fi.code as fee_item_code', 'fi.name as fee_item_name',
+                'fi.default_recurrence as fee_item_recurrence', 'fi.is_mandatory as fee_item_mandatory',
             ])
             ->first();
 
@@ -90,12 +94,68 @@ final class PolicyShow extends Component
             ->where('c.policy_id', $this->policyId)
             ->orderByDesc('c.incident_date')->orderByDesc('c.id')
             ->limit(self::HISTORY_LIMIT)
+            ->leftJoin('users as u', 'u.id', '=', 'c.recorded_by')
             ->select([
                 'c.id', 'c.incident_date', 'c.description', 'c.amount_claimed',
                 'c.amount_settled', 'c.status', 'c.settled_on',
-                's.first_name', 's.last_name',
+                's.first_name', 's.last_name', 's.matricule',
+                'si.certificate_no', 'u.name as recorded_by_name',
             ])
             ->get();
+    }
+
+    /**
+     * Insured-student counts by status, straight from the database rather
+     * than from the capped list above (a 300-student policy must still show
+     * a truthful headline count).
+     *
+     * @return array<string, int>
+     */
+    private function insuredCounts(): array
+    {
+        /** @var \Illuminate\Support\Collection<int, stdClass> $rows */
+        $rows = DB::table('student_insurances')
+            ->where('policy_id', $this->policyId)
+            ->groupBy('status')
+            ->selectRaw('status, COUNT(*) as total')
+            ->get();
+
+        $counts = ['active' => 0, 'lapsed' => 0, 'cancelled' => 0, 'total' => 0];
+
+        foreach ($rows as $row) {
+            $counts[(string) $row->status] = (int) $row->total;
+            $counts['total'] += (int) $row->total;
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Claim money and counts across the whole policy, uncapped.
+     *
+     * @return array<string, int>
+     */
+    private function claimTotals(): array
+    {
+        /** @var stdClass $row */
+        $row = DB::table('insurance_claims')
+            ->where('policy_id', $this->policyId)
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw("SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) as submitted")
+            ->selectRaw("SUM(CASE WHEN status = 'settled' THEN 1 ELSE 0 END) as settled")
+            ->selectRaw("SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected")
+            ->selectRaw('COALESCE(SUM(amount_claimed), 0) as claimed_amount')
+            ->selectRaw('COALESCE(SUM(amount_settled), 0) as settled_amount')
+            ->first();
+
+        return [
+            'total' => (int) $row->total,
+            'submitted' => (int) $row->submitted,
+            'settled' => (int) $row->settled,
+            'rejected' => (int) $row->rejected,
+            'claimed_amount' => (int) $row->claimed_amount,
+            'settled_amount' => (int) $row->settled_amount,
+        ];
     }
 
     // ── Export ────────────────────────────────────────────────────────────
@@ -120,8 +180,6 @@ final class PolicyShow extends Component
     private function policySummaryRows(): iterable
     {
         $policy = $this->policyRow();
-        $insured = $this->insuredStudents();
-        $claims = $this->claims();
 
         yield ['Provider', $policy->provider];
         yield ['Policy No', $policy->policy_no];
@@ -134,16 +192,28 @@ final class PolicyShow extends Component
             $policy->premium_per_student !== null ? Money::of((int) $policy->premium_per_student)->format(false) : '—',
         ];
         yield ['Status', ucfirst($policy->status)];
-        yield ['Insured Students', (string) $insured->count()];
-        yield ['Claims', (string) $claims->count()];
+        yield ['Insured Students', (string) $this->insuredCounts()['total']];
+        yield ['Claims', (string) $this->claimTotals()['total']];
+        yield ['Billed As (Fee Item)', $policy->fee_item_code !== null ? $policy->fee_item_code.' — '.$policy->fee_item_name : '—'];
     }
 
     public function render(): mixed
     {
+        $policy = $this->policyRow();
+        $counts = $this->insuredCounts();
+        $claimTotals = $this->claimTotals();
+
+        $premium = $policy->premium_per_student !== null ? (int) $policy->premium_per_student : null;
+        $end = \Illuminate\Support\Carbon::parse($policy->coverage_end);
+
         return view('livewire.welfare.insurance.policy-show', [
-            'policy' => $this->policyRow(),
+            'policy' => $policy,
             'insuredStudents' => $this->insuredStudents(),
             'claims' => $this->claims(),
+            'counts' => $counts,
+            'claimTotals' => $claimTotals,
+            'premiumTotal' => $premium === null ? null : $premium * $counts['active'],
+            'daysRemaining' => (int) round($end->diffInDays(now(), false) * -1),
         ]);
     }
 }

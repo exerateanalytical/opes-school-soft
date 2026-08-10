@@ -35,7 +35,7 @@
 
     {{-- Inline record-consultation panel (nurse desk; no separate route). --}}
     @if ($showForm && $canManage)
-        <section aria-label="Record consultation" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record consultation" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Consultation</h2>
 
             <form wire:submit="saveConsultation" class="mt-4 space-y-4">
@@ -44,7 +44,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Student matricule</span>
                         <input id="medical-form-matricule" type="text" wire:model="formMatricule"
                                placeholder="e.g. OS-26-A1B2C3D4"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formMatricule')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -53,13 +53,13 @@
                     <label for="medical-form-visited" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Visited at</span>
                         <input id="medical-form-visited" type="datetime-local" wire:model="formVisitedAt"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="medical-form-complaint" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Presenting complaint</span>
                         <textarea id="medical-form-complaint" rows="2" wire:model="formComplaint"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('formComplaint')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -68,19 +68,19 @@
                     <label for="medical-form-diagnosis" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Diagnosis (optional)</span>
                         <textarea id="medical-form-diagnosis" rows="2" wire:model="formDiagnosis"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                     </label>
 
                     <label for="medical-form-treatment" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Treatment (optional)</span>
                         <textarea id="medical-form-treatment" rows="2" wire:model="formTreatment"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                     </label>
 
                     <label for="medical-form-severity" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Severity</span>
                         <select id="medical-form-severity" wire:model="formSeverity"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($severityLabel as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
@@ -90,7 +90,7 @@
                     <label for="medical-form-outcome" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Outcome</span>
                         <select id="medical-form-outcome" wire:model="formOutcome"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             @foreach ($outcomeLabel as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
@@ -104,7 +104,7 @@
                         Save consultation
                     </button>
                     <button type="button" wire:click="toggleForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -114,7 +114,7 @@
 
     {{-- Inline refer panel, opened from a consultation row. --}}
     @if ($referConsultationId !== null && $canManage)
-        <section aria-label="Record referral" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record referral" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Refer Consultation #{{ $referConsultationId }}</h2>
 
             <form wire:submit="saveReferral" class="mt-4 space-y-4">
@@ -122,7 +122,7 @@
                     <label for="medical-refer-to" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Referred to (facility / practitioner)</span>
                         <input id="medical-refer-to" type="text" wire:model="referTo"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('referTo')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -131,7 +131,7 @@
                     <label for="medical-refer-reason" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Clinical reason</span>
                         <textarea id="medical-refer-reason" rows="2" wire:model="referReason"
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                     </label>
                 </div>
 
@@ -141,7 +141,7 @@
                         Record referral
                     </button>
                     <button type="button" wire:click="cancelReferral"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -151,14 +151,14 @@
 
     {{-- Inline close-referral panel, opened from a referral row. --}}
     @if ($closeReferralId !== null && $canManage)
-        <section aria-label="Close referral" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Close referral" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Close Referral #{{ $closeReferralId }}</h2>
 
             <form wire:submit="confirmClose" class="mt-4 space-y-4">
                 <label for="medical-close-notes" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Follow-up notes (optional)</span>
                     <textarea id="medical-close-notes" rows="2" wire:model="closeNotes"
-                              class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                              class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                     @error('closeNotes')
                         <span class="text-xs text-heritage-red">{{ $message }}</span>
                     @enderror
@@ -170,7 +170,7 @@
                         Close referral
                     </button>
                     <button type="button" wire:click="cancelClose"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -224,7 +224,7 @@
                 <label for="medical-filter-severity" class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Severity</span>
                     <select id="medical-filter-severity" wire:model.live="severity"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All severities</option>
                         @foreach ($severityLabel as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -235,7 +235,7 @@
                 <label for="medical-filter-outcome" class="flex min-w-[11rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Outcome</span>
                     <select id="medical-filter-outcome" wire:model.live="status"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All outcomes</option>
                         @foreach ($outcomeLabel as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -246,7 +246,7 @@
                 <label for="medical-filter-state" class="flex min-w-[10rem] flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">State</span>
                     <select id="medical-filter-state" wire:model.live="status"
-                            class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                            class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">All referrals</option>
                         <option value="open">Open</option>
                         <option value="closed">Closed</option>
@@ -258,7 +258,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="medical-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Search student name, matricule..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         </x-slot:filters>
 
@@ -349,7 +349,7 @@
         {{-- Mobile cards: the two or three fields that matter on a handset. --}}
         <x-slot:cards>
             @foreach ($rows as $row)
-                <article wire:key="medical-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="medical-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                     @if ($tab === 'consultations')
                         <div class="flex items-center justify-between gap-2">
                             <p class="font-medium text-charcoal">{{ $students[$row->student_id]['name'] ?? '—' }}</p>
@@ -374,7 +374,7 @@
              09-ui "Recent Medical Alerts by severity" column. --}}
         <x-slot:rail>
             <div class="space-y-4">
-                <section aria-label="Visits by severity" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Visits by severity" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Visits by Severity (30 days)</h3>
                     @php
                         $severityTotal = array_sum($kpis['severity_breakdown']);
@@ -399,7 +399,7 @@
                     </ul>
                 </section>
 
-                <section aria-label="Recent medical alerts" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Recent medical alerts" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Recent Medical Alerts</h3>
                     @if ($recentAlerts === [])
                         <p class="text-sm text-charcoal/60">No high-severity visits in the last 30 days.</p>

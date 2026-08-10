@@ -40,7 +40,7 @@
 
     {{-- Inline allocate-bed panel. --}}
     @if ($showAllocateForm)
-        <section aria-label="Allocate bed" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Allocate bed" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Allocate Bed</h2>
 
             <form wire:submit="saveAllocation" class="mt-4 space-y-4">
@@ -49,7 +49,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Student matricule</span>
                         <input id="alloc-form-matricule" type="text" wire:model="allocMatricule"
                                placeholder="e.g. OS-26-A1B2C3D4"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('allocMatricule')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -58,7 +58,7 @@
                     <label for="alloc-form-bed" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Bed</span>
                         <select id="alloc-form-bed" wire:model="allocBedId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Choose a free bed...</option>
                             @foreach ($availableBedOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -72,7 +72,7 @@
                     <label for="alloc-form-starts" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Starts on</span>
                         <input id="alloc-form-starts" type="date" wire:model="allocStartsOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
                 </div>
 
@@ -82,7 +82,7 @@
                         Allocate bed
                     </button>
                     <button type="button" wire:click="toggleAllocateForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -92,7 +92,7 @@
 
     {{-- Inline record-inspection panel. --}}
     @if ($showInspectionForm)
-        <section aria-label="Record inspection" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record inspection" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Inspection</h2>
 
             <form wire:submit="saveInspection" class="mt-4 space-y-4">
@@ -100,7 +100,7 @@
                     <label for="insp-form-hostel" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Hostel</span>
                         <select id="insp-form-hostel" wire:model="inspHostelId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Choose a hostel...</option>
                             @foreach ($hostelOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -114,7 +114,7 @@
                     <label for="insp-form-room" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Room (optional - whole building if blank)</span>
                         <select id="insp-form-room" wire:model="inspRoomId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Whole building</option>
                             @foreach ($roomOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -128,13 +128,13 @@
                     <label for="insp-form-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Inspected on</span>
                         <input id="insp-form-date" type="date" wire:model="inspInspectedOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="insp-form-rating" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Rating</span>
                         <select id="insp-form-rating" wire:model="inspRating"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="good">Good</option>
                             <option value="fair">Fair</option>
                             <option value="poor">Poor</option>
@@ -146,7 +146,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Findings (optional)</span>
                         <textarea id="insp-form-findings" wire:model="inspFindings" rows="3"
                                   placeholder="e.g. Leaking tap in the washroom..."
-                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                                  class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('inspFindings')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -159,7 +159,7 @@
                         Record inspection
                     </button>
                     <button type="button" wire:click="toggleInspectionForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -169,7 +169,7 @@
 
     {{-- Inline add-hostel panel. --}}
     @if ($showHostelForm)
-        <section aria-label="Add hostel" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add hostel" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Add Hostel</h2>
 
             <form wire:submit="saveHostel" class="mt-4 space-y-4">
@@ -178,7 +178,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Code</span>
                         <input id="hostel-form-code" type="text" wire:model="hostelCode"
                                placeholder="e.g. BH1"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('hostelCode')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -188,7 +188,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Name</span>
                         <input id="hostel-form-name" type="text" wire:model="hostelName"
                                placeholder="e.g. Boys Hostel 1"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('hostelName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -197,7 +197,7 @@
                     <label for="hostel-form-gender" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Gender</span>
                         <select id="hostel-form-gender" wire:model="hostelGender"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="boys">Boys</option>
                             <option value="girls">Girls</option>
                             <option value="mixed">Mixed</option>
@@ -214,7 +214,7 @@
                         Add hostel
                     </button>
                     <button type="button" wire:click="toggleHostelForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -224,7 +224,7 @@
 
     {{-- Inline add-room panel. --}}
     @if ($showRoomForm)
-        <section aria-label="Add room" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add room" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Add Room</h2>
 
             <form wire:submit="saveRoom" class="mt-4 space-y-4">
@@ -232,7 +232,7 @@
                     <label for="room-form-hostel" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Hostel</span>
                         <select id="room-form-hostel" wire:model="roomHostelId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Choose a hostel...</option>
                             @foreach ($hostelOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -247,7 +247,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Room no.</span>
                         <input id="room-form-name" type="text" wire:model="roomName"
                                placeholder="e.g. R101"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('roomName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -256,7 +256,7 @@
                     <label for="room-form-capacity" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Capacity</span>
                         <input id="room-form-capacity" type="number" min="1" wire:model="roomCapacity"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('roomCapacity')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -269,7 +269,7 @@
                         Add room
                     </button>
                     <button type="button" wire:click="toggleRoomForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -279,7 +279,7 @@
 
     {{-- Inline add-beds panel. --}}
     @if ($showBedsForm)
-        <section aria-label="Add beds" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add beds" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Set Room Beds</h2>
 
             <form wire:submit="saveBeds" class="mt-4 space-y-4">
@@ -287,7 +287,7 @@
                     <label for="beds-form-room" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Room</span>
                         <select id="beds-form-room" wire:model="bedsRoomId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Choose a room...</option>
                             @foreach ($roomOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -302,7 +302,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Bed labels (comma separated)</span>
                         <input id="beds-form-labels" type="text" wire:model="bedsLabels"
                                placeholder="e.g. A,B,C,D"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('bedsLabels')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -317,7 +317,7 @@
                         Save beds
                     </button>
                     <button type="button" wire:click="toggleBedsForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -340,19 +340,19 @@
                     {{ $showAllocateForm ? 'Hide form' : 'Allocate bed' }}
                 </button>
                 <button type="button" wire:click="toggleInspectionForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
                     {{ $showInspectionForm ? 'Hide form' : 'Record inspection' }}
                 </button>
                 <button type="button" wire:click="toggleHostelForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
                     {{ $showHostelForm ? 'Hide form' : 'Add hostel' }}
                 </button>
                 <button type="button" wire:click="toggleRoomForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
                     {{ $showRoomForm ? 'Hide form' : 'Add room' }}
                 </button>
                 <button type="button" wire:click="toggleBedsForm"
-                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
                     {{ $showBedsForm ? 'Hide form' : 'Set room beds' }}
                 </button>
             </div>
@@ -394,7 +394,7 @@
         <label for="hostel-filter-hostel" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Hostel</span>
             <select id="hostel-filter-hostel" wire:model.live="hostel"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All hostels</option>
                 @foreach ($hostelOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -406,7 +406,7 @@
             <label for="hostel-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ $tab === 'inspections' ? 'Rating' : 'Status' }}</span>
                 <select id="hostel-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -419,7 +419,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="hostel-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search by room no. or student name..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -517,7 +517,7 @@
                         @if ($row->status === 'active')
                             <button type="button" wire:click="endAllocation({{ $row->id }})"
                                     wire:confirm="End this allocation?"
-                                    class="rounded border border-sand px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
                                 End allocation
                             </button>
                         @endif
@@ -559,7 +559,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="hostel-card-{{ $tab }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'rooms')
                     @php
                         $beds = (int) $row->beds_count;
@@ -582,7 +582,7 @@
                     @if ($canManage && $row->status === 'active')
                         <button type="button" wire:click="endAllocation({{ $row->id }})"
                                 wire:confirm="End this allocation?"
-                                class="mt-2 rounded border border-sand px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
+                                class="mt-2 rounded border border-border-primary px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
                             End allocation
                         </button>
                     @endif
@@ -611,7 +611,7 @@
          inspections, as in the mockup's right column. --}}
     <x-slot:rail>
         <div class="space-y-4">
-            <section aria-label="Occupancy overview" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Occupancy overview" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Occupancy Overview</h3>
                 <p class="text-2xl font-semibold tabular-nums text-charcoal">{{ $kpis['occupied'] }}
                     <span class="text-sm font-normal text-charcoal/60">occupied beds</span></p>
@@ -625,7 +625,7 @@
                 </ul>
             </section>
 
-            <section aria-label="Hostel summary" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Hostel summary" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Hostel Summary</h3>
                 <ul class="space-y-2.5">
                     @foreach ($hostelSummary as $band)
@@ -647,7 +647,7 @@
                 </ul>
             </section>
 
-            <section aria-label="Upcoming inspections" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Upcoming inspections" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Open Inspections</h3>
                 @if ($openInspections === [])
                     <p class="text-sm text-charcoal/60">No unresolved findings.</p>

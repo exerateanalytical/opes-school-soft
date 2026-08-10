@@ -34,7 +34,7 @@
 
     {{-- Inline "Add Route" panel. --}}
     @if ($showRouteForm)
-        <section aria-label="Add route" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add route" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Add Route</h2>
 
             <form wire:submit="saveRoute" class="mt-4 space-y-4">
@@ -43,7 +43,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Route code</span>
                         <input id="route-form-code" type="text" wire:model="routeFormCode"
                                placeholder="e.g. R-01"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('routeFormCode')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -53,7 +53,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Route name</span>
                         <input id="route-form-name" type="text" wire:model="routeFormName"
                                placeholder="e.g. Town - Mile 4"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('routeFormName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -61,7 +61,7 @@
 
                     <label for="route-form-active" class="flex items-center gap-2 sm:col-span-2">
                         <input id="route-form-active" type="checkbox" wire:model="routeFormActive"
-                               class="rounded border-sand text-primary focus:ring-primary/50"/>
+                               class="rounded border-border-primary text-primary focus:ring-primary/50"/>
                         <span class="text-sm text-charcoal/80">Active (accepts riders)</span>
                     </label>
                 </div>
@@ -72,7 +72,7 @@
                         Save route
                     </button>
                     <button type="button" wire:click="toggleRouteForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -82,7 +82,7 @@
 
     {{-- Inline "Allocate Student" panel. --}}
     @if ($showAllocationForm)
-        <section aria-label="Allocate student to route" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Allocate student to route" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Allocate Student</h2>
 
             <form wire:submit="saveAllocation" class="mt-4 space-y-4">
@@ -91,7 +91,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Enrollment ID</span>
                         <input id="allocation-form-enrollment" type="number" min="1" wire:model="allocationFormEnrollmentId"
                                placeholder="e.g. 1024"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('allocationFormEnrollmentId')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -100,7 +100,7 @@
                     <label for="allocation-form-route" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Route</span>
                         <select id="allocation-form-route" wire:model="allocationFormRouteId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a route</option>
                             @foreach ($routeOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -114,7 +114,7 @@
                     <label for="allocation-form-stop" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Stop</span>
                         <select id="allocation-form-stop" wire:model="allocationFormStopId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a stop</option>
                             @foreach ($stopOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -128,7 +128,7 @@
                     <label for="allocation-form-direction" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Direction</span>
                         <select id="allocation-form-direction" wire:model="allocationFormDirection"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="both">Both</option>
                             <option value="pickup">Pickup only</option>
                             <option value="dropoff">Dropoff only</option>
@@ -138,7 +138,7 @@
                     <label for="allocation-form-starts-on" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Starts on</span>
                         <input id="allocation-form-starts-on" type="date" wire:model="allocationFormStartsOn"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('allocationFormStartsOn')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -151,7 +151,7 @@
                         Allocate
                     </button>
                     <button type="button" wire:click="toggleAllocationForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -161,7 +161,7 @@
 
     {{-- Inline "Add Vehicle" panel. --}}
     @if ($showVehicleForm)
-        <section aria-label="Add vehicle" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Add vehicle" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Add Vehicle</h2>
 
             <form wire:submit="saveVehicle" class="mt-4 space-y-4">
@@ -170,7 +170,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Registration number</span>
                         <input id="vehicle-form-registration" type="text" wire:model="vehicleFormRegistrationNo"
                                placeholder="e.g. LT 1234 A"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('vehicleFormRegistrationNo')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -179,7 +179,7 @@
                     <label for="vehicle-form-capacity" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Capacity</span>
                         <input id="vehicle-form-capacity" type="number" min="1" wire:model="vehicleFormCapacity"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('vehicleFormCapacity')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -188,7 +188,7 @@
                     <label for="vehicle-form-make" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Make</span>
                         <input id="vehicle-form-make" type="text" wire:model="vehicleFormMake"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('vehicleFormMake')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -197,7 +197,7 @@
                     <label for="vehicle-form-model" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Model</span>
                         <input id="vehicle-form-model" type="text" wire:model="vehicleFormModel"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('vehicleFormModel')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -206,7 +206,7 @@
                     <label for="vehicle-form-status" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Status</span>
                         <select id="vehicle-form-status" wire:model="vehicleFormStatus"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="operational">Operational</option>
                             <option value="under_maintenance">Under maintenance</option>
                             <option value="out_of_service">Out of service</option>
@@ -223,7 +223,7 @@
                         Save vehicle
                     </button>
                     <button type="button" wire:click="toggleVehicleForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -233,7 +233,7 @@
 
     {{-- Inline "Record Trip" panel (Logs tab, trips only). --}}
     @if ($showTripLogForm && $tab === 'logs' && $logType === 'trips')
-        <section aria-label="Record trip log" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record trip log" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Trip</h2>
 
             <form wire:submit="saveTripLog" class="mt-4 space-y-4">
@@ -241,7 +241,7 @@
                     <label for="trip-log-form-vehicle" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Vehicle</span>
                         <select id="trip-log-form-vehicle" wire:model="tripLogFormVehicleId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a vehicle</option>
                             @foreach ($vehicleOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -255,7 +255,7 @@
                     <label for="trip-log-form-route" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Route (optional)</span>
                         <select id="trip-log-form-route" wire:model="tripLogFormRouteId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">No route</option>
                             @foreach ($routeOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -269,7 +269,7 @@
                     <label for="trip-log-form-driver" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Driver ID (optional)</span>
                         <input id="trip-log-form-driver" type="number" min="1" wire:model="tripLogFormDriverId"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('tripLogFormDriverId')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -278,7 +278,7 @@
                     <label for="trip-log-form-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Date</span>
                         <input id="trip-log-form-date" type="date" wire:model="tripLogFormDate"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('tripLogFormDate')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -287,7 +287,7 @@
                     <label for="trip-log-form-odometer-start" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Odometer start</span>
                         <input id="trip-log-form-odometer-start" type="number" min="0" wire:model="tripLogFormOdometerStart"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('tripLogFormOdometerStart')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -296,7 +296,7 @@
                     <label for="trip-log-form-odometer-end" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Odometer end</span>
                         <input id="trip-log-form-odometer-end" type="number" min="0" wire:model="tripLogFormOdometerEnd"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('tripLogFormOdometerEnd')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -305,7 +305,7 @@
                     <label for="trip-log-form-notes" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Notes</span>
                         <input id="trip-log-form-notes" type="text" wire:model="tripLogFormNotes"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('tripLogFormNotes')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -318,7 +318,7 @@
                         Save trip
                     </button>
                     <button type="button" wire:click="toggleTripLogForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -328,7 +328,7 @@
 
     {{-- Inline "Record Fuel" panel (Logs tab, fuel only). --}}
     @if ($showFuelLogForm && $tab === 'logs' && $logType === 'fuel')
-        <section aria-label="Record fuel log" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record fuel log" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Fuel</h2>
 
             <form wire:submit="saveFuelLog" class="mt-4 space-y-4">
@@ -336,7 +336,7 @@
                     <label for="fuel-log-form-vehicle" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Vehicle</span>
                         <select id="fuel-log-form-vehicle" wire:model="fuelLogFormVehicleId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a vehicle</option>
                             @foreach ($vehicleOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -350,7 +350,7 @@
                     <label for="fuel-log-form-date" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Date</span>
                         <input id="fuel-log-form-date" type="date" wire:model="fuelLogFormDate"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('fuelLogFormDate')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -359,7 +359,7 @@
                     <label for="fuel-log-form-litres" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Litres</span>
                         <input id="fuel-log-form-litres" type="number" step="0.01" min="0.01" wire:model="fuelLogFormLitres"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('fuelLogFormLitres')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -368,7 +368,7 @@
                     <label for="fuel-log-form-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Cost (XAF)</span>
                         <input id="fuel-log-form-cost" type="number" min="0" wire:model="fuelLogFormCostAmount"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('fuelLogFormCostAmount')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -377,7 +377,7 @@
                     <label for="fuel-log-form-odometer" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Odometer (optional)</span>
                         <input id="fuel-log-form-odometer" type="number" min="0" wire:model="fuelLogFormOdometer"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('fuelLogFormOdometer')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -390,7 +390,7 @@
                         Save fuel log
                     </button>
                     <button type="button" wire:click="toggleFuelLogForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -400,7 +400,7 @@
 
     {{-- Inline "Record Maintenance" panel (Logs tab, maintenance only). --}}
     @if ($showMaintenanceLogForm && $tab === 'logs' && $logType === 'maintenance')
-        <section aria-label="Record maintenance log" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Record maintenance log" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Record Maintenance</h2>
 
             <form wire:submit="saveMaintenanceLog" class="mt-4 space-y-4">
@@ -408,7 +408,7 @@
                     <label for="maintenance-log-form-vehicle" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Vehicle</span>
                         <select id="maintenance-log-form-vehicle" wire:model="maintenanceLogFormVehicleId"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="">Select a vehicle</option>
                             @foreach ($vehicleOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -422,7 +422,7 @@
                     <label for="maintenance-log-form-type" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Type</span>
                         <select id="maintenance-log-form-type" wire:model="maintenanceLogFormType"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="service">Service</option>
                             <option value="repair">Repair</option>
                             <option value="inspection">Inspection</option>
@@ -436,7 +436,7 @@
                     <label for="maintenance-log-form-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Cost (XAF, optional)</span>
                         <input id="maintenance-log-form-cost" type="number" min="0" wire:model="maintenanceLogFormCostAmount"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('maintenanceLogFormCostAmount')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -445,7 +445,7 @@
                     <label for="maintenance-log-form-description" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Description</span>
                         <input id="maintenance-log-form-description" type="text" wire:model="maintenanceLogFormDescription"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('maintenanceLogFormDescription')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -458,7 +458,7 @@
                         Save maintenance log
                     </button>
                     <button type="button" wire:click="toggleMaintenanceLogForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -541,7 +541,7 @@
         <label for="transport-filter-route" class="flex min-w-[11rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Route</span>
             <select id="transport-filter-route" wire:model.live="route"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All routes</option>
                 @foreach ($routeOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -552,7 +552,7 @@
         <label for="transport-filter-vehicle" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">Vehicle</span>
             <select id="transport-filter-vehicle" wire:model.live="vehicle"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">All vehicles</option>
                 @foreach ($vehicleOptions as $option)
                     <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -564,7 +564,7 @@
             <label for="transport-filter-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="transport-filter-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -577,7 +577,7 @@
             <label for="transport-filter-logtype" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Log type</span>
                 <select id="transport-filter-logtype" wire:model.live="logType"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="trips">Trips</option>
                     <option value="fuel">Fuel</option>
                     <option value="maintenance">Maintenance</option>
@@ -589,7 +589,7 @@
             <span class="text-xs font-medium text-charcoal/70">Search</span>
             <input id="transport-filter-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="Search route, vehicle, student..."
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
     </x-slot:filters>
 
@@ -726,7 +726,7 @@
     <x-slot:cards>
         @foreach ($rows as $row)
             <article wire:key="transport-card-{{ $tab }}-{{ $logType }}-{{ $row->id }}"
-                     class="rounded border border-sand bg-white p-3">
+                     class="rounded border border-border-primary bg-white p-3">
                 @if ($tab === 'routes')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->name }}</p>
@@ -770,7 +770,7 @@
          mockup's right column. --}}
     <x-slot:rail>
         <div class="space-y-4">
-            <section aria-label="Vehicle status" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Vehicle status" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Vehicle Status</h3>
                 <ul class="space-y-2.5">
                     @foreach ($vehicleStatusBreakdown as $band)
@@ -792,7 +792,7 @@
                 </ul>
             </section>
 
-            <section aria-label="Upcoming maintenance" class="rounded border border-sand bg-white p-3">
+            <section aria-label="Upcoming maintenance" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Upcoming Maintenance</h3>
                 @if ($upcomingMaintenance === [])
                     <p class="text-sm text-charcoal/60">Nothing due in the next 60 days.</p>

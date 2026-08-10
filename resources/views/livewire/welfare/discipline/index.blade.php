@@ -64,7 +64,7 @@
 
     {{-- ── Open Case form ───────────────────────────────────────────────── --}}
     @if ($showOpenForm)
-        <div class="rounded border border-sand bg-white p-4">
+        <div class="rounded border border-border-primary bg-white p-4">
             <h2 class="text-sm font-semibold text-charcoal">{{ __('discipline.open_case') }}</h2>
 
             <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -74,10 +74,10 @@
                     </label>
                     <input id="student-query" type="text" wire:model.live.debounce.300ms="studentQuery"
                            placeholder="{{ __('discipline.student_search_placeholder') }}"
-                           class="mt-1 w-full rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
+                           class="mt-1 w-full rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
 
                     @if ($studentCandidates !== [])
-                        <ul class="mt-1 divide-y divide-sand rounded border border-sand bg-white text-sm">
+                        <ul class="mt-1 divide-y divide-border-primary rounded border border-border-primary bg-white text-sm">
                             @foreach ($studentCandidates as $candidate)
                                 <li>
                                     <button type="button"
@@ -98,7 +98,7 @@
                         {{ __('discipline.field_category') }}
                     </label>
                     <select id="form-category" wire:model="formCategoryId"
-                            class="mt-1 w-full rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
+                            class="mt-1 w-full rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
                         <option value="">{{ __('discipline.select_category') }}</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">
@@ -114,7 +114,7 @@
                         {{ __('discipline.field_occurred_on') }}
                     </label>
                     <input id="occurred-on" type="date" wire:model="occurredOn"
-                           class="mt-1 w-full rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
+                           class="mt-1 w-full rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
                     @error('occurredOn') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
 
@@ -123,7 +123,7 @@
                         {{ __('discipline.field_visibility') }}
                     </label>
                     <select id="visibility" wire:model="visibility"
-                            class="mt-1 w-full rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
+                            class="mt-1 w-full rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
                         <option value="internal">{{ __('discipline.visibility.internal') }}</option>
                         <option value="guardian">{{ __('discipline.visibility.guardian') }}</option>
                     </select>
@@ -135,13 +135,13 @@
                         {{ __('discipline.field_description') }}
                     </label>
                     <textarea id="description" wire:model="description" rows="3"
-                              class="mt-1 w-full rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none"></textarea>
+                              class="mt-1 w-full rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none"></textarea>
                     @error('description') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
 
                 <label class="flex items-center gap-2 text-sm text-charcoal">
                     <input type="checkbox" wire:model="isPositive"
-                           class="rounded border-sand text-primary focus:ring-primary"/>
+                           class="rounded border-border-primary text-primary focus:ring-primary"/>
                     {{ __('discipline.field_is_positive') }}
                 </label>
             </div>
@@ -152,7 +152,7 @@
                     {{ __('discipline.save_case') }}
                 </button>
                 <button type="button" wire:click="toggleOpenForm"
-                        class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
+                        class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50">
                     {{ __('opes.ui.cancel') }}
                 </button>
             </div>
@@ -161,7 +161,7 @@
 
     {{-- ── Status tabs + filters ────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="{{ __('discipline.tabs_label') }}" class="flex flex-wrap gap-1 rounded border border-sand bg-white p-1">
+        <div role="tablist" aria-label="{{ __('discipline.tabs_label') }}" class="flex flex-wrap gap-1 rounded border border-border-primary bg-white p-1">
             @foreach ($tabs as $tab)
                 <button type="button" role="tab" wire:key="tab-{{ $tab['value'] === '' ? 'all' : $tab['value'] }}"
                         wire:click="selectStatus('{{ $tab['value'] }}')"
@@ -176,11 +176,11 @@
             <label for="case-search" class="sr-only">{{ __('discipline.search_label') }}</label>
             <input id="case-search" type="search" wire:model.live.debounce.300ms="search"
                    placeholder="{{ __('discipline.search_placeholder') }}"
-                   class="w-56 rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
+                   class="w-56 rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none"/>
 
             <label for="category-filter" class="sr-only">{{ __('discipline.field_category') }}</label>
             <select id="category-filter" wire:model.live="categoryId"
-                    class="rounded border border-sand px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm focus:border-primary focus:outline-none">
                 <option value="">{{ __('discipline.all_categories') }}</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -190,14 +190,14 @@
     </div>
 
     {{-- ── Case table ───────────────────────────────────────────────────── --}}
-    <div class="rounded border border-sand bg-white">
+    <div class="rounded border border-border-primary bg-white">
         @if ($cases->isEmpty())
             <div class="px-4 py-6">
                 <x-empty-state :message="__('discipline.empty')"/>
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-sand text-sm">
+                <table class="min-w-full divide-y divide-border-primary text-sm">
                     <thead class="bg-sand/40 text-left text-xs uppercase tracking-wide text-charcoal/60">
                         <tr>
                             <th scope="col" class="px-4 py-2">{{ __('discipline.col_date') }}</th>
@@ -210,7 +210,7 @@
                             <th scope="col" class="px-4 py-2"><span class="sr-only">{{ __('discipline.view_case') }}</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand bg-white">
+                    <tbody class="divide-y divide-border-primary bg-white">
                         @foreach ($cases as $case)
                             <tr wire:key="case-{{ $case->id }}">
                                 <td class="px-4 py-2 text-charcoal/70">{{ $case->occurred_on->toDateString() }}</td>
@@ -246,7 +246,7 @@
                 </table>
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-sand px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-border-primary px-4 py-3">
                 <p class="text-xs text-charcoal/60">
                     {{ __('opes.ui.showing', ['first' => $cases->firstItem() ?? 0, 'last' => $cases->lastItem() ?? 0, 'total' => $cases->total()]) }}
                 </p>

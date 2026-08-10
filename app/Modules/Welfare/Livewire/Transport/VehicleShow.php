@@ -63,6 +63,85 @@ final class VehicleShow extends Component
     }
 
     /**
+     * Every driver ever posted to this vehicle, newest first. `licence_no`
+     * is an encrypted column and is deliberately NOT surfaced here.
+     *
+     * @return \Illuminate\Support\Collection<int, stdClass>
+     */
+    private function driverHistory(): \Illuminate\Support\Collection
+    {
+        return DB::table('vehicle_drivers')
+            ->where('vehicle_id', $this->vehicleId)
+            ->orderByDesc('active_from')->orderByDesc('id')
+            ->limit(self::HISTORY_LIMIT)
+            ->get(['id', 'name', 'phone', 'active_from', 'active_to']);
+    }
+
+    /**
+     * The routes this vehicle actually runs, derived from its trip log
+     * (there is no vehicle→route FK in the schema), with the live student
+     * allocation count on each.
+     *
+     * @return \Illuminate\Support\Collection<int, stdClass>
+     */
+    private function routesServed(): \Illuminate\Support\Collection
+    {
+        return DB::table('vehicle_trip_logs as l')
+            ->join('transport_routes as tr', 'tr.id', '=', 'l.route_id')
+            ->where('l.vehicle_id', $this->vehicleId)
+            ->groupBy('tr.id', 'tr.code', 'tr.name', 'tr.is_active')
+            ->orderBy('tr.code')
+            ->limit(self::HISTORY_LIMIT)
+            ->select(['tr.id', 'tr.code', 'tr.name', 'tr.is_active'])
+            ->selectRaw('COUNT(l.id) as trip_count')
+            ->selectRaw('MAX(l.date) as last_trip_on')
+            ->selectSub(
+                DB::table('transport_allocations')
+                    ->whereColumn('route_id', 'tr.id')
+                    ->where('status', 'active')
+                    ->selectRaw('COUNT(*)'),
+                'active_allocations'
+            )
+            ->selectSub(
+                DB::table('transport_stops')->whereColumn('route_id', 'tr.id')->selectRaw('COUNT(*)'),
+                'stop_count'
+            )
+            ->get();
+    }
+
+    /**
+     * Students currently allocated to any route this vehicle runs - the
+     * closest the schema allows to a "manifest" (allocations are keyed to a
+     * route, not to a vehicle).
+     *
+     * @return \Illuminate\Support\Collection<int, stdClass>
+     */
+    private function assignedStudents(): \Illuminate\Support\Collection
+    {
+        $routeIds = $this->routesServed()->pluck('id')->all();
+
+        if ($routeIds === []) {
+            return collect();
+        }
+
+        return DB::table('transport_allocations as a')
+            ->join('enrollments as e', 'e.id', '=', 'a.enrollment_id')
+            ->join('students as s', 's.id', '=', 'e.student_id')
+            ->join('transport_routes as tr', 'tr.id', '=', 'a.route_id')
+            ->leftJoin('transport_stops as st', 'st.id', '=', 'a.stop_id')
+            ->whereIn('a.route_id', $routeIds)
+            ->where('a.status', 'active')
+            ->orderBy('tr.code')->orderBy('st.sequence')->orderBy('s.last_name')
+            ->limit(self::HISTORY_LIMIT * 4)
+            ->select([
+                'a.id', 'a.direction', 'a.starts_on',
+                's.id as student_id', 's.first_name', 's.last_name', 's.matricule',
+                'tr.code as route_code', 'st.name as stop_name', 'st.pickup_time', 'st.dropoff_time',
+            ])
+            ->get();
+    }
+
+    /**
      * @return \Illuminate\Support\Collection<int, stdClass>
      */
     private function tripLogs(): \Illuminate\Support\Collection
@@ -138,16 +217,43 @@ final class VehicleShow extends Component
         yield ['Insurance Expires', $vehicle->insurance_expires_on ?? '—'];
         yield ['Inspection Expires', $vehicle->inspection_expires_on ?? '—'];
         yield ['Current Driver', $driver?->name ?? '—'];
+        yield ['Routes Served', (string) $this->routesServed()->count()];
+        yield ['Students Allocated', (string) $this->assignedStudents()->count()];
     }
 
     public function render(): mixed
     {
+        $vehicle = $this->vehicleRow();
+        $tripLogs = $this->tripLogs();
+        $fuelLogs = $this->fuelLogs();
+        $maintenanceLogs = $this->maintenanceLogs();
+        $assigned = $this->assignedStudents();
+
+        $capacity = (int) $vehicle->capacity;
+        $allocated = $assigned->count();
+
         return view('livewire.welfare.transport.vehicle-show', [
-            'vehicle' => $this->vehicleRow(),
+            'vehicle' => $vehicle,
             'driver' => $this->currentDriver(),
-            'tripLogs' => $this->tripLogs(),
-            'fuelLogs' => $this->fuelLogs(),
-            'maintenanceLogs' => $this->maintenanceLogs(),
+            'driverHistory' => $this->driverHistory(),
+            'routes' => $this->routesServed(),
+            'assignedStudents' => $assigned,
+            'tripLogs' => $tripLogs,
+            'fuelLogs' => $fuelLogs,
+            'maintenanceLogs' => $maintenanceLogs,
+            'stats' => [
+                'capacity' => $capacity,
+                'allocated' => $allocated,
+                'seats_free' => max(0, $capacity - $allocated),
+                'utilisation_pct' => $capacity > 0 ? (int) round($allocated / $capacity * 100) : 0,
+                'distance_km' => (int) $tripLogs->sum(
+                    fn (stdClass $l): int => max(0, (int) $l->odometer_end - (int) $l->odometer_start)
+                ),
+                'litres' => (float) $fuelLogs->sum(fn (stdClass $l): float => (float) $l->litres),
+                'fuel_cost' => (int) $fuelLogs->sum(fn (stdClass $l): int => (int) $l->cost_amount),
+                'maintenance_cost' => (int) $maintenanceLogs->sum(fn (stdClass $l): int => (int) $l->cost_amount),
+                'last_service_on' => $maintenanceLogs->first()->date ?? null,
+            ],
         ]);
     }
 }

@@ -29,7 +29,7 @@
 
     {{-- Inline check-in panel (gate desk; no separate route). --}}
     @if ($showForm)
-        <section aria-label="Check in visitor" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <section aria-label="Check in visitor" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
             <h2 class="text-base font-semibold text-charcoal">Check In Visitor</h2>
 
             <form wire:submit="saveCheckIn" class="mt-4 space-y-4">
@@ -38,7 +38,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Visitor name</span>
                         <input id="visitor-form-name" type="text" wire:model="formName"
                                placeholder="e.g. Ngwa Franklin"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formName')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -48,7 +48,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Phone</span>
                         <input id="visitor-form-phone" type="text" wire:model="formPhone"
                                placeholder="e.g. 6 77 00 00 00"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formPhone')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -58,14 +58,14 @@
                         <span class="text-xs font-medium text-charcoal/70">ID document ref (optional, stored encrypted)</span>
                         <input id="visitor-form-idref" type="text" wire:model="formIdRef"
                                placeholder="National ID / passport no."
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
 
                     <label for="visitor-form-purpose" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Purpose of visit</span>
                         <input id="visitor-form-purpose" type="text" wire:model="formPurpose"
                                placeholder="e.g. Fee payment, parent meeting..."
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formPurpose')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -74,7 +74,7 @@
                     <label for="visitor-form-host-type" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Visiting</span>
                         <select id="visitor-form-host-type" wire:model.live="formHostType"
-                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
                             <option value="office">An office / desk</option>
                             <option value="staff">A staff member</option>
                             <option value="student">A student</option>
@@ -88,7 +88,7 @@
                             </span>
                             <input id="visitor-form-host-ref" type="text" wire:model="formHostRef"
                                    placeholder="{{ $formHostType === 'student' ? 'e.g. OS-26-A1B2C3D4' : 'e.g. bursar@school.cm' }}"
-                                   class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                             @error('formHostRef')
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
@@ -99,7 +99,7 @@
                         <span class="text-xs font-medium text-charcoal/70">Badge no.</span>
                         <input id="visitor-form-badge" type="text" wire:model="formBadge"
                                placeholder="e.g. V-07"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                         @error('formBadge')
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
@@ -108,7 +108,7 @@
                     <label for="visitor-form-checked-in" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Checked in at</span>
                         <input id="visitor-form-checked-in" type="datetime-local" wire:model="formCheckedInAt"
-                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
                 </div>
 
@@ -118,7 +118,7 @@
                         Check in
                     </button>
                     <button type="button" wire:click="toggleForm"
-                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
                         Cancel
                     </button>
                 </div>
@@ -167,7 +167,7 @@
             <label for="visitor-filter-host" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Visiting</span>
                 <select id="visitor-filter-host" wire:model.live="hostType"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All hosts</option>
                     @foreach ($hostTypeLabel as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
@@ -179,7 +179,7 @@
                 <span class="text-xs font-medium text-charcoal/70">Search</span>
                 <input id="visitor-filter-search" type="search" wire:model.live.debounce.400ms="search"
                        placeholder="Search name, badge, phone..."
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         </x-slot:filters>
 
@@ -238,7 +238,7 @@
         {{-- Mobile cards: the two or three fields that matter on a handset. --}}
         <x-slot:cards>
             @foreach ($rows as $row)
-                <article wire:key="visitor-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-sand bg-white p-3">
+                <article wire:key="visitor-card-{{ $tab }}-{{ $row->id }}" class="rounded border border-border-primary bg-white p-3">
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->visitor_name }}</p>
                         <x-status-pill :status="$row->checked_out_at === null ? 'amber' : 'ok'"
@@ -260,7 +260,7 @@
         {{-- Right rail: host-type bars + the oldest open visits. --}}
         <x-slot:rail>
             <div class="space-y-4">
-                <section aria-label="Visits by host type" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Visits by host type" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Visits by Host (30 days)</h3>
                     @php
                         $hostTotal = array_sum($hostBreakdown);
@@ -285,7 +285,7 @@
                     </ul>
                 </section>
 
-                <section aria-label="Longest on site" class="rounded border border-sand bg-white p-3">
+                <section aria-label="Longest on site" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Longest On Site</h3>
                     @if ($longestOnSite === [])
                         <p class="text-sm text-charcoal/60">Nobody is on site right now.</p>

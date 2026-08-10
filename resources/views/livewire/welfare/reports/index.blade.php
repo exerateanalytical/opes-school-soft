@@ -25,11 +25,11 @@
         <x-slot:actions>
             <div class="flex items-center gap-2 no-print">
                 <button type="button" wire:click="exportExcel"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export Excel
                 </button>
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -43,19 +43,19 @@
             <label for="wr-date-from" class="flex min-w-[9rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">From</span>
                 <input id="wr-date-from" type="date" wire:model.live="dateFrom"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <label for="wr-date-to" class="flex min-w-[9rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">To</span>
                 <input id="wr-date-to" type="date" wire:model.live="dateTo"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
 
             <label for="wr-status" class="flex min-w-[10rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Status</span>
                 <select id="wr-status" wire:model.live="status"
-                        class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                     <option value="">All</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -64,7 +64,7 @@
             </label>
 
             <button type="button" wire:click="resetFilters"
-                    class="self-end rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal no-print">
+                    class="self-end rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal no-print">
                 Reset
             </button>
         </x-slot:filters>

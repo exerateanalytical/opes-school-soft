@@ -173,6 +173,81 @@ final class CaseShow extends Component
         return $name === null ? null : (string) $name;
     }
 
+    /**
+     * The student's live guardian links - who is entitled to be told about
+     * this case at all, and how to reach them. Guardian visibility of the
+     * narrative itself is still governed by the case's `visibility` flag
+     * (07-students §row 20).
+     *
+     * @return \Illuminate\Support\Collection<int, stdClass>
+     */
+    private function guardians(int $studentId): \Illuminate\Support\Collection
+    {
+        return DB::table('student_guardians as sg')
+            ->join('guardians as g', 'g.id', '=', 'sg.guardian_id')
+            ->where('sg.student_id', $studentId)
+            ->whereNull('sg.valid_to')
+            ->orderByDesc('sg.is_primary')
+            ->limit(20)
+            ->select([
+                'sg.id', 'sg.relationship', 'sg.is_primary', 'sg.has_custody',
+                'sg.is_emergency_contact', 'sg.receives_reports',
+                'g.first_name', 'g.last_name', 'g.phone', 'g.email',
+            ])
+            ->get();
+    }
+
+    /**
+     * This student's other discipline entries, newest first - the
+     * cross-year history the sanction ladder is graded against
+     * (07-students §133).
+     *
+     * @return \Illuminate\Support\Collection<int, stdClass>
+     */
+    private function studentHistory(int $studentId): \Illuminate\Support\Collection
+    {
+        return DB::table('discipline_cases as c')
+            ->join('discipline_categories as cat', 'cat.id', '=', 'c.discipline_category_id')
+            ->where('c.student_id', $studentId)
+            ->where('c.id', '!=', $this->caseId)
+            ->orderByDesc('c.occurred_on')->orderByDesc('c.id')
+            ->limit(50)
+            ->select([
+                'c.id', 'c.occurred_on', 'c.status', 'c.is_positive',
+                'cat.name as category_name', 'cat.severity',
+            ])
+            ->selectSub(
+                DB::table('discipline_sanctions')
+                    ->whereColumn('discipline_case_id', 'c.id')
+                    ->selectRaw('COUNT(*)'),
+                'sanction_count'
+            )
+            ->get();
+    }
+
+    /**
+     * Names of the users who applied each sanction, keyed by sanction id -
+     * the audit half of the sanctions table.
+     *
+     * @return array<int, string>
+     */
+    private function sanctionAuthors(): array
+    {
+        /** @var \Illuminate\Support\Collection<int, stdClass> $rows */
+        $rows = DB::table('discipline_sanctions as s')
+            ->leftJoin('users as u', 'u.id', '=', 's.applied_by')
+            ->where('s.discipline_case_id', $this->caseId)
+            ->get(['s.id', 'u.name']);
+
+        $out = [];
+
+        foreach ($rows as $row) {
+            $out[(int) $row->id] = (string) ($row->name ?? '—');
+        }
+
+        return $out;
+    }
+
     private function userName(?int $userId): ?string
     {
         if ($userId === null) {
@@ -200,6 +275,9 @@ final class CaseShow extends Component
             'classGroupName' => $this->classGroupName($case->enrollment_id),
             'reporterName' => $this->userName($case->reported_by),
             'resolverName' => $this->userName($case->resolved_by),
+            'guardians' => $this->guardians($case->student_id),
+            'studentHistory' => $this->studentHistory($case->student_id),
+            'sanctionAuthors' => $this->sanctionAuthors(),
             'canManage' => $canManage,
             'suggestion' => $canManage && ! $case->is_positive
                 ? app(ApplySanction::class)->suggestionFor($this->caseId)
