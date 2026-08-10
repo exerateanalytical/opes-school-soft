@@ -27,6 +27,7 @@
 11. **A `NEEDS VERIFICATION` value in the specs (`docs/specs/*.md`) is never invented.** 00-core §16: "a wrong seeded value is more dangerous than an empty field, because it looks authoritative." If a real number is needed (DSF codes, CNPS rates, IRPP brackets, MINESEC specimens) and isn't in the specs, leave it unset and say so — don't guess.
 12. **Before any destructive git operation, `git status` first.** This session found a `mobile/` directory of the user's own in-progress mockup images sitting untracked in the repo root — never added, never touched. Always check for unfamiliar untracked content before a broad `git add`.
 13. **Never `git push`.** Commit locally only, unless explicitly told to push in that exact message.
+14. **Never pass `--env=testing` (or any `--env=`) to an artisan command in this repo.** There is no `.env.testing` file. Laravel does NOT error when the named env file is missing — it silently falls back to the real `.env`, whose `DB_DATABASE` is `opeschool`, the live demo database. On 2026-08-10 an agent ran `migrate:fresh --env=testing --force` to rebuild a corrupted test schema and it wiped the live `opeschool` DB instead (recovered from `storage/opes-backups/`, see git log around this date). The ONLY correct way to target the test database is the explicit env var prefix: `DB_DATABASE=opeschool_test php artisan ...`. Never use `--env=` for this, ever.
 
 ---
 
