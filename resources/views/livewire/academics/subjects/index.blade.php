@@ -163,7 +163,11 @@
                 </td>
                 @if ($canManage)
                     <td class="px-4 py-2.5">
-                        <div class="flex items-center justify-end">
+                        <div class="flex items-center justify-end gap-1">
+                            <button type="button" wire:click="toggleAllocations({{ $subject->id }})"
+                                    class="rounded px-2 py-1 text-xs font-medium text-charcoal/70 hover:bg-sand hover:text-primary">
+                                {{ __('opes.subjects_screen.allocations') }}
+                            </button>
                             <button type="button" wire:click="startEdit({{ $subject->id }})"
                                     title="{{ __('opes.subjects_screen.edit') }}"
                                     class="rounded p-1.5 text-charcoal/50 hover:bg-sand hover:text-primary">
@@ -176,6 +180,75 @@
                     </td>
                 @endif
             </tr>
+            @if ($canManage && $allocationsForSubjectId === $subject->id)
+                <tr wire:key="subject-allocations-{{ $subject->id }}">
+                    <td colspan="6" class="bg-sand/30 px-4 py-3">
+                        @if ($expandedAllocations->isEmpty())
+                            <p class="text-sm text-charcoal/60">{{ __('opes.subjects_screen.allocations_empty') }}</p>
+                        @else
+                            <div class="space-y-2">
+                                @foreach ($expandedAllocations as $allocation)
+                                    <div wire:key="allocation-{{ $allocation->id }}" class="rounded border border-sand bg-white p-3">
+                                        @if ($editingAllocationId === $allocation->id)
+                                            <form wire:submit="saveAllocation" class="space-y-3">
+                                                <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
+                                                    <label for="alloc-coefficient-{{ $allocation->id }}" class="flex flex-col gap-1">
+                                                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.coefficient_field') }}</span>
+                                                        <input id="alloc-coefficient-{{ $allocation->id }}" type="number" step="0.01" min="0" max="99.99"
+                                                               wire:model="allocCoefficient"
+                                                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                                        @error('allocCoefficient')
+                                                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                                        @enderror
+                                                    </label>
+                                                    <label for="alloc-optional-{{ $allocation->id }}" class="flex items-center gap-2 pt-5">
+                                                        <input id="alloc-optional-{{ $allocation->id }}" type="checkbox" wire:model="allocIsOptional"
+                                                               class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                        <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.is_optional_field') }}</span>
+                                                    </label>
+                                                    <label for="alloc-counts-{{ $allocation->id }}" class="flex items-center gap-2 pt-5">
+                                                        <input id="alloc-counts-{{ $allocation->id }}" type="checkbox" wire:model="allocCountsTowardAverage"
+                                                               class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                        <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.counts_toward_average_field') }}</span>
+                                                    </label>
+                                                </div>
+                                                <label for="alloc-active-{{ $allocation->id }}" class="flex items-center gap-2">
+                                                    <input id="alloc-active-{{ $allocation->id }}" type="checkbox" wire:model="allocIsActive"
+                                                           class="h-4 w-4 rounded border-sand text-primary focus:ring-primary"/>
+                                                    <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.status_active') }}</span>
+                                                </label>
+                                                <div class="flex items-center gap-2 border-t border-sand pt-3">
+                                                    <button type="submit"
+                                                            class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                                        {{ __('opes.subjects_screen.save') }}
+                                                    </button>
+                                                    <button type="button" wire:click="cancelAllocationForm"
+                                                            class="rounded border border-sand px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                                        {{ __('opes.subjects_screen.cancel') }}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        @else
+                                            <div class="flex items-center justify-between gap-2">
+                                                <div class="text-sm text-charcoal">
+                                                    <span class="font-medium">
+                                                        {{ $allocation->classLevel !== null ? (app()->getLocale() === 'fr' ? $allocation->classLevel->name_fr : $allocation->classLevel->name) : '—' }}
+                                                    </span>
+                                                    <span class="text-charcoal/60">— {{ __('opes.subjects_screen.coefficient_field') }}: {{ $allocation->coefficient }}</span>
+                                                </div>
+                                                <button type="button" wire:click="startEditAllocation({{ $allocation->id }})"
+                                                        class="text-sm font-medium text-primary hover:underline">
+                                                    {{ __('opes.subjects_screen.edit') }}
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+            @endif
         @endforeach
 
         <x-slot:cards>

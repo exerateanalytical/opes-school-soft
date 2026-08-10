@@ -68,14 +68,13 @@
 
     <div class="flex flex-wrap items-start justify-between gap-3">
         <h1 class="min-w-0 text-xl font-semibold text-charcoal">{{ __('opes.guardians_screen.title') }}</h1>
-        {{-- 7.6: an edit control that did not close-and-succeed the link row,
-             audit the before/after flags and revoke the portal session would
-             break exactly the trail that section exists to protect. --}}
-        <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-              class="cursor-not-allowed rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal/40">
-            {{ __('opes.guardians_screen.read_only_notice') }}
-        </span>
     </div>
+
+    @if (session('status'))
+        <div class="rounded border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm text-charcoal">
+            {{ session('status') }}
+        </div>
+    @endif
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
@@ -303,8 +302,9 @@
                                     $validity = LinkPresentation::validity($link);
                                     $flags = LinkPresentation::flags($link);
                                     $scopes = LinkPresentation::scopes($link);
+                                    $linkOpen = $link->valid_to === null;
                                 @endphp
-                                <tr wire:key="guardian-link-{{ $link->id }}">
+                                <tr wire:key="guardian-link-{{ $link->id }}-row">
                                     <td class="px-4 py-2.5">
                                         <div class="flex items-center gap-2.5">
                                             <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase text-white">
@@ -350,14 +350,90 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-2.5 text-right">
-                                        <a href="{{ route('students.show', $link->student_id) }}"
-                                           title="{{ __('opes.guardians_screen.view_student') }}"
-                                           class="inline-flex rounded p-1.5 text-charcoal/50 hover:bg-sand hover:text-primary">
-                                            <span class="sr-only">{{ __('opes.guardians_screen.view_student') }}</span>
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        </a>
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a href="{{ route('students.show', $link->student_id) }}"
+                                               title="{{ __('opes.guardians_screen.view_student') }}"
+                                               class="inline-flex rounded p-1.5 text-charcoal/50 hover:bg-sand hover:text-primary">
+                                                <span class="sr-only">{{ __('opes.guardians_screen.view_student') }}</span>
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </a>
+                                            @if ($canManageGuardians && $linkOpen)
+                                                <button type="button" wire:click="toggleAuthorizationForm({{ $link->id }})"
+                                                        title="Edit authorization"
+                                                        class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/50">
+                                                    Edit
+                                                </button>
+                                                <button type="button" wire:click="toggleUnlinkForm({{ $link->id }})"
+                                                        title="Unlink"
+                                                        class="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50">
+                                                    Unlink
+                                                </button>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
+
+                                @if ($canManageGuardians && $showUnlinkForm && $unlinkLinkId === $link->id)
+                                    <tr wire:key="guardian-link-{{ $link->id }}-unlink">
+                                        <td colspan="6" class="bg-sand/20 px-4 py-3">
+                                            <form wire:submit.prevent="unlinkGuardian" class="space-y-2">
+                                                <label class="flex flex-col gap-1">
+                                                    <span class="text-xs font-medium text-charcoal/70">Reason for ending this link</span>
+                                                    <input type="text" wire:model="unlinkReason"
+                                                           class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                                                    @error('unlinkReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                                                </label>
+                                                <div class="flex justify-end gap-2">
+                                                    <button type="button" wire:click="toggleUnlinkForm"
+                                                            class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="submit"
+                                                            class="rounded bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">
+                                                        End Link
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endif
+
+                                @if ($canManageGuardians && $showAuthorizationForm && $authorizationLinkId === $link->id)
+                                    <tr wire:key="guardian-link-{{ $link->id }}-auth">
+                                        <td colspan="6" class="bg-sand/20 px-4 py-3">
+                                            <form wire:submit.prevent="setAuthorization" class="space-y-3">
+                                                <div class="flex flex-wrap gap-4 text-sm text-charcoal/80">
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authHasCustody"/> Custody</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authIsPrimary"/> Primary guardian</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authReceivesReports"/> Receives reports</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authReceivesInvoices"/> Receives invoices</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authIsEmergencyContact"/> Emergency contact</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authIsAuthorisedForPickup"/> Authorised for pickup</label>
+                                                    <label class="flex items-center gap-1.5"><input type="checkbox" wire:model="authIsFeePayer"/> Fee payer</label>
+                                                </div>
+                                                <label class="flex flex-col gap-1">
+                                                    <span class="text-xs font-medium text-charcoal/70">Reason for this change</span>
+                                                    <input type="text" wire:model="authorizationReason"
+                                                           class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                                                    @error('authorizationReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                                                </label>
+                                                <p class="text-xs text-charcoal/55">
+                                                    Saving closes the current link today and starts a new one tomorrow with these flags, unless this link has not started yet.
+                                                </p>
+                                                <div class="flex justify-end gap-2">
+                                                    <button type="button" wire:click="toggleAuthorizationForm"
+                                                            class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/50">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="submit"
+                                                            class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90">
+                                                        Save Authorization
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endif
                             @endforeach
                         </tbody>
                     </table>

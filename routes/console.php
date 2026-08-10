@@ -46,3 +46,13 @@ Schedule::call(static function (): void {
     app(\App\Modules\Library\Actions\AccrueOverdueFines::class)->handle($today, $system);
     app(\App\Modules\Library\Actions\ExpireReservations::class)->handle($today, $system);
 })->dailyAt('01:45')->name('opes-library-nightly');
+
+
+// 08-operations 11.1 - drain the outbox. Safe at any frequency: DispatchOutbox
+// claims each row under lockForUpdate and spends the attempt BEFORE calling the
+// driver, so an overlapping run cannot double-send and a poison message cannot
+// loop forever. withoutOverlapping is belt-and-braces, not the safety mechanism.
+Schedule::command('opes:outbox:dispatch')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->name('opes-outbox-dispatch');

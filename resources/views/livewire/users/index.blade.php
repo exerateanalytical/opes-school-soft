@@ -43,7 +43,7 @@
                     </a>
                 @endcan
             </li>
-            @foreach (['Assign Role', 'User Permissions', 'Activity Log'] as $unbuilt)
+            @foreach (['User Permissions', 'Activity Log'] as $unbuilt)
                 <li>
                     <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
                           class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
@@ -152,19 +152,86 @@
             </td>
             <td class="px-4 py-2.5 text-charcoal/70">{{ __('opes.users.never_logged_in') }}</td>
             <td class="px-4 py-2.5">
-                <div class="flex items-center justify-end gap-1 text-charcoal/50">
-                    <span class="rounded p-1.5" title="{{ __('opes.users.column_actions') }}">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </span>
-                    <span class="rounded p-1.5">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                    </span>
-                    <span class="rounded p-1.5">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
-                    </span>
+                <div class="flex flex-wrap items-center justify-end gap-1 text-xs">
+                    @can('role.assign')
+                        <button type="button" wire:click="toggleRoleForm({{ $user->id }})"
+                                class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                            {{ __('opes.users.change_role') }}
+                        </button>
+                    @endcan
+                    @can('user.set_password')
+                        <button type="button" wire:click="togglePasswordForm({{ $user->id }})"
+                                class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                            {{ __('opes.users.reset_password') }}
+                        </button>
+                    @endcan
+                    @can('api.manage_tokens')
+                        <a href="{{ route('users.tokens', $user) }}"
+                           class="rounded border border-sand px-2 py-1 font-medium text-charcoal hover:bg-sand/40">
+                            {{ __('opes.users.api_tokens') }}
+                        </a>
+                    @endcan
                 </div>
             </td>
         </tr>
+
+        @if ($roleFormUserId === $user->id)
+            <tr>
+                <td colspan="5" class="border-t-0 bg-sand/20 px-4 py-3">
+                    <form wire:submit.prevent="changeRole({{ $user->id }})" class="flex flex-wrap items-end gap-3">
+                        <label for="role-select-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.role_field_label') }}</span>
+                            <select id="role-select-{{ $user->id }}" wire:model="selectedRole"
+                                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                <option value="">{{ __('opes.users.role_placeholder') }}</option>
+                                @foreach ($roleOptions as $roleOption)
+                                    <option value="{{ $roleOption->value }}">{{ $roleOption->label(app()->getLocale()) }}</option>
+                                @endforeach
+                            </select>
+                            @error('selectedRole')
+                                <span class="text-xs text-heritage-red">{{ $message }}</span>
+                            @enderror
+                        </label>
+                        <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            {{ __('opes.users.save') }}
+                        </button>
+                        <button type="button" wire:click="toggleRoleForm({{ $user->id }})"
+                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
+                            {{ __('opes.users.cancel') }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        @endif
+
+        @if ($passwordFormUserId === $user->id)
+            <tr>
+                <td colspan="5" class="border-t-0 bg-sand/20 px-4 py-3">
+                    <form wire:submit.prevent="setPassword({{ $user->id }})" class="flex flex-wrap items-end gap-3">
+                        <label for="new-password-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.new_password_label') }}</span>
+                            <input id="new-password-{{ $user->id }}" type="password" wire:model="newPassword"
+                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                            @error('newPassword')
+                                <span class="text-xs text-heritage-red">{{ $message }}</span>
+                            @enderror
+                        </label>
+                        <label for="new-password-confirm-{{ $user->id }}" class="flex min-w-[10rem] flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.users.new_password_confirmation_label') }}</span>
+                            <input id="new-password-confirm-{{ $user->id }}" type="password" wire:model="newPasswordConfirmation"
+                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                        </label>
+                        <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            {{ __('opes.users.save') }}
+                        </button>
+                        <button type="button" wire:click="togglePasswordForm({{ $user->id }})"
+                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand/40">
+                            {{ __('opes.users.cancel') }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        @endif
     @endforeach
 
     <x-slot:cards>

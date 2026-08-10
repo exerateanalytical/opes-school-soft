@@ -12,6 +12,110 @@
         <p class="text-sm text-charcoal/70">Status: {{ $declaration->status->value }}</p>
     </div>
 
+    @if (session('status'))
+        <div class="rounded border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <div class="flex flex-wrap gap-2">
+        @if ($declaration->status->isFileable())
+            <button type="button" wire:click="toggleFileForm" class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                {{ $showFileForm ? 'Cancel filing' : ($isDsf ? 'Record DSF filing' : 'File declaration') }}
+            </button>
+        @endif
+        @if ($declaration->status->isFiled() && $declaration->amends_declaration_id === null)
+            <button type="button" wire:click="toggleAmendForm" class="rounded border border-sand px-3 py-1.5 text-sm font-semibold text-charcoal">
+                {{ $showAmendForm ? 'Cancel amendment' : 'Amend declaration' }}
+            </button>
+        @endif
+        @if ($isWithholding)
+            <button type="button" wire:click="toggleAttestationForm" class="rounded border border-sand px-3 py-1.5 text-sm font-semibold text-charcoal">
+                {{ $showAttestationForm ? 'Cancel attestation' : 'Issue withholding attestation' }}
+            </button>
+        @endif
+    </div>
+
+    @if ($showFileForm)
+        <form wire:submit="file" class="space-y-3 rounded border border-sand bg-white p-4">
+            @error('fileExternalReference') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+            <div class="grid gap-3 sm:grid-cols-2">
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Filing channel</span>
+                    <select wire:model="fileChannel" class="rounded border border-sand px-2 py-1.5 text-sm">
+                        <option value="impots_cm">impots_cm</option>
+                        <option value="paper">paper</option>
+                        <option value="other">other</option>
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">DGI acknowledgement reference</span>
+                    <input type="text" wire:model="fileExternalReference" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+            </div>
+            <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Confirm filing</button>
+        </form>
+    @endif
+
+    @if ($showAmendForm)
+        <form wire:submit="amend" class="space-y-3 rounded border border-sand bg-white p-4">
+            @error('amendReason') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+            <label class="flex flex-col gap-1">
+                <span class="text-xs font-medium text-charcoal/70">Amendment reason</span>
+                <textarea wire:model="amendReason" rows="3" class="rounded border border-sand px-2 py-1.5 text-sm"></textarea>
+            </label>
+            <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Generate amendment</button>
+        </form>
+    @endif
+
+    @if ($showAttestationForm)
+        <form wire:submit="issueAttestation" class="space-y-3 rounded border border-sand bg-white p-4">
+            @error('attWithheldAmount') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+            <div class="grid gap-3 sm:grid-cols-3">
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Supplier ID</span>
+                    <input type="number" wire:model="attSupplierId" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Source</span>
+                    <select wire:model="attSourceType" class="rounded border border-sand px-2 py-1.5 text-sm">
+                        <option value="invoice">Supplier invoice</option>
+                        <option value="payment">Supplier payment</option>
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Source document ID</span>
+                    <input type="number" wire:model="attSourceId" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Withholding rule ID</span>
+                    <input type="number" wire:model="attWithholdingRuleId" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Period year</span>
+                    <input type="number" wire:model="attPeriodYear" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Period month</span>
+                    <input type="number" min="1" max="12" wire:model="attPeriodMonth" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Base amount</span>
+                    <input type="number" wire:model="attBaseAmount" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Rate applied (basis points)</span>
+                    <input type="number" wire:model="attRateBpApplied" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Withheld amount</span>
+                    <input type="number" wire:model="attWithheldAmount" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                </label>
+            </div>
+            <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Issue attestation</button>
+        </form>
+    @endif
+
     @if ($unmappedForm)
         <p class="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             Not yet mapped to the official form: the DGI form box codes are unverified, so the lines below

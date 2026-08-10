@@ -140,11 +140,68 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
         ->middleware('can:students.view')->name('students.show');
 
+    /*
+     * Guardians directory - built and module-tested but never routed/wired
+     * into the sidebar; this closes that gap the same way the Welfare block
+     * further down does. MUST be registered before `/guardians/{guardian}`
+     * below, same ordering reason as `/students/promotion` above.
+     */
+    Route::get('/guardians', \App\Modules\Guardians\Livewire\Guardians\Index::class)
+        ->middleware('can:guardians.manage')->name('guardians.index');
+
     Route::get('/guardians/{guardian}', \App\Modules\Guardians\Livewire\Guardians\Show::class)
         ->middleware('can:students.view')->name('guardians.show');
 
-    Route::get('/admissions', \App\Modules\Admissions\Livewire\Wizard::class)
+    /*
+     * 07-students §6.2: the registrar's landing page is the application
+     * QUEUE, not the intake wizard. /admissions used to drop straight into
+     * the wizard, so a submitted application could be created but never
+     * triaged. The wizard keeps its own URL and is now reached from the
+     * queue (or directly, for a fresh intake).
+     */
+    Route::get('/admissions', \App\Modules\Admissions\Livewire\Index::class)
         ->middleware('can:admissions.manage')->name('admissions.index');
+
+    Route::get('/admissions/wizard', \App\Modules\Admissions\Livewire\Wizard::class)
+        ->middleware('can:admissions.manage')->name('admissions.wizard');
+
+    /*
+     * 09-ui §8.11: the audit log has always been written and hash-chained;
+     * it simply had no viewer. "An un-viewable audit log satisfies no
+     * auditor." Chain verification runs the existing VerifyAuditChain.
+     */
+    Route::get('/audit-log', \App\Modules\Identity\Livewire\AuditLog\Index::class)
+        ->middleware('can:audit.view')->name('audit.index');
+
+    /*
+     * 08-operations §3.8: the backup engine and its drills have always
+     * existed as artisan commands only, so restore was CLI-only and the
+     * dashboard could nag about a missing backup with no button to press.
+     * Restore itself stays gated on backup.restore (withheld even from
+     * Administrator by Role::defaultPermissions) and is surfaced, not
+     * automated.
+     */
+    Route::get('/operations/backups', \App\Modules\Operations\Livewire\Backups\Index::class)
+        ->middleware('can:backup.run')->name('operations.backups');
+
+    /*
+     * 10-documents §18: bulk print jobs. The table shipped in Phase 13 with
+     * no model, Action or screen behind it.
+     */
+    Route::get('/documents/bulk-prints', \App\Modules\Reporting\Livewire\BulkPrints\Index::class)
+        ->middleware('can:documents.bulk_print')->name('documents.bulk-prints');
+
+    /*
+     * Communication outbox (08-operations §11.1). The tables shipped in
+     * Phase 12 with no code behind them, so every "degrades to a queued
+     * outbox" promise in the specs degraded to nothing. The SMS gateway
+     * itself stays deferred - this is the outbox and its log driver.
+     */
+    Route::get('/communication/outbox', \App\Modules\Communication\Livewire\Outbox\Index::class)
+        ->middleware('can:communication.view')->name('communication.outbox');
+
+    Route::get('/communication/templates', \App\Modules\Communication\Livewire\Templates\Index::class)
+        ->middleware('can:communication.view')->name('communication.templates');
 
     /*
      * Marks entry, docs/specs/01-assessment.md 17. The single highest-traffic
@@ -156,6 +213,22 @@ Route::middleware('auth')->group(function (): void {
      * T22 treats reaching an unassigned allocation as a failure even for a
      * user who holds the permission.
      */
+    /*
+     * Examinations (scheduling) and Results (computed results/statistics) -
+     * built and module-tested but never routed/wired into the sidebar.
+     * Registered before /marks so ordering matches the rest of this file's
+     * convention of specific-before-parameterised, though neither collides
+     * with /marks in practice.
+     */
+    Route::get('/examinations', \App\Modules\Assessment\Livewire\Examinations\Index::class)
+        ->middleware('can:assessment.configure')->name('assessment.examinations.index');
+
+    Route::get('/examinations/{exam}', \App\Modules\Assessment\Livewire\Examinations\Show::class)
+        ->middleware('can:assessment.configure')->whereNumber('exam')->name('assessment.examinations.show');
+
+    Route::get('/results', \App\Modules\Assessment\Livewire\Results\Index::class)
+        ->middleware('can:academics.view')->name('assessment.results.index');
+
     Route::get('/marks', \App\Modules\Assessment\Livewire\Marks\Entry::class)
         ->middleware('can:marks.enter')->name('marks.entry');
 
@@ -198,6 +271,14 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/finance/cashier', \App\Modules\Fees\Livewire\Cashier::class)
         ->middleware('can:fee.view')->name('fees.cashier');
+
+    /*
+     * Cash-desk close-out sheet (04-fees §11.7): opening float, the session's
+     * own collections, expected vs counted, and the variance with its written
+     * reason. Read-only - opening and closing happen on the Cashier screen.
+     */
+    Route::get('/finance/cash-desk/{session}', \App\Modules\Fees\Livewire\CashDesk\Show::class)
+        ->middleware('can:fee.view')->whereNumber('session')->name('fees.cashdesk.show');
 
     Route::get('/finance/statement/{student}', \App\Modules\Fees\Livewire\Statement::class)
         ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement');
@@ -252,6 +333,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/procurement/orders/capture', \App\Modules\Procurement\Livewire\PurchaseOrders\Edit::class)
         ->middleware('can:procurement.order_manage')->name('procurement.orders.capture');
 
+    Route::get('/procurement/orders/{order}', \App\Modules\Procurement\Livewire\PurchaseOrders\Show::class)
+        ->middleware('can:procurement.view')->whereNumber('order')->name('procurement.orders.show');
+
     Route::get('/procurement/receipts', \App\Modules\Procurement\Livewire\GoodsReceipts\Index::class)
         ->middleware('can:procurement.view')->name('procurement.receipts.index');
 
@@ -261,11 +345,17 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/procurement/invoices/capture', \App\Modules\Procurement\Livewire\SupplierInvoices\Capture::class)
         ->middleware('can:procurement.invoice_create')->name('procurement.invoices.capture');
 
+    Route::get('/procurement/invoices/{invoice}', \App\Modules\Procurement\Livewire\SupplierInvoices\Show::class)
+        ->middleware('can:procurement.invoice_view')->whereNumber('invoice')->name('procurement.invoices.show');
+
     Route::get('/procurement/payments', \App\Modules\Procurement\Livewire\Payments\Index::class)
         ->middleware('can:procurement.payment_record')->name('procurement.payments.index');
 
     Route::get('/procurement/payments/pay', \App\Modules\Procurement\Livewire\Payments\Pay::class)
         ->middleware('can:procurement.payment_record')->name('procurement.payments.pay');
+
+    Route::get('/procurement/payments/{payment}', \App\Modules\Procurement\Livewire\Payments\Show::class)
+        ->middleware('can:procurement.payment_record')->whereNumber('payment')->name('procurement.payments.show');
 
     Route::get('/procurement/payables', \App\Modules\Procurement\Livewire\PayablesDashboard::class)
         ->middleware('can:procurement.view')->name('procurement.payables');
@@ -298,6 +388,16 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/settings/tax', \App\Modules\Tax\Livewire\TaxConfiguration::class)
         ->middleware('can:ledger.configure')->name('tax.settings');
+
+    /*
+     * Settings (SchoolProfile's generic engine-configuration store) - built
+     * and module-tested but never routed/wired into the sidebar. Read-only
+     * for this pass (WriteSetting's locking/validation/audit contract needs
+     * its own dedicated screen, not squeezed in here). Gated on setting.view,
+     * matching Navigation::items()'s `settings` entry.
+     */
+    Route::get('/settings', \App\Modules\SchoolProfile\Livewire\Index::class)
+        ->middleware('can:setting.view')->name('settings.index');
 
     /*
      * Withholding Attestation print button, 03-tax-procurement §6.6 /
@@ -353,6 +453,184 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/welfare/discipline/{case}', \App\Modules\Welfare\Livewire\Discipline\CaseShow::class)
         ->middleware('can:discipline.view')->whereNumber('case')->name('welfare.discipline.show');
+
+    /*
+     * Welfare (Phase 10): transport, hostel, medical, visitors, insurance.
+     * Screens were built in the overnight session but never routed/wired
+     * into the sidebar - this pass closes that gap. Gated on each module's
+     * `.view` permission, matching Navigation::items() below, per this
+     * file's nav-and-route-agree-by-construction contract.
+     */
+    Route::get('/transport', \App\Modules\Welfare\Livewire\Transport\Index::class)
+        ->middleware('can:transport.view')->name('welfare.transport.index');
+
+    Route::get('/transport/vehicles/{vehicle}', \App\Modules\Welfare\Livewire\Transport\VehicleShow::class)
+        ->middleware('can:transport.view')->whereNumber('vehicle')->name('transport.vehicles.show');
+
+    Route::get('/hostel', \App\Modules\Welfare\Livewire\Hostel\Index::class)
+        ->middleware('can:hostel.view')->name('welfare.hostel.index');
+
+    Route::get('/hostel/rooms/{room}', \App\Modules\Welfare\Livewire\Hostel\RoomShow::class)
+        ->middleware('can:hostel.view')->whereNumber('room')->name('hostel.rooms.show');
+
+    Route::get('/medical', \App\Modules\Welfare\Livewire\Medical\Index::class)
+        ->middleware('can:medical.view')->name('welfare.medical.index');
+
+    Route::get('/visitors', \App\Modules\Welfare\Livewire\Visitors\Index::class)
+        ->middleware('can:visitor.manage')->name('welfare.visitors.index');
+
+    Route::get('/insurance', \App\Modules\Welfare\Livewire\Insurance\Index::class)
+        ->middleware('can:insurance.view')->name('welfare.insurance.index');
+
+    Route::get('/welfare/insurance/policies/{policy}', \App\Modules\Welfare\Livewire\Insurance\PolicyShow::class)
+        ->middleware('can:insurance.view')->whereNumber('policy')->name('insurance.policies.show');
+
+    /*
+     * Phase 9 (Assets/Inventory/Library) and Phase 11 (HR/Payroll): screens
+     * built and module-tested overnight but never routed/wired into the
+     * sidebar - this pass closes that gap, same as the Welfare block above.
+     * Gated on each module's `.view` permission, matching Navigation::items().
+     */
+    Route::get('/assets', \App\Modules\Assets\Livewire\Index::class)
+        ->middleware('can:asset.view')->name('assets.index');
+
+    Route::get('/assets/{asset}', \App\Modules\Assets\Livewire\Show::class)
+        ->middleware('can:asset.view')->whereNumber('asset')->name('assets.show');
+
+    Route::get('/inventory', \App\Modules\Inventory\Livewire\Index::class)
+        ->middleware('can:inventory.view')->name('inventory.index');
+
+    Route::get('/inventory/items/{item}', \App\Modules\Inventory\Livewire\Show::class)
+        ->middleware('can:inventory.view')->whereNumber('item')->name('inventory.items.show');
+
+    Route::get('/library', \App\Modules\Library\Livewire\Index::class)
+        ->middleware('can:library.view')->name('library.index');
+
+    Route::get('/library/books/{book}', \App\Modules\Library\Livewire\BookShow::class)
+        ->middleware('can:library.view')->whereNumber('book')->name('library.books.show');
+
+    Route::get('/library/members/{member}', \App\Modules\Library\Livewire\MemberShow::class)
+        ->middleware('can:library.view')->whereNumber('member')->name('library.members.show');
+
+    Route::get('/staff', \App\Modules\HR\Livewire\Index::class)
+        ->middleware('can:staff.view')->name('hr.index');
+
+    Route::get('/payroll', \App\Modules\Payroll\Livewire\Index::class)
+        ->middleware('can:payroll.view')->name('payroll.index');
+
+    Route::get('/payroll/runs/{run}', \App\Modules\Payroll\Livewire\Show::class)
+        ->middleware('can:payroll.view')->whereNumber('run')->name('payroll.runs.show');
+
+    /*
+     * Reports hub (2026-08 build): the directory screen. Individual report
+     * cluster screens (reports.academic, reports.assessment, ...) register
+     * their own routes below/nearby as they ship; the hub lists only the
+     * ones that exist (Route::has() guard in Hub::categories()).
+     */
+    Route::get('/reports', \App\Modules\Reporting\Livewire\Reports\Hub::class)
+        ->middleware('can:reports.view')->name('reports.hub');
+
+    Route::get('/reports/academic', \App\Modules\Academics\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.academic');
+
+    Route::get('/reports/financial', \App\Modules\Accounting\Livewire\Reports\Index::class)
+        ->middleware('can:ledger.view')->name('reports.financial');
+
+    /*
+     * Finance Dashboard (02-accounting §21.3) - the accountant's overview:
+     * KPIs with period-over-period deltas, income/expense charts, collection
+     * donut, top outstanding, and the treasury position split by float
+     * (cash / bank / MTN / Orange) rather than lumped together.
+     */
+    Route::get('/finance/dashboard', \App\Modules\Accounting\Livewire\FinanceDashboard::class)
+        ->middleware('can:ledger.view')->name('finance.dashboard');
+
+    /*
+     * The OHADA/SYSCOHADA statements themselves (02-accounting §14.2/§17.7):
+     * Bilan, Compte de resultat, Tableau des flux, plus prior-period
+     * comparatives. Separate from /reports/financial, which carries the
+     * working reports (trial balance, general ledger, journal register).
+     */
+    Route::get('/reports/statements', \App\Modules\Accounting\Livewire\Statements\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.statements');
+
+    /*
+     * Year-end console (02-accounting §17/§18): the checklist, the closing
+     * entry, result appropriation and the a-nouveaux carry-forward. Without
+     * this the ledger could never enter a second fiscal year.
+     */
+    Route::get('/accounting/year-end', \App\Modules\Accounting\Livewire\YearEnd\Console::class)
+        ->middleware('can:ledger.view')->name('accounting.year-end');
+
+    /*
+     * Bank / mobile-money reconciliation (02-accounting §13). Each float
+     * reconciles against its own operator statement - which is the whole
+     * point of having split MTN 5521 from Orange 5522 in the first place.
+     */
+    Route::get('/accounting/reconciliation', \App\Modules\Accounting\Livewire\Reconciliation\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.reconciliation');
+
+    /*
+     * Budget and budget-vs-actual (02-accounting §16). Also what finally
+     * gives chart_of_accounts.budget_control a reader - the column has
+     * shipped seeded since Phase 4 with nothing consuming it.
+     */
+    Route::get('/accounting/budgets', \App\Modules\Accounting\Livewire\Budgets\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.budgets');
+
+    /*
+     * Expense capture (02-accounting §21.3) - the petty, unregistered,
+     * cash-and-receipt spend that never goes through a supplier invoice.
+     * Recording and approving are DIFFERENT rights on purpose: the
+     * maker-checker split is the control, so they are gated separately.
+     */
+    Route::get('/accounting/expenses', \App\Modules\Accounting\Livewire\Expenses\Index::class)
+        ->middleware('can:ledger.view')->name('accounting.expenses.index');
+
+    Route::get('/accounting/expenses/{expense}', \App\Modules\Accounting\Livewire\Expenses\Show::class)
+        ->middleware('can:ledger.view')->whereNumber('expense')->name('accounting.expenses.show');
+
+    /*
+     * Report card and payslip, rendered through the shared RenderDocument
+     * pipeline and returned INLINE so the operator previews before printing
+     * (the same behaviour the fee money-documents already have). The harder
+     * documents.print / documents.reprint gates are enforced inside
+     * RenderDocument itself, so the route carries only the read gate.
+     */
+    Route::get('/assessment/report-cards/{enrollment}/{period}/print', \App\Modules\Assessment\Http\Controllers\PrintReportCardController::class)
+        ->middleware('can:academics.view')->whereNumber('enrollment')->whereNumber('period')
+        ->name('assessment.report-cards.print');
+
+    Route::get('/payroll/payslips/{payrollItem}/print', \App\Modules\Payroll\Http\Controllers\PrintPayslipController::class)
+        ->middleware('can:payroll.view')->whereNumber('payrollItem')
+        ->name('payroll.payslips.print');
+
+    Route::get('/reports/assessment', \App\Modules\Assessment\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.assessment');
+
+    Route::get('/reports/fees', \App\Modules\Fees\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.fees');
+
+    Route::get('/reports/hr', \App\Modules\HR\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.hr');
+
+    Route::get('/reports/procurement', \App\Modules\Procurement\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.procurement');
+
+    Route::get('/reports/library', \App\Modules\Library\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.library');
+
+    Route::get('/reports/students-guardians', \App\Modules\Students\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.students-guardians');
+
+    Route::get('/reports/welfare', \App\Modules\Welfare\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.welfare');
+
+    Route::get('/reports/assets-inventory', \App\Modules\Assets\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.assets-inventory');
+
+    Route::get('/reports/tax', \App\Modules\Tax\Livewire\Reports\Index::class)
+        ->middleware('can:reports.view')->name('reports.tax');
 
     /*
      * Scheduled modules. Every sidebar item is a real link: modules not yet

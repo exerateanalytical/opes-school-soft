@@ -35,9 +35,11 @@
         {{-- Inline create panel (only `classes.index` is routed; creation
              happens on the list screen itself). --}}
         @if ($showForm && $canManage)
-            <section aria-label="{{ __('opes.classes_screen.form_title') }}"
+            <section aria-label="{{ $editingGroupId === null ? __('opes.classes_screen.form_title') : __('opes.classes_screen.form_edit_title') }}"
                      class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
-                <h2 class="text-base font-semibold text-charcoal">{{ __('opes.classes_screen.form_title') }}</h2>
+                <h2 class="text-base font-semibold text-charcoal">
+                    {{ $editingGroupId === null ? __('opes.classes_screen.form_title') : __('opes.classes_screen.form_edit_title') }}
+                </h2>
 
                 <form wire:submit="save" class="mt-4 space-y-4">
                     <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -92,6 +94,20 @@
                                 <span class="text-xs text-heritage-red">{{ $message }}</span>
                             @enderror
                         </label>
+
+                        @if ($editingGroupId !== null)
+                            <label for="class-status" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.column_status') }}</span>
+                                <select id="class-status" wire:model="groupStatus"
+                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    <option value="active">{{ __('opes.classes_screen.status_active') }}</option>
+                                    <option value="inactive">{{ __('opes.classes_screen.status_inactive') }}</option>
+                                </select>
+                                @error('groupStatus')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                        @endif
                     </div>
 
                     <div class="flex items-center gap-2 border-t border-sand pt-4">
@@ -157,6 +173,9 @@
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_stream') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_capacity') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_status') }}</th>
+                    @if ($canManage)
+                        <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.subjects_screen.column_actions') }}</th>
+                    @endif
                 </tr>
             </x-slot:head>
 
@@ -174,6 +193,20 @@
                         <x-status-pill :status="$classGroup->status === 'active' ? 'ok' : 'red'"
                                        :label="$classGroup->status === 'active' ? __('opes.classes_screen.status_active') : __('opes.classes_screen.status_inactive')"/>
                     </td>
+                    @if ($canManage)
+                        <td class="px-4 py-2.5">
+                            <div class="flex items-center justify-end">
+                                <button type="button" wire:click="startEditGroup({{ $classGroup->id }})"
+                                        title="{{ __('opes.subjects_screen.edit') }}"
+                                        class="rounded p-1.5 text-charcoal/50 hover:bg-sand hover:text-primary">
+                                    <span class="sr-only">{{ __('opes.subjects_screen.edit') }}</span>
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    @endif
                 </tr>
             @endforeach
 
@@ -199,6 +232,14 @@
                                 <dd>{{ $classGroup->capacity }}</dd>
                             </div>
                         </dl>
+                        @if ($canManage)
+                            <div class="mt-2 border-t border-sand pt-2">
+                                <button type="button" wire:click="startEditGroup({{ $classGroup->id }})"
+                                        class="text-sm font-medium text-primary hover:underline">
+                                    {{ __('opes.subjects_screen.edit') }}
+                                </button>
+                            </div>
+                        @endif
                     </article>
                 @endforeach
             </x-slot:cards>

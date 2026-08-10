@@ -22,6 +22,290 @@
     ];
 @endphp
 
+@if (session('status'))
+    <p class="mb-4 rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary" role="status">
+        {{ session('status') }}
+    </p>
+@endif
+
+{{-- Inline enroll-students panel. --}}
+@if ($showEnrollForm)
+    <section aria-label="Enroll students" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <h2 class="text-base font-semibold text-charcoal">Enroll Students in Policy</h2>
+
+        <form wire:submit="saveEnrollment" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <label for="enroll-form-policy" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Policy</span>
+                    <select id="enroll-form-policy" wire:model="enrollPolicyId"
+                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="">Select a policy...</option>
+                        @foreach ($policyOptions as $option)
+                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('enrollPolicyId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="enroll-form-date" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Enrolled on</span>
+                    <input id="enroll-form-date" type="date" wire:model="enrollEnrolledOn"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('enrollEnrolledOn')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="enroll-form-ids" class="flex flex-col gap-1 sm:col-span-2">
+                    <span class="text-xs font-medium text-charcoal/70">Enrollment IDs (comma-separated)</span>
+                    <input id="enroll-form-ids" type="text" wire:model="enrollEnrollmentIds"
+                           placeholder="e.g. 101, 102, 103"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('enrollEnrollmentIds')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    Enroll
+                </button>
+                <button type="button" wire:click="toggleEnrollForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </section>
+@endif
+
+{{-- Inline record-claim panel. --}}
+@if ($showClaimForm)
+    <section aria-label="Record claim" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <h2 class="text-base font-semibold text-charcoal">Record Claim</h2>
+
+        <form wire:submit="saveClaim" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <label for="claim-form-policy" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Policy</span>
+                    <select id="claim-form-policy" wire:model="claimPolicyId"
+                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="">Select a policy...</option>
+                        @foreach ($policyOptions as $option)
+                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('claimPolicyId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="claim-form-cert" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Certificate / student insurance ID (optional)</span>
+                    <input id="claim-form-cert" type="text" wire:model="claimStudentInsuranceId"
+                           placeholder="e.g. 42"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('claimStudentInsuranceId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="claim-form-date" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Incident date</span>
+                    <input id="claim-form-date" type="date" wire:model="claimIncidentDate"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('claimIncidentDate')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="claim-form-amount" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Amount claimed (FCFA)</span>
+                    <input id="claim-form-amount" type="number" min="1" wire:model="claimAmount"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('claimAmount')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="claim-form-description" class="flex flex-col gap-1 sm:col-span-2">
+                    <span class="text-xs font-medium text-charcoal/70">Description</span>
+                    <textarea id="claim-form-description" wire:model="claimDescription" rows="3"
+                              placeholder="Describe the incident..."
+                              class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                    @error('claimDescription')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    Record claim
+                </button>
+                <button type="button" wire:click="toggleClaimForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </section>
+@endif
+
+{{-- Inline save-policy panel. --}}
+@if ($showPolicyForm)
+    <section aria-label="Save policy" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <h2 class="text-base font-semibold text-charcoal">New Policy</h2>
+
+        <form wire:submit="savePolicy" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <label for="policy-form-provider" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Provider</span>
+                    <input id="policy-form-provider" type="text" wire:model="policyProvider"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('policyProvider')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="policy-form-no" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Policy number</span>
+                    <input id="policy-form-no" type="text" wire:model="policyNo"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('policyNo')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="policy-form-cover-type" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Cover type</span>
+                    <select id="policy-form-cover-type" wire:model="policyCoverType"
+                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="student">Student</option>
+                        <option value="asset">Asset</option>
+                    </select>
+                    @error('policyCoverType')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="policy-form-year" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Academic year</span>
+                    <select id="policy-form-year" wire:model="policyAcademicYearId"
+                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="">Select a year...</option>
+                        @foreach ($academicYearOptions as $option)
+                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('policyAcademicYearId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="policy-form-premium" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Premium per student (FCFA, student cover only)</span>
+                    <input id="policy-form-premium" type="number" min="0" wire:model="policyPremiumPerStudent"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('policyPremiumPerStudent')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <div></div>
+
+                <label for="policy-form-start" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Coverage start</span>
+                    <input id="policy-form-start" type="date" wire:model="policyCoverageStart"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('policyCoverageStart')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="policy-form-end" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Coverage end</span>
+                    <input id="policy-form-end" type="date" wire:model="policyCoverageEnd"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('policyCoverageEnd')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    Save policy
+                </button>
+                <button type="button" wire:click="togglePolicyForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </section>
+@endif
+
+{{-- Inline settle-claim panel. --}}
+@if ($showSettleForm)
+    <section aria-label="Settle claim" class="mb-4 rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+        <h2 class="text-base font-semibold text-charcoal">Settle Claim #{{ $settleClaimId }}</h2>
+
+        <form wire:submit="settleClaim" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <label for="settle-form-outcome" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Outcome</span>
+                    <select id="settle-form-outcome" wire:model="settleOutcome"
+                            class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="settled">Settled</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    @error('settleOutcome')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="settle-form-date" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Decision date</span>
+                    <input id="settle-form-date" type="date" wire:model="settleDecidedOn"
+                           class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('settleDecidedOn')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                @if ($settleOutcome === 'settled')
+                    <label for="settle-form-amount" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Amount settled (FCFA)</span>
+                        <input id="settle-form-amount" type="number" min="1" wire:model="settleAmount"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('settleAmount')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                @endif
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    Record decision
+                </button>
+                <button type="button" wire:click="toggleSettleForm({{ $settleClaimId }})"
+                        class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </section>
+@endif
+
 <x-list-screen
     title="Student Insurance"
     :breadcrumb="['Dashboard', 'Welfare', 'Insurance']"
@@ -29,6 +313,21 @@
     empty-message="No insurance records match these filters yet. Policies, certificates and claims appear here as they are recorded."
     rail-title="Coverage Overview"
 >
+    <x-slot:actions>
+        <button type="button" wire:click="togglePolicyForm"
+                class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/40">
+            {{ $showPolicyForm ? 'Hide form' : 'New policy' }}
+        </button>
+        <button type="button" wire:click="toggleEnrollForm"
+                class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+            {{ $showEnrollForm ? 'Hide form' : 'Enroll students' }}
+        </button>
+        <button type="button" wire:click="toggleClaimForm"
+                class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/40">
+            {{ $showClaimForm ? 'Hide form' : 'Record claim' }}
+        </button>
+    </x-slot:actions>
+
     {{-- Five KPI cards: active policies, insured students, uninsured
          students, open claims, settled amount - dataset-wide numbers. --}}
     <x-slot:kpis>
@@ -116,6 +415,7 @@
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Coverage</th>
                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Insured</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Actions</th>
             @elseif ($tab === 'insured')
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Student</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Matricule</th>
@@ -132,6 +432,7 @@
                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Claimed</th>
                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Settled</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Actions</th>
             @else
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Student</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Matricule</th>
@@ -152,6 +453,9 @@
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->coverage_start }} → {{ $row->coverage_end }}</td>
                 <td class="px-4 py-2.5 text-right tabular-nums">{{ $row->insured_count }}</td>
                 <td class="px-4 py-2.5"><x-status-pill :status="$policyTone[$row->status] ?? 'ok'" :label="$policyLabel[$row->status] ?? $row->status"/></td>
+                <td class="px-4 py-2.5">
+                    <a href="{{ url('/welfare/insurance/policies/'.$row->id) }}" class="text-sm font-medium text-primary hover:underline">View</a>
+                </td>
             @elseif ($tab === 'insured')
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</td>
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->matricule }}</td>
@@ -168,6 +472,14 @@
                 <td class="px-4 py-2.5 text-right tabular-nums">{{ number_format($row->amount_claimed) }}</td>
                 <td class="px-4 py-2.5 text-right tabular-nums">{{ $row->amount_settled !== null ? number_format($row->amount_settled) : '—' }}</td>
                 <td class="px-4 py-2.5"><x-status-pill :status="$claimTone[$row->status] ?? 'ok'" :label="$claimLabel[$row->status] ?? $row->status"/></td>
+                <td class="px-4 py-2.5">
+                    @if (in_array($row->status, ['draft', 'submitted'], true))
+                        <button type="button" wire:click="toggleSettleForm({{ $row->id }})"
+                                class="rounded border border-sand px-3 py-1 text-xs font-semibold text-charcoal hover:bg-sand/40">
+                            {{ $showSettleForm && $settleClaimId === $row->id ? 'Hide' : 'Settle' }}
+                        </button>
+                    @endif
+                </td>
             @else
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</td>
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->matricule }}</td>
@@ -200,6 +512,12 @@
                         <x-status-pill :status="$claimTone[$row->status] ?? 'ok'" :label="$claimLabel[$row->status] ?? $row->status"/>
                     </div>
                     <p class="mt-1 text-sm text-charcoal/70">{{ number_format($row->amount_claimed) }} FCFA claimed · {{ $row->amount_settled !== null ? number_format($row->amount_settled).' FCFA settled' : 'not settled' }}</p>
+                    @if (in_array($row->status, ['draft', 'submitted'], true))
+                        <button type="button" wire:click="toggleSettleForm({{ $row->id }})"
+                                class="mt-2 rounded border border-sand px-3 py-1 text-xs font-semibold text-charcoal hover:bg-sand/40">
+                            {{ $showSettleForm && $settleClaimId === $row->id ? 'Hide' : 'Settle' }}
+                        </button>
+                    @endif
                 @else
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>

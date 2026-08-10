@@ -8,7 +8,14 @@
     ];
 @endphp
 
-<x-list-screen
+<div class="min-w-0 space-y-4">
+    @if (session('status'))
+        <p class="rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
+
+    <x-list-screen
     :title="__('opes.ledger_screen.je_title')"
     :breadcrumb="[__('opes.ledger_screen.breadcrumb_dashboard'), __('opes.ledger_screen.breadcrumb_ledger'), __('opes.ledger_screen.breadcrumb_je')]"
     :paginator="$entries"
@@ -86,7 +93,7 @@
     </x-slot:head>
 
     @foreach ($entries as $entry)
-        <tr>
+        <tr wire:key="je-row-{{ $entry->id }}">
             <td class="px-4 py-2.5 font-mono text-charcoal">{{ $entry->piece_no ?? __('opes.ledger_screen.je_piece_draft_placeholder') }}</td>
             <td class="px-4 py-2.5 text-charcoal/80">{{ $entry->date->format('d/m/Y') }}</td>
             <td class="px-4 py-2.5 text-charcoal/80">{{ $journalOptions->get($entry->journal_id)?->code ?? '—' }}</td>
@@ -102,9 +109,38 @@
                        class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.ledger_screen.je_continue_draft') }}
                     </a>
+                @elseif ($canReverse && $entry->status === \App\Modules\Accounting\Models\JournalEntry::STATUS_POSTED)
+                    <button type="button" wire:click="startReverse({{ $entry->id }})"
+                            class="rounded border border-heritage-red/40 px-2 py-1 text-xs font-medium text-heritage-red hover:border-heritage-red/70">
+                        {{ __('opes.ledger_screen.je_reverse') }}
+                    </button>
                 @endif
             </td>
         </tr>
+        @if ($reversingEntryId === $entry->id)
+            <tr wire:key="je-reverse-row-{{ $entry->id }}">
+                <td colspan="8" class="bg-heritage-red/5 px-4 py-3">
+                    <div class="flex flex-wrap items-end gap-3">
+                        <label for="je-reverse-reason-{{ $entry->id }}" class="flex min-w-[20rem] flex-1 flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.je_reverse_reason_label') }}</span>
+                            <input id="je-reverse-reason-{{ $entry->id }}" type="text" wire:model="reverseReason"
+                                   placeholder="{{ __('opes.ledger_screen.je_reverse_reason_placeholder') }}"
+                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                            @error('reverseReason') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
+                        </label>
+                        <button type="button" wire:click="reverseEntry"
+                                wire:confirm="{{ __('opes.ledger_screen.je_reverse_confirm') }}"
+                                class="rounded bg-heritage-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-heritage-red/90">
+                            {{ __('opes.ledger_screen.je_reverse_submit') }}
+                        </button>
+                        <button type="button" wire:click="cancelReverse"
+                                class="rounded border border-sand px-3 py-1.5 text-xs font-medium text-charcoal/70 hover:text-charcoal">
+                            {{ __('opes.ledger_screen.cancel') }}
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        @endif
     @endforeach
 
     <x-slot:cards>
@@ -134,4 +170,5 @@
             </article>
         @endforeach
     </x-slot:cards>
-</x-list-screen>
+    </x-list-screen>
+</div>

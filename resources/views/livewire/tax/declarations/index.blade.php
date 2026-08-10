@@ -10,6 +10,58 @@
         </p>
     </div>
 
+    @if (session('status'))
+        <div class="rounded border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <div class="flex justify-end">
+        <button type="button" wire:click="toggleGenerateForm"
+                class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+            {{ $showGenerateForm ? 'Cancel' : 'Generate a declaration' }}
+        </button>
+    </div>
+
+    @if ($showGenerateForm)
+        <form wire:submit="generate" class="space-y-3 rounded border border-sand bg-white p-4">
+            @error('generate') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+            <label class="flex flex-col gap-1">
+                <span class="text-xs font-medium text-charcoal/70">Declaration type</span>
+                <select wire:model.live="genType" class="rounded border border-sand px-2 py-1.5 text-sm">
+                    <option value="tva_monthly">TVA (monthly)</option>
+                    <option value="withholding_monthly">Withholding (monthly)</option>
+                    <option value="dsf_annual">DSF (annual)</option>
+                </select>
+            </label>
+
+            @if ($genType === 'dsf_annual')
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Fiscal year (closing or closed)</span>
+                    <select wire:model="genFiscalYearId" class="rounded border border-sand px-2 py-1.5 text-sm">
+                        <option value="">&mdash;</option>
+                        @foreach ($availableFiscalYears as $fiscalYear)
+                            <option value="{{ $fiscalYear->id }}">{{ $fiscalYear->code }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            @else
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Period year</span>
+                        <input type="number" wire:model="genYear" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Period month (1-12)</span>
+                        <input type="number" min="1" max="12" wire:model="genMonth" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                </div>
+            @endif
+
+            <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Generate</button>
+        </form>
+    @endif
+
     <div class="flex flex-wrap gap-3">
         <label class="text-sm text-charcoal/80">
             Status

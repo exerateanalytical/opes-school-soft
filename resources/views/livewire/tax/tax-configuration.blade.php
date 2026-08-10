@@ -55,7 +55,85 @@
         @endforeach
     </nav>
 
+    @if (session('status'))
+        <div class="rounded border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+            {{ session('status') }}
+        </div>
+    @endif
+
     @if ($tab === 'tax-codes')
+        <div class="flex justify-end">
+            <button type="button" wire:click="toggleTaxCodeForm"
+                    class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                {{ $showTaxCodeForm ? 'Cancel' : 'Configure a tax code' }}
+            </button>
+        </div>
+
+        @if ($showTaxCodeForm)
+            <form wire:submit="saveTaxCode" class="space-y-3 rounded border border-sand bg-white p-4">
+                @error('tcCode') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Code</span>
+                        <input type="text" wire:model="tcCode" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($taxCodeId !== null)/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Name (en)</span>
+                        <input type="text" wire:model="tcName" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Name (fr)</span>
+                        <input type="text" wire:model="tcNameFr" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Tax type</span>
+                        <select wire:model="tcTaxType" class="rounded border border-sand px-2 py-1.5 text-sm">
+                            <option value="tva">tva</option>
+                            <option value="withholding_air">withholding_air</option>
+                            <option value="withholding_precompte">withholding_precompte</option>
+                            <option value="other">other</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Rate (basis points, 100000 = 100%)</span>
+                        <input type="number" wire:model="tcRateBp" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($taxCodeId !== null)/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Direction</span>
+                        <select wire:model="tcDirection" class="rounded border border-sand px-2 py-1.5 text-sm">
+                            <option value="output">output</option>
+                            <option value="input">input</option>
+                            <option value="both">both</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Effective from</span>
+                        <input type="date" wire:model="tcEffectiveFrom" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($taxCodeId !== null)/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Effective to (empty = open)</span>
+                        <input type="date" wire:model="tcEffectiveTo" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Exemption legal ref</span>
+                        <input type="text" wire:model="tcExemptionLegalRef" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model="tcIsExempt"/> Exempt
+                    </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model="tcIsZeroRated"/> Zero-rated
+                    </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model="tcIsActive"/> Active
+                    </label>
+                </div>
+                <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Save tax code</button>
+            </form>
+        @endif
+
         <div class="overflow-x-auto rounded border border-sand bg-white">
             <table class="min-w-full text-sm">
                 <thead>
@@ -66,6 +144,7 @@
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Direction</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">In force</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                    <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -77,10 +156,13 @@
                         <td class="px-4 py-2">{{ $taxCode->direction }}</td>
                         <td class="px-4 py-2">{{ $taxCode->effective_from->toDateString() }} &rarr; {{ $taxCode->effective_to?->toDateString() ?? 'open' }}</td>
                         <td class="px-4 py-2">{{ $taxCode->is_active ? 'active' : 'inactive' }}</td>
+                        <td class="px-4 py-2">
+                            <button type="button" wire:click="editTaxCode({{ $taxCode->id }})" class="text-xs font-medium text-charcoal underline">Edit</button>
+                        </td>
                     </tr>
                 @empty
                     <tr class="border-t border-sand">
-                        <td colspan="6" class="px-4 py-6 text-center text-charcoal/60">
+                        <td colspan="7" class="px-4 py-6 text-center text-charcoal/60">
                             No tax code configured. Configure them with your accountant &mdash; the TVA
                             engine refuses to compute until at least one active code exists.
                         </td>
@@ -91,10 +173,155 @@
         </div>
     @elseif ($tab === 'withholding')
         <div class="space-y-4">
-            <div class="rounded border border-sand bg-white px-4 py-3 text-sm text-charcoal">
-                Recognition basis:
-                <strong>{{ $settings?->withholding_recognition?->value ?? 'not decided (blocks withholding)' }}</strong>
+            <div class="flex items-center justify-between rounded border border-sand bg-white px-4 py-3 text-sm text-charcoal">
+                <span>
+                    Recognition basis:
+                    <strong>{{ $settings?->withholding_recognition?->value ?? 'not decided (blocks withholding)' }}</strong>
+                </span>
+                <button type="button" wire:click="toggleTaxSettingsForm" class="text-xs font-medium text-charcoal underline">
+                    {{ $showTaxSettingsForm ? 'Cancel' : 'Decide settings' }}
+                </button>
             </div>
+
+            @if ($showTaxSettingsForm)
+                <form wire:submit="saveTaxSettings" class="space-y-3 rounded border border-sand bg-white p-4">
+                    @error('tsWithholdingRecognition') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Withholding recognition</span>
+                            <select wire:model="tsWithholdingRecognition" class="rounded border border-sand px-2 py-1.5 text-sm">
+                                <option value="">&mdash;</option>
+                                <option value="on_invoice">on_invoice</option>
+                                <option value="on_payment">on_payment</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Prorata rounding</span>
+                            <select wire:model="tsProrataRounding" class="rounded border border-sand px-2 py-1.5 text-sm">
+                                <option value="">&mdash;</option>
+                                <option value="exact_bp">exact_bp</option>
+                                <option value="up_to_whole_percent">up_to_whole_percent</option>
+                            </select>
+                        </label>
+                    </div>
+                    <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Save settings</button>
+                </form>
+            @endif
+
+            <div class="flex justify-end gap-2">
+                <button type="button" wire:click="toggleWithholdingProfileForm"
+                        class="rounded border border-sand px-3 py-1.5 text-sm font-semibold text-charcoal">
+                    {{ $showWithholdingProfileForm ? 'Cancel profile' : 'Configure a profile' }}
+                </button>
+                <button type="button" wire:click="toggleWithholdingRuleForm"
+                        class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                    {{ $showWithholdingRuleForm ? 'Cancel rule' : 'Configure a rule' }}
+                </button>
+            </div>
+
+            @if ($showWithholdingRuleForm)
+                <form wire:submit="saveWithholdingRule" class="space-y-3 rounded border border-sand bg-white p-4">
+                    @error('wrCode') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Code</span>
+                            <input type="text" wire:model="wrCode" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($withholdingRuleId !== null)/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Name (en)</span>
+                            <input type="text" wire:model="wrName" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Name (fr)</span>
+                            <input type="text" wire:model="wrNameFr" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Withholding type</span>
+                            <select wire:model="wrWithholdingType" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($withholdingRuleId !== null)>
+                                <option value="air">air</option>
+                                <option value="precompte_achats">precompte_achats</option>
+                                <option value="precompte_station_service">precompte_station_service</option>
+                                <option value="no_contributor_card">no_contributor_card</option>
+                                <option value="niu_inactive">niu_inactive</option>
+                                <option value="other">other</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Rate (basis points)</span>
+                            <input type="number" wire:model="wrRateBp" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($withholdingRuleId !== null)/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Base</span>
+                            <select wire:model="wrBase" class="rounded border border-sand px-2 py-1.5 text-sm">
+                                <option value="">unset</option>
+                                <option value="amount_ht">amount_ht</option>
+                                <option value="amount_ttc">amount_ttc</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Applies to</span>
+                            <select wire:model="wrAppliesTo" class="rounded border border-sand px-2 py-1.5 text-sm">
+                                <option value="services">services</option>
+                                <option value="goods">goods</option>
+                                <option value="both">both</option>
+                                <option value="rent">rent</option>
+                                <option value="commission">commission</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Minimum base</span>
+                            <input type="number" wire:model="wrMinimumBase" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Priority</span>
+                            <input type="number" wire:model="wrPriority" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Legal ref</span>
+                            <input type="text" wire:model="wrLegalRef" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Effective from</span>
+                            <input type="date" wire:model="wrEffectiveFrom" class="rounded border border-sand px-2 py-1.5 text-sm" @disabled($withholdingRuleId !== null)/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Effective to (empty = open)</span>
+                            <input type="date" wire:model="wrEffectiveTo" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model="wrIsActive"/> Active
+                    </label>
+                    <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Save rule</button>
+                </form>
+            @endif
+
+            @if ($showWithholdingProfileForm)
+                <form wire:submit="saveWithholdingProfile" class="space-y-3 rounded border border-sand bg-white p-4">
+                    @error('wpCode') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    @error('wpRulesCsv') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Code</span>
+                            <input type="text" wire:model="wpCode" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Name (en)</span>
+                            <input type="text" wire:model="wpName" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Name (fr)</span>
+                            <input type="text" wire:model="wpNameFr" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                        </label>
+                    </div>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Rules (rule_id:sequence, comma-separated)</span>
+                        <input type="text" wire:model="wpRulesCsv" placeholder="1:1,2:2" class="rounded border border-sand px-2 py-1.5 text-sm"/>
+                    </label>
+                    <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">Save profile</button>
+                </form>
+            @endif
+
             <div class="overflow-x-auto rounded border border-sand bg-white">
                 <table class="min-w-full text-sm">
                     <thead>
@@ -107,6 +334,7 @@
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Priority</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">In force</th>
                         <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                        <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -122,10 +350,16 @@
                             <td class="px-4 py-2">
                                 {{ $rule->isConfirmed() ? 'confirmed' : 'not confirmed - never applied' }}
                             </td>
+                            <td class="px-4 py-2 space-x-2">
+                                <button type="button" wire:click="editWithholdingRule({{ $rule->id }})" class="text-xs font-medium text-charcoal underline">Edit</button>
+                                @if (! $rule->isConfirmed())
+                                    <button type="button" wire:click="confirmWithholdingRule({{ $rule->id }})" wire:confirm="Activate this withholding rule?" class="text-xs font-medium text-primary underline">Activate</button>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr class="border-t border-sand">
-                            <td colspan="8" class="px-4 py-6 text-center text-charcoal/60">
+                            <td colspan="9" class="px-4 py-6 text-center text-charcoal/60">
                                 No withholding rule configured. A school that pays a supplier without
                                 withholding is personally liable for the tax plus penalties &mdash;
                                 configure the rules with your accountant.

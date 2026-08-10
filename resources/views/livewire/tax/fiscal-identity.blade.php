@@ -29,7 +29,37 @@
             Confirmed on {{ $identity->fiscal_identity_confirmed_at?->toDateString() }}.
             The NIU is now immutable; corrections require the permission-gated correction procedure
             with a reason and a supporting document.
+            <button type="button" wire:click="toggleCorrectionForm" class="ml-2 text-xs font-medium text-charcoal underline">
+                {{ $showCorrectionForm ? 'Cancel correction' : 'Correct fiscal identity' }}
+            </button>
         </div>
+
+        @if ($showCorrectionForm)
+            <form wire:submit="correct" class="space-y-3 rounded border border-amber-300 bg-amber-50 p-4">
+                <p class="text-xs text-amber-900">
+                    A NIU typo silently propagates onto every printed invoice and filed declaration -
+                    this correction is a recorded act, not a routine edit (03-tax-procurement &sect;2.2).
+                </p>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Corrected NIU</span>
+                    <input type="text" maxlength="14" wire:model="correctionNiu"
+                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Reason</span>
+                    <textarea wire:model="correctionReason" rows="2"
+                              class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Supporting document reference</span>
+                    <input type="text" wire:model="correctionSupportingDocumentReference"
+                           class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                </label>
+                <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
+                    Correct fiscal identity
+                </button>
+            </form>
+        @endif
     @else
         <div class="rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
             Not confirmed yet &mdash; printing invoices, receipts and attestations is blocked until the

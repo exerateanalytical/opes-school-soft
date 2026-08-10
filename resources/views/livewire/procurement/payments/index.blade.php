@@ -77,7 +77,7 @@
 
     @foreach ($payments as $payment)
         <tr wire:key="payment-{{ $payment->id }}" class="border-t border-sand/60 hover:bg-sand/20">
-            <td class="px-3 py-2 font-mono text-sm">{{ $payment->payment_no }}</td>
+            <td class="px-3 py-2 font-mono text-sm"><a href="{{ url('/procurement/payments/'.$payment->id) }}" class="text-primary hover:underline">{{ $payment->payment_no }}</a></td>
             <td class="px-3 py-2 text-sm">{{ $payment->supplier_name }}</td>
             <td class="px-3 py-2 text-sm">{{ $payment->payment_date }}</td>
             <td class="px-3 py-2 text-sm">{{ str_replace('_', ' ', (string) $payment->payment_method) }}</td>

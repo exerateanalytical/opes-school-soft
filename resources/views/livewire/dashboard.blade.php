@@ -1,15 +1,49 @@
 <div class="space-y-6">
-    <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.dashboard.title') }}</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.dashboard.title') }}</h1>
+
+        {{-- Which identity is producing this (filtered) screen. Makes a role
+             demonstration legible, and is a useful orientation cue for a real
+             user who holds more than one account. --}}
+        @if ($signedInAs !== null)
+            <p class="text-xs text-charcoal/70">
+                {{ __('opes.dashboard.signed_in_as') }}:
+                <span class="font-semibold text-charcoal">{{ $signedInAs['name'] }}</span>
+                @if ($signedInAs['role'] !== null)
+                    <span aria-hidden="true">·</span>
+                    <span class="font-semibold text-charcoal">{{ $signedInAs['role'] }}</span>
+                @endif
+            </p>
+        @endif
+    </div>
+
+    @if ($financeDashboardUrl !== null)
+        <p>
+            <a href="{{ $financeDashboardUrl }}" wire:navigate
+               class="inline-flex items-center gap-2 rounded border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">
+                {{ __('opes.dashboard.go_to_finance') }}
+            </a>
+        </p>
+    @endif
 
     {{-- ── Tiles. Only the four whose data actually exists (09-ui 3). Each
          gets the mockup's coloured icon-circle; deltas stay OFF here because
          no "vs last term" comparison exists for any of these four figures
          yet - inventing one would violate the no-fabricated-data rule. ───── --}}
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-{{ $canViewAttendance ? 5 : 4 }}">
-        {{-- The tile links to the user list only for someone allowed to open
-             it. A link that guarantees a 403 is not a shortcut, it is a trap,
-             and it also tells the reader a screen exists that they may not
-             see. --}}
+    @if ($tileCount > 0)
+    <div @class([
+        'grid grid-cols-1 gap-3 sm:grid-cols-2',
+        'xl:grid-cols-1' => $tileCount === 1,
+        'xl:grid-cols-2' => $tileCount === 2,
+        'xl:grid-cols-3' => $tileCount === 3,
+        'xl:grid-cols-4' => $tileCount === 4,
+        'xl:grid-cols-5' => $tileCount >= 5,
+    ])>
+        {{-- Identity tiles: gated on user.view, the same permission the
+             /users screen behind them is gated on. The tile links there only
+             for someone allowed to open it. A link that guarantees a 403 is
+             not a shortcut, it is a trap. --}}
+        @if ($canViewUsers)
         <x-kpi-card :label="__('opes.dashboard.tile_users')"
                     :value="$activeUsers"
                     :href="$canViewUsers ? '/users' : null"
@@ -24,7 +58,9 @@
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
             </x-slot:icon>
         </x-kpi-card>
+        @endif
 
+        @if ($canViewHealth)
         <div class="flex items-start gap-3 rounded border border-sand bg-white px-4 py-3">
             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-badge-teal text-white">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
@@ -38,13 +74,18 @@
                 </p>
             </div>
         </div>
+        @endif
 
-        {{-- Null, not zero: see Dashboard::lastBackupAge(). --}}
+        {{-- Null, not zero: see Dashboard::lastBackupAge(). Gated on
+             backup.run - the operator right that makes the figure
+             actionable. --}}
+        @if ($canViewBackup)
         <x-kpi-card :label="__('opes.dashboard.tile_backup')" :value="$lastBackupAge" icon-bg="bg-badge-orange">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3.5 2"/></svg>
             </x-slot:icon>
         </x-kpi-card>
+        @endif
 
         {{-- Phase 8 F5: shown only to a role that holds attendance.view - the
              same permission the /attendance route itself is gated on, so the
@@ -62,6 +103,7 @@
             </x-kpi-card>
         @endif
     </div>
+    @endif
 
     {{-- ── "What's open right now" (08-operations §6.4). The panel decides
          its own visibility (fee.view or ledger.view - the Bursar, Accountant,

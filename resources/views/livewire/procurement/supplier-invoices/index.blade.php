@@ -3,6 +3,13 @@
         blocking states (match exception, unresolved withholding) as KPIs. */
 @endphp
 
+<div class="space-y-4">
+    @if (session('status'))
+        <p class="rounded border border-primary/40 bg-primary/10 p-2 text-sm text-primary" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
+
 <x-list-screen
     :title="__('opes.supplier_invoice_screen.title')"
     :breadcrumb="[__('opes.nav.dashboard'), __('opes.supplier_invoice_screen.title')]"
@@ -54,7 +61,119 @@
            class="self-end rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
             {{ __('opes.supplier_invoice_screen.new_invoice') }}
         </a>
+
+        @if ($canManageInvoices)
+            <button type="button" wire:click="toggleCreditNoteForm"
+                    class="self-end rounded border border-primary px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10">
+                {{ $showCreditNoteForm ? 'Cancel' : 'Issue credit note' }}
+            </button>
+        @endif
     </x-slot:filters>
+
+    @if ($showCreditNoteForm)
+        <div class="mb-4 rounded border border-sand bg-white p-3">
+            <p class="mb-2 text-sm font-medium">Issue a supplier credit note (avoir)</p>
+            @error('creditNote') <p class="mb-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Original invoice (optional)</span>
+                    <select wire:model.live="creditNoteInvoiceId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <option value="">—</option>
+                        @foreach ($postedInvoices as $invoice)
+                            <option value="{{ $invoice->id }}">{{ $invoice->internal_no }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.supplier') }}</span>
+                    <select wire:model="creditNoteSupplierId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <option value="">—</option>
+                        @foreach ($suppliers as $supplier)
+                            <option value="{{ $supplier->id }}">{{ $supplier->code }} {{ $supplier->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Credit note date</span>
+                    <input type="date" wire:model="creditNoteDate" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">Reason type</span>
+                    <select wire:model="creditNoteReasonType" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                        @foreach ($creditNoteReasonTypes as $reasonType)
+                            <option value="{{ $reasonType }}">{{ str_replace('_', ' ', $reasonType) }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            </div>
+
+            <label class="mt-3 flex flex-col gap-1">
+                <span class="text-xs font-medium text-charcoal/70">Reason note</span>
+                <textarea wire:model="creditNoteReasonNote" rows="2" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
+            </label>
+
+            <table class="mt-3 w-full text-xs">
+                <thead>
+                    <tr class="text-left text-charcoal/70">
+                        <th class="px-1 py-1">Invoice line</th>
+                        <th class="px-1 py-1">{{ __('opes.supplier_invoice_screen.line_description') }}</th>
+                        <th class="px-1 py-1">{{ __('opes.supplier_invoice_screen.line_quantity') }}</th>
+                        <th class="px-1 py-1">{{ __('opes.supplier_invoice_screen.line_unit_price') }}</th>
+                        <th class="px-1 py-1">{{ __('opes.supplier_invoice_screen.line_tax_code') }}</th>
+                        <th class="px-1 py-1">{{ __('opes.supplier_invoice_screen.line_account') }}</th>
+                        <th class="px-1 py-1"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($creditNoteLines as $index => $line)
+                        <tr wire:key="cn-line-{{ $index }}">
+                            <td class="px-1 py-1">
+                                <select wire:model="creditNoteLines.{{ $index }}.supplier_invoice_line_id" class="w-full rounded border border-sand px-1.5 py-1">
+                                    <option value="">—</option>
+                                    @foreach ($creditNoteInvoiceLines as $invoiceLine)
+                                        <option value="{{ $invoiceLine->id }}">#{{ $invoiceLine->line_no }} {{ $invoiceLine->description }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-1 py-1"><input type="text" wire:model="creditNoteLines.{{ $index }}.description" class="w-full rounded border border-sand px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="text" wire:model="creditNoteLines.{{ $index }}.quantity" class="w-16 rounded border border-sand px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="number" wire:model="creditNoteLines.{{ $index }}.unit_price_ht" class="w-24 rounded border border-sand px-1.5 py-1"/></td>
+                            <td class="px-1 py-1">
+                                <select wire:model="creditNoteLines.{{ $index }}.tax_code_id" class="w-full rounded border border-sand px-1.5 py-1">
+                                    <option value="">—</option>
+                                    @foreach ($taxCodes as $taxCode)
+                                        <option value="{{ $taxCode->id }}">{{ $taxCode->code }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-1 py-1">
+                                <select wire:model="creditNoteLines.{{ $index }}.expense_account_id" class="w-full rounded border border-sand px-1.5 py-1">
+                                    <option value="">—</option>
+                                    @foreach ($expenseAccounts as $account)
+                                        <option value="{{ $account->id }}">{{ $account->code }} {{ $account->name }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-1 py-1">
+                                <button type="button" wire:click="removeCreditNoteLine({{ $index }})" class="text-heritage-red">✕</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" wire:click="addCreditNoteLine" class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/40">
+                    {{ __('opes.supplier_invoice_screen.add_line') }}
+                </button>
+                <button type="button" wire:click="saveCreditNote" wire:confirm="Issue this credit note?"
+                        class="rounded border border-primary bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90">
+                    Issue credit note
+                </button>
+            </div>
+        </div>
+    @endif
 
     <x-slot:head>
         <th class="px-3 py-2 text-left">{{ __('opes.supplier_invoice_screen.col_internal_no') }}</th>
@@ -66,12 +185,16 @@
         <th class="px-3 py-2 text-right">{{ __('opes.supplier_invoice_screen.col_net_payable') }}</th>
         <th class="px-3 py-2 text-left">{{ __('opes.supplier_invoice_screen.col_match') }}</th>
         <th class="px-3 py-2 text-left">{{ __('opes.supplier_invoice_screen.col_status') }}</th>
+        @if ($canManageInvoices)
+            <th class="px-3 py-2 text-left"><span class="sr-only">Actions</span></th>
+        @endif
     </x-slot:head>
 
     @foreach ($invoices as $invoice)
         <tr wire:key="invoice-{{ $invoice->id }}" class="border-t border-sand/60 hover:bg-sand/20">
             <td class="px-3 py-2 font-mono text-sm">
-                <a href="{{ url('/procurement/invoices/capture?invoice='.$invoice->id) }}" class="text-primary hover:underline">{{ $invoice->internal_no }}</a>
+                <a href="{{ url('/procurement/invoices/'.$invoice->id) }}" class="text-primary hover:underline">{{ $invoice->internal_no }}</a>
+                <a href="{{ url('/procurement/invoices/capture?invoice='.$invoice->id) }}" class="ml-2 text-xs text-charcoal/50 hover:underline">edit</a>
             </td>
             <td class="px-3 py-2 font-mono text-sm">{{ $invoice->supplier_invoice_no }}</td>
             <td class="px-3 py-2 text-sm">{{ $invoice->supplier_name }}</td>
@@ -94,7 +217,41 @@
                 @endif
             </td>
             <td class="px-3 py-2 text-sm">{{ str_replace('_', ' ', (string) $invoice->status) }}</td>
+            @if ($canManageInvoices)
+                <td class="px-3 py-2 text-sm">
+                    @if (! in_array($invoice->status, ['partially_paid', 'paid', 'cancelled'], true))
+                        <button type="button" wire:click="startCancel({{ $invoice->id }})"
+                                class="rounded border border-heritage-red px-2 py-1 text-xs font-medium text-heritage-red hover:bg-heritage-red/10">
+                            Cancel
+                        </button>
+                    @endif
+                </td>
+            @endif
         </tr>
+
+        @if ($canManageInvoices && $cancellingId === $invoice->id)
+            <tr wire:key="invoice-cancel-{{ $invoice->id }}" class="border-t border-sand/60 bg-sand/10">
+                <td colspan="9" class="px-3 py-3">
+                    <div class="space-y-2">
+                        <p class="text-sm font-medium">Cancel {{ $invoice->internal_no }}</p>
+                        @error('cancelReason') <p class="text-xs text-heritage-red">{{ $message }}</p> @enderror
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">Cancellation reason</span>
+                            <textarea wire:model="cancelReason" rows="2" class="w-full max-w-lg rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"></textarea>
+                        </label>
+                        <div class="flex gap-2">
+                            <button type="button" wire:click="confirmCancel" wire:confirm="Cancel this supplier invoice?"
+                                    class="rounded border border-heritage-red bg-heritage-red px-3 py-1.5 text-xs font-medium text-white hover:bg-heritage-red/90">
+                                Confirm cancellation
+                            </button>
+                            <button type="button" wire:click="cancelCancel" class="rounded border border-sand px-3 py-1.5 text-xs font-medium text-charcoal hover:bg-sand/40">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        @endif
     @endforeach
 
     <x-slot:cards>
@@ -110,3 +267,4 @@
         @endforeach
     </x-slot:cards>
 </x-list-screen>
+</div>

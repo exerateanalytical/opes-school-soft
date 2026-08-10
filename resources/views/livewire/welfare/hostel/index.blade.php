@@ -31,6 +31,300 @@
     ];
 @endphp
 
+<div class="min-w-0 space-y-4">
+    @if (session('status'))
+        <p class="rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
+
+    {{-- Inline allocate-bed panel. --}}
+    @if ($showAllocateForm)
+        <section aria-label="Allocate bed" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Allocate Bed</h2>
+
+            <form wire:submit="saveAllocation" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <label for="alloc-form-matricule" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Student matricule</span>
+                        <input id="alloc-form-matricule" type="text" wire:model="allocMatricule"
+                               placeholder="e.g. OS-26-A1B2C3D4"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('allocMatricule')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="alloc-form-bed" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Bed</span>
+                        <select id="alloc-form-bed" wire:model="allocBedId"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Choose a free bed...</option>
+                            @foreach ($availableBedOptions as $option)
+                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('allocBedId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="alloc-form-starts" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Starts on</span>
+                        <input id="alloc-form-starts" type="date" wire:model="allocStartsOn"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Allocate bed
+                    </button>
+                    <button type="button" wire:click="toggleAllocateForm"
+                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
+    {{-- Inline record-inspection panel. --}}
+    @if ($showInspectionForm)
+        <section aria-label="Record inspection" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Record Inspection</h2>
+
+            <form wire:submit="saveInspection" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <label for="insp-form-hostel" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Hostel</span>
+                        <select id="insp-form-hostel" wire:model="inspHostelId"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Choose a hostel...</option>
+                            @foreach ($hostelOptions as $option)
+                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('inspHostelId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="insp-form-room" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Room (optional - whole building if blank)</span>
+                        <select id="insp-form-room" wire:model="inspRoomId"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Whole building</option>
+                            @foreach ($roomOptions as $option)
+                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('inspRoomId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="insp-form-date" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Inspected on</span>
+                        <input id="insp-form-date" type="date" wire:model="inspInspectedOn"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    </label>
+
+                    <label for="insp-form-rating" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Rating</span>
+                        <select id="insp-form-rating" wire:model="inspRating"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </label>
+
+                    <label for="insp-form-findings" class="flex flex-col gap-1 sm:col-span-2">
+                        <span class="text-xs font-medium text-charcoal/70">Findings (optional)</span>
+                        <textarea id="insp-form-findings" wire:model="inspFindings" rows="3"
+                                  placeholder="e.g. Leaking tap in the washroom..."
+                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                        @error('inspFindings')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Record inspection
+                    </button>
+                    <button type="button" wire:click="toggleInspectionForm"
+                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
+    {{-- Inline add-hostel panel. --}}
+    @if ($showHostelForm)
+        <section aria-label="Add hostel" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Add Hostel</h2>
+
+            <form wire:submit="saveHostel" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                    <label for="hostel-form-code" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Code</span>
+                        <input id="hostel-form-code" type="text" wire:model="hostelCode"
+                               placeholder="e.g. BH1"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('hostelCode')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="hostel-form-name" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Name</span>
+                        <input id="hostel-form-name" type="text" wire:model="hostelName"
+                               placeholder="e.g. Boys Hostel 1"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('hostelName')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="hostel-form-gender" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Gender</span>
+                        <select id="hostel-form-gender" wire:model="hostelGender"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="boys">Boys</option>
+                            <option value="girls">Girls</option>
+                            <option value="mixed">Mixed</option>
+                        </select>
+                        @error('hostelGender')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Add hostel
+                    </button>
+                    <button type="button" wire:click="toggleHostelForm"
+                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
+    {{-- Inline add-room panel. --}}
+    @if ($showRoomForm)
+        <section aria-label="Add room" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Add Room</h2>
+
+            <form wire:submit="saveRoom" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                    <label for="room-form-hostel" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Hostel</span>
+                        <select id="room-form-hostel" wire:model="roomHostelId"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Choose a hostel...</option>
+                            @foreach ($hostelOptions as $option)
+                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('roomHostelId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="room-form-name" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Room no.</span>
+                        <input id="room-form-name" type="text" wire:model="roomName"
+                               placeholder="e.g. R101"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('roomName')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="room-form-capacity" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Capacity</span>
+                        <input id="room-form-capacity" type="number" min="1" wire:model="roomCapacity"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('roomCapacity')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Add room
+                    </button>
+                    <button type="button" wire:click="toggleRoomForm"
+                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
+    {{-- Inline add-beds panel. --}}
+    @if ($showBedsForm)
+        <section aria-label="Add beds" class="rounded-lg border border-sand bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Set Room Beds</h2>
+
+            <form wire:submit="saveBeds" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <label for="beds-form-room" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Room</span>
+                        <select id="beds-form-room" wire:model="bedsRoomId"
+                                class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Choose a room...</option>
+                            @foreach ($roomOptions as $option)
+                                <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('bedsRoomId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="beds-form-labels" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Bed labels (comma separated)</span>
+                        <input id="beds-form-labels" type="text" wire:model="bedsLabels"
+                               placeholder="e.g. A,B,C,D"
+                               class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('bedsLabels')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <p class="text-xs text-charcoal/60">This replaces the room's bed list: labels you omit are removed (unless they carry allocation history), new labels are added, and existing ones are kept as-is.</p>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Save beds
+                    </button>
+                    <button type="button" wire:click="toggleBedsForm"
+                            class="rounded border border-sand px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
 <x-list-screen
     title="Hostel Management"
     :breadcrumb="['Dashboard', 'Hostel']"
@@ -38,6 +332,33 @@
     empty-message="No hostel records match these filters yet. Hostels, rooms and allocations appear here as they are set up."
     rail-title="Occupancy Overview"
 >
+    @if ($canManage)
+        <x-slot:actions>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" wire:click="toggleAllocateForm"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    {{ $showAllocateForm ? 'Hide form' : 'Allocate bed' }}
+                </button>
+                <button type="button" wire:click="toggleInspectionForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                    {{ $showInspectionForm ? 'Hide form' : 'Record inspection' }}
+                </button>
+                <button type="button" wire:click="toggleHostelForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                    {{ $showHostelForm ? 'Hide form' : 'Add hostel' }}
+                </button>
+                <button type="button" wire:click="toggleRoomForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                    {{ $showRoomForm ? 'Hide form' : 'Add room' }}
+                </button>
+                <button type="button" wire:click="toggleBedsForm"
+                        class="rounded border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-sand/30">
+                    {{ $showBedsForm ? 'Hide form' : 'Set room beds' }}
+                </button>
+            </div>
+        </x-slot:actions>
+    @endif
+
     {{-- Five KPI cards, mirroring the mockup's strip: total rooms, total
          beds, occupied beds, occupancy rate, open inspections -
          dataset-wide numbers. --}}
@@ -126,6 +447,7 @@
                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Available</th>
                 <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">Occupancy %</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Room Status</th>
+                <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Actions</th>
             @elseif ($tab === 'allocations')
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Student</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Matricule</th>
@@ -134,6 +456,9 @@
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Bed</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Since</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                @if ($canManage)
+                    <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Actions</th>
+                @endif
             @elseif ($tab === 'inspections')
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Date</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Hostel</th>
@@ -174,6 +499,9 @@
                 <td class="px-4 py-2.5 text-right tabular-nums">{{ max(0, $beds - $occupied) }}</td>
                 <td class="px-4 py-2.5 text-right tabular-nums">{{ number_format($pct, 2) }}%</td>
                 <td class="px-4 py-2.5"><x-status-pill :status="$tone" :label="$word"/></td>
+                <td class="px-4 py-2.5">
+                    <a href="{{ url('/hostel/rooms/'.$row->id) }}" class="text-sm font-medium text-primary hover:underline">View</a>
+                </td>
             @elseif ($tab === 'allocations')
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</td>
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->matricule }}</td>
@@ -184,6 +512,17 @@
                 <td class="px-4 py-2.5">
                     <x-status-pill :status="$row->status === 'active' ? 'ok' : 'amber'" :label="$row->status === 'active' ? 'Active' : 'Ended'"/>
                 </td>
+                @if ($canManage)
+                    <td class="px-4 py-2.5">
+                        @if ($row->status === 'active')
+                            <button type="button" wire:click="endAllocation({{ $row->id }})"
+                                    wire:confirm="End this allocation?"
+                                    class="rounded border border-sand px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
+                                End allocation
+                            </button>
+                        @endif
+                    </td>
+                @endif
             @elseif ($tab === 'inspections')
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->inspected_on }}</td>
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ $row->hostel_name }}</td>
@@ -240,6 +579,13 @@
                         <x-status-pill :status="$row->status === 'active' ? 'ok' : 'amber'" :label="$row->status === 'active' ? 'Active' : 'Ended'"/>
                     </div>
                     <p class="mt-1 text-sm text-charcoal/70">{{ $row->hostel_code }} · {{ $row->room_name }} · Bed {{ $row->bed_label }}</p>
+                    @if ($canManage && $row->status === 'active')
+                        <button type="button" wire:click="endAllocation({{ $row->id }})"
+                                wire:confirm="End this allocation?"
+                                class="mt-2 rounded border border-sand px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
+                            End allocation
+                        </button>
+                    @endif
                 @elseif ($tab === 'inspections')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->hostel_name }} · {{ $row->inspected_on }}</p>
@@ -322,3 +668,4 @@
         </div>
     </x-slot:rail>
 </x-list-screen>
+</div>

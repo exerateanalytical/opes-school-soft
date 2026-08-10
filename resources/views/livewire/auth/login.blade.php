@@ -60,12 +60,25 @@
             <p class="text-xs font-semibold uppercase tracking-wide text-charcoal/70">
                 {{ __('opes.auth.demo_heading') }}
             </p>
-            <button type="button" wire:click="demoLogin"
-                    class="mt-2 w-full rounded border border-chrome bg-chrome px-4 py-2.5 text-sm font-semibold text-white
-                           hover:bg-chrome-light">
-                {{ __('opes.auth.demo_sign_in') }}
-            </button>
+            <p class="mt-1 text-xs text-charcoal/70">{{ __('opes.auth.demo_choose_role') }}</p>
+
+            {{-- One button per configured identity. Each signs in as a REAL
+                 user holding that role through Spatie, so what the visitor
+                 then sees is the product's own permission checks answering -
+                 not a demo mode. --}}
+            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                @foreach ($this->demoIdentities() as $identity)
+                    <button type="button" wire:click="demoLogin('{{ $identity['key'] }}')"
+                            wire:key="demo-{{ $identity['key'] }}"
+                            class="rounded border border-chrome bg-chrome px-3 py-2 text-left text-sm font-semibold text-white
+                                   hover:bg-chrome-light">
+                        {{ __('opes.auth.demo_sign_in_as', ['role' => $identity['label']]) }}
+                    </button>
+                @endforeach
+            </div>
+
             <p class="mt-2 text-xs text-charcoal/60">{{ __('opes.auth.demo_help') }}</p>
+            <p class="mt-1 text-xs text-charcoal/60">{{ __('opes.auth.demo_rbac_help') }}</p>
         </div>
     @endif
 

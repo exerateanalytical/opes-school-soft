@@ -534,8 +534,52 @@
                             {{ __('opes.assessment_screen.submit') }}
                         </button>
                     @endif
+
+                    @if ($canReject)
+                        {{-- §7.2's approve counterpart to "Return to teacher"
+                             below. ValidateMarks re-checks marks.validate
+                             internally; this only keeps the button from
+                             rendering for an actor who could not use it. --}}
+                        <button type="button" wire:click="approveMarks"
+                                wire:confirm="Approve these marks? They move to the validated stage."
+                                class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            Approve
+                        </button>
+
+                        {{-- §7.4: the validator's return-to-teacher action.
+                             RejectMarks always requires a reason, so this opens
+                             a small inline panel rather than firing on click. --}}
+                        <button type="button" wire:click="toggleRejectForm"
+                                class="rounded border border-heritage-red px-3 py-1.5 text-sm font-medium text-heritage-red hover:bg-heritage-red/10">
+                            {{ $showRejectForm ? 'Cancel return' : 'Return to teacher' }}
+                        </button>
+                    @endif
                 </div>
             </div>
+
+            @if ($canReject && $showRejectForm)
+                <div class="rounded border border-heritage-red/40 bg-heritage-red/5 px-3 py-3">
+                    <label for="reject-reason" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Reason for returning these marks</span>
+                        <textarea id="reject-reason" wire:model="rejectReason" rows="2" maxlength="500"
+                                  class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
+                        @error('rejectReason')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                    <div class="mt-2 flex items-center gap-2">
+                        <button type="button" wire:click="rejectMarks"
+                                wire:confirm="Return this submission to the teacher for correction?"
+                                class="rounded bg-heritage-red px-3 py-1.5 text-sm font-medium text-white hover:bg-heritage-red/90">
+                            Confirm return
+                        </button>
+                        <button type="button" wire:click="toggleRejectForm"
+                                class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            @endif
         @endif
     </div>
     @endunless

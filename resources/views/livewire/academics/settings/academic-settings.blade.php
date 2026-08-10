@@ -112,6 +112,35 @@
                     @endif
                 </div>
 
+                @if ($year !== null)
+                    {{-- Lifecycle status (SetAcademicYearStatus): distinct from
+                         "current" above - this gates whether the year accepts
+                         writes (planned -> active -> closed). --}}
+                    <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-sand pt-3">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.status_label') }}</span>
+                        <span class="text-sm font-medium text-charcoal">{{ $statusLabel($year->status) }}</span>
+                        @if ($year->status->value !== 'active')
+                            <button type="button" wire:click="setStatus({{ $year->id }}, 'active')"
+                                    class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                {{ __('opes.academics.status_set_active') }}
+                            </button>
+                        @endif
+                        @if ($year->status->value !== 'planned')
+                            <button type="button" wire:click="setStatus({{ $year->id }}, 'planned')"
+                                    class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                {{ __('opes.academics.status_set_planned') }}
+                            </button>
+                        @endif
+                        @if ($year->status->value !== 'closed')
+                            <button type="button" wire:click="setStatus({{ $year->id }}, 'closed')"
+                                    wire:confirm="{{ __('opes.academics.status_close_confirm') }}"
+                                    class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:border-heritage-red/50 hover:text-heritage-red">
+                                {{ __('opes.academics.status_set_closed') }}
+                            </button>
+                        @endif
+                    </div>
+                @endif
+
                 @if ($year === null)
                     <div class="mt-4">
                         <x-empty-state :message="__('opes.academics.no_year')">
@@ -362,6 +391,321 @@
                  passing mark, GPA toggles...) is omitted: none of those
                  fields has a consumer in Phase 1, and wiring settings nothing
                  reads would be fabricated configuration (task brief). --}}
+
+            {{-- Departments card. Foundational reference data - CreateDepartment. --}}
+            <section aria-label="{{ __('opes.academics.departments_title') }}"
+                     class="rounded border border-sand bg-white p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-charcoal">{{ __('opes.academics.departments_title') }}</h2>
+                        <p class="mt-0.5 text-xs text-charcoal/60">{{ __('opes.academics.departments_subtitle') }}</p>
+                    </div>
+                    <button type="button" wire:click="toggleDepartmentForm"
+                            class="rounded border border-chrome bg-chrome px-3 py-1.5 text-sm font-medium text-white hover:bg-chrome-light">
+                        {{ $showDepartmentForm ? __('opes.academics.cancel') : __('opes.academics.add_department') }}
+                    </button>
+                </div>
+
+                @if ($showDepartmentForm)
+                    <form wire:submit="saveDepartment" class="mt-4 space-y-4 border-t border-sand pt-4">
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                            <label for="dept-code" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.code_label') }}</span>
+                                <input id="dept-code" type="text" wire:model="departmentCode"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('departmentCode')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="dept-name" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_label') }}</span>
+                                <input id="dept-name" type="text" wire:model="departmentName"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('departmentName')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="dept-name-fr" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_fr_label') }}</span>
+                                <input id="dept-name-fr" type="text" wire:model="departmentNameFr"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            </label>
+                        </div>
+                        <div class="border-t border-sand pt-4">
+                            <button type="submit"
+                                    class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                {{ __('opes.academics.save') }}
+                            </button>
+                        </div>
+                    </form>
+                @endif
+
+                <ul class="mt-4 space-y-1.5 text-sm text-charcoal/80">
+                    @forelse ($departments as $department)
+                        <li class="flex justify-between gap-2 border-b border-sand/60 py-1.5 last:border-0">
+                            <span class="font-medium text-charcoal">{{ $department->name }}</span>
+                            <span class="text-charcoal/50">{{ $department->code }}</span>
+                        </li>
+                    @empty
+                        <li class="text-charcoal/50">{{ __('opes.ui.no_data') }}</li>
+                    @endforelse
+                </ul>
+            </section>
+
+            {{-- Houses card. CreateHouse. --}}
+            <section aria-label="{{ __('opes.academics.houses_title') }}"
+                     class="rounded border border-sand bg-white p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-charcoal">{{ __('opes.academics.houses_title') }}</h2>
+                        <p class="mt-0.5 text-xs text-charcoal/60">{{ __('opes.academics.houses_subtitle') }}</p>
+                    </div>
+                    <button type="button" wire:click="toggleHouseForm"
+                            class="rounded border border-chrome bg-chrome px-3 py-1.5 text-sm font-medium text-white hover:bg-chrome-light">
+                        {{ $showHouseForm ? __('opes.academics.cancel') : __('opes.academics.add_house') }}
+                    </button>
+                </div>
+
+                @if ($showHouseForm)
+                    <form wire:submit="saveHouse" class="mt-4 space-y-4 border-t border-sand pt-4">
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                            <label for="house-code" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.code_label') }}</span>
+                                <input id="house-code" type="text" wire:model="houseCode"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('houseCode')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="house-name" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_label') }}</span>
+                                <input id="house-name" type="text" wire:model="houseName"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('houseName')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="house-colour" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.colour_label') }}</span>
+                                <input id="house-colour" type="color" wire:model="houseColour"
+                                       class="h-9 w-16 rounded border border-sand bg-white"/>
+                            </label>
+                        </div>
+                        <div class="border-t border-sand pt-4">
+                            <button type="submit"
+                                    class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                {{ __('opes.academics.save') }}
+                            </button>
+                        </div>
+                    </form>
+                @endif
+
+                <ul class="mt-4 space-y-1.5 text-sm text-charcoal/80">
+                    @forelse ($houses as $house)
+                        <li class="flex items-center justify-between gap-2 border-b border-sand/60 py-1.5 last:border-0">
+                            <span class="flex items-center gap-2 font-medium text-charcoal">
+                                <span class="h-3 w-3 rounded-full" style="background-color: {{ $house->colour }}" aria-hidden="true"></span>
+                                {{ $house->name }}
+                            </span>
+                            <span class="text-charcoal/50">{{ $house->code }}</span>
+                        </li>
+                    @empty
+                        <li class="text-charcoal/50">{{ __('opes.ui.no_data') }}</li>
+                    @endforelse
+                </ul>
+            </section>
+
+            {{-- Rooms card. CreateRoom - used later by the Examinations screen. --}}
+            <section aria-label="{{ __('opes.academics.rooms_title') }}"
+                     class="rounded border border-sand bg-white p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-charcoal">{{ __('opes.academics.rooms_title') }}</h2>
+                        <p class="mt-0.5 text-xs text-charcoal/60">{{ __('opes.academics.rooms_subtitle') }}</p>
+                    </div>
+                    <button type="button" wire:click="toggleRoomForm"
+                            class="rounded border border-chrome bg-chrome px-3 py-1.5 text-sm font-medium text-white hover:bg-chrome-light">
+                        {{ $showRoomForm ? __('opes.academics.cancel') : __('opes.academics.add_room') }}
+                    </button>
+                </div>
+
+                @if ($showRoomForm)
+                    <form wire:submit="saveRoom" class="mt-4 space-y-4 border-t border-sand pt-4">
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
+                            <label for="room-code" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.code_label') }}</span>
+                                <input id="room-code" type="text" wire:model="roomCode"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('roomCode')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="room-name" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_label') }}</span>
+                                <input id="room-name" type="text" wire:model="roomName"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('roomName')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="room-capacity" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.capacity_label') }}</span>
+                                <input id="room-capacity" type="number" min="1" max="2000" wire:model="roomCapacity"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('roomCapacity')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="room-building" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.building_label') }}</span>
+                                <input id="room-building" type="text" wire:model="roomBuilding"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            </label>
+                            <label for="room-type" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.type_label') }}</span>
+                                <select id="room-type" wire:model="roomType"
+                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    <option value="classroom">{{ __('opes.academics.room_type_classroom') }}</option>
+                                    <option value="lab">{{ __('opes.academics.room_type_lab') }}</option>
+                                    <option value="hall">{{ __('opes.academics.room_type_hall') }}</option>
+                                    <option value="office">{{ __('opes.academics.room_type_office') }}</option>
+                                    <option value="other">{{ __('opes.academics.room_type_other') }}</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="border-t border-sand pt-4">
+                            <button type="submit"
+                                    class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                {{ __('opes.academics.save') }}
+                            </button>
+                        </div>
+                    </form>
+                @endif
+
+                <ul class="mt-4 space-y-1.5 text-sm text-charcoal/80">
+                    @forelse ($rooms as $room)
+                        <li class="flex justify-between gap-2 border-b border-sand/60 py-1.5 last:border-0">
+                            <span class="font-medium text-charcoal">{{ $room->name }}</span>
+                            <span class="text-charcoal/50">{{ $room->code }} · {{ __('opes.academics.capacity_label') }} {{ $room->capacity }}</span>
+                        </li>
+                    @empty
+                        <li class="text-charcoal/50">{{ __('opes.ui.no_data') }}</li>
+                    @endforelse
+                </ul>
+            </section>
+
+            {{-- School sections card. CreateSchoolSection - the (education
+                 level, track, sub-system) triple the rest of the academic
+                 structure hangs from. --}}
+            <section aria-label="{{ __('opes.academics.sections_title') }}"
+                     class="rounded border border-sand bg-white p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-charcoal">{{ __('opes.academics.sections_title') }}</h2>
+                        <p class="mt-0.5 text-xs text-charcoal/60">{{ __('opes.academics.sections_subtitle') }}</p>
+                    </div>
+                    <button type="button" wire:click="toggleSectionForm"
+                            class="rounded border border-chrome bg-chrome px-3 py-1.5 text-sm font-medium text-white hover:bg-chrome-light">
+                        {{ $showSectionForm ? __('opes.academics.cancel') : __('opes.academics.add_section') }}
+                    </button>
+                </div>
+
+                @if ($showSectionForm)
+                    <form wire:submit="saveSection" class="mt-4 space-y-4 border-t border-sand pt-4">
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+                            <label for="section-education-level" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.education_level_label') }}</span>
+                                <select id="section-education-level" wire:model="sectionEducationLevel"
+                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    <option value="">{{ __('opes.academics.section_choose') }}</option>
+                                    @foreach ($educationLevels as $level)
+                                        <option value="{{ $level->value }}">{{ ucwords(str_replace('_', ' ', $level->value)) }}</option>
+                                    @endforeach
+                                </select>
+                                @error('sectionEducationLevel')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-track" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.track_label') }}</span>
+                                <select id="section-track" wire:model="sectionTrack"
+                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    <option value="">{{ __('opes.academics.section_choose') }}</option>
+                                    @foreach ($tracks as $track)
+                                        <option value="{{ $track->value }}">{{ ucwords(str_replace('_', ' ', $track->value)) }}</option>
+                                    @endforeach
+                                </select>
+                                @error('sectionTrack')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-sub-system" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.sub_system_label') }}</span>
+                                <select id="section-sub-system" wire:model="sectionSubSystem"
+                                        class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                    <option value="">{{ __('opes.academics.section_choose') }}</option>
+                                    @foreach ($subSystems as $subSystem)
+                                        <option value="{{ $subSystem->value }}">{{ ucwords(str_replace('_', ' ', $subSystem->value)) }}</option>
+                                    @endforeach
+                                </select>
+                                @error('sectionSubSystem')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-name" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_label') }}</span>
+                                <input id="section-name" type="text" wire:model="sectionName"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('sectionName')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-name-fr" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.name_fr_label') }}</span>
+                                <input id="section-name-fr" type="text" wire:model="sectionNameFr"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('sectionNameFr')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-matricule-format" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.matricule_format_label') }}</span>
+                                <input id="section-matricule-format" type="text" wire:model="sectionMatriculeFormat"
+                                       placeholder="e.g. {YEAR}-{SEQ}"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('sectionMatriculeFormat')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                            <label for="section-display-order" class="flex flex-col gap-1">
+                                <span class="text-xs font-medium text-charcoal/70">{{ __('opes.academics.display_order_label') }}</span>
+                                <input id="section-display-order" type="number" min="0" wire:model="sectionDisplayOrder"
+                                       class="rounded border border-sand bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                @error('sectionDisplayOrder')
+                                    <span class="text-xs text-heritage-red">{{ $message }}</span>
+                                @enderror
+                            </label>
+                        </div>
+                        <div class="border-t border-sand pt-4">
+                            <button type="submit"
+                                    class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                {{ __('opes.academics.save') }}
+                            </button>
+                        </div>
+                    </form>
+                @endif
+
+                <ul class="mt-4 space-y-1.5 text-sm text-charcoal/80">
+                    @forelse ($sections as $section)
+                        <li class="flex justify-between gap-2 border-b border-sand/60 py-1.5 last:border-0">
+                            <span class="font-medium text-charcoal">{{ $section->name }}</span>
+                            <span class="text-charcoal/50">{{ $section->matricule_format }}</span>
+                        </li>
+                    @empty
+                        <li class="text-charcoal/50">{{ __('opes.ui.no_data') }}</li>
+                    @endforelse
+                </ul>
+            </section>
         </div>
 
         {{-- ── Right rail ───────────────────────────────────────────────── --}}
