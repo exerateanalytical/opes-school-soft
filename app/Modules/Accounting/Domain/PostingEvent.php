@@ -58,6 +58,11 @@ enum PostingEvent: string
     case WithholdingRetained = 'withholding.retained';
     case GoodsReceivedNotInvoiced = 'goods.received_not_invoiced';
 
+    // Expense capture (02 §21.3) - the petty, unregistered, cash-and-receipt
+    // charge that never goes near a supplier invoice. Dr the class 6 (or
+    // class 2 capex) lines, Cr the treasury account that actually paid.
+    case ExpenseRecorded = 'expense.recorded';
+
     // Inventory (06)
     case InventoryPurchased = 'inventory.purchased';
     case InventoryReceivedIntoStock = 'inventory.received_into_stock';
@@ -200,6 +205,25 @@ enum PostingEvent: string
                 'document.lines.*.label' => 'string',
             ],
 
+            // §21.3 - the expense voucher. `expense.lines` is the iterated
+            // debit side (one Dr per charge line, class 6 or class 2);
+            // `expense.treasury_account_id` is the single credit. The
+            // partner tuple is present but usually null - an unregistered
+            // market trader has no third-party account, which is precisely
+            // why this document exists rather than a supplier invoice.
+            self::ExpenseRecorded => [
+                'expense.total' => 'int',
+                'expense.reference' => 'string',
+                'expense.description' => 'string',
+                'expense.payee_label' => 'string',
+                'expense.partner' => 'partner',
+                'expense.treasury_account_id' => 'int',
+                'expense.lines' => 'list',
+                'expense.lines.*.amount' => 'int',
+                'expense.lines.*.expense_account_id' => 'int',
+                'expense.lines.*.label' => 'string',
+            ],
+
             self::InventoryPurchased,
             self::InventoryReceivedIntoStock,
             self::InventoryIssued,
@@ -338,9 +362,46 @@ enum PostingEvent: string
                 'fine.income_account_id' => 'int',
             ],
 
+            // §17.2 step 9 / §18.1-§18.2. The four scalars below are the
+            // original shape and are UNCHANGED - `closing.amount` is still
+            // the entry total, `closing.result_account_id` still compte 13.
+            // The two collections are ADDITIVE and are what makes the close
+            // expressible at all: §18.1 closes EVERY class 6/7/8 account
+            // with a balance (one line each, not a lump), and §18.2 is
+            // explicit that the à-nouveaux carries every collective balance
+            // as ONE LINE PER PARTNER - "for a 1 200-student school this is
+            // a several-thousand-line entry; that is correct and expected".
+            // A four-scalar payload can express neither.
+            //
+            // Two collections rather than one because a partner tuple is
+            // not optional in EvaluatePostingRule: `partner_source` either
+            // resolves to a (type, id) pair or throws. Partner-bearing
+            // lines (collective accounts, L8) iterate `closing.partner_lines`;
+            // everything else iterates `closing.lines`. Amounts on both are
+            // SIGNED (positive debits, negative credits): a class 7 account
+            // being emptied is a debit, a class 6 a credit, and which side
+            // any given account lands on is data, not configuration.
             self::YearEndClosing,
             self::YearEndAppropriation,
-            self::YearEndOpeningBalances,
+            self::YearEndOpeningBalances => [
+                'closing.amount' => 'int',
+                'closing.reference' => 'string',
+                'closing.result_account_id' => 'int',
+                'closing.counterpart_account_id' => 'int',
+                'closing.lines' => 'list',
+                'closing.lines.*.amount' => 'int',
+                'closing.lines.*.target_account_id' => 'int',
+                'closing.lines.*.label' => 'string',
+                'closing.partner_lines' => 'list',
+                'closing.partner_lines.*.amount' => 'int',
+                'closing.partner_lines.*.target_account_id' => 'int',
+                'closing.partner_lines.*.label' => 'string',
+                'closing.partner_lines.*.partner' => 'partner',
+                // §18.2: "each carried partner line retains its `due_date`,
+                // so aging survives the boundary".
+                'closing.partner_lines.*.due_date' => 'string',
+            ],
+
             self::FxRevaluation => [
                 'closing.amount' => 'int',
                 'closing.reference' => 'string',

@@ -89,6 +89,22 @@ final class PostJournalEntry
                 ));
             }
 
+            // Budget control (02-accounting §16), deliberately HERE: the
+            // lines are already frozen under FOR UPDATE and the entry is
+            // known to balance, but no gapless piece_no has been allocated
+            // yet - so a refusal rolls back without burning a number out of
+            // the sequence.
+            //
+            // This is a no-op unless an account carries budget_control other
+            // than `none` AND the fiscal year has an approved, current
+            // budget; a draft budget can never refuse a posting.
+            // PostFromEvent needs no change - it posts through here.
+            app(AssertWithinBudget::class)->handle(
+                $lines->all(),
+                (string) $entry->date,
+                (int) $entry->fiscal_year_id,
+            );
+
             // L5.
             $period = AccountingPeriod::lockForPosting($entry->accounting_period_id);
             $period->assertOpenForPosting($allowSoftLocked);
