@@ -37,7 +37,12 @@ enum ImportKind: string
         return match ($this) {
             self::Students => ['first_name', 'last_name', 'date_of_birth', 'gender'],
             self::Guardians => ['first_name', 'last_name', 'phone'],
-            self::Staff => ['first_name', 'last_name', 'hired_on'],
+            // gender, date_of_birth and phone moved here from optional:
+            // HireStaffMember - the real Action CommitImportBatch calls -
+            // requires all three. They shipped merely optional, which would
+            // have let a file pass validation and then fail at commit for
+            // every single row.
+            self::Staff => ['first_name', 'last_name', 'hired_on', 'gender', 'date_of_birth', 'phone'],
         };
     }
 
@@ -58,10 +63,14 @@ enum ImportKind: string
             self::Guardians => [
                 'middle_name', 'email', 'relationship', 'national_id_number',
                 'occupation', 'address',
+                // Links the newly created guardian to an EXISTING student by
+                // matricule, via LinkGuardian, in the same commit. Absent or
+                // unresolvable = the guardian is still created, just
+                // unlinked - a bad matricule must not block the whole row.
+                'student_matricule',
             ],
             self::Staff => [
-                'middle_name', 'gender', 'phone', 'email', 'job_title',
-                'national_id_number',
+                'middle_name', 'email', 'job_title', 'national_id_number',
             ],
         };
     }

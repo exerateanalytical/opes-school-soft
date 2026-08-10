@@ -93,11 +93,20 @@ final class ValidateImportBatch
                 'last_name' => 'required|string|max:120',
                 'phone' => 'required|string|max:40',
                 'email' => 'nullable|email|max:190',
+                'relationship' => 'nullable|string|in:father,mother,stepfather,stepmother,grandparent,uncle,aunt,sibling,legal_guardian,sponsor,other',
+                // NOT validated against the students table here - Validate
+                // is a pure dry run with no domain reads by design, and a
+                // matricule that does not resolve is not a row ERROR, it
+                // just leaves the guardian unlinked (CommitImportBatch).
+                'student_matricule' => 'nullable|string|max:40',
             ],
             ImportKind::Staff => [
                 'first_name' => 'required|string|max:120',
                 'last_name' => 'required|string|max:120',
                 'hired_on' => 'required|date',
+                'gender' => 'required|string|in:male,female,m,f',
+                'date_of_birth' => 'required|date|before:today',
+                'phone' => 'required|string|max:40',
                 'email' => 'nullable|email|max:190',
             ],
         };
