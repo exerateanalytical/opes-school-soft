@@ -72,7 +72,21 @@ final class Login extends Component
      */
     private function landingFor(?User $user): string
     {
-        if ($user === null || ! Route::has('finance.dashboard')) {
+        if ($user === null) {
+            return '/dashboard';
+        }
+
+        // A guardian has no /dashboard permission at all - EnsureGuardianPortal
+        // is the only door open to that role - so sending one there the way
+        // every other role defaults would land on a guaranteed 403 rather
+        // than degrading to the generic screen. /portal is its own middleware
+        // stack (auth then guardian.portal), unconditionally correct for any
+        // user holding the role.
+        if ($user->hasRole(Role::Guardian->value)) {
+            return '/portal';
+        }
+
+        if (! Route::has('finance.dashboard')) {
             return '/dashboard';
         }
 

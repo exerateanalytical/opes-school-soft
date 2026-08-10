@@ -114,6 +114,16 @@ return [
                 'email' => 'demo.teacher@opeschool.test',
                 'name' => 'Demo Teacher',
             ],
+            // The guardian portal (/portal) has existed since Phase 12 with
+            // six real screens, but no demo button ever offered it - a
+            // demo of the product genuinely could not show a parent's view.
+            // demo.guardian1@opeschool.test is a real DemoDataSeeder
+            // guardian with portal_user_id set on a real Guardian row.
+            [
+                'role' => 'guardian',
+                'email' => 'demo.guardian1@opeschool.test',
+                'name' => 'Demo Guardian',
+            ],
         ],
     ],
 

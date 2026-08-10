@@ -555,7 +555,12 @@ final class DemoDataSeeder extends Seeder
                     'is_emergency_contact' => true,
                     'is_authorised_for_pickup' => true,
                     'is_fee_payer' => $g === 0,
-                    'valid_from' => '2026-09-01',
+                    // NOT the academic year start: a guardian's authorization
+                    // to see their own child begins at enrollment, and dating
+                    // it to 2026-09-01 left every demo parent portal showing
+                    // "no child linked" for the entire ~7 weeks before that
+                    // date - which is every day this demo has actually run.
+                    'valid_from' => '2026-01-01',
                     'valid_to' => null,
                     'revocation_reason' => null,
                     'created_by' => null,
