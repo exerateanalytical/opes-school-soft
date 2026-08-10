@@ -31,11 +31,31 @@ beforeEach(function () {
     RateLimiter::clear('login:bursar@school.test|127.0.0.1');
 });
 
+// This user is a Bursar, and a Bursar now lands on the finance dashboard
+// rather than the generic one - see Login::landingFor(). The generic landing
+// is still asserted below for a user who holds no finance role, so both
+// halves of that branch stay covered.
 it('logs a user in with correct credentials', function () {
     loginUser();
 
     Livewire::test(Login::class)
         ->set('email', 'bursar@school.test')
+        ->set('password', 'Correct-Horse-1')
+        ->call('authenticate')
+        ->assertRedirect('/finance/dashboard');
+
+    expect(auth()->check())->toBeTrue();
+});
+
+it('lands a user with no finance role on the generic dashboard', function () {
+    (new \Database\Seeders\RolePermissionSeeder())->run();
+    User::factory()->create([
+        'email' => 'teacher@school.test',
+        'password' => 'Correct-Horse-1',
+    ])->assignRole(Role::Teacher->value);
+
+    Livewire::test(Login::class)
+        ->set('email', 'teacher@school.test')
         ->set('password', 'Correct-Horse-1')
         ->call('authenticate')
         ->assertRedirect('/dashboard');

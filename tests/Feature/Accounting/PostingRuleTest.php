@@ -199,10 +199,15 @@ it('mutates an unlocked rule in place on edit', function (): void {
     $rule = saveRule();
     $edited = saveRule(['priority' => 200]);
 
+    // Scoped to this rule's own code, NOT a global count: migrations now
+    // seed real posting rules of their own (year-end appropriation, treasury
+    // statement charges), so a global count measures the seed set rather
+    // than the behaviour under test. What matters here is that editing
+    // mutated the existing row instead of adding a second one.
     expect($edited->id)->toBe($rule->id)
         ->and($edited->version)->toBe(1)
         ->and($edited->priority)->toBe(200)
-        ->and(PostingRule::query()->count())->toBe(1);
+        ->and(PostingRule::query()->where('code', 'momo_fee_payment')->count())->toBe(1);
 });
 
 it('creates version+1 and closes the predecessor once the rule is locked', function (): void {
