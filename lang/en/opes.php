@@ -32,6 +32,7 @@ return [
         'dashboard' => 'Dashboard',
         'admissions' => 'Admissions',
         'students' => 'Students',
+        'import' => 'Data import',
         'guardians' => 'Guardians',
         'staff' => 'Staff',
         'payroll' => 'Payroll',
@@ -1922,5 +1923,32 @@ return [
         'supersedes' => 'Supersedes',
         'empty' => 'No book has been generated for this fiscal year yet.',
         'select_year' => 'Select a fiscal year first.',
+    ],
+
+    /*
+     * The data import suite (00-core §15 Phase 2).
+     */
+    'import_screen' => [
+        'title' => 'Data import',
+        'intro' => 'Upload a CSV to onboard people in bulk. Nothing is created until you commit: staging and validation show you exactly which rows would fail first.',
+        'kind' => 'What is in this file',
+        'filename' => 'File name',
+        'csv' => 'CSV content',
+        'stage' => 'Stage file',
+        'validate' => 'Validate',
+        'commit' => 'Commit',
+        'report' => 'Dry-run report',
+        'rows' => 'Rows',
+        'valid' => 'Valid',
+        'invalid' => 'Invalid',
+        'imported' => 'Imported',
+        'status' => 'Status',
+        'data' => 'Data',
+        'problems' => 'Problems',
+        'empty' => 'Nothing staged yet.',
+        'no_batch' => 'Stage a file first.',
+        'staged' => 'Staged :count row(s). Nothing has been created yet.',
+        'validated' => 'Validated: :valid row(s) ready, :invalid to fix.',
+        'committed' => 'Imported :count record(s).',
     ],
 ];

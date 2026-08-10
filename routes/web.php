@@ -137,6 +137,19 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/students/promotion', \App\Modules\Students\Livewire\Promotion\Wizard::class)
         ->middleware('can:promotion.evaluate')->name('students.promotion');
 
+    /*
+     * Data import (00-core §15 Phase 2). Three phases - stage, validate,
+     * commit - so a school sees which rows would fail before any record
+     * exists. Gated on students.manage: this creates people.
+     *
+     * MUST precede /students/{student}: that route carries no numeric
+     * constraint, so "import" would match it as a student id and this
+     * route would never be reached - the same ordering trap documented
+     * for /students/promotion above.
+     */
+    Route::get('/students/import', \App\Modules\Students\Livewire\Import\Index::class)
+        ->middleware('can:students.manage')->name('students.import');
+
     Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
         ->middleware('can:students.view')->name('students.show');
 

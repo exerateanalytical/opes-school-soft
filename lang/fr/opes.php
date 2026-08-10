@@ -34,6 +34,7 @@ return [
         'dashboard' => 'Tableau de bord',
         'admissions' => 'Admissions',
         'students' => 'Élèves',
+        'import' => 'Import de données',
         'guardians' => 'Parents / Tuteurs',
         'staff' => 'Personnel',
         'payroll' => 'Paie',
@@ -1915,5 +1916,32 @@ return [
         'supersedes' => 'Remplace',
         'empty' => "Aucun livre n'a encore été généré pour cet exercice.",
         'select_year' => "Sélectionnez d'abord un exercice.",
+    ],
+
+    /*
+     * La suite d'import de données (00-core §15 Phase 2).
+     */
+    'import_screen' => [
+        'title' => 'Import de données',
+        'intro' => "Importez un fichier CSV pour créer des personnes en masse. Rien n'est créé avant la validation finale : la préparation et le contrôle vous montrent d'abord quelles lignes échoueraient.",
+        'kind' => 'Contenu du fichier',
+        'filename' => 'Nom du fichier',
+        'csv' => 'Contenu CSV',
+        'stage' => 'Préparer le fichier',
+        'validate' => 'Contrôler',
+        'commit' => 'Valider et créer',
+        'report' => "Rapport de contrôle",
+        'rows' => 'Lignes',
+        'valid' => 'Valides',
+        'invalid' => 'Invalides',
+        'imported' => 'Importées',
+        'status' => 'Statut',
+        'data' => 'Données',
+        'problems' => 'Problèmes',
+        'empty' => 'Aucun fichier préparé.',
+        'no_batch' => "Préparez d'abord un fichier.",
+        'staged' => ':count ligne(s) préparée(s). Rien n\'a encore été créé.',
+        'validated' => 'Contrôle : :valid ligne(s) prête(s), :invalid à corriger.',
+        'committed' => ':count enregistrement(s) importé(s).',
     ],
 ];

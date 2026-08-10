@@ -78,6 +78,7 @@ use App\Modules\SchoolProfile\Livewire\Index as SettingsIndex;
 use App\Modules\Students\Livewire\Promotion\Wizard as PromotionWizard;
 use App\Modules\Students\Livewire\Reports\Index as StudentsReportsIndex;
 use App\Modules\Welfare\Livewire\Reports\Index as WelfareReportsIndex;
+use App\Modules\Students\Livewire\Import\Index as StudentsImportIndex;
 use App\Modules\Students\Livewire\Students\Index as StudentsIndex;
 use App\Modules\Students\Livewire\Students\Show as StudentsShow;
 use App\Modules\Welfare\Livewire\Discipline\CaseShow as DisciplineCaseShow;
@@ -246,6 +247,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('reports.financial', AccountingReportsIndex::class);
         Livewire::component('accounting.statements.index', AccountingStatementsIndex::class);
         Livewire::component('accounting.year-end.console', YearEndConsole::class);
+        Livewire::component('students.import.index', StudentsImportIndex::class);
         Livewire::component('accounting.books.index', AccountingBooksIndex::class);
         Livewire::component('accounting.budgets.index', AccountingBudgetsIndex::class);
         Livewire::component('accounting.reconciliation.index', AccountingReconciliationIndex::class);

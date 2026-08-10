@@ -37,6 +37,8 @@ final class Navigation
             // this URL (guardian RECORDS have existed since Phase 2, reached
             // through a student's profile; what was missing was this list).
             ['key' => 'guardians', 'route' => '/guardians', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
+            // 00-core §15 Phase 2: bulk onboarding from a CSV.
+            ['key' => 'import', 'route' => '/students/import', 'permission' => Permission::StudentsManage, 'enabled' => true, 'built' => true],
             // Phase 11 F1/wiring pass: staff directory.
             ['key' => 'staff', 'route' => '/staff', 'permission' => Permission::StaffView, 'enabled' => true, 'built' => true],
             // Phase 11 F2/wiring pass: payroll runs.
