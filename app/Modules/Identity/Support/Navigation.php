@@ -55,6 +55,12 @@ final class Navigation
             ['key' => 'pta', 'route' => '/guardians/pta', 'permission' => Permission::GuardiansManage, 'enabled' => true, 'built' => true],
             // 00-core §15 Phase 2: bulk onboarding from a CSV.
             ['key' => 'import', 'route' => '/students/import', 'permission' => Permission::StudentsManage, 'enabled' => true, 'built' => true],
+            // The end-of-year promotion wizard. It was routed, registered and
+            // tested but never given a sidebar entry, so the only way to reach
+            // it was to type the URL. Gated on promotion.evaluate to match its
+            // route's outer gate (the apply step is gated harder inside the
+            // component), per this file's nav-and-route-agree contract.
+            ['key' => 'promotion', 'route' => '/students/promotion', 'permission' => Permission::PromotionEvaluate, 'enabled' => true, 'built' => true],
             // Phase 11 F1/wiring pass: staff directory.
             ['key' => 'staff', 'route' => '/staff', 'permission' => Permission::StaffView, 'enabled' => true, 'built' => true],
             // Phase 11 F2/wiring pass: payroll runs.

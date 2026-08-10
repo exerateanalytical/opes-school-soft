@@ -49,6 +49,8 @@
         'setup' => '<path d="M9 3h6v3H9z"/><path d="M6 5h2m8 0h2a1 1 0 011 1v14a1 1 0 01-1 1H6a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M9 12l2 2 4-4"/>',
         // Data import: an arrow landing into a tray.
         'import' => '<path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
+        // Promotion: a step upward - a class moving to the next year.
+        'promotion' => '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/><path d="M4 21h16"/>',
         // Statutory books: a bound ledger.
         'books' => '<path d="M4 5a2 2 0 012-2h13v18H6a2 2 0 01-2-2z"/><path d="M9 3v18"/>',
         // Reconciliation: two arrows tying back to each other.

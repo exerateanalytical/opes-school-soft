@@ -84,12 +84,22 @@
                         <a href="{{ $item['route'] }}"
                            @if ($isActive) aria-current="page" @endif
                            @unless ($item['built'] ?? true) title="{{ __('opes.nav.nav_disabled_title') }}" @endunless
-                           class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
-                               ? 'bg-chrome-light font-semibold text-white'
+                           class="relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
+                               ? 'bg-primary font-semibold text-white'
                                : (($item['built'] ?? true)
                                    ? 'text-white/85 hover:bg-chrome-light/60 hover:text-white'
                                    : 'text-white/60 hover:bg-chrome-light/40 hover:text-white/90') }}">
-                            <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
+                            @if ($isActive)
+                                {{-- The design system's gold left indicator on
+                                     the active module. Absolutely positioned so
+                                     it cannot shift the label the way a border
+                                     would, and aria-hidden because
+                                     aria-current="page" already carries this
+                                     meaning to a screen reader. --}}
+                                <span class="absolute inset-y-1 left-0 w-[3px] rounded-full bg-heritage-yellow" aria-hidden="true"></span>
+                            @endif
+                            <x-opes-nav-icon :nav-key="$item['key']"
+                                             class="h-4.5 w-4.5 shrink-0 {{ $isActive ? 'text-heritage-yellow' : '' }}"/>
                             <span class="min-w-0 truncate">{{ $label }}</span>
                             @unless ($item['built'] ?? true)
                                 {{-- The module is scheduled, not missing: the
@@ -121,7 +131,7 @@
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
         {{-- ── Top bar ─────────────────────────────────────────────────── --}}
-        <header class="sticky top-0 z-30 flex h-16 min-w-0 shrink-0 items-center gap-3 border-b border-sand bg-white px-3 sm:px-4">
+        <header class="sticky top-0 z-30 flex h-16 min-w-0 shrink-0 items-center gap-3 border-b border-border-primary bg-white px-3 sm:px-4">
             <button type="button"
                     class="-ml-1 rounded p-2 text-charcoal/70 hover:bg-sand md:hidden"
                     :aria-expanded="nav ? 'true' : 'false'"
@@ -205,7 +215,7 @@
                     </button>
 
                     <div x-show="open" x-cloak x-transition.opacity
-                         class="absolute right-0 z-40 mt-1 w-56 rounded border border-sand bg-white py-1 shadow-lg">
+                         class="absolute right-0 z-40 mt-1 w-56 rounded border border-border-primary bg-white py-1 shadow-lg">
                         <p class="px-3 py-2 text-xs text-charcoal/60">
                             {{ __('opes.shell.signed_in_as') }}
                             <span class="block truncate text-sm font-medium text-charcoal">{{ $shellUser->name ?? '' }}</span>
@@ -213,7 +223,7 @@
                         {{-- EN / FR. Two plain form buttons rather than a select: no
                              JavaScript, and it works on the cheap Android handsets that
                              make up most of the field fleet. --}}
-                        <div class="flex items-center gap-1 border-t border-sand px-3 py-2" role="group"
+                        <div class="flex items-center gap-1 border-t border-border-primary px-3 py-2" role="group"
                              aria-label="{{ __('opes.shell.language') }}">
                             @foreach (['en' => 'EN', 'fr' => 'FR'] as $code => $short)
                                 <form method="POST" action="/locale">
@@ -252,7 +262,11 @@
         </header>
 
         {{-- ── Main ────────────────────────────────────────────────────── --}}
-        <main class="min-w-0 flex-1 overflow-x-hidden bg-ivory px-4 py-6 sm:px-6">
+        {{-- The canvas is deliberately the soft surface, not white: the design
+             system's desktop structure is white CARDS lifting off a #F5F7F6
+             BODY. On an all-white canvas the cards have nothing to separate
+             from and the page reads flat. --}}
+        <main class="min-w-0 flex-1 overflow-x-hidden bg-sand px-4 py-6 sm:px-6">
             {{ $slot }}
         </main>
 
