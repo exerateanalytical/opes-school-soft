@@ -962,9 +962,39 @@ final class RenderReportCard
             ->where('assessment_period_id', '=', $periodId)
             ->first();
 
-        return $row === null
-            ? ['available' => true, 'recorded' => false]
-            : ['available' => true, 'recorded' => true, 'values' => (array) $row];
+        if ($row === null) {
+            return ['available' => true, 'recorded' => false];
+        }
+
+        // Resolve the five level ids to their printable labels. A bulletin
+        // prints "Tres bien", not level id 3, and the label is read from the
+        // scale rather than mapped here so a school that renames a level sees
+        // its own wording on the card.
+        $levels = DB::table('conduct_scale_levels')
+            ->where('conduct_scale_id', '=', $row->conduct_scale_id)
+            ->get()
+            ->keyBy('id');
+
+        $dimensions = [];
+
+        foreach (['conduite', 'travail', 'assiduite', 'discipline', 'tenue'] as $dimension) {
+            $levelId = $row->{$dimension.'_level_id'} ?? null;
+            $level = $levelId === null ? null : ($levels[$levelId] ?? null);
+
+            $dimensions[$dimension] = $level === null ? null : [
+                'code' => (string) $level->code,
+                'label' => (string) $level->label,
+                'label_fr' => (string) $level->label_fr,
+            ];
+        }
+
+        return [
+            'available' => true,
+            'recorded' => true,
+            'dimensions' => $dimensions,
+            'notes' => $row->notes,
+            'values' => (array) $row,
+        ];
     }
 
     /**
