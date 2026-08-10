@@ -69,6 +69,7 @@ return [
         'bulk_prints' => 'Bulk prints',
         'outbox' => 'Message outbox',
         'message_templates' => 'Message templates',
+        'setup' => 'Go-live readiness',
         'settings' => 'Settings',
         'nav_disabled_title' => 'Arrives in a later phase',
     ],
@@ -1950,5 +1951,16 @@ return [
         'staged' => 'Staged :count row(s). Nothing has been created yet.',
         'validated' => 'Validated: :valid row(s) ready, :invalid to fix.',
         'committed' => 'Imported :count record(s).',
+    ],
+
+    /*
+     * Go-live readiness (00-core §16 blocking gates).
+     */
+    'setup_screen' => [
+        'title' => 'Go-live readiness',
+        'intro' => 'Every check below is evaluated against this school\'s live data. Nothing here can be ticked off: a row turns green when the thing is actually configured. Several answers belong to the school\'s accountant, and a guessed value would look authoritative while being wrong.',
+        'ready' => 'No blocking gate is open. The product is configured well enough to go live.',
+        'not_ready' => ':count check(s) block go-live. Each one names what already refuses to run.',
+        'owner' => 'Answered by',
     ],
 ];

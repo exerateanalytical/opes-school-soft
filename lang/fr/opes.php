@@ -71,6 +71,7 @@ return [
         'bulk_prints' => 'Impressions en lot',
         'outbox' => 'Messages sortants',
         'message_templates' => 'Modèles de messages',
+        'setup' => 'Mise en service',
         'settings' => 'Paramètres',
         'nav_disabled_title' => 'Disponible dans une phase ultérieure',
     ],
@@ -1943,5 +1944,16 @@ return [
         'staged' => ':count ligne(s) préparée(s). Rien n\'a encore été créé.',
         'validated' => 'Contrôle : :valid ligne(s) prête(s), :invalid à corriger.',
         'committed' => ':count enregistrement(s) importé(s).',
+    ],
+
+    /*
+     * Préparation à la mise en service (00-core §16).
+     */
+    'setup_screen' => [
+        'title' => 'Préparation à la mise en service',
+        'intro' => "Chaque contrôle ci-dessous est évalué sur les données réelles de l'établissement. Rien ne se coche ici : une ligne passe au vert lorsque le paramètre est réellement configuré. Plusieurs réponses relèvent du comptable de l'école, et une valeur devinée paraîtrait faire autorité tout en étant fausse.",
+        'ready' => "Aucun point bloquant. Le produit est suffisamment configuré pour la mise en service.",
+        'not_ready' => ':count point(s) bloquent la mise en service. Chacun indique ce qui refuse déjà de fonctionner.',
+        'owner' => 'À traiter par',
     ],
 ];

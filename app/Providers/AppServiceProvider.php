@@ -72,6 +72,7 @@ use App\Modules\Accounting\Livewire\Reconciliation\Index as AccountingReconcilia
 use App\Modules\Communication\Livewire\Outbox\Index as CommunicationOutboxIndex;
 use App\Modules\Communication\Livewire\Templates\Index as CommunicationTemplatesIndex;
 use App\Modules\Operations\Livewire\Backups\Index as OperationsBackupsIndex;
+use App\Modules\Operations\Livewire\Setup\Index as OperationsSetupIndex;
 use App\Modules\Reporting\Livewire\BulkPrints\Index as BulkPrintsIndex;
 use App\Modules\Reporting\Livewire\Reports\Hub as ReportsHub;
 use App\Modules\SchoolProfile\Livewire\Index as SettingsIndex;
@@ -247,6 +248,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('reports.financial', AccountingReportsIndex::class);
         Livewire::component('accounting.statements.index', AccountingStatementsIndex::class);
         Livewire::component('accounting.year-end.console', YearEndConsole::class);
+        Livewire::component('operations.setup.index', OperationsSetupIndex::class);
         Livewire::component('students.import.index', StudentsImportIndex::class);
         Livewire::component('accounting.books.index', AccountingBooksIndex::class);
         Livewire::component('accounting.budgets.index', AccountingBudgetsIndex::class);

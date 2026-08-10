@@ -162,6 +162,9 @@ final class Navigation
             // engine-configuration key/value store now lives at /settings.
             // /settings/tax, /settings/fiscal-identity and /settings/licence
             // remain separate screens for their own modules, unaffected.
+            // 00-core §16: which blocking gates are still open, and who
+            // has to answer each one.
+            ['key' => 'setup', 'route' => '/setup', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => true],
             ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => true],
         ];
     }

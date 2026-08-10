@@ -147,6 +147,15 @@ Route::middleware('auth')->group(function (): void {
      * route would never be reached - the same ordering trap documented
      * for /students/promotion above.
      */
+    /*
+     * Go-live readiness (00-core §16 blocking gates). Read-only by
+     * design: every row is evaluated against live data, so nothing can
+     * be ticked to turn a red row green - a school gets green by
+     * configuring the thing.
+     */
+    Route::get('/setup', \App\Modules\Operations\Livewire\Setup\Index::class)
+        ->middleware('can:setting.view')->name('operations.setup');
+
     Route::get('/students/import', \App\Modules\Students\Livewire\Import\Index::class)
         ->middleware('can:students.manage')->name('students.import');
 
