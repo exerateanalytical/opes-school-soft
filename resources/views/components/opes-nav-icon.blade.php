@@ -25,6 +25,8 @@
         'unfinished_work' => '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
         // System documentation: a document with a checkmark.
         'system_documentation' => '<path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/><path d="M9 13l2 2 4-4"/>',
+        // Webhooks: a plug connecting outward.
+        'webhooks' => '<circle cx="6" cy="12" r="3"/><path d="M9 12h6l4-6M15 12l4 6"/>',
         'admissions' => '<path d="M3 12l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/>',
         'students' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
         'guardians' => '<circle cx="8" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M2 21c0-3.3 2.7-6 6-6s6 2.7 6 6M12 21c0-3.3 2.7-6 6-6"/>',

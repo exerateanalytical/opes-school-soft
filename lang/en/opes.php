@@ -57,6 +57,7 @@ return [
         'reconciliation' => 'Bank reconciliation',
         'books' => 'Statutory books',
         'system_documentation' => 'System documentation',
+        'webhooks' => 'Webhooks',
         'budgets' => 'Budgets',
         'procurement' => 'Procurement',
         'tax' => 'Tax & declarations',
@@ -2120,5 +2121,29 @@ return [
         'schema_version' => 'Schema version',
         'hash' => 'SHA-256',
         'empty' => 'Nothing generated yet.',
+    ],
+
+    /*
+     * Outbound webhooks - Phase 12 scope shipped as schema only until now.
+     */
+    'webhooks_screen' => [
+        'title' => 'Webhooks',
+        'intro' => 'Notify an external system when something happens - a fee invoice is issued, a payment is received. Every delivery is signed so the receiver can verify it really came from this school.',
+        'register' => 'Register an endpoint',
+        'name' => 'Name',
+        'url' => 'URL',
+        'events' => 'Events',
+        'events_hint' => 'Comma-separated event names, or * for every event.',
+        'status' => 'Status',
+        'active' => 'Active',
+        'revoked' => 'Revoked',
+        'revoke' => 'Revoke',
+        'confirm_revoke' => 'Revoke this endpoint? It will stop receiving deliveries.',
+        'no_endpoints' => 'No webhook endpoints registered yet.',
+        'secret_shown_once' => 'This secret is shown once. Copy it now - it cannot be retrieved again.',
+        'recent_deliveries' => 'Recent deliveries',
+        'attempts' => 'Attempts',
+        'response' => 'Response',
+        'no_deliveries' => 'No deliveries yet.',
     ],
 ];

@@ -61,6 +61,16 @@ Route::middleware('auth')->group(function (): void {
      * that works from outside the building is a heavier right than editing a
      * user record, so it is grantable - and revocable - on its own.
      */
+    /*
+     * Outbound webhook endpoints - Phase 12 scope shipped as schema
+     * only (webhook_endpoints/webhook_deliveries existed, nothing wrote
+     * to them). Gated on api.manage_tokens: a webhook secret is a
+     * credential that works from outside the building, the same class
+     * of right as an API token.
+     */
+    Route::get('/webhooks', \App\Modules\Reporting\Livewire\Webhooks\Index::class)
+        ->middleware('can:api.manage_tokens')->name('reporting.webhooks');
+
     Route::get('/users/{user}/tokens', \App\Modules\Identity\Livewire\Users\Tokens::class)
         ->middleware('can:api.manage_tokens')->whereNumber('user')->name('users.tokens');
 

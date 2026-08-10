@@ -110,6 +110,9 @@ final class Navigation
             ['key' => 'books', 'route' => '/accounting/books', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // AUDCIF §14.4: the generated system documentation.
             ['key' => 'system_documentation', 'route' => '/accounting/system-documentation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // Outbound webhook endpoints - Phase 12, shipped schema-only
+            // until now.
+            ['key' => 'webhooks', 'route' => '/webhooks', 'permission' => Permission::ApiTokenManage, 'enabled' => true, 'built' => true],
             // 02-accounting §13: each treasury float against its own
             // operator statement (MTN and Orange reconcile separately).
             ['key' => 'reconciliation', 'route' => '/accounting/reconciliation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],

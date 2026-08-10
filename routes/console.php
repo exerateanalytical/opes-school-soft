@@ -65,3 +65,11 @@ Schedule::command('opes:forms:sweep-unfinished-work')
     ->hourly()
     ->withoutOverlapping()
     ->name('opes-forms-sweep-unfinished-work');
+
+// Webhook deliveries: claim-then-spend under lock (DeliverPendingWebhooks),
+// so overlapping runs cannot double-send and a permanently-erroring
+// endpoint cannot loop forever - it exhausts after MAX_ATTEMPTS.
+Schedule::command('opes:webhooks:deliver')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->name('opes-webhooks-deliver');

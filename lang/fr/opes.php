@@ -58,6 +58,7 @@ return [
         'reconciliation' => 'Rapprochement bancaire',
         'books' => 'Livres obligatoires',
         'system_documentation' => 'Documentation du système',
+        'webhooks' => 'Webhooks',
         'budgets' => 'Budgets',
         'procurement' => 'Achats & fournisseurs',
         'tax' => 'Impôts & déclarations',
@@ -2106,5 +2107,29 @@ return [
         'schema_version' => 'Version du schéma',
         'hash' => 'SHA-256',
         'empty' => "Rien n'a encore été généré.",
+    ],
+
+    /*
+     * Webhooks sortants.
+     */
+    'webhooks_screen' => [
+        'title' => 'Webhooks',
+        'intro' => "Informez un système externe lorsqu'un événement se produit - une facture émise, un paiement reçu. Chaque envoi est signé afin que le destinataire puisse vérifier qu'il provient bien de cet établissement.",
+        'register' => 'Enregistrer un point de terminaison',
+        'name' => 'Nom',
+        'url' => 'URL',
+        'events' => 'Événements',
+        'events_hint' => "Noms d'événements séparés par des virgules, ou * pour tous.",
+        'status' => 'Statut',
+        'active' => 'Actif',
+        'revoked' => 'Révoqué',
+        'revoke' => 'Révoquer',
+        'confirm_revoke' => 'Révoquer ce point de terminaison ? Il ne recevra plus aucun envoi.',
+        'no_endpoints' => 'Aucun webhook enregistré.',
+        'secret_shown_once' => "Cette clé secrète n'est affichée qu'une seule fois. Copiez-la maintenant - elle ne pourra plus être récupérée.",
+        'recent_deliveries' => 'Envois récents',
+        'attempts' => 'Tentatives',
+        'response' => 'Réponse',
+        'no_deliveries' => 'Aucun envoi pour le moment.',
     ],
 ];
