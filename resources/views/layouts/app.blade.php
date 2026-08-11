@@ -1,9 +1,28 @@
 @php
     use App\Modules\Identity\Domain\Role;
     use App\Modules\Identity\Support\Navigation;
+    use App\Modules\SchoolProfile\Actions\ReadSetting;
+    use App\Modules\SchoolProfile\Livewire\Branding;
+    use App\Support\Branding\BrandPalette;
 
     /** @var \App\Modules\Identity\Models\User|null $shellUser */
     $shellUser = auth()->user();
+
+    // The school's one brand-colour choice (/settings/branding), applied as
+    // an inline override AFTER the compiled stylesheet so it wins on
+    // specificity without a rebuild. ReadSetting is cached
+    // (rememberForever, invalidated on write), so this costs nothing beyond
+    // the first read per deploy. Wrapped defensively: a hand-edited or
+    // stale setting value must never crash every page in the app over a
+    // cosmetic preference - it just falls back to the built-in Heritage
+    // green for that render.
+    $brandOverride = null;
+    try {
+        $brandPrimaryColor = (string) app(ReadSetting::class)->handle(Branding::SETTING_KEY, '#0B5A32');
+        $brandOverride = BrandPalette::fromPrimary($brandPrimaryColor);
+    } catch (\Throwable) {
+        $brandOverride = null;
+    }
 
     // Permission first, then enabled/disabled. An item the user may not see is
     // absent; an item nobody can use yet is present but inert. Conflating the
@@ -32,6 +51,21 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    @if ($brandOverride !== null)
+        {{-- The one place the school's picked colour actually applies:
+             overrides the compiled defaults for the three tokens the shell
+             chrome is built from. Every other token (gold, semantic
+             success/warning/danger/info, surfaces) is untouched - a school
+             changes its ONE brand colour, not the whole design system. --}}
+        <style>
+            :root {
+                --color-chrome: {{ $brandOverride['chrome'] }};
+                --color-chrome-light: {{ $brandOverride['chromeLight'] }};
+                --color-primary: {{ $brandOverride['primary'] }};
+            }
+        </style>
+    @endif
 </head>
 <body class="min-h-screen bg-ivory font-sans text-charcoal antialiased">
 {{-- The top bar is white; the sidebar is dark chrome-green running the full

@@ -193,6 +193,10 @@ final class Navigation
             // has to answer each one.
             ['key' => 'setup', 'route' => '/setup', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => true],
             ['key' => 'settings', 'route' => '/settings', 'permission' => Permission::SettingView, 'enabled' => true, 'built' => true],
+            // The school's brand-colour picker. Gated on setting.edit rather
+            // than .view, matching its route: unlike the settings BROWSER
+            // above, this screen has nothing useful to show read-only.
+            ['key' => 'branding', 'route' => '/settings/branding', 'permission' => Permission::SettingEdit, 'enabled' => true, 'built' => true],
         ];
     }
 

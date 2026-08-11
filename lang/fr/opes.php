@@ -81,6 +81,7 @@ return [
         'message_templates' => 'Modèles de messages',
         'setup' => 'Mise en service',
         'settings' => 'Paramètres',
+        'branding' => 'Identité visuelle',
         'nav_disabled_title' => 'Disponible dans une phase ultérieure',
     ],
     // La page d'accueil des modules planifiés, vers laquelle pointe chaque
@@ -2561,5 +2562,19 @@ return [
         'col_can_see_case' => 'Visibilité du dossier',
         'col_kind' => 'Nature',
         'col_sanctions' => 'Sanctions',
+    ],
+
+    'branding' => [
+        'title' => 'Identité visuelle',
+        'subtitle' => 'Choisissez la couleur avec laquelle votre établissement utilise la plateforme. Le reste du système visuel reste fixe.',
+        'color_input_label' => 'Choisir une couleur de marque',
+        'hex_input_label' => 'Couleur de marque (hexadécimal)',
+        'reset' => 'Revenir au vert par défaut',
+        'preview_label' => 'Aperçu',
+        'preview_nav_item' => 'Tableau de bord',
+        'preview_button' => 'Enregistrer',
+        'invalid_preview' => 'Saisissez une couleur hexadécimale à 6 chiffres valide (ex. #0B5A32) pour voir un aperçu.',
+        'save' => 'Enregistrer la couleur',
+        'saved' => 'Couleur de marque mise à jour.',
     ],
 ];

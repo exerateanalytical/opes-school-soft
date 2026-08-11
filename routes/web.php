@@ -484,6 +484,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/settings', \App\Modules\SchoolProfile\Livewire\Index::class)
         ->middleware('can:setting.view')->name('settings.index');
 
+    // The school's one brand-colour picker.
+    Route::get('/settings/branding', \App\Modules\SchoolProfile\Livewire\Branding::class)
+        ->middleware('can:setting.edit')->name('settings.branding');
+
     /*
      * Withholding Attestation print button, 03-tax-procurement §6.6 /
      * 10-documents §15's WHT-CERT (phase-12-13 D3) - gated tax.view, the

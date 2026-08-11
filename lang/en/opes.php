@@ -79,6 +79,7 @@ return [
         'message_templates' => 'Message templates',
         'setup' => 'Go-live readiness',
         'settings' => 'Settings',
+        'branding' => 'Branding',
         'nav_disabled_title' => 'Arrives in a later phase',
     ],
     // The scheduled-module landing page every not-yet-built sidebar item
@@ -2581,5 +2582,19 @@ return [
         'col_can_see_case' => 'Case visibility',
         'col_kind' => 'Kind',
         'col_sanctions' => 'Sanctions',
+    ],
+
+    'branding' => [
+        'title' => 'Branding',
+        'subtitle' => 'Choose the one colour your school runs the platform under. Everything else in the design system stays fixed.',
+        'color_input_label' => 'Pick a brand colour',
+        'hex_input_label' => 'Brand colour as hex',
+        'reset' => 'Reset to the default green',
+        'preview_label' => 'Preview',
+        'preview_nav_item' => 'Dashboard',
+        'preview_button' => 'Save',
+        'invalid_preview' => 'Enter a valid 6-digit hex colour (e.g. #0B5A32) to see a preview.',
+        'save' => 'Save colour',
+        'saved' => 'Brand colour updated.',
     ],
 ];
