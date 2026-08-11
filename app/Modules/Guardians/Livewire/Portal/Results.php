@@ -6,9 +6,9 @@ namespace App\Modules\Guardians\Livewire\Portal;
 
 use App\Modules\Guardians\Domain\GuardianCapability;
 use App\Modules\Guardians\Policies\GuardianPortalPolicy;
+use App\Modules\Guardians\Support\Portal\PublishedResults;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -63,56 +63,25 @@ final class Results extends Component
     }
 
     /**
+     * The query, the payload narrowing and the promotion conjunct now live in
+     * Support\Portal\PublishedResults, so this screen and the mobile API
+     * (docs/specs/2026-08-11-guardian-mobile-api-v1.md §4) cannot drift on the
+     * rules that matter most - row 8's "publication checked first" and row
+     * 10's "applied only". The behaviour of this screen is unchanged.
+     *
      * @return Collection<int, \stdClass>
      */
     private function publishedSnapshots(): Collection
     {
-        $enrollmentIds = DB::table('enrollments')->where('student_id', $this->studentId)->pluck('id');
-
-        if ($enrollmentIds->isEmpty()) {
-            return collect();
-        }
-
-        return DB::table('report_card_snapshots as s')
-            ->join('period_publications as p', 'p.id', '=', 's.period_publication_id')
-            ->join('assessment_periods as ap', 'ap.id', '=', 's.assessment_period_id')
-            ->whereIn('s.enrollment_id', $enrollmentIds)
-            ->where('p.status', 'published')
-            ->whereNull('s.superseded_by_snapshot_id')
-            ->orderByDesc('ap.starts_on')
-            ->get([
-                's.id', 's.enrollment_id', 's.assessment_period_id', 's.generation',
-                's.payload', 's.issued_at', 'ap.name as period_name', 'ap.name_fr as period_name_fr',
-            ]);
+        return app(PublishedResults::class)->snapshots($this->studentId);
     }
 
     /**
-     * Row 10: `receives_reports` alone is not enough - the promotion
-     * decision must also be `applied` (07-students 7.5 row 10 / 11.5),
-     * which `applied_enrollment_id IS NOT NULL` records (the promotion
-     * engine's own vocabulary, docs/plans/phase-8.md).
-     *
      * @return array{outcome: string|null, annual_average: string|null}|null
      */
     private function appliedPromotion(int $enrollmentId): ?array
     {
-        if (! Schema::hasTable('promotion_decisions')) {
-            return null;
-        }
-
-        $row = DB::table('promotion_decisions')
-            ->where('enrollment_id', $enrollmentId)
-            ->whereNotNull('applied_enrollment_id')
-            ->first(['outcome', 'decision', 'annual_average']);
-
-        if ($row === null) {
-            return null;
-        }
-
-        return [
-            'outcome' => is_string($row->outcome ?? null) ? $row->outcome : (is_string($row->decision ?? null) ? $row->decision : null),
-            'annual_average' => is_string($row->annual_average ?? null) ? $row->annual_average : null,
-        ];
+        return app(PublishedResults::class)->appliedPromotion($enrollmentId);
     }
 
     public function render(): mixed
@@ -138,12 +107,7 @@ final class Results extends Component
                 : $snapshots->first();
 
             if ($selectedRow !== null) {
-                /** @var array<string, mixed> $payload */
-                $payload = json_decode((string) $selectedRow->payload, true, flags: JSON_THROW_ON_ERROR);
-
-                if (! $canRank) {
-                    unset($payload['rank']);
-                }
+                $payload = app(PublishedResults::class)->payload($selectedRow, $canRank);
 
                 $card = [
                     'snapshot_id' => (int) $selectedRow->id,

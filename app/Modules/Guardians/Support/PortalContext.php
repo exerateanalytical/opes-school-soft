@@ -74,6 +74,22 @@ final class PortalContext
             return null;
         }
 
+        return self::resolveForUserId((int) $userId);
+    }
+
+    /**
+     * The same resolution for a user id the caller already holds - the mobile
+     * API path (docs/specs/2026-08-11-guardian-mobile-api-v1.md §3), where the
+     * principal arrives on a Sanctum token rather than the session and
+     * `auth()->id()` answers for the default guard, not the API one.
+     *
+     * Deliberately the SAME body, not a parallel one: 7.5's non-per-link
+     * conjunctive gates (active user, active non-archived guardian) must have
+     * exactly one implementation, or the two doors drift and the weaker one
+     * becomes the product's real boundary.
+     */
+    public static function resolveForUserId(int $userId): ?self
+    {
         // Queried rather than read off the Authenticatable contract: the
         // contract has no status accessor, and Guardians must not import
         // Identity's User model (tests/Architecture/ModuleBoundaryTest.php).

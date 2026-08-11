@@ -143,6 +143,36 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by('verify:'.$request->ip());
         });
 
+        // The guardian mobile budgets (docs/specs/2026-08-11-guardian-mobile-
+        // api-v1.md 2.4). `auth-mobile` guards the unauthenticated token
+        // endpoint: 5/min keyed by IP AND the submitted identifier, so a
+        // password spray across many accounts from one address and a
+        // brute force against one account are both walled. The identifier is
+        // hashed into the key - a rate-limit cache entry is not a place to
+        // keep an email address in clear.
+        RateLimiter::for('auth-mobile', function (Request $request): Limit {
+            $identifier = mb_strtolower(trim((string) $request->input('identifier', '')));
+
+            return Limit::perMinute(5)->by(
+                'auth-mobile:'.$request->ip().':'.hash('sha256', $identifier),
+            );
+        });
+
+        // `api-portal` is the authenticated mobile budget: 120/min per TOKEN,
+        // not per user, so a parent signed in on a phone and a tablet does not
+        // throttle themselves. Higher than `api`'s 60 because one screen
+        // legitimately fans out into several reads when it opens.
+        RateLimiter::for('api-portal', function (Request $request): Limit {
+            $token = $request->user()?->currentAccessToken();
+            $tokenId = $token?->getKey();
+
+            $key = $tokenId !== null
+                ? 'token:'.$tokenId
+                : 'user:'.($request->user()?->getAuthIdentifier() ?? $request->ip());
+
+            return Limit::perMinute(120)->by('api-portal:'.$key);
+        });
+
         // Livewire infers a component's public name from its class name, and
         // strips a trailing ".index" segment on the assumption the class
         // itself is reachable via a sibling namespace lookup (09-ui 8.10's

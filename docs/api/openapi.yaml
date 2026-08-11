@@ -275,6 +275,772 @@ paths:
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # -------------------------------------------------------------------------
+  # Guardian mobile surface - docs/specs/2026-08-11-guardian-mobile-api-v1.md.
+  # Device tokens carry portal.read + portal.write and NOTHING else, so this
+  # surface and the integration surface above cannot borrow each other.
+  # -------------------------------------------------------------------------
+  /v1/auth/token:
+    post:
+      operationId: issueGuardianDeviceToken
+      summary: Sign a guardian in on a device
+      description: >-
+        Unauthenticated. Returns a device-bound Sanctum token carrying exactly
+        `portal.read` and `portal.write`. Rate limited to 5 requests/minute per
+        IP and identifier. Every failure mode - unknown identifier, wrong
+        password, suspended account, account with no active guardian behind it
+        - returns the SAME 422 message; the reason is written to the audit log,
+        never to the response. Re-authenticating from the same `device_id`
+        revokes that device's previous token first.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier, password, device_id, device_name, platform]
+              properties:
+                identifier:
+                  type: string
+                  description: Email address, or a phone number on the guardian record.
+                password: { type: string, format: password }
+                device_id: { type: string, maxLength: 64 }
+                device_name: { type: string, maxLength: 120 }
+                platform: { type: string, enum: [ios, android, web] }
+      responses:
+        '201':
+          description: Token issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/DeviceToken' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/auth/refresh:
+    post:
+      operationId: refreshGuardianDeviceToken
+      summary: Rotate the presented device token
+      description: >-
+        Requires the `portal.read` ability. Issues a new secret for the same
+        device and deletes the old row, so one device never holds two live
+        credentials. A non-device (staff integration) token is refused with 403.
+      responses:
+        '200':
+          description: Token rotated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/DeviceToken' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/auth/logout:
+    post:
+      operationId: revokeCurrentDeviceToken
+      summary: Sign out of this device
+      description: Requires the `portal.read` ability. Revokes only the presented token.
+      responses:
+        '200':
+          description: Revoked.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/auth/logout-all:
+    post:
+      operationId: revokeAllDeviceTokens
+      summary: Sign out of every device
+      description: >-
+        Requires the `portal.read` ability. Revokes every `mobile:` token this
+        user holds. Staff integration tokens on the same user are untouched.
+      responses:
+        '200':
+          description: Revoked, with a count.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/auth/devices:
+    get:
+      operationId: listGuardianDevices
+      summary: Where this account is signed in
+      description: >-
+        Requires the `portal.read` ability. Token values are never returned -
+        only platform, timestamps and which entry is the current request's.
+      responses:
+        '200':
+          description: The user's device tokens.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Device' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/auth/devices/{token}:
+    delete:
+      operationId: forgetGuardianDevice
+      summary: Revoke one device
+      description: >-
+        Requires the `portal.read` ability. A token id that is not this user's
+        own `mobile:` token returns 404 - whether it exists at all is not the
+        caller's business.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Revoked.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # Every /v1/me operation requires: the `portal.read` ability (token), the
+  # `portal.access` permission (user), an active guardian row (guardian.api),
+  # and - for anything child-scoped - the matrix row named in its description.
+  # A child the caller holds no valid link to returns 404, never 403: row 32
+  # makes the child's EXISTENCE a guarded fact.
+  /v1/me:
+    get:
+      operationId: showGuardian
+      summary: The signed-in guardian
+      description: >-
+        Identity and the capabilities 7.5 grants on any valid link without
+        naming a child (rows 16, 26, 29), plus the business date the whole
+        request was evaluated against.
+      responses:
+        '200':
+          description: The guardian.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children:
+    get:
+      operationId: listGuardianChildren
+      summary: The guardian's children
+      description: >-
+        Row 1 per child - every currently-valid link appears, however narrow
+        its other flags. Each row carries a `capabilities` list, which is the
+        client's RENDERING contract (hide the tile when a code is absent) and
+        never a control: every endpoint re-checks.
+      responses:
+        '200':
+          description: Children with their capability projection.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PortalChild' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/dashboard:
+    get:
+      operationId: showGuardianDashboard
+      summary: The home screen in one round trip
+      description: >-
+        An aggregate, not a new source of truth. A tile the principal may not
+        see is ABSENT rather than zero - zero would disclose that the number
+        exists and is empty.
+      responses:
+        '200':
+          description: Dashboard payload.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}:
+    get:
+      operationId: showGuardianChild
+      summary: One child
+      description: >-
+        Row 1 (identity, always) plus a `detail` block only when row 2
+        (`has_custody`) allows it. 404 when no valid link exists (row 32).
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: The child.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/PortalChild' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/guardians:
+    get:
+      operationId: listChildOtherGuardians
+      summary: The child's other guardians
+      description: >-
+        Row 31, `has_custody`. Names and relationship ONLY - never another
+        guardian's ID number, address or phone. 404 without a link, 403 with a
+        link but without row 31.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Other guardians of this child.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/medical:
+    get:
+      operationId: showChildMedical
+      summary: The child's medical record
+      description: >-
+        Two answers behind one route, which is why 7.5 makes them two rows.
+        Row 4 (`has_custody`) returns the whole record, `scope: full`. Row 3
+        (`has_custody` OR `is_emergency_contact`) returns only the
+        emergency-relevant entries, `scope: emergency`. Neither row - 403.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Medical records at the granted scope.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/results:
+    get:
+      operationId: listChildResults
+      summary: Published results and report cards
+      description: >-
+        Rows 5, 7, 9, 10. Reads `report_card_snapshots` joined to a PUBLISHED
+        `period_publications` row - never `marks` or `period_results` - so row
+        8 ("publication checked first, always") holds by construction. Numbers
+        come straight from the stored snapshot payload and are never
+        recomputed (01-assessment 13.3). `rank` is stripped without row 9.
+        `promotion` appears only with row 10 AND an applied decision.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Published periods, newest first.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/attendance:
+    get:
+      operationId: showChildAttendance
+      summary: Attendance
+      description: >-
+        Row 11 returns period summaries (`scope: summary`); row 12 adds the
+        per-session records with their justification state (`scope: detail`).
+        Neither row - 403.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Attendance at the granted scope.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/discipline:
+    get:
+      operationId: listChildDiscipline
+      summary: Discipline cases
+      description: >-
+        Row 19 lists the cases; only rows with `visibility = 'guardian'` are
+        ever selected, so a case naming another minor is invisible to every
+        guardian. The narrative fields (description, resolution note) require
+        row 20 in addition - knowing a case exists and reading its prose are
+        different grants.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Cases with sanctions.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/timetable:
+    get:
+      operationId: showChildTimetable
+      summary: The child's class timetable
+      description: >-
+        Row 26, granted on any valid link. Slots effective on the request's
+        business date, ordered by day then start time.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Timetable slots.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/fees:
+    get:
+      operationId: showChildFees
+      summary: Fees - totals, structure, invoices, installments, statement
+      description: >-
+        Rows 13 (invoices) and 14 (the running statement). A link holding one
+        and not the other receives one and not the other; a link holding
+        neither gets 403. Totals are derived FROM the statement, never re-summed
+        beside it, so a parent's headline figures and their line list cannot
+        disagree. `structure` is what this child was actually billed - the
+        issued invoice lines grouped by item - not the school's price list,
+        which may since have been superseded or waived for this enrollment.
+        All money is minor units; `currency` is read off the invoices.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: The fees tab in one round trip.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/invoices/{invoice}:
+    get:
+      operationId: showChildInvoice
+      summary: One invoice with its lines
+      description: >-
+        Row 13. The invoice is resolved THROUGH the child's enrollment, so an
+        id belonging to another family is simply not found - 404, not 403.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Invoice header and lines, minor units.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/receipts/{payment}:
+    get:
+      operationId: showChildReceipt
+      summary: One receipt, as a verification descriptor
+      description: >-
+        Row 15. Returns the receipt number, amount, date, method and a
+        `verify_url` the app renders as a QR - NOT PDF bytes. 10-documents 4.8
+        makes RenderDocument the only path to a signed document and gates it on
+        `documents.print`, a staff permission the guardian role must never
+        hold; forking that Action to dodge the gate would put a second, weaker
+        path to a signed financial document in the product.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: payment
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Receipt descriptor with a verification URL.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/payments:
+    get:
+      operationId: listGuardianPayments
+      summary: Payments across every child
+      description: >-
+        Rows 16 and 17. Deliberately NOT child-scoped - row 16 ("payments made
+        by this guardian") is granted on any valid link without naming a child,
+        so a parent who receives no invoices still has a record of their own
+        money. Holding the wide grant (rows 15/17) shows every receipt against
+        the child; holding only the row-16 floor shows just the rows that match
+        this guardian's own phone number. `payments` has no `payer_guardian_id`
+        column yet, so `is_own` is a best-effort match used for DISPLAY -
+        authorization always takes the safe side of that approximation.
+      responses:
+        '200':
+          description: Payments, newest first, each naming its child.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/documents:
+    get:
+      operationId: listChildDocuments
+      summary: School-issued and guardian-supplied documents
+      description: >-
+        Rows 22 and 23 - two shelves, two grants. Row 22 is what the school
+        issued about the child (`issued_documents`, valid only); row 23 is what
+        a guardian supplied (`student_documents`). Only row 23 has bytes; row 22
+        entries carry `verification_code` and `verify_url` instead, with
+        `has_bytes: false`.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Both shelves, each present only if its row is granted.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/documents/{kind}/{document}/download:
+    get:
+      operationId: downloadChildDocument
+      summary: Download one document
+      description: >-
+        `kind` is `school` (row 22) or `supplied` (row 23). The kind is part of
+        the path rather than inferred from the id, so the capability checked is
+        never chosen by the data - the two shelves are separate id spaces and a
+        `supplied` id must not be probeable through the row-22 grant.
+        `supplied` streams the stored file with `Cache-Control: private,
+        no-store`; `school` returns the verification descriptor.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [school, supplied] }
+        - name: document
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: File bytes (supplied) or a verification descriptor (school).
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/payments:
+    post:
+      operationId: initiatePayment
+      summary: Start an online payment (row 18)
+      description: >-
+        Returns `501 not_implemented` - no payment gateway exists yet (spec 1
+        non-goals, 5). The route ships now so the app builds its payment flow
+        against a stable contract and gets a truthful answer, rather than
+        against a mock that would be torn out later. The row-18 capability
+        check runs FIRST and for real: a guardian without it gets 403, never
+        501, so this endpoint cannot become an oracle for which links are fee
+        payers. Requires `portal.write` and honours `Idempotency-Key`.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+  /v1/me/announcements:
+    get:
+      operationId: listAnnouncements
+      summary: School announcements
+      description: >-
+        Row 26, granted on any valid link, so not child-scoped. A guardian whose
+        every link has expired gets 403 - 7.5's historic-access rule: an
+        announcement is about a school you are currently part of. Scoped by
+        PARTICIPATION rather than by re-deriving `announcement_recipients`
+        scopes, because the office's scope is resolved into participants at send
+        time and re-deriving it here would be a second, drifting answer to who
+        was addressed.
+      responses:
+        '200':
+          description: Announcements, newest first.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/notifications:
+    get:
+      operationId: listNotifications
+      summary: This user's notifications
+      description: >-
+        Not matrix territory - `notifications.user_id` IS the scope. `meta.unread`
+        is the badge count.
+      parameters:
+        - $ref: '#/components/parameters/perPage'
+      responses:
+        '200':
+          description: Notifications, newest first, with an unread count.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/notifications/{notification}/read:
+    post:
+      operationId: markNotificationRead
+      summary: Mark one notification read
+      description: >-
+        Ownership is checked by `Notifications\Actions\MarkNotificationRead` -
+        one owner check, in the module that owns notifications. Another user's
+        row answers 404, not 403: whether a notification id exists is not a
+        guardian's business. Requires `portal.write`.
+      parameters:
+        - name: notification
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Marked read (idempotent). }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      summary: Mark every notification read
+      description: Own rows only. Returns how many were changed. Requires `portal.write`.
+      responses:
+        '200': { description: Count of rows marked read. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/threads:
+    get:
+      operationId: listThreads
+      summary: Message threads this user participates in
+      description: >-
+        Authorized by PARTICIPATION, not by the matrix, and deliberately: a
+        teacher who messaged a parent about one child would otherwise become
+        unreachable the day that link expired, mid-conversation. Announcements
+        are excluded - they have their own endpoint and their own rendering.
+        Unread counts come from a message-id watermark, not a timestamp, because
+        MySQL DATETIME is second-granular and a reply landing in the same second
+        as a read stamp would silently read as already read.
+      responses:
+        '200':
+          description: Threads, newest first, with unread counts.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/threads/{thread}/messages:
+    get:
+      operationId: listThreadMessages
+      summary: Messages in one thread
+      description: >-
+        The participation check is repeated here rather than inferred from the
+        list - a client may hold a thread id from any source, and the list is a
+        convenience, never a control. A thread this user is not in answers 404.
+      parameters:
+        - name: thread
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Messages, oldest first. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      operationId: sendThreadMessage
+      summary: Post a reply
+      description: >-
+        Body at most 4 000 characters (spec 5). Goes through
+        `Communication\Actions\Messaging\PostMessage`, which re-checks
+        participation inside its own transaction - the check on the way in is
+        defence in depth, not the control. Requires `portal.write` and honours
+        `Idempotency-Key`.
+      parameters:
+        - name: thread
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '201': { description: The posted message. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/profile:
+    patch:
+      operationId: updateOwnProfile
+      summary: Edit own contact details (row 29)
+      description: >-
+        Row 29 is the only place a guardian writes about themselves, and row 30
+        is what makes it safe: an attempt to set `has_custody`,
+        `receives_reports`, `receives_invoices`, `is_fee_payer`, `status`,
+        `is_archived` or `portal_user_id` is a SECURITY event - audited, then
+        403. A guardian who could edit their own authorization flags could grant
+        themselves every other row in the matrix. The permitted set is a closed
+        allow-list, never a deny-list, so a column added to `guardians` next
+        year is not silently writable. Requires `portal.write`.
+      responses:
+        '200': { description: The updated contact details. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/devices/push:
+    post:
+      operationId: registerPushDevice
+      summary: Register this device for push
+      description: >-
+        Web Push and Expo push are the same registration with different key
+        material, discriminated by `platform` (spec 7). Upserts on `endpoint`,
+        so an app re-subscribing after a permission refresh does not pile up
+        duplicate rows that then receive duplicate pushes. Requires
+        `portal.write`.
+      responses:
+        '201': { description: Registered. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    delete:
+      operationId: unregisterPushDevice
+      summary: Unregister this device
+      description: >-
+        Idempotent on purpose - unregistering a device that was already gone is
+        a success, because an app signing out must not be able to fail here.
+        Scoped by user id inside the Action: `endpoint` is unique table-wide, so
+        an unscoped delete would let any signed-in guardian unsubscribe a
+        stranger's device by quoting its endpoint.
+      responses:
+        '200': { description: Unregistered. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/meetings:
+    post:
+      operationId: requestMeeting
+      summary: Request a meeting (row 27)
+      description: >-
+        Row 27, which needs `has_custody`. The time posted is a PREFERENCE, not
+        a booking - `requested_by = guardian` is what tells the office to treat
+        it as an ask. Does NOT reuse `ScheduleGuardianMeeting`: that Action is
+        gated on `guardians.manage`, the same staff permission that edits
+        authorization flags (row 30, granted to nobody), so reusing it would be
+        a privilege escalation wearing a reuse's clothes. Requires
+        `portal.write` and honours `Idempotency-Key`.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '201': { description: The meeting request. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/children/{student}/sanctions/{sanction}/ack:
+    post:
+      operationId: acknowledgeSanction
+      summary: Acknowledge a sanction (row 21)
+      description: >-
+        Row 21, plus a conjunct the matrix does not own: the sanction must hang
+        off a case belonging to this child AND that case must be
+        `visibility = 'guardian'`. Without it a guardian holding row 21 could
+        acknowledge a sanction on an `internal` case they are not allowed to
+        know exists - and the acknowledgement would confirm it. The stamp itself
+        stays in `Welfare\Actions\AcknowledgeSanction`, so `acknowledged_at` has
+        exactly one writer; a second acknowledgement is refused with 422, never
+        silently rewritten, because WHEN a parent signed is evidentiary.
+        Requires `portal.write` and honours `Idempotency-Key`.
+      parameters:
+        - name: student
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: sanction
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '200': { description: Acknowledged. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /v1/me/search:
+    get:
+      operationId: guardianSearch
+      summary: Guardian-scoped search
+      description: >-
+        NOT one index filtered afterwards. Search is the easiest endpoint to
+        leak from, because a result count, a snippet or an autocomplete
+        suggestion discloses that a record exists even when the record is
+        withheld. So this walks the caller's own valid links and, per child,
+        asks the SAME capability the corresponding read endpoint asks BEFORE
+        querying that source at all - a guardian without row 13 does not get an
+        invoice search returning nothing, they get no invoice search. Discipline
+        prose is matchable only with row 20, since matching text a parent may not
+        read would disclose it through the fact of the match. `%` and `_` in the
+        query are escaped before they reach a LIKE. Covers only what earlier
+        slices ship - a source with no vetted reader has no re-scoped search.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, maxLength: 120 }
+      responses:
+        '200':
+          description: Results, each carrying an `opes://` deep link.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
 components:
   securitySchemes:
     bearerToken:
@@ -301,9 +1067,74 @@ components:
         required ability.
     NotFound:
       description: No such record.
+    ValidationFailed:
+      description: >-
+        The request body failed validation. On the sign-in endpoint this is
+        also the single, deliberately uninformative answer to every credential
+        failure.
     TooManyRequests:
-      description: The 60 requests/min `api` budget is exhausted.
+      description: >-
+        A rate limit is exhausted - the 60/min `api` budget, the 5/min
+        `auth-mobile` sign-in budget, or the 120/min `api-portal` device budget.
+    Conflict:
+      description: >-
+        The same `Idempotency-Key` was replayed with a DIFFERENT body. The
+        original response is not returned, because the caller evidently meant
+        something else and silently answering the old request would hide that.
+    NotImplemented:
+      description: >-
+        The contract exists and the caller is authorized, but the capability is
+        not built yet - currently only online payment initiation (row 18),
+        which has no gateway behind it.
   schemas:
+    DeviceToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The plaintext token. Returned once, never retrievable again.
+        expires_at: { type: string, format: date-time, nullable: true }
+        abilities:
+          type: array
+          items: { type: string }
+          description: Always exactly `portal.read` and `portal.write`.
+        guardian:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            display_name: { type: string }
+            language: { type: string }
+    Device:
+      type: object
+      properties:
+        id: { type: integer }
+        platform: { type: string }
+        created_at: { type: string, format: date-time, nullable: true }
+        last_used_at: { type: string, format: date-time, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+        is_current: { type: boolean }
+    PortalChild:
+      type: object
+      properties:
+        id: { type: integer }
+        matricule: { type: string }
+        first_name: { type: string }
+        last_name: { type: string }
+        display_name: { type: string }
+        class: { type: string, nullable: true }
+        status: { type: string }
+        has_photo: { type: boolean }
+        capabilities:
+          type: array
+          items: { type: string }
+          description: >-
+            GuardianCapability values granted for THIS child. Rendering
+            contract only - the server re-checks on every endpoint.
+        detail:
+          type: object
+          nullable: true
+          description: Present only when row 2 (`has_custody`) allows it.
     PageMeta:
       type: object
       properties:

@@ -6,8 +6,8 @@ namespace App\Modules\Guardians\Livewire\Portal;
 
 use App\Modules\Guardians\Domain\GuardianCapability;
 use App\Modules\Guardians\Policies\GuardianPortalPolicy;
+use App\Modules\Guardians\Support\Portal\ChildDocuments;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -35,12 +35,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 #[Layout('layouts.portal')]
 final class Documents extends Component
 {
-    /**
-     * The FQCN Students\Models\Student would resolve to, held as a string
-     * so this class never imports it (ModuleBoundaryTest).
-     */
-    private const STUDENT_SUBJECT_TYPE = 'App\\Modules\\Students\\Models\\Student';
-
     public int $studentId;
 
     public string $childName = '';
@@ -70,25 +64,12 @@ final class Documents extends Component
         $canSchoolIssued = $policy->allows(GuardianCapability::R22ViewSchoolIssuedDocuments, $this->studentId);
         $canGuardianSupplied = $policy->allows(GuardianCapability::R23ViewGuardianSuppliedDocuments, $this->studentId);
 
-        $schoolIssued = collect();
-        $guardianSupplied = collect();
+        // One reader for both doors - the same rows this screen has always
+        // shown, now also served to the mobile API (ChildDocuments).
+        $reader = app(ChildDocuments::class);
 
-        if ($canSchoolIssued && Schema::hasTable('issued_documents')) {
-            $schoolIssued = DB::table('issued_documents')
-                ->where('subject_type', self::STUDENT_SUBJECT_TYPE)
-                ->where('subject_id', $this->studentId)
-                ->where('status', 'valid')
-                ->orderByDesc('issued_at')
-                ->get(['id', 'document_template_id', 'serial', 'issued_at', 'language']);
-        }
-
-        if ($canGuardianSupplied && Schema::hasTable('student_documents')) {
-            $guardianSupplied = DB::table('student_documents')
-                ->where('student_id', $this->studentId)
-                ->where('is_archived', false)
-                ->orderByDesc('created_at')
-                ->get(['id', 'title', 'issued_on', 'expires_on', 'verification_status', 'created_at']);
-        }
+        $schoolIssued = $canSchoolIssued ? $reader->schoolIssued($this->studentId) : collect();
+        $guardianSupplied = $canGuardianSupplied ? $reader->guardianSupplied($this->studentId) : collect();
 
         return view('livewire.guardians.portal.documents', [
             'studentId' => $this->studentId,

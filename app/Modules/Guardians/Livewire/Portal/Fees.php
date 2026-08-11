@@ -63,22 +63,13 @@ final class Fees extends Component
         $this->activeTab = in_array($tab, ['statement', 'invoices', 'receipts'], true) ? $tab : 'statement';
     }
 
-    private function latestEnrollmentId(): ?int
-    {
-        $id = DB::table('enrollments')
-            ->where('student_id', $this->studentId)
-            ->orderByDesc('academic_year_id')
-            ->orderByDesc('id')
-            ->value('id');
-
-        return $id === null ? null : (int) $id;
-    }
-
     public function render(): mixed
     {
         $context = PortalContext::current();
-        $enrollmentId = $this->latestEnrollmentId();
         $reader = app(ChildFeeStatement::class);
+        // One implementation of "which enrollment do we mean", shared with the
+        // mobile API so the two doors cannot show different balances.
+        $enrollmentId = $reader->latestEnrollmentId($this->studentId);
 
         $statement = [];
         $closing = 0;

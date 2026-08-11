@@ -178,6 +178,18 @@ enum Permission: string
     // translation keys and Laravel reads a dot as a nested-array step.
     case PortalAccess = 'portal.access';
     case PortalManage = 'portal.manage';
+
+    // docs/specs/2026-08-11-guardian-mobile-api-v1.md §2.3: the mobile app's
+    // two token abilities. IssueApiToken validates abilities against THIS
+    // enum, so a device token cannot be minted carrying a scope that has no
+    // case here - which is exactly why they are cases and not free strings.
+    //
+    // They gate PRESENCE on the /v1/me surface; portal.access remains the
+    // outer door and GuardianScopeMatrix (07-students §7.5) remains the only
+    // decision about what a guardian may see per child. A token holding
+    // portal.read still sees nothing its links do not grant.
+    case PortalRead = 'portal.read';
+    case PortalWrite = 'portal.write';
     case ApiTokenManage = 'api.manage_tokens';
     case WebhookManage = 'webhook.manage';
     case CommunicationSend = 'communication.send';

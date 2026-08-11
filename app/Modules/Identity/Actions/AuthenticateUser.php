@@ -31,18 +31,13 @@ final class AuthenticateUser
     {
         $user = User::query()->where('email', $email)->first();
 
-        $passwordOk = Hash::check($password, $user->password ?? self::DUMMY_HASH);
+        if (! $this->verify($user, $password, $email)) {
+            return false;
+        }
 
-        if ($user === null || ! $passwordOk || $user->isSuspended()) {
-            // The reason is recorded SERVER-SIDE for the auditor. The message
-            // shown to the visitor stays generic - see the Livewire component.
-            $this->audit->handle(
-                action: AuditAction::LoginFailed,
-                module: 'Identity',
-                after: ['email' => $email, 'reason' => $this->reason($user, $passwordOk)],
-                actor: $user?->toAuditActor(),
-            );
-
+        // Narrowing for PHPStan: verify() returns false for a null user, so
+        // reaching here proves the row exists.
+        if ($user === null) {
             return false;
         }
 
@@ -56,6 +51,38 @@ final class AuthenticateUser
             auditableId: (int) $user->getKey(),
             actor: $user->toAuditActor(),
         );
+
+        return true;
+    }
+
+    /**
+     * Does this credential hold - and if not, why, for the auditor only.
+     *
+     * Extracted so the stateless mobile token endpoint
+     * (docs/specs/2026-08-11-guardian-mobile-api-v1.md §2.2) checks a password
+     * through the SAME code the session flow uses: same dummy-hash timing
+     * defence, same "suspended counts as failure", same audit row. What it
+     * deliberately does not do is establish a session - that is handle()'s job
+     * and the API has no session to establish.
+     *
+     * $identifierForAudit is what the caller typed (an email, or a phone that
+     * resolved to this user); the audit records the attempt, never the
+     * password (00-core §14).
+     */
+    public function verify(?User $user, string $password, string $identifierForAudit): bool
+    {
+        $passwordOk = Hash::check($password, $user->password ?? self::DUMMY_HASH);
+
+        if ($user === null || ! $passwordOk || $user->isSuspended()) {
+            $this->audit->handle(
+                action: AuditAction::LoginFailed,
+                module: 'Identity',
+                after: ['email' => $identifierForAudit, 'reason' => $this->reason($user, $passwordOk)],
+                actor: $user?->toAuditActor(),
+            );
+
+            return false;
+        }
 
         return true;
     }

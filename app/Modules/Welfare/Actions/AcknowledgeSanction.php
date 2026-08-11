@@ -22,16 +22,38 @@ use Illuminate\Validation\ValidationException;
  * gains its own acknowledge button it will call THIS action inside a
  * portal-scoped wrapper, so the timestamp has exactly one writer.
  *
+ * That wrapper now exists — Guardians\Actions\AcknowledgeSanctionAsGuardian,
+ * row 21 of the 7.5 matrix — so the promise above is kept literally: the staff
+ * gate moved OUT of the writer into handle(), and the wrapper calls
+ * handleAuthorized() after its own matrix check. Two authorization paths, each
+ * explicit about the authority it carries; still exactly ONE piece of code
+ * that stamps `acknowledged_at`, writes the audit entry and refuses a repeat.
+ * A guardian will never hold `discipline.manage`, so the alternative was a
+ * fork — and a forked evidentiary timestamp is two different answers to "when
+ * did the parent sign".
+ *
  * Refuses a second acknowledgement rather than silently rewriting the
  * timestamp: WHEN the guardian signed is evidentiary.
  */
 final class AcknowledgeSanction
 {
+    /** The staff door: the Discipline Master logging a returned slip. */
     public function handle(int $sanctionId): DisciplineSanction
     {
         Gate::authorize(Permission::DisciplineManage->value);
 
-        return DB::transaction(function () use ($sanctionId): DisciplineSanction {
+        return $this->handleAuthorized($sanctionId);
+    }
+
+    /**
+     * The write itself, for a caller that has ALREADY established its own
+     * authority over this sanction. Carries no gate of its own, deliberately:
+     * the two callers do not share a gate to carry. Never call it without
+     * having authorized first.
+     */
+    public function handleAuthorized(int $sanctionId, ?Actor $actor = null): DisciplineSanction
+    {
+        return DB::transaction(function () use ($sanctionId, $actor): DisciplineSanction {
             /** @var DisciplineSanction $sanction */
             $sanction = DisciplineSanction::query()->lockForUpdate()->findOrFail($sanctionId);
 
@@ -42,7 +64,7 @@ final class AcknowledgeSanction
                 ]);
             }
 
-            $actor = $this->currentActor();
+            $actor ??= $this->currentActor();
 
             $sanction->acknowledged_at = now();
             $sanction->save();

@@ -7,6 +7,7 @@ namespace App\Modules\Guardians\Support\Portal;
 use App\Modules\Guardians\Models\Guardian;
 use App\Support\Clock\BusinessDate;
 use App\Support\Money\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -140,6 +141,250 @@ final readonly class ChildFeeStatement
                 ];
             }
         )->values();
+    }
+
+    /**
+     * The enrollment a portal screen or an API read means when it says "this
+     * child's fees": the most recent one. Extracted from Livewire\Portal\Fees
+     * so the mobile API cannot pick a DIFFERENT enrollment and quietly show a
+     * parent a different balance from the one the web portal shows them.
+     */
+    public function latestEnrollmentId(int $studentId): ?int
+    {
+        $id = DB::table('enrollments')
+            ->where('student_id', $studentId)
+            ->orderByDesc('academic_year_id')
+            ->orderByDesc('id')
+            ->value('id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * The currency the child is billed in. Read off the enrollment's invoices
+     * rather than assumed: 02-accounting keeps `currency` on the invoice, and
+     * a payload that hard-coded XAF would be a lie the moment a school is
+     * onboarded in another zone.
+     */
+    public function currency(int $enrollmentId): string
+    {
+        $currency = DB::table('invoices')
+            ->where('enrollment_id', $enrollmentId)
+            ->orderByDesc('issue_date')
+            ->value('currency');
+
+        return is_string($currency) && $currency !== '' ? $currency : 'XAF';
+    }
+
+    /**
+     * Row 14's headline numbers: what was billed, what has been paid, what is
+     * still owed, and when the next money is due.
+     *
+     * Derived from statement() rather than re-summed, so a parent's totals and
+     * a parent's line list can never disagree - the closing balance IS the
+     * outstanding amount by construction.
+     *
+     * @return array{billed: int, paid: int, outstanding: int, next_due_on: string|null}
+     */
+    public function totals(int $enrollmentId, ?string $asOf = null): array
+    {
+        $asOf ??= BusinessDate::today();
+
+        $billed = 0;
+        $paid = 0;
+        $outstanding = 0;
+
+        foreach ($this->statement($enrollmentId, $asOf) as $row) {
+            $billed += $row->debit;
+            $paid += $row->credit;
+            $outstanding = $row->balance;
+        }
+
+        return [
+            'billed' => $billed,
+            'paid' => $paid,
+            'outstanding' => $outstanding,
+            'next_due_on' => $this->nextDueOn($enrollmentId, $asOf),
+        ];
+    }
+
+    /**
+     * The fee structure as BILLED - the issued invoice lines, grouped by item.
+     * Not the school's price list: a parent is entitled to see what THEIR
+     * child was charged, and a fee_structures read would show them a schedule
+     * that may have been superseded, waived or adjusted for this enrollment.
+     *
+     * @return Collection<int, \stdClass>
+     */
+    public function structure(int $enrollmentId): Collection
+    {
+        return DB::table('invoice_lines as l')
+            ->join('invoices as i', 'i.id', '=', 'l.invoice_id')
+            ->where('i.enrollment_id', $enrollmentId)
+            ->where('i.status', 'issued')
+            ->groupBy('l.description', 'l.description_fr', 'l.fee_category_code')
+            ->orderBy('l.description')
+            ->select([
+                'l.description', 'l.description_fr', 'l.fee_category_code',
+                DB::raw('CAST(SUM(l.amount + l.tax_amount) AS SIGNED) as amount'),
+            ])
+            ->get();
+    }
+
+    /**
+     * The installment plan rows for this enrollment's issued invoices, with a
+     * derived status the app renders as a chip. Cancelled rows are excluded -
+     * a cancelled installment is not a schedule item a parent should plan
+     * around.
+     *
+     * @return Collection<int, object{id: int, invoice_id: int, sequence_no: int, label: string, label_fr: string|null, amount: int, due_on: string, status: 'due_soon'|'overdue'|'scheduled'}&\stdClass>
+     */
+    public function installments(int $enrollmentId, ?string $asOf = null): Collection
+    {
+        if (! Schema::hasTable('invoice_installments')) {
+            return collect();
+        }
+
+        $asOf ??= BusinessDate::today();
+        // Carbon rather than strtotime(): strtotime returns false on a date it
+        // cannot parse, and `date('Y-m-d', false)` silently means 1 Jan 1970 -
+        // which would mark every future installment `overdue`.
+        $soon = CarbonImmutable::parse($asOf)->addDays(14)->toDateString();
+
+        return DB::table('invoice_installments as ii')
+            ->join('invoices as i', 'i.id', '=', 'ii.invoice_id')
+            ->where('i.enrollment_id', $enrollmentId)
+            ->where('i.status', 'issued')
+            ->where('ii.is_cancelled', false)
+            ->orderBy('ii.due_date')
+            ->orderBy('ii.sequence_no')
+            ->get(['ii.id', 'ii.invoice_id', 'ii.sequence_no', 'ii.label', 'ii.label_fr', 'ii.amount', 'ii.due_date'])
+            ->map(static function (object $row) use ($asOf, $soon): object {
+                $due = (string) $row->due_date;
+
+                return (object) [
+                    'id' => (int) $row->id,
+                    'invoice_id' => (int) $row->invoice_id,
+                    'sequence_no' => (int) $row->sequence_no,
+                    'label' => (string) $row->label,
+                    'label_fr' => $row->label_fr === null ? null : (string) $row->label_fr,
+                    'amount' => (int) $row->amount,
+                    'due_on' => $due,
+                    // A schedule state, not a payment state: allocations live
+                    // on the invoice, and telling a parent an installment is
+                    // "paid" would require an allocation read this class does
+                    // not own. `overdue`/`due_soon`/`scheduled` is what the
+                    // due date alone can honestly say.
+                    'status' => $due < $asOf ? 'overdue' : ($due <= $soon ? 'due_soon' : 'scheduled'),
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * One issued invoice with its lines, keyed to the enrollment so an id
+     * belonging to another child cannot be fetched by guessing.
+     */
+    public function invoice(int $enrollmentId, int $invoiceId): ?\stdClass
+    {
+        $invoice = DB::table('invoices')
+            ->where('id', $invoiceId)
+            ->where('enrollment_id', $enrollmentId)
+            ->where('status', 'issued')
+            ->first(['id', 'invoice_no', 'issue_date', 'due_date', 'currency', 'type', 'status']);
+
+        if ($invoice === null) {
+            return null;
+        }
+
+        $lines = DB::table('invoice_lines')
+            ->where('invoice_id', $invoiceId)
+            ->orderBy('line_no')
+            ->get(['line_no', 'description', 'description_fr', 'quantity', 'unit_amount', 'amount', 'tax_amount']);
+
+        $total = 0;
+
+        foreach ($lines as $line) {
+            $total += (int) $line->amount + (int) $line->tax_amount;
+        }
+
+        return (object) [
+            'id' => (int) $invoice->id,
+            'invoice_no' => $invoice->invoice_no === null ? null : (string) $invoice->invoice_no,
+            'issue_date' => (string) $invoice->issue_date,
+            'due_date' => (string) $invoice->due_date,
+            'currency' => (string) $invoice->currency,
+            'type' => (string) $invoice->type,
+            'status' => (string) $invoice->status,
+            'total' => $total,
+            'lines' => $lines->map(static fn (object $line): array => [
+                'line_no' => (int) $line->line_no,
+                'description' => (string) $line->description,
+                'description_fr' => $line->description_fr === null ? null : (string) $line->description_fr,
+                'quantity' => (int) $line->quantity,
+                'unit_amount' => (int) $line->unit_amount,
+                'amount' => (int) $line->amount,
+                'tax_amount' => (int) $line->tax_amount,
+            ])->values()->all(),
+        ];
+    }
+
+    /**
+     * One payment row for this enrollment - the receipt endpoint's lookup.
+     * Keyed to the enrollment for the same reason as invoice().
+     */
+    public function receipt(int $enrollmentId, int $paymentId): ?\stdClass
+    {
+        $row = DB::table('payments')
+            ->where('id', $paymentId)
+            ->where('enrollment_id', $enrollmentId)
+            ->first([
+                'id', 'receipt_no', 'value_date', 'amount', 'payment_method',
+                'clearing_state', 'payer_name', 'payer_phone', 'reference',
+            ]);
+
+        return $row === null ? null : (object) [
+            'id' => (int) $row->id,
+            'receipt_no' => (string) $row->receipt_no,
+            'value_date' => (string) $row->value_date,
+            'amount' => (int) $row->amount,
+            'payment_method' => (string) $row->payment_method,
+            'clearing_state' => (string) $row->clearing_state,
+            'payer_name' => (string) $row->payer_name,
+            'payer_phone' => $row->payer_phone === null ? null : (string) $row->payer_phone,
+            'reference' => $row->reference === null ? null : (string) $row->reference,
+        ];
+    }
+
+    /**
+     * The earliest unpaid-looking obligation after $asOf: the next installment
+     * due, falling back to the next invoice due date when no plan exists.
+     */
+    private function nextDueOn(int $enrollmentId, string $asOf): ?string
+    {
+        if (Schema::hasTable('invoice_installments')) {
+            $due = DB::table('invoice_installments as ii')
+                ->join('invoices as i', 'i.id', '=', 'ii.invoice_id')
+                ->where('i.enrollment_id', $enrollmentId)
+                ->where('i.status', 'issued')
+                ->where('ii.is_cancelled', false)
+                ->whereDate('ii.due_date', '>=', $asOf)
+                ->orderBy('ii.due_date')
+                ->value('ii.due_date');
+
+            if ($due !== null) {
+                return (string) $due;
+            }
+        }
+
+        $due = DB::table('invoices')
+            ->where('enrollment_id', $enrollmentId)
+            ->where('status', 'issued')
+            ->whereDate('due_date', '>=', $asOf)
+            ->orderBy('due_date')
+            ->value('due_date');
+
+        return $due === null ? null : (string) $due;
     }
 
     /**

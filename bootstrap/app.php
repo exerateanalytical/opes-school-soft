@@ -73,6 +73,17 @@ return Application::configure(basePath: dirname(__DIR__))
             // are fail-closed 403s - see the middleware classes themselves.
             'guardian.portal' => \App\Modules\Guardians\Http\Middleware\EnsureGuardianPortal::class,
             'staff.portal' => \App\Modules\HR\Http\Middleware\EnsureStaffPortal::class,
+
+            // The mobile guardian door (docs/specs/2026-08-11-guardian-mobile-
+            // api-v1.md 3): the same two questions as guardian.portal, asked of
+            // a Sanctum-token principal instead of a session one. Aliased, not
+            // global - only the /v1/me group pays for it.
+            'guardian.api' => \App\Modules\Guardians\Http\Middleware\EnsureGuardianApi::class,
+
+            // Replay protection for the portal's write endpoints (spec 5): a
+            // flaky mobile network must not double-post a message, a meeting
+            // request or a payment.
+            'idempotency' => \App\Modules\Identity\Http\Middleware\EnforceIdempotency::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
