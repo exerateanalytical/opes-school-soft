@@ -16,6 +16,8 @@ return [
         'niu' => 'NIU',
         'rccm' => 'RCCM',
         'accreditation' => 'N° d\'agrément ministériel',
+        'po_box' => 'B.P.',
+        'tel' => 'Tél. :',
     ],
 
     'subject' => [

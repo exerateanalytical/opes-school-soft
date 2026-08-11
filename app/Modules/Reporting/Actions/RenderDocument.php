@@ -596,6 +596,22 @@ final class RenderDocument
                 'registrar_signature_path' => $profile->registrar_signature_path,
                 'school_stamp_path' => $profile->school_stamp_path,
             ],
+            // Letterhead contacts (10-documents §4.7). Ordinary school-supplied
+            // details, not registry-issued identifiers like the NIU below, so
+            // they carry none of the §2 verification requirements. Every one is
+            // nullable and the header block prints only what it is given.
+            'contacts' => $profile === null ? [] : [
+                'address_line1' => $profile->address_line1 ?? null,
+                'address_line2' => $profile->address_line2 ?? null,
+                'city' => $profile->city ?? null,
+                'region' => $profile->region ?? null,
+                'po_box' => $profile->po_box ?? null,
+                'phone' => $profile->phone ?? null,
+                'phone_alt' => $profile->phone_alt ?? null,
+                'email' => $profile->email ?? null,
+                'website' => $profile->website ?? null,
+                'authorisation_line' => $profile->authorisation_line ?? null,
+            ],
             'fiscal' => $fiscal === null ? null : [
                 'niu' => $fiscal->niu,
                 'rccm_number' => $fiscal->rccm_number,

@@ -20,6 +20,8 @@ return [
         'niu' => 'Taxpayer No. (NIU)',
         'rccm' => 'Trade Register (RCCM)',
         'accreditation' => 'Ministry accreditation No.',
+        'po_box' => 'P.O. Box',
+        'tel' => 'Tel:',
     ],
 
     'subject' => [

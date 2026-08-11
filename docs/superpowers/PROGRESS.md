@@ -125,4 +125,14 @@ Work through modules in the SAME priority order as §5 below (cheap nav fixes fi
 
 **Needs a human in the loop before shipping:** anything in §5 items 6–7 (refunds/write-offs, revenue recognition — real money movement), anything that changes `PostFromEvent` or a posting rule, anything that would need `OPENSSL_CONF` set (rule #10 — cannot even be tested without the user's OS-level change), and obviously: `git push`.
 
+**ANOTHER CLAUDE SESSION IS ACTIVE IN THIS REPO (as of 2026-08-11 morning).** It is building the **guardian-portal mobile screens and the mobile app**. Do NOT kill its processes, do NOT edit its files, and do NOT "fix" work-in-progress you find in its area. Its territory:
+- `resources/views/livewire/guardians/portal/**` and anything else guardian-portal *screen* related
+- `resources/views/layouts/portal.blade.php`
+- the untracked `mobile/` directory at the repo root (the user's own mockups live there too — never `git add` it)
+- mobile-specific styling and breakpoints
+
+If you need to touch a shared file (`lang/*/opes.php`, `resources/css/app.css`, `routes/web.php`, `AppServiceProvider.php`), make the smallest possible additive change, re-check locale parity, and expect concurrent edits — re-read the file immediately before editing rather than trusting a stale read.
+
+**Test-database contention is real and ongoing.** With two or more sessions active, `opeschool_test` is a shared resource. Before any test run: `powershell -Command "Get-CimInstance Win32_Process -Filter \"Name='php.exe'\" | Select-Object ProcessId,CommandLine"` and look for `pest` or `artisan test`. If one is running, WAIT — do not kill it (rule 2c), and do not try to rebuild the schema underneath it (a `DROP DATABASE`/`migrate` will race it and fail with "table already exists" on a database you just created empty; this happened repeatedly on 2026-08-11). Also: never pipe `artisan migrate` into `head`/`grep -m` — closing the pipe early SIGPIPEs the migrate and leaves a half-built schema that looks like corruption.
+
 **Leave alone — parked for human review, not autonomous work:** the two stray worktrees under `.claude/worktrees/` from 2026-08-10 (`agent-a746d99bcdcd921e2` — Guardian popup-form conversion, has a couple of stray debug artifacts to eyeball before any merge; `agent-a22b256b841ecf39d` — webhook/notification tests, uncommitted, this is the agent that caused the `--env=testing` incident). Do not merge or build on top of either without the user reviewing them first. Build fresh on `main` instead.

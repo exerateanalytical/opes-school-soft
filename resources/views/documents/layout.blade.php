@@ -45,14 +45,79 @@
             text-align: center;
         }
         .doc-signature-line { border-top: 0.7pt solid #333; margin-top: 26pt; padding-top: 2pt; }
+
+        /* ── Screen preview ────────────────────────────────────────────────
+           The PDF engine paginates against @page above and ignores all of
+           this. A BROWSER does not: without it the same markup renders as
+           text running edge-to-edge on a white window, which reads as a
+           broken page rather than a document. Here the sheet is given its
+           real A4 width, centred on a neutral background with a soft
+           shadow, so what an operator previews on screen is recognisably
+           the sheet that will come out of the printer.
+
+           `position: fixed` on the watermark and footer is right for print
+           (once per page) but wrong on screen, where "fixed" pins them to
+           the VIEWPORT and they float over the page as it scrolls. On
+           screen they become absolute, positioned against the sheet. */
+        @media screen {
+            body {
+                background: #eceeed;
+                padding: 24px 0;
+            }
+            .doc-sheet {
+                position: relative;
+                width: 210mm;
+                min-height: 297mm;
+                box-sizing: border-box;
+                margin: 0 auto;
+                padding: 28pt 32pt 48pt 32pt;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(1, 60, 31, .10), 0 16px 40px rgba(1, 60, 31, .10);
+            }
+            .doc-watermark { position: absolute; }
+            .doc-footer {
+                position: absolute;
+                bottom: 14pt;
+                left: 32pt;
+                right: 32pt;
+                width: auto;
+            }
+        }
+
+        /* ── Print ─────────────────────────────────────────────────────────
+           Printing from the browser must produce the same sheet as the PDF
+           engine: no preview chrome, no shadow, and none of the sheet's
+           own padding (the @page margin already provides it, and applying
+           both would double the margin and push content off the page). */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .doc-sheet {
+                width: auto;
+                min-height: 0;
+                margin: 0;
+                padding: 0;
+                background: none;
+                box-shadow: none;
+            }
+            /* Keep a table row, a signature block or a totals band from
+               being split across a page break mid-row. */
+            tr, .doc-signatures, .doc-no-break { page-break-inside: avoid; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+        }
     </style>
 </head>
 <body>
+{{-- The sheet wrapper is what gives the screen preview a real page to be
+     drawn on; in print and in the PDF engine it collapses to nothing (see
+     the @media print block) so pagination is unchanged. --}}
+<div class="doc-sheet">
     @include('documents.blocks.watermark')
     @include('documents.blocks.document_footer')
 
     <div style="position: relative; z-index: 1;">
         @yield('content')
     </div>
+</div>
 </body>
 </html>

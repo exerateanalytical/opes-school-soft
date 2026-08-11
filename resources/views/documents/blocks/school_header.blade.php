@@ -20,6 +20,39 @@
         @endif
     @endif
 
+    @php
+        // The contact strip. Built by filtering rather than by a chain of
+        // @if/separator markup, so a school that supplies only a phone gets
+        // "Tel: ..." with no stray bullet before or after it.
+        $c = $school['contacts'] ?? [];
+
+        $addressParts = array_values(array_filter([
+            $c['address_line1'] ?? null,
+            $c['address_line2'] ?? null,
+            trim(implode(' ', array_filter([$c['city'] ?? null, $c['region'] ?? null]))) ?: null,
+            !empty($c['po_box']) ? __('documents.school.po_box', [], $document['language']).' '.$c['po_box'] : null,
+        ]));
+
+        $reachParts = array_values(array_filter([
+            !empty($c['phone']) ? __('documents.school.tel', [], $document['language']).' '.$c['phone'] : null,
+            $c['phone_alt'] ?? null,
+            $c['email'] ?? null,
+            $c['website'] ?? null,
+        ]));
+    @endphp
+
+    @if ($addressParts !== [])
+        <div class="doc-muted">{{ implode(' · ', $addressParts) }}</div>
+    @endif
+
+    @if ($reachParts !== [])
+        <div class="doc-muted">{{ implode(' · ', $reachParts) }}</div>
+    @endif
+
+    @if (!empty($c['authorisation_line']))
+        <div class="doc-muted">{{ $c['authorisation_line'] }}</div>
+    @endif
+
     @if (($school['fiscal'] ?? null) !== null)
         <div class="doc-muted">
             @if (!empty($school['fiscal']['niu']))
