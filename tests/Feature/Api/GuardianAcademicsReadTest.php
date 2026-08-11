@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\getJson;
@@ -18,6 +19,13 @@ use function Pest\Laravel\getJson;
  * must still not see an `internal` discipline case; a guardian with row 5 must
  * still not see an unpublished period.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 it('refuses results to a link that does not receive reports', function () {
     ['guardian' => $guardian, 'token' => $token] = gmreadGuardian();

@@ -26,10 +26,23 @@
                             <p class="text-xs font-semibold uppercase tracking-wide text-charcoal/60">{{ __('opes.guardian_portal.discipline_sanctions') }}</p>
                             <ul class="mt-1 space-y-1 text-sm">
                                 @foreach ($sanctionsByCase->get($case->id) as $sanction)
-                                    <li class="flex items-center justify-between gap-2">
+                                    <li wire:key="sanction-{{ $sanction->id }}" class="flex flex-wrap items-center justify-between gap-2">
                                         <span>{{ $sanction->type }} &middot; {{ $sanction->starts_on }}@if ($sanction->ends_on) &ndash; {{ $sanction->ends_on }}@endif</span>
-                                        <x-status-pill :status="$sanction->acknowledged_at ? 'ok' : 'amber'"
-                                                       :label="$sanction->acknowledged_at ? __('opes.guardian_portal.discipline_acknowledged') : __('opes.guardian_portal.discipline_pending_ack')"/>
+
+                                        <span class="flex shrink-0 items-center gap-2">
+                                            <x-status-pill :status="$sanction->acknowledged_at ? 'ok' : 'amber'"
+                                                           :label="$sanction->acknowledged_at ? __('opes.guardian_portal.discipline_acknowledged') : __('opes.guardian_portal.discipline_pending_ack')"/>
+
+                                            {{-- Row 21, and only while unsigned: a second
+                                                 acknowledgement is refused by the writer,
+                                                 because WHEN a parent signed is evidentiary. --}}
+                                            @if ($canAcknowledge && $sanction->acknowledged_at === null)
+                                                <button type="button" wire:click="acknowledge({{ $sanction->id }})"
+                                                        class="rounded border border-primary px-2.5 py-1 text-xs font-semibold text-primary hover:bg-surface-green">
+                                                    {{ __('opes.guardian_portal.ack_button') }}
+                                                </button>
+                                            @endif
+                                        </span>
                                     </li>
                                 @endforeach
                             </ul>

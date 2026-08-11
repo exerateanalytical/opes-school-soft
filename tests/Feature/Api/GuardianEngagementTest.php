@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Modules\Guardians\Models\Guardian;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,13 @@ use function Pest\Laravel\postJson;
  * grant themselves every other row in the matrix. That test is the reason this
  * file exists.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 it('lets a guardian correct their own contact details', function () {
     ['guardian' => $guardian, 'token' => $token] = gmreadGuardian();

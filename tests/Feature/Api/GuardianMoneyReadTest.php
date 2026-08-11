@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -20,6 +21,13 @@ use function Pest\Laravel\postJson;
  * row-16 FLOOR sees only this guardian's own payments - never the unfiltered
  * list, even when another guardian has paid a great deal of money.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 /**
  * A minimal issued invoice against a real enrollment, so the fee reads have

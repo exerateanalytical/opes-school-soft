@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Modules\Guardians\Models\Guardian;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Guardians\Support\PortalContext;
@@ -24,6 +25,13 @@ use function Pest\Laravel\getJson;
  * answer is 404, because row 32 makes the child's existence itself a guarded
  * fact and a 403 would confirm it.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 /**
  * @return array{user: User, guardian: Guardian, token: string}

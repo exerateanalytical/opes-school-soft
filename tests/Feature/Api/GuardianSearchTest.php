@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\getJson;
 
 /*
@@ -12,6 +13,13 @@ use function Pest\Laravel\getJson;
  * withheld. So the assertions here are about what never appears in results at
  * all - not about a filtered list being short.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 it('never returns another family\'s child, however exactly the name matches', function () {
     ['guardian' => $guardian, 'token' => $token] = gmreadGuardian();

@@ -774,6 +774,42 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
         ->whereNumber('student')->name('portal.children.discipline');
     Route::get('/children/{student}/documents', \App\Modules\Guardians\Livewire\Portal\Documents::class)
         ->whereNumber('student')->name('portal.children.documents');
+
+    /*
+     * Phase 12-P3: the screens that bring this portal level with the mobile
+     * app. Each names the 7.5 row its component authorizes on entry, because
+     * GuardianDenyByDefaultRouteEnumerationTest walks this list and a route
+     * added here without a capability check inside its component is exactly
+     * what that test exists to catch.
+     */
+    Route::get('/children/{student}/attendance', \App\Modules\Guardians\Livewire\Portal\Attendance::class)
+        ->whereNumber('student')->name('portal.children.attendance');          // rows 11/12
+    Route::get('/children/{student}/timetable', \App\Modules\Guardians\Livewire\Portal\Timetable::class)
+        ->whereNumber('student')->name('portal.children.timetable');           // row 26
+    Route::get('/children/{student}/health', \App\Modules\Guardians\Livewire\Portal\Health::class)
+        ->whereNumber('student')->name('portal.children.health');              // rows 3/4
+    Route::get('/children/{student}/meeting', \App\Modules\Guardians\Livewire\Portal\Meeting::class)
+        ->whereNumber('student')->name('portal.children.meeting');             // row 27
+
+    // Guardian-scoped, not child-scoped: rows 16/26/29 are granted on "any
+    // valid link" without naming a child.
+    Route::get('/payments', \App\Modules\Guardians\Livewire\Portal\Payments::class)
+        ->name('portal.payments');                                             // rows 16/17
+    Route::get('/announcements', \App\Modules\Guardians\Livewire\Portal\Announcements::class)
+        ->name('portal.announcements');                                        // row 26
+    Route::get('/search', \App\Modules\Guardians\Livewire\Portal\Search::class)
+        ->name('portal.search');                                               // per-row, per child
+    Route::get('/account', \App\Modules\Guardians\Livewire\Portal\Account::class)
+        ->name('portal.account');                                              // row 29 (and row 30's refusal)
+
+    // Not matrix territory at all - a notification is scoped by its own
+    // `user_id`, a thread by participation. See GuardianInbox.
+    Route::get('/notifications', \App\Modules\Guardians\Livewire\Portal\Notifications::class)
+        ->name('portal.notifications');
+    Route::get('/messages', \App\Modules\Guardians\Livewire\Portal\Messages::class)
+        ->name('portal.messages');
+    Route::get('/messages/{thread}', \App\Modules\Guardians\Livewire\Portal\Thread::class)
+        ->whereNumber('thread')->name('portal.messages.thread');
 });
 
 /*

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Modules\Guardians\Models\Guardian;
 use App\Modules\Identity\Actions\IssueDeviceToken;
 use App\Modules\Identity\Domain\Permission as OpesPermission;
@@ -22,6 +23,13 @@ use function Pest\Laravel\postJson;
  * "is this person a parent here" - so every failure mode is asserted to look
  * identical from outside.
  */
+
+/*
+ * Declared per file, as every other suite in this repo does. Without it these
+ * tests' rows survive into the next FILE and break its count-based assertions -
+ * they pass in isolation, which is exactly how the omission went unnoticed.
+ */
+uses(RefreshDatabase::class);
 
 /**
  * @return array{user: User, guardian: Guardian}

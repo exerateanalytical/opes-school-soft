@@ -7,6 +7,7 @@ namespace App\Modules\Guardians\Http\Api;
 use App\Modules\Guardians\Domain\GuardianCapability;
 use App\Modules\Guardians\Policies\GuardianPortalPolicy;
 use App\Modules\Guardians\Support\Portal\ChildDirectory;
+use App\Modules\Guardians\Support\Portal\ChildMedical;
 use App\Modules\Guardians\Support\PortalContext;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
@@ -139,27 +140,12 @@ final class ChildrenController
             abort(403);
         }
 
-        if (! Schema::hasTable('student_medical_records')) {
-            return response()->json(['data' => ['scope' => $canFull ? 'full' : 'emergency', 'records' => []]]);
-        }
-
-        $query = DB::table('student_medical_records')
-            ->where('student_id', $student)
-            ->orderByDesc('recorded_at');
-
-        if ($canFull) {
-            $records = $query->get([
-                'condition_type', 'summary', 'detail', 'severity', 'is_emergency_relevant', 'recorded_at',
-            ]);
-        } else {
-            $records = $query->where('is_emergency_relevant', true)
-                ->get(['condition_type', 'summary', 'severity', 'recorded_at']);
-        }
-
         return response()->json([
             'data' => [
                 'scope' => $canFull ? 'full' : 'emergency',
-                'records' => $records->all(),
+                // One reader for both doors - the portal's Health screen shows
+                // exactly these rows at exactly this scope.
+                'records' => app(ChildMedical::class)->records($student, $canFull)->all(),
             ],
         ]);
     }

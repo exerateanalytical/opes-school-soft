@@ -6,11 +6,10 @@ namespace App\Modules\Guardians\Http\Api;
 
 use App\Modules\Guardians\Domain\GuardianCapability;
 use App\Modules\Guardians\Policies\GuardianPortalPolicy;
+use App\Modules\Guardians\Support\Portal\ChildAcademics;
 use App\Modules\Guardians\Support\Portal\PublishedResults;
-use App\Modules\Guardians\Support\PortalContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Slice C - results, report cards, attendance, discipline, timetable
@@ -28,6 +27,7 @@ final class AcademicsController
     public function __construct(
         private readonly GuardianPortalPolicy $policy,
         private readonly PublishedResults $results,
+        private readonly ChildAcademics $academics,
     ) {
     }
 
@@ -101,41 +101,13 @@ final class AcademicsController
             abort(403);
         }
 
-        $enrollmentIds = DB::table('enrollments')->where('student_id', $student)->pluck('id')->all();
-
-        $summaries = [];
-        $records = [];
-
-        if ($enrollmentIds !== [] && Schema::hasTable('attendance_summaries')) {
-            $summaries = DB::table('attendance_summaries as s')
-                ->join('assessment_periods as ap', 'ap.id', '=', 's.assessment_period_id')
-                ->whereIn('s.enrollment_id', $enrollmentIds)
-                ->orderByDesc('ap.starts_on')
-                ->get([
-                    'ap.name as period_name', 'ap.name_fr as period_name_fr',
-                    's.sessions_expected', 's.sessions_present', 's.sessions_absent',
-                    's.sessions_excused', 's.sessions_late', 's.retards',
-                    's.hours_absent_justified', 's.hours_absent_unjustified', 's.computed_at',
-                ])->all();
-        }
-
-        if ($canDetail && $enrollmentIds !== [] && Schema::hasTable('attendance_records')) {
-            $records = DB::table('attendance_records as r')
-                ->join('attendance_registers as reg', 'reg.id', '=', 'r.attendance_register_id')
-                ->whereIn('r.enrollment_id', $enrollmentIds)
-                ->orderByDesc('reg.date')
-                ->limit(200)
-                ->get([
-                    'reg.date as session_date', 'reg.session', 'r.status', 'r.is_justified', 'r.justification_type',
-                    'r.minutes_late', 'r.remark',
-                ])->all();
-        }
-
         return response()->json([
             'data' => [
                 'scope' => $canDetail ? 'detail' : 'summary',
-                'summaries' => $summaries,
-                'records' => $records,
+                'summaries' => $this->academics->attendanceSummaries($student)->all(),
+                // Row 12 only. A summary-only link gets an empty list, not a
+                // truncated one - the difference is the whole point of the row.
+                'records' => $canDetail ? $this->academics->attendanceRecords($student)->all() : [],
             ],
         ]);
     }
@@ -225,38 +197,9 @@ final class AcademicsController
             abort(403);
         }
 
-        $context = PortalContext::current();
-        $asOf = $context?->asOf ?? now()->toDateString();
-
-        $classGroupId = DB::table('enrollment_segments as seg')
-            ->join('enrollments as enr', 'enr.id', '=', 'seg.enrollment_id')
-            ->where('enr.student_id', $student)
-            ->whereNull('seg.ends_on')
-            ->whereIn('enr.status', ['pending', 'active', 'suspended'])
-            ->orderByDesc('seg.starts_on')
-            ->value('seg.class_group_id');
-
-        if ($classGroupId === null || ! Schema::hasTable('timetable_slots')) {
-            return response()->json(['data' => ['slots' => []]]);
-        }
-
-        $slots = DB::table('timetable_slots as ts')
-            ->join('timetable_periods as tp', 'tp.id', '=', 'ts.timetable_period_id')
-            ->leftJoin('subjects as sub', 'sub.id', '=', 'ts.subject_id')
-            ->leftJoin('rooms as r', 'r.id', '=', 'ts.room_id')
-            ->where('ts.class_group_id', $classGroupId)
-            ->where('ts.effective_from', '<=', $asOf)
-            ->where(function ($query) use ($asOf): void {
-                $query->whereNull('ts.effective_to')->orWhere('ts.effective_to', '>=', $asOf);
-            })
-            ->orderBy('ts.day_of_week')
-            ->orderBy('tp.starts_at')
-            ->get([
-                'ts.day_of_week', 'tp.name as period_name', 'tp.starts_at', 'tp.ends_at',
-                'sub.name as subject_name', 'r.name as room_name',
-            ])->all();
-
-        return response()->json(['data' => ['slots' => $slots]]);
+        return response()->json([
+            'data' => ['slots' => $this->academics->timetable($student)->all()],
+        ]);
     }
 
     /** Row 32: no valid link, no child - and no confirmation that one exists. */
