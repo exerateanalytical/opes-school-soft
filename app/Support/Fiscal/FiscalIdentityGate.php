@@ -47,10 +47,44 @@ final class FiscalIdentityGate
     }
 
     /**
+     * PROVISIONAL: the fields are filled in, but no human has confirmed them.
+     *
+     * Completeness and truthfulness are different questions. `missingFields()`
+     * answers the first; only `fiscal_identity_confirmed_at` answers the
+     * second, because it records a person taking responsibility for the NIU
+     * being the school's real one. A demo copy, a fresh install someone typed
+     * placeholders into, or a half-finished setup all sit in this state: they
+     * satisfy every structural check and are still not something to print a
+     * legally sufficient receipt on.
+     *
+     * Documents rendered while provisional carry the SPECIMEN watermark
+     * (10-documents §4.7 - "SPECIMEN for previews and demo licences"), which
+     * is what makes it safe to let them render at all. Confirming the
+     * identity removes the watermark; nothing else needs to change.
+     */
+    public static function isProvisional(): bool
+    {
+        if (self::missingFields() !== []) {
+            // Incomplete is a harder state than provisional, and is refused
+            // outright rather than watermarked.
+            return true;
+        }
+
+        return DB::table('fiscal_identities')
+            ->where('id', 1)
+            ->value('fiscal_identity_confirmed_at') === null;
+    }
+
+    /**
      * Refuses with a setup prompt rather than printing a deficient money
      * document (10-documents §4.7). Called by the Print Action BEFORE
      * RenderDocument, so an incomplete fiscal identity never even reaches
      * the render/hash/series-allocation transaction.
+     *
+     * Deliberately checks COMPLETENESS only, not confirmation: an unconfirmed
+     * identity still prints, under SPECIMEN. Refusing there too would leave a
+     * school unable to see its own document layouts until the day it has a
+     * NIU, which is when it least wants surprises.
      */
     public static function assertCompleteForMoneyDocuments(): void
     {

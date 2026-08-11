@@ -21,6 +21,7 @@ use App\Modules\Reporting\Models\IssuedDocument;
 use App\Modules\SchoolProfile\Actions\ReadSetting;
 use App\Support\Audit\Actor;
 use App\Support\Clock\BusinessDate;
+use App\Support\Fiscal\FiscalIdentityGate;
 use App\Support\Sequence\SequenceAllocator;
 use DomainException;
 use Illuminate\Support\Carbon;
@@ -271,7 +272,12 @@ final class RenderDocument
         $isDuplicate = $priorPrints > 0;
         $copyNo = $priorPrints + 1;
 
-        $watermark = $issued->isRevoked() ? 'void' : ($isDuplicate ? 'duplicata' : null);
+        // Precedence: void > duplicata > specimen. A revoked or duplicate
+        // document is the more urgent thing to say, and only one watermark
+        // can be drawn; specimen is the weakest claim of the three.
+        $watermark = $issued->isRevoked()
+            ? 'void'
+            : ($isDuplicate ? 'duplicata' : $this->provisionalWatermark());
 
         $outputHtml = $this->renderHtml($template, $issued->template_version, $issued->serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
             'watermark' => $watermark,
@@ -370,6 +376,25 @@ final class RenderDocument
         $bytes = $this->pdf->render($html, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
         $hash = hash('sha256', $bytes);
 
+        // SPECIMEN is an OUTPUT overlay, never part of the hashed artefact -
+        // exactly how duplicata behaves on reprint. Hashing the clean render
+        // is what lets a document issued while provisional still reprint
+        // byte-identically after the identity is confirmed: the stored hash
+        // describes the document, and the watermark describes the conditions
+        // it was printed under. Folding the watermark into the hash would
+        // make confirming the NIU retroactively fail every prior document's
+        // reproducibility check (§4.5).
+        $outputBytes = $bytes;
+
+        if ($this->provisionalWatermark() !== null) {
+            $specimenHtml = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
+                'watermark' => 'specimen',
+                'issued_at' => $issuedAt,
+                'copy_no' => 1,
+            ]);
+            $outputBytes = $this->pdf->render($specimenHtml, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
+        }
+
         // 8. IssuedDocument + DocumentPrintLog.
         if ($actor->id === null) {
             throw new DomainException('Issuing a document requires an authenticated actor (00-core 14).');
@@ -408,10 +433,13 @@ final class RenderDocument
             false, 1, $lang, $bulkPrintJobId, $actor,
         );
 
-        $path = $this->store($template, $serial, $bytes, 1);
+        // Stores and returns the OUTPUT bytes - what the operator actually
+        // receives, carrying SPECIMEN when provisional. `$hash` above stays
+        // the clean artefact's, which is what reprint verifies against.
+        $path = $this->store($template, $serial, $outputBytes, 1);
 
         return new RenderedDocument(
-            bytes: $bytes,
+            bytes: $outputBytes,
             html: $html,
             contentHash: $hash,
             language: $lang,
@@ -446,9 +474,11 @@ final class RenderDocument
         $generatedAt = Carbon::now()->startOfSecond();
 
         // Live documents are working views: no series, no IssuedDocument,
-        // no byte-identity - and a footer that SAYS so (4.2).
+        // no byte-identity - and a footer that SAYS so (4.2). There is no
+        // hash to protect here, so the specimen overlay simply goes on the
+        // one and only render.
         $html = $this->renderHtml($template, $template->version, null, $lang, $chrome, $data, $subjectLabel, [
-            'watermark' => null,
+            'watermark' => $this->provisionalWatermark(),
             'issued_at' => null,
             'generated_at' => $generatedAt,
             'generated_by' => $actor->name,
@@ -692,6 +722,19 @@ final class RenderDocument
     private const FINANCIAL_TEMPLATE_CODES = [
         'FEE-RECEIPT', 'FEE-RECEIPT-POS', 'FEE-INVOICE', 'WHT-CERT', 'PAY-VOUCHER',
     ];
+
+    /**
+     * 'specimen' while the school's fiscal identity is provisional, otherwise
+     * null (10-documents §4.7 - "SPECIMEN for previews and demo licences").
+     *
+     * Returned as the watermark VALUE rather than a boolean so every call
+     * site reads as the watermark decision it is, and so the three render
+     * paths cannot disagree about the string.
+     */
+    private function provisionalWatermark(): ?string
+    {
+        return FiscalIdentityGate::isProvisional() ? 'specimen' : null;
+    }
 
     private function isFinancial(DocumentTemplate $template): bool
     {
