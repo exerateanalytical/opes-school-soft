@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Modules\Guardians\Livewire\Portal\Account;
+use App\Modules\Guardians\Livewire\Portal\AccountEdit;
 use App\Modules\Guardians\Livewire\Portal\Attendance;
 use App\Modules\Guardians\Livewire\Portal\Health;
 use App\Modules\Guardians\Livewire\Portal\Meeting;
@@ -266,7 +266,7 @@ it('lets a guardian save their own contact details', function () {
 
     actingAs($user);
 
-    Livewire::test(Account::class)
+    Livewire::test(AccountEdit::class)
         ->set('city', 'Bafoussam')
         ->set('occupation', 'Tailor')
         ->call('save')
@@ -284,7 +284,7 @@ it('refuses the account screen once every link has expired', function () {
 
     actingAs($user);
 
-    get(route('portal.account'))->assertForbidden();
+    get(route('portal.account.edit'))->assertForbidden();
 });
 
 it('records a meeting request as made by the guardian', function () {

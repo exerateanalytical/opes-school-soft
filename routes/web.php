@@ -799,8 +799,25 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
         ->name('portal.announcements');                                        // row 26
     Route::get('/search', \App\Modules\Guardians\Livewire\Portal\Search::class)
         ->name('portal.search');                                               // per-row, per child
+    /*
+     * The account area, built to mobile/parent-profile.png and
+     * mobile/account-settings.png. `portal.account` itself is NOT row-gated:
+     * it is about the guardian, not a child, so a parent whose links have all
+     * expired can still see who the school thinks they are and how to reach
+     * the office. The screens that WRITE (edit, notifications) carry row 29.
+     */
     Route::get('/account', \App\Modules\Guardians\Livewire\Portal\Account::class)
-        ->name('portal.account');                                              // row 29 (and row 30's refusal)
+        ->name('portal.account');
+    Route::get('/account/settings', \App\Modules\Guardians\Livewire\Portal\AccountSettings::class)
+        ->name('portal.account.settings');
+    Route::get('/account/edit', \App\Modules\Guardians\Livewire\Portal\AccountEdit::class)
+        ->name('portal.account.edit');                                         // row 29 (and row 30's refusal)
+    Route::get('/account/notifications', \App\Modules\Guardians\Livewire\Portal\NotificationSettings::class)
+        ->name('portal.account.notifications');                                // row 29
+    Route::get('/account/security', \App\Modules\Guardians\Livewire\Portal\Security::class)
+        ->name('portal.account.security');
+    Route::get('/help', \App\Modules\Guardians\Livewire\Portal\HelpSupport::class)
+        ->name('portal.help');
 
     // Not matrix territory at all - a notification is scoped by its own
     // `user_id`, a thread by participation. See GuardianInbox.
