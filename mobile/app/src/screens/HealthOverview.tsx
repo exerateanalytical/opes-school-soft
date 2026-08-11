@@ -28,7 +28,7 @@ export default function HealthOverview(): React.JSX.Element {
   const childId = Number(useLocalSearchParams<{ id?: string }>().id ?? 0);
 
   const state = useScreenData(
-    async () => ({ data: (await me.medical(childId)).data, stale: false, fetchedAt: Date.now() }),
+    async () => ({ data: await me.medical(childId), stale: false, fetchedAt: Date.now() }),
     [childId],
   );
 

@@ -19,7 +19,7 @@ import { followDeepLink } from '@/navigation';
 export default function Notifications(): React.JSX.Element {
   const { t, language } = useI18n();
   const state = useScreenData(
-    async () => ({ data: (await me.notifications()).data, stale: false, fetchedAt: Date.now() }),
+    async () => ({ data: await me.notifications(), stale: false, fetchedAt: Date.now() }),
     [],
   );
 

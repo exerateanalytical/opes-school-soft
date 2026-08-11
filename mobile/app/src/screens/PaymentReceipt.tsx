@@ -37,7 +37,7 @@ export default function PaymentReceipt(): React.JSX.Element {
 
   const state = useScreenData(
     async () => ({
-      data: (await me.receipt(childId, paymentId)).data,
+      data: await me.receipt(childId, paymentId),
       stale: false,
       fetchedAt: Date.now(),
     }),

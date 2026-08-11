@@ -4,10 +4,12 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      // Keeps `@/…` imports resolving the same way tsconfig `paths` does, so a
-      // moved file breaks the type-check rather than only the runtime.
-      ['module-resolver', { alias: { '@': './src' } }],
-      // Must stay LAST - Reanimated's plugin rewrites worklets and expects to
+      // `@/…` is NOT aliased here on purpose. Expo SDK 53's Metro reads
+      // `paths` straight out of tsconfig.json, so a babel alias would be a
+      // second, silently-diverging copy of the same mapping - and the version
+      // that ran at runtime would not be the one the type-checker used.
+      //
+      // Must stay LAST: Reanimated's plugin rewrites worklets and expects to
       // see the final AST.
       'react-native-reanimated/plugin',
     ],

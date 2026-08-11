@@ -27,7 +27,7 @@ export default function MessageChatClassTeacher(): React.JSX.Element {
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState<string[]>([]);
   const state = useScreenData(
-    async () => ({ data: (await me.messages(threadId)).data, stale: false, fetchedAt: Date.now() }),
+    async () => ({ data: await me.messages(threadId), stale: false, fetchedAt: Date.now() }),
     [threadId],
   );
 

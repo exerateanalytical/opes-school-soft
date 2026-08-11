@@ -6,8 +6,21 @@ surface documented in `docs/specs/2026-08-11-guardian-mobile-api-v1.md` and
 
 ## State of this build — read this first
 
-**This is a partial build and the parts are clearly separable.** What follows
-is exact, so the next session does not have to re-derive it.
+**All 81 reference screens are built, the project type-checks clean, and it
+bundles.** What follows is exact, including what is still missing.
+
+### Verified
+
+```
+npm install        773 packages, clean
+npx tsc --noEmit   0 errors
+npx expo export    1191 modules, 3.02 MB Hermes bundle, android OK
+```
+
+That is a real check, not a claim: the bundler resolves every import and
+compiles every route, so there are no missing modules, no broken paths and no
+syntax errors anywhere in the tree. It is **not** a rendering test — see
+"Fidelity" below.
 
 ### Complete and reviewable
 
@@ -24,59 +37,59 @@ is exact, so the next session does not have to re-derive it.
 | Loading / denied / not-found / offline handling, written once | `src/components/useScreenData.tsx` |
 | Routing + `opes://` deep-link mapping | `src/navigation.ts`, `app/` |
 
-### Screens built — 22 of 66
+### Screens — 81 files, one per reference PNG
 
-`SplashScreen`, `WelcomeOnboarding`, `LoginWelcomeBack`, `ForgotPasswordReset`,
-`VerifyYourAccountOtp`, `ParentDashboard`, `MyChildren`, `ChildOverview`,
-`ChildProfile`, `ResultsOverview`, `AcademicOverview`, `SubjectResults`,
-`Attendance`, `BehaviourDiscipline`, `FeesDashboard`, `OutstandingBalance`,
-`FeeStructureBreakdown`, `MakePayment`, `PaymentReceipt`,
-`PaymentHistoryReceipts`, `ChildDocuments`, `HealthOverview`, `MessagesInbox`,
-`MessageChatClassTeacher`, `Notifications`, `SchoolAnnouncements`,
-`GlobalSearch`, `ParentProfile`.
+`src/screens/` holds one component per PNG, same filename → same component
+name, plus `ClassTimetable` (see below). Verify the mapping with:
 
-### Screens NOT built — the remaining 44
+```bash
+for f in mobile/*.png; do b=$(basename "$f" .png); \
+  n=$(echo "$b" | awk -F- '{for(i=1;i<=NF;i++)printf toupper(substr($i,1,1)) substr($i,2)}'); \
+  [ -f "mobile/app/src/screens/$n.tsx" ] || echo "MISSING $n"; done
+```
 
-The 81 PNGs in `mobile/` reduce to **66 distinct screens** (11 groups are
-byte-identical duplicates; `md5sum *.png | sort | uniq -w32 -d` reproduces the
-list). The ones above are done; the rest are not started:
+Three kinds of file, and the distinction is deliberate:
 
-`AcademicPerformanceAnalytics`, `AccountSettings`, `ActivityDetails`,
-`Assignments`, `BulletinDePaiePayslip`, `BulletinScolaireReportCard` (+`-2`),
-`ChildDocumentsMain`, `ChildOverview2`, `DigitalSchoolIdChildId` (+`Secure`),
-`EmergencyImportantContacts` (+`-2`, `-3`), `ExcursionsTrips`, `GlobalSearch2`,
-`HealthId`, `HealthOverview2`, `HelpSupport`,
-`ImmunizationVaccinationRecords` (+`-2`), `LoginWelcomeBack2`,
-`MedicalDocuments`, `MedicalHistory`, `NotificationPreferences`,
-`OfficialFeesReceipt`, `OpesHealthId`, `ParentDashboard2`,
-`PaymentMethodSelection`, `PaymentProcessing`, `ReportCardViewer`,
-`SchoolActivities`, `SchoolInformation`, `Security`, `SportsEvents`,
-`TeacherSchoolContact`, `TermSequenceHistory`, `TranscriptViewer`,
-plus the duplicate-group re-export files.
+- **Implementations** (~50). The real screens.
+- **Duplicate aliases** (15). The 81 PNGs contain 11 byte-identical groups
+  (`md5sum mobile/*.png | sort | uniq -w32 -d`). Those are one screen exported
+  twice by the design tool, so they re-export rather than fork — two copies of
+  a screen drift apart.
+- **Variant aliases** (10). `child-overview-2`, `health-overview-2`,
+  `global-search-2` and friends are the *same* screen in a different state
+  (scrolled, keyboard up, results populated). Also re-exports, for the same
+  reason.
 
-Nothing about the foundation blocks them: each is a composition of the existing
-kit against an endpoint that already exists. `FeesDashboard` and
-`BehaviourDiscipline` are the best models to copy — they show, respectively, a
-multi-section data screen and a screen where three capabilities have to be kept
-visibly apart.
+`ClassTimetable` is the one screen with **no** reference PNG. It exists because
+`ChildOverview` offers a timetable tile (row 26 is granted on almost every
+link) and the endpoint shipped in Slice C — a tile navigating nowhere would be
+a worse answer to the missing design than a plain screen built from the kit.
 
-### Never run
+### What the screens honestly cannot do
 
-**`npm install` has not been run and the app has not been launched, type-checked
-or rendered.** There is no `node_modules`, no lockfile, and no Expo project
-registration. Dependency versions in `package.json` were chosen to be mutually
-consistent for Expo SDK 53 but are unverified against the registry. Treat the
-first `npx expo start` as a debugging session, not a smoke test.
+Four screens are wired to the truth rather than to a plausible fiction, and
+each says so on screen:
+
+| Screen | Why |
+|---|---|
+| `MakePayment`, `PaymentProcessing`, `PaymentMethodSelection` | No gateway exists. They call the real endpoint, get the real `501`, and show the school's real message. A mock would teach parents the app can take their money. |
+| `Assignments` | Homework has no guardian endpoint and no matrix row. Shows the timetable, states the gap. |
+| `SchoolActivities`, `ExcursionsTrips`, `SportsEvents`, `ActivityDetails` | Activities are a P0 non-goal. Backed by announcements (row 26). Notably **no permission-slip button** — consent is a legal record and there is no write endpoint for one. |
+| `BulletinDePaiePayslip` | A payslip is a *staff* record. No matrix row could ever grant a parent one; the PNG is a stray from the staff design set. Rendered as an explicit refusal so nobody wires it to payroll later. |
 
 ### Fidelity is faithful, not proven
 
-The tokens were read off the reference PNGs by eye. **The rendered output has
-never been diffed against those PNGs** — that needs a simulator and a
-screenshot harness this environment does not have. The previous session's
-handover raised exactly this and offered two options; this build took option
-(a) (build to the token system faithfully) because the user asked for the
-screens. So: "pixel-perfect" is *not* a claim this build can substantiate, and
-nobody should repeat it upstream until option (b) exists.
+The tokens were read off the reference PNGs by eye. The project bundles, but
+**no screen has ever been rendered and nothing has been diffed against the
+PNGs** — that needs a simulator and a screenshot harness this environment does
+not have. The previous session's handover raised exactly this and offered two
+options; this build took option (a) (build to the token system faithfully)
+because the user asked for the screens. So: "pixel-perfect" is *not* a claim
+this build can substantiate, and nobody should repeat it upstream until option
+(b) exists.
+
+Bundling proves the code is *valid*. It says nothing about whether a card is
+16px from the edge or 12.
 
 Two specific places the PNGs imply something the tokens do not cover:
 
