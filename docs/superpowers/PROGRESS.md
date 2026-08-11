@@ -90,6 +90,17 @@ The user supplied a full design spec: Heritage Deep Green `#013C1F`/`#002D17` + 
 
 Work through modules in the SAME priority order as §5 below (cheap nav fixes first, since those screens get touched anyway) but treat the visual/typography/completeness pass as part of "wiring a screen properly," not a separate task — when you touch a screen for any reason, bring it fully up to the Heritage system rather than leaving it half-migrated. Log progress per module in the night log (§6a): `- <module>: N of M screens migrated, gaps found: <list>`.
 
+## 4b. ⚠ NO DOCUMENT CAN BE PREVIEWED OR PRINTED IN THE DEMO RIGHT NOW — needs the user
+
+Discovered 2026-08-11 while doing the letterhead work. Every one of the 8 built document types refuses to render, each for a *correct* reason. These are the guards working, not bugs — but the net effect is that a demo cannot show a single document.
+
+1. **Every money document** (receipt, invoice, statement, payment voucher, withholding attestation) refuses with: *"The school fiscal identity is incomplete (missing: niu, tax_regime, tax_centre_name, legal_name)"* — the 03-tax-procurement §2 guard. **This needs a REAL NIU and tax-centre from the user.** Do NOT invent one: a fabricated taxpayer number printed on a receipt is precisely the "wrong value that looks authoritative" 00-core §16 forbids, and it would be worse than the current refusal. This single gap is also the root cause of all 8 pre-existing failures in the document render suite.
+2. **Payslips**: every row in `payroll_items` has `is_cancelled = 1`, and a cancelled line has no payslip to issue. Needs a real (non-cancelled) payroll run in the demo.
+3. **Report cards**: no published report card exists — a bulletin is issued from the publication snapshot and never re-derived from marks (01-assessment §13), so a period must be *published* first.
+4. The `settings` table is **empty**, so `school.name` / `school.name_fr` resolve to `''` — even the letterhead's school name would render blank. The school's *name* is safe for the user to fill in via Settings; it is not a registry-issued value.
+
+Fixing 2–4 is ordinary demo-data work and can be done unattended. Fixing 1 cannot — it is the only true blocker, and it is a question for the user, not a task.
+
 ## 5. What's NOT done — in priority order for the next session
 
 > Revised 2026-08-11 after a full 4-agent platform audit (Students/Guardians/Academics/Assessment; Fees/Accounting/Tax/Procurement; Identity/HR/Payroll/Welfare; Communication/Notifications/Documents/Reporting). Items 1-5 below are new/reordered findings from that audit — do these FIRST, they're cheap and safe. Items 6+ are the pre-existing backlog.
