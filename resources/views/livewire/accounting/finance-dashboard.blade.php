@@ -6,8 +6,11 @@
      * from the arrays the component handed over - this app ships no JS
      * charting library and adds no build step for one.
      *
-     * Palette: primary green #0F5132 for money in, heritage amber for money
-     * owed but not yet due, heritage red for money overdue. Colour never
+     * Palette: primary green for money in, heritage gold for money
+     * owed but not yet due, heritage red for money overdue. Every colour is
+     * taken from a CSS custom property rather than a literal hex, so the
+     * charts re-skin with the rest of the platform instead of silently
+     * keeping the previous brand. Colour never
      * carries meaning alone (09-ui §10) - every slice, bar and series is
      * labelled in text as well.
      */
@@ -47,8 +50,8 @@
     if ($donutTotal > 0) {
         $offset = 0.0;
         foreach ([
-            ['key' => 'collected', 'label' => 'Collected', 'colour' => '#0F5132'],
-            ['key' => 'outstanding', 'label' => 'Outstanding', 'colour' => '#C9A227'],
+            ['key' => 'collected', 'label' => 'Collected', 'colour' => 'var(--color-primary)'],
+            ['key' => 'outstanding', 'label' => 'Outstanding', 'colour' => 'var(--color-heritage-yellow)'],
             ['key' => 'overdue', 'label' => 'Overdue', 'colour' => '#A4161A'],
         ] as $slice) {
             $value = (int) $collection[$slice['key']];
@@ -279,22 +282,22 @@
                             <title id="fd-trend-title">Monthly collection trend</title>
                             <desc id="fd-trend-desc">Cleared receipts per month over the twelve months ending {{ \Illuminate\Support\Carbon::parse($window['end'])->format('F Y') }}.</desc>
 
-                            <line x1="30" y1="170" x2="630" y2="170" stroke="#D8D2C4" stroke-width="1"/>
-                            <line x1="30" y1="20" x2="30" y2="170" stroke="#D8D2C4" stroke-width="1"/>
+                            <line x1="30" y1="170" x2="630" y2="170" stroke="var(--color-border-primary)" stroke-width="1"/>
+                            <line x1="30" y1="20" x2="30" y2="170" stroke="var(--color-border-primary)" stroke-width="1"/>
 
-                            <path d="{{ $trendArea }}" fill="#0F5132" fill-opacity="0.10"/>
-                            <path d="{{ $trendPath }}" fill="none" stroke="#0F5132" stroke-width="2.5"
+                            <path d="{{ $trendArea }}" fill="var(--color-primary)" fill-opacity="0.10"/>
+                            <path d="{{ $trendPath }}" fill="none" stroke="var(--color-primary)" stroke-width="2.5"
                                   stroke-linejoin="round" stroke-linecap="round"/>
 
                             @foreach ($trendPoints as $index => $point)
-                                <circle cx="{{ round($point['x'], 2) }}" cy="{{ round($point['y'], 2) }}" r="3" fill="#0F5132">
+                                <circle cx="{{ round($point['x'], 2) }}" cy="{{ round($point['y'], 2) }}" r="3" fill="var(--color-primary)">
                                     <title>{{ $point['label'] }}: {{ Money::of($point['amount'])->format() }}</title>
                                 </circle>
                                 <text x="{{ round($point['x'], 2) }}" y="188" text-anchor="middle"
-                                      font-size="9" fill="#4A4A48">{{ $point['label'] }}</text>
+                                      font-size="9" fill="var(--color-text-muted)">{{ $point['label'] }}</text>
                             @endforeach
 
-                            <text x="30" y="14" font-size="9" fill="#4A4A48">{{ Money::of($seriesMax)->format(false) }}</text>
+                            <text x="30" y="14" font-size="9" fill="var(--color-text-muted)">{{ Money::of($seriesMax)->format(false) }}</text>
                         </svg>
                         <figcaption class="sr-only">
                             @foreach ($chartSeries as $point)
@@ -344,7 +347,7 @@
                             <desc id="fd-donut-desc">
                                 @foreach ($donutSlices as $slice){{ $slice['label'] }} {{ number_format($slice['percent'], 1) }}%. @endforeach
                             </desc>
-                            <circle cx="100" cy="100" r="70" fill="none" stroke="#EFEBE1" stroke-width="26"/>
+                            <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-surface-secondary)" stroke-width="26"/>
                             @foreach ($donutSlices as $slice)
                                 @if ($slice['length'] > 0)
                                     <circle cx="100" cy="100" r="70" fill="none"
@@ -356,10 +359,10 @@
                                     </circle>
                                 @endif
                             @endforeach
-                            <text x="100" y="96" text-anchor="middle" font-size="13" font-weight="600" fill="#2B2B29">
+                            <text x="100" y="96" text-anchor="middle" font-size="13" font-weight="600" fill="var(--color-text-primary)">
                                 {{ number_format(($collection['collected'] / max(1, $donutTotal)) * 100, 1) }}%
                             </text>
-                            <text x="100" y="112" text-anchor="middle" font-size="9" fill="#4A4A48">collected</text>
+                            <text x="100" y="112" text-anchor="middle" font-size="9" fill="var(--color-text-muted)">collected</text>
                         </svg>
                     </figure>
 
@@ -402,19 +405,19 @@
                         <desc id="fd-income-desc">
                             @foreach ($incomeByCategory as $point){{ $point['label'] }}: {{ Money::of($point['amount'])->format() }}. @endforeach
                         </desc>
-                        <line x1="0" y1="160" x2="{{ max(240, count($incomeByCategory) * 70) }}" y2="160" stroke="#D8D2C4" stroke-width="1"/>
+                        <line x1="0" y1="160" x2="{{ max(240, count($incomeByCategory) * 70) }}" y2="160" stroke="var(--color-border-primary)" stroke-width="1"/>
                         @foreach ($incomeByCategory as $index => $point)
                             @php
                                 $height = $incomeMax > 0 ? ((int) $point['amount'] / $incomeMax) * 130 : 0;
                                 $x = ($index * 70) + 18;
                             @endphp
                             <rect x="{{ $x }}" y="{{ round(160 - $height, 2) }}" width="34"
-                                  height="{{ round(max($height, 1), 2) }}" rx="3" fill="#0F5132">
+                                  height="{{ round(max($height, 1), 2) }}" rx="3" fill="var(--color-primary)">
                                 <title>{{ $point['label'] }}: {{ Money::of($point['amount'])->format() }}</title>
                             </rect>
                             <text x="{{ $x + 17 }}" y="{{ round(154 - $height, 2) }}" text-anchor="middle"
-                                  font-size="9" fill="#4A4A48">{{ Money::of($point['amount'])->format(false) }}</text>
-                            <text x="{{ $x + 17 }}" y="174" text-anchor="middle" font-size="9" fill="#4A4A48">
+                                  font-size="9" fill="var(--color-text-muted)">{{ Money::of($point['amount'])->format(false) }}</text>
+                            <text x="{{ $x + 17 }}" y="174" text-anchor="middle" font-size="9" fill="var(--color-text-muted)">
                                 {{ \Illuminate\Support\Str::limit($point['label'], 12, '…') }}
                             </text>
                         @endforeach

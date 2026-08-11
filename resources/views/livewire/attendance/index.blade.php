@@ -121,7 +121,7 @@
                         @php $deg = (int) round($donutRate * 360); @endphp
                         <div class="mt-3 flex items-center gap-4">
                             <div class="relative h-28 w-28 shrink-0 rounded-full"
-                                 style="background: conic-gradient(#1D6F42 0deg {{ $deg }}deg, #C1272D {{ $deg }}deg 360deg);"
+                                 style="background: conic-gradient(var(--color-primary) 0deg {{ $deg }}deg, var(--color-heritage-red) {{ $deg }}deg 360deg);"
                                  role="img" aria-label="{{ __('attendance.kpi_month_rate') }}: {{ $pct($donutRate) }}">
                                 <div class="absolute inset-3 flex items-center justify-center rounded-full bg-white">
                                     <span class="text-lg font-semibold text-charcoal">{{ $pct($donutRate) }}</span>
