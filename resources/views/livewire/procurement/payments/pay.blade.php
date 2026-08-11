@@ -21,11 +21,11 @@
         </div>
     @endif
 
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.supplier') }}</span>
-                <select wire:model.live="supplierId" class="rounded border border-sand px-2 py-1.5">
+                <select wire:model.live="supplierId" class="rounded border border-border-primary px-2 py-1.5">
                     <option value="">—</option>
                     @foreach ($suppliers as $supplier)
                         <option value="{{ $supplier->id }}">{{ $supplier->code }} · {{ $supplier->name }}</option>
@@ -34,11 +34,11 @@
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.payment_date') }}</span>
-                <input type="date" wire:model.live="paymentDate" class="rounded border border-sand px-2 py-1.5"/>
+                <input type="date" wire:model.live="paymentDate" class="rounded border border-border-primary px-2 py-1.5"/>
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.method') }}</span>
-                <select wire:model="paymentMethod" class="rounded border border-sand px-2 py-1.5">
+                <select wire:model="paymentMethod" class="rounded border border-border-primary px-2 py-1.5">
                     @foreach (['cash', 'mobile_money', 'bank'] as $method)
                         <option value="{{ $method }}">{{ str_replace('_', ' ', $method) }}</option>
                     @endforeach
@@ -46,7 +46,7 @@
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.treasury_account') }}</span>
-                <select wire:model="treasuryAccountId" class="rounded border border-sand px-2 py-1.5">
+                <select wire:model="treasuryAccountId" class="rounded border border-border-primary px-2 py-1.5">
                     <option value="">—</option>
                     @foreach ($treasuryAccounts as $account)
                         <option value="{{ $account->id }}">{{ $account->code }} · {{ $account->name_fr }}</option>
@@ -55,15 +55,15 @@
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.reference') }}</span>
-                <input type="text" wire:model="reference" class="rounded border border-sand px-2 py-1.5"/>
+                <input type="text" wire:model="reference" class="rounded border border-border-primary px-2 py-1.5"/>
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.fee_amount') }}</span>
-                <input type="number" min="0" wire:model="feeAmount" class="rounded border border-sand px-2 py-1.5"/>
+                <input type="number" min="0" wire:model="feeAmount" class="rounded border border-border-primary px-2 py-1.5"/>
             </label>
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.fee_bearer') }}</span>
-                <select wire:model="feeBearer" class="rounded border border-sand px-2 py-1.5">
+                <select wire:model="feeBearer" class="rounded border border-border-primary px-2 py-1.5">
                     <option value="school">{{ __('opes.supplier_payment_screen.fee_bearer_school') }}</option>
                     <option value="supplier">{{ __('opes.supplier_payment_screen.fee_bearer_supplier') }}</option>
                 </select>
@@ -71,7 +71,7 @@
         </div>
     </section>
 
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <h2 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.supplier_payment_screen.open_invoices') }}</h2>
 
         @if ($openInvoices === [])
@@ -91,7 +91,7 @@
                     </thead>
                     <tbody>
                         @foreach ($openInvoices as $invoice)
-                            <tr wire:key="open-invoice-{{ $invoice->id }}" class="border-t border-sand/60">
+                            <tr wire:key="open-invoice-{{ $invoice->id }}" class="border-t border-border-primary/60">
                                 <td class="px-2 py-1 font-mono">{{ $invoice->internal_no }} <span class="text-charcoal/50">({{ $invoice->supplier_invoice_no }})</span></td>
                                 <td class="px-2 py-1">{{ $invoice->due_date }}</td>
                                 <td class="px-2 py-1 text-right font-mono">{{ number_format($invoice->total_ttc, 0, ',', ' ') }}</td>
@@ -100,7 +100,7 @@
                                 <td class="px-2 py-1 text-right">
                                     <input type="number" min="0" max="{{ $invoice->outstanding }}"
                                            wire:model="allocations.{{ $invoice->id }}"
-                                           class="w-32 rounded border border-sand px-2 py-1 text-right font-mono"/>
+                                           class="w-32 rounded border border-border-primary px-2 py-1 text-right font-mono"/>
                                 </td>
                             </tr>
                         @endforeach

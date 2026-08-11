@@ -43,13 +43,13 @@
         <label for="payments-search" class="flex min-w-[14rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.search') }}</span>
             <input id="payments-search" type="search" wire:model.live.debounce.300ms="search"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         <label for="payments-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.filter_status') }}</span>
             <select id="payments-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach (['draft', 'approved', 'paid', 'voided'] as $option)
                     <option value="{{ $option }}">{{ $option }}</option>
@@ -76,7 +76,7 @@
     </x-slot:head>
 
     @foreach ($payments as $payment)
-        <tr wire:key="payment-{{ $payment->id }}" class="border-t border-sand/60 hover:bg-sand/20">
+        <tr wire:key="payment-{{ $payment->id }}" class="border-t border-border-primary/60 hover:bg-sand/20">
             <td class="px-3 py-2 font-mono text-sm"><a href="{{ url('/procurement/payments/'.$payment->id) }}" class="text-primary hover:underline">{{ $payment->payment_no }}</a></td>
             <td class="px-3 py-2 text-sm">{{ $payment->supplier_name }}</td>
             <td class="px-3 py-2 text-sm">{{ $payment->payment_date }}</td>
@@ -112,13 +112,13 @@
             </td>
         </tr>
         @if ($voidingId === $payment->id)
-            <tr wire:key="payment-void-{{ $payment->id }}" class="border-t border-sand/60 bg-badge-red/5">
+            <tr wire:key="payment-void-{{ $payment->id }}" class="border-t border-border-primary/60 bg-badge-red/5">
                 <td colspan="9" class="px-3 py-2">
                     <div class="flex flex-wrap items-end gap-2">
                         <label class="flex grow flex-col gap-1">
                             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.void_reason') }}</span>
                             <input type="text" wire:model="voidReason"
-                                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                         </label>
                         <button type="button" wire:click="confirmVoid" class="rounded bg-badge-red px-3 py-1.5 text-sm font-medium text-white">
                             {{ __('opes.supplier_payment_screen.confirm_void') }}
@@ -131,7 +131,7 @@
 
     <x-slot:cards>
         @foreach ($payments as $payment)
-            <article wire:key="payment-card-{{ $payment->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="payment-card-{{ $payment->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-center justify-between">
                     <span class="font-mono text-sm">{{ $payment->payment_no }}</span>
                     <span class="text-xs text-charcoal/60">{{ $payment->status }}</span>

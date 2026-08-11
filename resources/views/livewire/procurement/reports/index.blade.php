@@ -19,11 +19,11 @@
         >
             <x-slot:actions>
                 <button type="button" wire:click="exportExcel"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export Excel
                 </button>
                 <button type="button" wire:click="exportPdf"
-                        class="rounded border border-sand px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                     Export PDF
                 </button>
                 <button type="button" onclick="window.print()"
@@ -37,7 +37,7 @@
                     <label for="report-filter-supplier" class="flex min-w-[11rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Supplier</span>
                         <select id="report-filter-supplier" wire:model.live="supplier"
-                                class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">All suppliers</option>
                             @foreach ($supplierOptions as $option)
                                 <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
@@ -50,7 +50,7 @@
                     <label for="report-filter-status" class="flex min-w-[11rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Status</span>
                         <select id="report-filter-status" wire:model.live="status"
-                                class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                             <option value="">All statuses</option>
                             @foreach ($statusOptions as $option)
                                 <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -63,13 +63,13 @@
                     <label for="report-filter-date-from" class="flex min-w-[9rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">From</span>
                         <input id="report-filter-date-from" type="date" wire:model.live="dateFrom"
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                     </label>
 
                     <label for="report-filter-date-to" class="flex min-w-[9rem] flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">To</span>
                         <input id="report-filter-date-to" type="date" wire:model.live="dateTo"
-                               class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                     </label>
                 @endif
             </x-slot:filters>

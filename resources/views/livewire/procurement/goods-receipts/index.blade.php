@@ -38,7 +38,7 @@
     </x-slot:kpis>
 
     @if ($showForm)
-        <div class="mb-4 rounded border border-sand bg-white p-3">
+        <div class="mb-4 rounded border border-border-primary bg-white p-3">
             <p class="mb-2 text-sm font-medium">New goods receipt</p>
             @error('formSupplierId') <p class="mb-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
             @error('formLines') <p class="mb-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
@@ -47,7 +47,7 @@
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Purchase order (optional)</span>
-                    <select wire:model.live="formPurchaseOrderId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model.live="formPurchaseOrderId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">—</option>
                         @foreach ($purchaseOrders as $po)
                             <option value="{{ $po->id }}">{{ $po->po_no }}</option>
@@ -56,7 +56,7 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_supplier') }}</span>
-                    <select wire:model="formSupplierId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    <select wire:model="formSupplierId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         <option value="">—</option>
                         @foreach ($suppliers as $supplier)
                             <option value="{{ $supplier->id }}">{{ $supplier->code }} {{ $supplier->name }}</option>
@@ -65,11 +65,11 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_received_on') }}</span>
-                    <input type="date" wire:model="formReceivedOn" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                    <input type="date" wire:model="formReceivedOn" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_delivery_note') }}</span>
-                    <input type="text" wire:model="formDeliveryNoteRef" class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                    <input type="text" wire:model="formDeliveryNoteRef" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
                 </label>
             </div>
 
@@ -88,17 +88,17 @@
                     @foreach ($formLines as $index => $line)
                         <tr wire:key="gr-line-{{ $index }}">
                             <td class="px-1 py-1">
-                                <select wire:model="formLines.{{ $index }}.purchase_order_line_id" class="w-full rounded border border-sand px-1.5 py-1">
+                                <select wire:model="formLines.{{ $index }}.purchase_order_line_id" class="w-full rounded border border-border-primary px-1.5 py-1">
                                     <option value="">—</option>
                                     @foreach ($poLines as $poLine)
                                         <option value="{{ $poLine->id }}">#{{ $poLine->line_no }} {{ $poLine->description }}</option>
                                     @endforeach
                                 </select>
                             </td>
-                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.description" class="w-full rounded border border-sand px-1.5 py-1"/></td>
-                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.qty_received" class="w-16 rounded border border-sand px-1.5 py-1"/></td>
-                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.qty_rejected" class="w-16 rounded border border-sand px-1.5 py-1"/></td>
-                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.rejection_reason" class="w-full rounded border border-sand px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.description" class="w-full rounded border border-border-primary px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.qty_received" class="w-16 rounded border border-border-primary px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.qty_rejected" class="w-16 rounded border border-border-primary px-1.5 py-1"/></td>
+                            <td class="px-1 py-1"><input type="text" wire:model="formLines.{{ $index }}.rejection_reason" class="w-full rounded border border-border-primary px-1.5 py-1"/></td>
                             <td class="px-1 py-1">
                                 <button type="button" wire:click="removeLine({{ $index }})" class="text-heritage-red">✕</button>
                             </td>
@@ -108,7 +108,7 @@
             </table>
 
             <div class="mt-3 flex flex-wrap gap-2">
-                <button type="button" wire:click="addLine" class="rounded border border-sand px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/40">
+                <button type="button" wire:click="addLine" class="rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal hover:bg-sand/40">
                     {{ __('opes.procurement_screen.po_add_line') }}
                 </button>
                 <button type="button" wire:click="save" class="rounded border border-primary bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90">
@@ -122,7 +122,7 @@
         <label for="receipts-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.filter_status') }}</span>
             <select id="receipts-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($statusOptions as $statusOption)
                     <option value="{{ $statusOption }}">{{ $statusOption }}</option>
@@ -145,7 +145,7 @@
     </x-slot:head>
 
     @foreach ($receipts as $receipt)
-        <tr wire:key="receipt-{{ $receipt->id }}" class="border-t border-sand/60 hover:bg-sand/20">
+        <tr wire:key="receipt-{{ $receipt->id }}" class="border-t border-border-primary/60 hover:bg-sand/20">
             <td class="px-3 py-2 font-mono text-sm">{{ $receipt->receipt_no }}</td>
             <td class="px-3 py-2 text-sm">{{ $receipt->supplier_name }}</td>
             <td class="px-3 py-2 font-mono text-sm">{{ $receipt->po_no ?? '—' }}</td>
@@ -174,7 +174,7 @@
 
     <x-slot:cards>
         @foreach ($receipts as $receipt)
-            <article wire:key="receipt-card-{{ $receipt->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="receipt-card-{{ $receipt->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-center justify-between">
                     <span class="font-mono text-sm">{{ $receipt->receipt_no }}</span>
                     <x-status-pill :status="$grTone[$receipt->status] ?? 'amber'" :label="(string) $receipt->status"/>

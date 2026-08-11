@@ -15,7 +15,7 @@
     @endif
 
     @if ($showForm)
-        <section class="rounded border border-sand bg-white p-4"
+        <section class="rounded border border-border-primary bg-white p-4"
                  x-data="{
                     rows: [{ description: '', quantity: '1', estimated_unit_price: 0, expense_account_id: '' }],
                     addRow() { this.rows.push({ description: '', quantity: '1', estimated_unit_price: 0, expense_account_id: '' }); },
@@ -33,10 +33,10 @@
 
             <label class="mb-3 flex max-w-xs flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Needed by</span>
-                <input type="date" wire:model="formNeededBy" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                <input type="date" wire:model="formNeededBy" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
             </label>
 
-            <div class="overflow-x-auto rounded border border-sand">
+            <div class="overflow-x-auto rounded border border-border-primary">
                 <table class="min-w-full text-sm">
                     <thead>
                         <tr class="text-left text-xs text-charcoal/60">
@@ -49,21 +49,21 @@
                     </thead>
                     <tbody>
                         <template x-for="(row, index) in rows" :key="index">
-                            <tr class="border-t border-sand/60">
+                            <tr class="border-t border-border-primary/60">
                                 <td class="px-2 py-1">
                                     <input type="text" x-model="row.description" @keydown.enter.prevent="addRow()"
-                                           class="w-full min-w-[12rem] rounded border border-sand px-2 py-1 text-sm"/>
+                                           class="w-full min-w-[12rem] rounded border border-border-primary px-2 py-1 text-sm"/>
                                 </td>
                                 <td class="px-2 py-1">
                                     <input type="text" inputmode="decimal" x-model="row.quantity"
-                                           class="w-20 rounded border border-sand px-2 py-1 text-right font-mono text-sm"/>
+                                           class="w-20 rounded border border-border-primary px-2 py-1 text-right font-mono text-sm"/>
                                 </td>
                                 <td class="px-2 py-1">
                                     <input type="number" min="0" x-model.number="row.estimated_unit_price"
-                                           class="w-28 rounded border border-sand px-2 py-1 text-right font-mono text-sm"/>
+                                           class="w-28 rounded border border-border-primary px-2 py-1 text-right font-mono text-sm"/>
                                 </td>
                                 <td class="px-2 py-1">
-                                    <select x-model="row.expense_account_id" class="w-40 rounded border border-sand px-2 py-1 text-sm">
+                                    <select x-model="row.expense_account_id" class="w-40 rounded border border-border-primary px-2 py-1 text-sm">
                                         <option value="">—</option>
                                         @foreach ($expenseAccounts as $account)
                                             <option value="{{ $account->id }}">{{ $account->code }} {{ $account->name }}</option>
@@ -84,7 +84,7 @@
 
             <div class="mt-3 flex items-center justify-between">
                 <button type="button" @click="addRow()"
-                        class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
                     {{ __('opes.procurement_screen.po_add_line') }}
                 </button>
 
@@ -94,7 +94,7 @@
                         {{ __('opes.procurement_screen.po_save') }}
                     </button>
                     <button type="button" wire:click="toggleForm"
-                            class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
                         {{ __('opes.ui.cancel') ?? 'Cancel' }}
                     </button>
                 </span>
@@ -132,7 +132,7 @@
         <label for="requisitions-status" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.filter_status') }}</span>
             <select id="requisitions-status" wire:model.live="status"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 @foreach ($statusOptions as $statusOption)
                     <option value="{{ $statusOption }}">{{ str_replace('_', ' ', $statusOption) }}</option>
@@ -144,7 +144,7 @@
             <label for="requisitions-reject-reason" class="flex min-w-[14rem] flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.reject_reason') }}</span>
                 <input id="requisitions-reject-reason" type="text" wire:model="rejectReason"
-                       class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                       class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
             </label>
         @endif
     </x-slot:filters>
@@ -172,7 +172,7 @@
     </x-slot:head>
 
     @foreach ($requisitions as $requisition)
-        <tr wire:key="requisition-{{ $requisition->id }}" class="border-t border-sand/60 hover:bg-sand/20">
+        <tr wire:key="requisition-{{ $requisition->id }}" class="border-t border-border-primary/60 hover:bg-sand/20">
             <td class="px-3 py-2 font-mono text-sm">{{ $requisition->requisition_no }}</td>
             <td class="px-3 py-2 text-sm">{{ $requisition->requested_by_name }}</td>
             <td class="px-3 py-2 text-sm">{{ $requisition->requested_on }}</td>
@@ -212,7 +212,7 @@
 
     <x-slot:cards>
         @foreach ($requisitions as $requisition)
-            <article wire:key="requisition-card-{{ $requisition->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="requisition-card-{{ $requisition->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-center justify-between">
                     <span class="font-mono text-sm">{{ $requisition->requisition_no }}</span>
                     <x-status-pill :status="$reqTone[$requisition->status] ?? 'amber'" :label="str_replace('_', ' ', (string) $requisition->status)"/>

@@ -10,7 +10,7 @@
     @endif
 
     @if ($canManage && $showForm)
-        <section class="rounded border border-sand bg-white p-4" aria-label="{{ __('opes.procurement_screen.supplier_profile') }}">
+        <section class="rounded border border-border-primary bg-white p-4" aria-label="{{ __('opes.procurement_screen.supplier_profile') }}">
             <h2 class="mb-3 text-sm font-semibold text-charcoal">
                 {{ $editingSupplierId === null ? __('opes.procurement_screen.suppliers_title') : __('opes.procurement_screen.supplier_profile') }}
             </h2>
@@ -26,11 +26,11 @@
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_name') }}</span>
-                    <input type="text" wire:model="formName" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                    <input type="text" wire:model="formName" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.detail_type') }}</span>
-                    <select wire:model="formSupplierType" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="formSupplierType" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         @foreach ($supplierTypes as $type)
                             <option value="{{ $type }}">{{ str_replace('_', ' ', $type) }}</option>
                         @endforeach
@@ -38,11 +38,11 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_niu') }}</span>
-                    <input type="text" wire:model="formNiu" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                    <input type="text" wire:model="formNiu" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.detail_regime') }}</span>
-                    <select wire:model="formRegimeFiscal" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="formRegimeFiscal" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="">—</option>
                         @foreach ($regimeFiscalOptions as $regime)
                             <option value="{{ $regime }}">{{ str_replace('_', ' ', $regime) }}</option>
@@ -51,7 +51,7 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.detail_payable_account') }}</span>
-                    <select wire:model="formPayableAccountId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="formPayableAccountId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="">—</option>
                         @foreach ($payableAccounts as $account)
                             <option value="{{ $account->id }}">{{ $account->code }} — {{ $account->name }}</option>
@@ -60,7 +60,7 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_category') }}</span>
-                    <select wire:model="formCategoryId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+                    <select wire:model="formCategoryId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                         <option value="">—</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -69,15 +69,15 @@
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.detail_payment_terms') }}</span>
-                    <input type="number" min="0" wire:model="formPaymentTermsDays" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                    <input type="number" min="0" wire:model="formPaymentTermsDays" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.col_phone') }}</span>
-                    <input type="text" wire:model="formPhone" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                    <input type="text" wire:model="formPhone" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Email</span>
-                    <input type="email" wire:model="formEmail" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                    <input type="email" wire:model="formEmail" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
                 </label>
             </div>
 
@@ -87,7 +87,7 @@
                     {{ __('opes.ui.save') ?? 'Save' }}
                 </button>
                 <button type="button" wire:click="toggleForm"
-                        class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
                     {{ __('opes.ui.cancel') ?? 'Cancel' }}
                 </button>
             </div>
@@ -99,7 +99,7 @@
             <p class="mb-2 text-sm text-charcoal">Archive this supplier?</p>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Reason (optional)</span>
-                <input type="text" wire:model="archiveReason" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+                <input type="text" wire:model="archiveReason" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
             </label>
             @error('archiveReason') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
             <div class="mt-2 flex items-center gap-2">
@@ -108,7 +108,7 @@
                     {{ __('opes.procurement_screen.state_archived') }}
                 </button>
                 <button type="button" wire:click="cancelArchive"
-                        class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
                     {{ __('opes.ui.cancel') ?? 'Cancel' }}
                 </button>
             </div>
@@ -152,13 +152,13 @@
         <label for="suppliers-search" class="flex min-w-[14rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.suppliers_search') }}</span>
             <input id="suppliers-search" type="search" wire:model.live.debounce.300ms="search"
-                   class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal"/>
+                   class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
 
         <label for="suppliers-state" class="flex min-w-[10rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.filter_state') }}</span>
             <select id="suppliers-state" wire:model.live="state"
-                    class="rounded border border-sand bg-white px-2 py-1.5 text-sm text-charcoal">
+                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
                 <option value="active">{{ __('opes.procurement_screen.state_active') }}</option>
                 <option value="archived">{{ __('opes.procurement_screen.state_archived') }}</option>
@@ -179,7 +179,7 @@
     </x-slot:head>
 
     @foreach ($suppliers as $supplier)
-        <tr wire:key="supplier-{{ $supplier->id }}" class="border-t border-sand/60 hover:bg-sand/20">
+        <tr wire:key="supplier-{{ $supplier->id }}" class="border-t border-border-primary/60 hover:bg-sand/20">
             <td class="px-3 py-2 font-mono text-sm">
                 <a href="{{ url('/procurement/suppliers/'.$supplier->id) }}" class="text-primary hover:underline">{{ $supplier->code }}</a>
             </td>
@@ -200,7 +200,7 @@
                 <td class="px-3 py-2 text-sm">
                     <span class="inline-flex gap-1">
                         <button type="button" wire:click="editSupplier({{ $supplier->id }})"
-                                class="rounded border border-sand px-2 py-1 text-xs text-charcoal hover:bg-sand/40">
+                                class="rounded border border-border-primary px-2 py-1 text-xs text-charcoal hover:bg-sand/40">
                             {{ __('opes.ui.edit') ?? 'Edit' }}
                         </button>
                         @if (! $supplier->is_archived)
@@ -217,7 +217,7 @@
 
     <x-slot:cards>
         @foreach ($suppliers as $supplier)
-            <article wire:key="supplier-card-{{ $supplier->id }}" class="rounded border border-sand bg-white p-3">
+            <article wire:key="supplier-card-{{ $supplier->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-center justify-between">
                     <a href="{{ url('/procurement/suppliers/'.$supplier->id) }}" class="font-mono text-sm text-primary">{{ $supplier->code }}</a>
                     @if ($supplier->is_archived)

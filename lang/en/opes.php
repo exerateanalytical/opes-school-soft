@@ -1871,6 +1871,13 @@ return [
 
     // Phase 12 (docs/plans/phase-12-13.md 12.4): personal access token
     // management at /users/{user}/tokens.
+    // The guardian mobile API's own user-facing strings
+    // (docs/specs/2026-08-11-guardian-mobile-api-v1.md §6). Localised because
+    // the app renders them verbatim to a parent, in their own language.
+    'api' => [
+        'idempotency_conflict' => 'This request was already sent with different content.',
+    ],
+
     'api_tokens' => [
         'title' => 'API tokens',
         'create_title' => 'Issue a new token',

@@ -31,7 +31,7 @@
         </x-kpi-card>
     </div>
 
-    <section class="rounded border border-sand bg-white p-4">
+    <section class="rounded border border-border-primary bg-white p-4">
         <div class="mb-2 flex items-baseline justify-between">
             <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.payables_dashboard.aged_title') }}</h2>
             <p class="text-xs text-charcoal/60">{{ __('opes.payables_dashboard.aged_axis', ['axis' => $aged['axis'], 'as_of' => $aged['as_of']]) }}</p>
@@ -41,7 +41,7 @@
             <p class="text-sm text-charcoal/60">{{ __('opes.payables_dashboard.aged_empty') }}</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full divide-y divide-sand text-sm">
+                <table class="w-full divide-y divide-border-primary text-sm">
                     <thead>
                         <tr class="text-left text-xs uppercase tracking-wide text-charcoal/60">
                             <th class="px-2 py-1 text-left">{{ __('opes.payables_dashboard.col_supplier') }}</th>
@@ -53,7 +53,7 @@
                             <th class="px-2 py-1 text-right">{{ __('opes.payables_dashboard.col_total') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-sand">
+                    <tbody class="divide-y divide-border-primary">
                         @foreach ($aged['rows'] as $row)
                             <tr wire:key="aged-{{ $row->supplier_id }}">
                                 <td class="px-2 py-1">{{ $row->supplier_name }}</td>
@@ -65,7 +65,7 @@
                                 <td class="px-2 py-1 text-right font-mono font-semibold">{{ number_format($row->total, 0, ',', ' ') }}</td>
                             </tr>
                         @endforeach
-                        <tr class="border-t-2 border-sand">
+                        <tr class="border-t-2 border-border-primary">
                             <td class="px-2 py-1 font-semibold">{{ __('opes.payables_dashboard.col_total') }}</td>
                             <td class="px-2 py-1 text-right font-mono font-semibold">{{ number_format($agedTotals['current'], 0, ',', ' ') }}</td>
                             <td class="px-2 py-1 text-right font-mono font-semibold">{{ number_format($agedTotals['days_1_30'], 0, ',', ' ') }}</td>
@@ -81,7 +81,7 @@
     </section>
 
     <div class="grid gap-4 lg:grid-cols-2">
-        <section class="rounded border border-sand bg-white p-4">
+        <section class="rounded border border-border-primary bg-white p-4">
             <h2 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.payables_dashboard.exceptions_title') }}</h2>
             <ul class="space-y-1 text-sm">
                 <li class="flex justify-between">
@@ -102,7 +102,7 @@
             @endforeach
         </section>
 
-        <section class="rounded border border-sand bg-white p-4">
+        <section class="rounded border border-border-primary bg-white p-4">
             <h2 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.payables_dashboard.commitments_title') }}</h2>
             @if ($commitments['rows'] === [])
                 <p class="text-sm text-charcoal/60">{{ __('opes.payables_dashboard.commitments_empty') }}</p>

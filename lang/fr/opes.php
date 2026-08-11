@@ -1866,6 +1866,10 @@ return [
 
     // Phase 12 (docs/plans/phase-12-13.md 12.4) : gestion des jetons d'accès
     // personnels à /users/{user}/tokens.
+    'api' => [
+        'idempotency_conflict' => 'Cette requête a déjà été envoyée avec un contenu différent.',
+    ],
+
     'api_tokens' => [
         'title' => 'Jetons API',
         'create_title' => 'Émettre un nouveau jeton',

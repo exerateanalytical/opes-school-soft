@@ -29,7 +29,7 @@
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label class="flex flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.po_supplier') }}</span>
-            <select wire:model="supplierId" class="rounded border border-sand bg-white px-2 py-1.5 text-sm">
+            <select wire:model="supplierId" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm">
                 <option value="">—</option>
                 @foreach ($suppliers as $supplier)
                     <option value="{{ $supplier->id }}">{{ $supplier->code }} — {{ $supplier->name }}</option>
@@ -39,11 +39,11 @@
 
         <label class="flex flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.procurement_screen.po_order_date') }}</span>
-            <input type="date" wire:model="orderDate" class="rounded border border-sand bg-white px-2 py-1.5 text-sm"/>
+            <input type="date" wire:model="orderDate" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm"/>
         </label>
     </div>
 
-    <div class="overflow-x-auto rounded border border-sand bg-white">
+    <div class="overflow-x-auto rounded border border-border-primary bg-white">
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="text-left text-xs text-charcoal/60">
@@ -57,25 +57,25 @@
             </thead>
             <tbody>
                 <template x-for="(row, index) in rows" :key="index">
-                    <tr class="border-t border-sand/60">
+                    <tr class="border-t border-border-primary/60">
                         <td class="px-2 py-1">
                             <input type="text" x-model="row.description" @keydown.enter.prevent="addRow()"
-                                   class="w-full min-w-[12rem] rounded border border-sand px-2 py-1 text-sm"/>
+                                   class="w-full min-w-[12rem] rounded border border-border-primary px-2 py-1 text-sm"/>
                         </td>
                         <td class="px-2 py-1">
                             <input type="text" inputmode="decimal" x-model="row.quantity"
-                                   class="w-20 rounded border border-sand px-2 py-1 text-right font-mono text-sm"/>
+                                   class="w-20 rounded border border-border-primary px-2 py-1 text-right font-mono text-sm"/>
                         </td>
                         <td class="px-2 py-1">
                             <input type="number" min="0" x-model.number="row.unit_price_ht"
-                                   class="w-28 rounded border border-sand px-2 py-1 text-right font-mono text-sm"/>
+                                   class="w-28 rounded border border-border-primary px-2 py-1 text-right font-mono text-sm"/>
                         </td>
                         <td class="px-2 py-1">
                             <input type="number" min="0" max="10000" x-model.number="row.discount_rate_bp"
-                                   class="w-24 rounded border border-sand px-2 py-1 text-right font-mono text-sm"/>
+                                   class="w-24 rounded border border-border-primary px-2 py-1 text-right font-mono text-sm"/>
                         </td>
                         <td class="px-2 py-1">
-                            <select x-model="row.expense_account_id" class="w-40 rounded border border-sand px-2 py-1 text-sm">
+                            <select x-model="row.expense_account_id" class="w-40 rounded border border-border-primary px-2 py-1 text-sm">
                                 <option value="">—</option>
                                 @foreach ($expenseAccounts as $account)
                                     <option value="{{ $account->id }}">{{ $account->code }} {{ $account->name }}</option>
@@ -96,7 +96,7 @@
 
     <div class="flex items-center justify-between">
         <button type="button" @click="addRow()"
-                class="rounded border border-sand px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
+                class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal hover:bg-sand/40">
             {{ __('opes.procurement_screen.po_add_line') }}
         </button>
 

@@ -20,11 +20,11 @@
 
     @if ($invoiceModel === null)
         {{-- ── Capture form ─────────────────────────────────────────── --}}
-        <section class="rounded border border-sand bg-white p-4">
+        <section class="rounded border border-border-primary bg-white p-4">
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <label class="flex flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.supplier') }}</span>
-                    <select wire:model="supplierId" class="rounded border border-sand px-2 py-1.5">
+                    <select wire:model="supplierId" class="rounded border border-border-primary px-2 py-1.5">
                         <option value="">—</option>
                         @foreach ($suppliers as $supplier)
                             <option value="{{ $supplier->id }}">{{ $supplier->code }} · {{ $supplier->name }}</option>
@@ -33,19 +33,19 @@
                 </label>
                 <label class="flex flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.supplier_invoice_no') }}</span>
-                    <input type="text" wire:model="supplierInvoiceNo" class="rounded border border-sand px-2 py-1.5"/>
+                    <input type="text" wire:model="supplierInvoiceNo" class="rounded border border-border-primary px-2 py-1.5"/>
                 </label>
                 <label class="flex flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.invoice_date') }}</span>
-                    <input type="date" wire:model="invoiceDate" class="rounded border border-sand px-2 py-1.5"/>
+                    <input type="date" wire:model="invoiceDate" class="rounded border border-border-primary px-2 py-1.5"/>
                 </label>
                 <label class="flex flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.due_date') }}</span>
-                    <input type="date" wire:model="dueDate" class="rounded border border-sand px-2 py-1.5"/>
+                    <input type="date" wire:model="dueDate" class="rounded border border-border-primary px-2 py-1.5"/>
                 </label>
                 <label class="flex flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.purchase_order') }}</span>
-                    <input type="text" inputmode="numeric" wire:model="purchaseOrderId" class="rounded border border-sand px-2 py-1.5" placeholder="PO id"/>
+                    <input type="text" inputmode="numeric" wire:model="purchaseOrderId" class="rounded border border-border-primary px-2 py-1.5" placeholder="PO id"/>
                 </label>
             </div>
 
@@ -65,13 +65,13 @@
                     </thead>
                     <tbody>
                         @foreach ($rows as $index => $row)
-                            <tr wire:key="row-{{ $index }}" class="border-t border-sand/60">
-                                <td class="px-2 py-1"><input type="text" wire:model="rows.{{ $index }}.description" class="w-full rounded border border-sand px-2 py-1"/></td>
-                                <td class="px-2 py-1"><input type="text" inputmode="decimal" wire:model="rows.{{ $index }}.quantity" class="w-20 rounded border border-sand px-2 py-1"/></td>
-                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.unit_price_ht" class="w-28 rounded border border-sand px-2 py-1"/></td>
-                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.discount_rate_bp" class="w-20 rounded border border-sand px-2 py-1"/></td>
+                            <tr wire:key="row-{{ $index }}" class="border-t border-border-primary/60">
+                                <td class="px-2 py-1"><input type="text" wire:model="rows.{{ $index }}.description" class="w-full rounded border border-border-primary px-2 py-1"/></td>
+                                <td class="px-2 py-1"><input type="text" inputmode="decimal" wire:model="rows.{{ $index }}.quantity" class="w-20 rounded border border-border-primary px-2 py-1"/></td>
+                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.unit_price_ht" class="w-28 rounded border border-border-primary px-2 py-1"/></td>
+                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.discount_rate_bp" class="w-20 rounded border border-border-primary px-2 py-1"/></td>
                                 <td class="px-2 py-1">
-                                    <select wire:model="rows.{{ $index }}.tax_code_id" class="w-32 rounded border border-sand px-2 py-1">
+                                    <select wire:model="rows.{{ $index }}.tax_code_id" class="w-32 rounded border border-border-primary px-2 py-1">
                                         <option value="">—</option>
                                         @foreach ($taxCodes as $taxCode)
                                             <option value="{{ $taxCode->id }}">{{ $taxCode->code }}</option>
@@ -79,14 +79,14 @@
                                     </select>
                                 </td>
                                 <td class="px-2 py-1">
-                                    <select wire:model="rows.{{ $index }}.expense_account_id" class="w-40 rounded border border-sand px-2 py-1">
+                                    <select wire:model="rows.{{ $index }}.expense_account_id" class="w-40 rounded border border-border-primary px-2 py-1">
                                         <option value="">—</option>
                                         @foreach ($accounts as $account)
                                             <option value="{{ $account->id }}">{{ $account->code }} {{ $account->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.purchase_order_line_id" class="w-20 rounded border border-sand px-2 py-1"/></td>
+                                <td class="px-2 py-1"><input type="text" inputmode="numeric" wire:model="rows.{{ $index }}.purchase_order_line_id" class="w-20 rounded border border-border-primary px-2 py-1"/></td>
                                 <td class="px-2 py-1">
                                     <button type="button" wire:click="removeRow({{ $index }})" class="text-badge-red hover:underline">{{ __('opes.supplier_invoice_screen.remove_line') }}</button>
                                 </td>
@@ -97,13 +97,13 @@
             </div>
 
             <div class="mt-3 flex items-center gap-3">
-                <button type="button" wire:click="addRow" class="rounded border border-sand px-3 py-1.5 text-sm hover:bg-sand/30">{{ __('opes.supplier_invoice_screen.add_line') }}</button>
+                <button type="button" wire:click="addRow" class="rounded border border-border-primary px-3 py-1.5 text-sm hover:bg-sand/30">{{ __('opes.supplier_invoice_screen.add_line') }}</button>
                 <button type="button" wire:click="save" class="rounded bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">{{ __('opes.supplier_invoice_screen.save') }}</button>
             </div>
         </section>
     @else
         {{-- ── Captured invoice: match + tax panels ─────────────────── --}}
-        <section class="rounded border border-sand bg-white p-4">
+        <section class="rounded border border-border-primary bg-white p-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="font-mono text-lg">{{ $invoiceModel->internal_no }}</h2>
                 <div class="flex items-center gap-2 text-sm">
@@ -123,7 +123,7 @@
             </dl>
         </section>
 
-        <section class="rounded border border-sand bg-white p-4">
+        <section class="rounded border border-border-primary bg-white p-4">
             <h3 class="text-sm font-semibold text-charcoal">{{ __('opes.supplier_invoice_screen.panel_lines') }}</h3>
             <div class="mt-2 overflow-x-auto">
                 <table class="w-full min-w-[64rem] text-sm">
@@ -143,7 +143,7 @@
                     </thead>
                     <tbody>
                         @foreach ($invoiceLines as $line)
-                            <tr wire:key="line-{{ $line->line_no }}" class="border-t border-sand/60 {{ $line->match_status === 'exception' ? 'bg-badge-red/5' : '' }}">
+                            <tr wire:key="line-{{ $line->line_no }}" class="border-t border-border-primary/60 {{ $line->match_status === 'exception' ? 'bg-badge-red/5' : '' }}">
                                 <td class="px-2 py-1.5">{{ $line->line_no }}</td>
                                 <td class="px-2 py-1.5">{{ $line->description }}</td>
                                 <td class="px-2 py-1.5 text-right font-mono">{{ number_format((int) $line->amount_ht, 0, ',', ' ') }}</td>
@@ -171,11 +171,11 @@
             </div>
         </section>
 
-        <section class="flex flex-wrap items-end gap-3 rounded border border-sand bg-white p-4">
+        <section class="flex flex-wrap items-end gap-3 rounded border border-border-primary bg-white p-4">
             @if ($invoiceModel->status->value === 'match_exception')
                 <label class="flex min-w-[18rem] flex-col gap-1 text-sm">
                     <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.override_reason') }}</span>
-                    <input type="text" wire:model="overrideReason" class="rounded border border-sand px-2 py-1.5"/>
+                    <input type="text" wire:model="overrideReason" class="rounded border border-border-primary px-2 py-1.5"/>
                 </label>
                 <button type="button" wire:click="overrideMatch" class="rounded border border-badge-orange px-3 py-1.5 text-sm text-badge-orange hover:bg-badge-orange/10">
                     {{ __('opes.supplier_invoice_screen.override_match') }}
@@ -186,13 +186,13 @@
                 @if ($invoiceModel->match_status->value === 'not_required')
                     <label class="flex min-w-[16rem] flex-col gap-1 text-sm">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.unmatched_reason') }}</span>
-                        <input type="text" wire:model="unmatchedReason" class="rounded border border-sand px-2 py-1.5"/>
+                        <input type="text" wire:model="unmatchedReason" class="rounded border border-border-primary px-2 py-1.5"/>
                     </label>
                 @endif
                 @if ($invoiceModel->withholding_unresolved)
                     <label class="flex min-w-[16rem] flex-col gap-1 text-sm">
                         <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_invoice_screen.waive_reason') }}</span>
-                        <input type="text" wire:model="waiveReason" class="rounded border border-sand px-2 py-1.5"/>
+                        <input type="text" wire:model="waiveReason" class="rounded border border-border-primary px-2 py-1.5"/>
                     </label>
                 @endif
                 <button type="button" wire:click="approve" class="rounded bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
