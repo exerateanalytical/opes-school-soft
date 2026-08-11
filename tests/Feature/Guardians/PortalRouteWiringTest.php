@@ -116,6 +116,47 @@ it('registers every child-scoped tab', function () {
     }
 });
 
+it('links to every portal screen from somewhere', function () {
+    /*
+     * A screen nothing links to is a screen no parent can reach.
+     * `portal.children.meeting` shipped in exactly that state - routed,
+     * tested, and orphaned - which no other test in this suite would have
+     * caught, because they all navigate by route name rather than by
+     * following what the UI actually offers.
+     */
+    $viewPath = resource_path('views/livewire/guardians/portal');
+    $layout = resource_path('views/layouts/portal.blade.php');
+
+    $corpus = '';
+
+    foreach (array_merge(glob($viewPath.DIRECTORY_SEPARATOR.'*.blade.php') ?: [], [$layout]) as $file) {
+        $corpus .= (string) file_get_contents($file);
+    }
+
+    // The dashboard is the portal's entry point and is linked from the shell
+    // itself; the thread detail is reached with a runtime id from the inbox.
+    $reachedElsewhere = ['portal.dashboard', 'portal.messages.thread'];
+
+    $orphans = [];
+
+    foreach (Route::getRoutes() as $route) {
+        $name = $route->getName();
+
+        if ($name === null
+            || ! str_starts_with($name, 'portal.')
+            || $name === 'portal.staff'
+            || in_array($name, $reachedElsewhere, true)) {
+            continue;
+        }
+
+        if (! str_contains($corpus, "'".$name."'")) {
+            $orphans[] = $name;
+        }
+    }
+
+    expect($orphans)->toBe([]);
+});
+
 it('registers every account-area screen', function () {
     foreach ([
         'portal.account',

@@ -1905,6 +1905,11 @@ return [
 
     // Phase 12 (docs/plans/phase-12-13.md 12.2): the guardian portal's own
     // minimal shell and its five per-child screens.
+    'errors' => [
+        'forbidden_title' => 'You do not have access to this page',
+        'forbidden_body' => 'If you believe this is a mistake, ask an administrator to check your role.',
+    ],
+
     'guardian_portal' => [
         'brand_title' => 'Guardian Portal',
         'brand_suffix' => 'Family Portal',
@@ -2066,6 +2071,8 @@ return [
         'account_school_managed' => 'Only the school can change these details. Contact the office if something is wrong.',
         'account_saved' => 'Your details have been saved.',
         'account_save' => 'Save changes',
+        'denied_title' => 'Your school has not shared this with you',
+        'denied_body' => 'This part of the portal is opened per guardian, per child, by the school office. Nothing has gone wrong — contact the office if you believe you should have access.',
 
         // Phase 12-P3b: the account area, built to mobile/parent-profile.png
         // and mobile/account-settings.png.

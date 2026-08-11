@@ -75,5 +75,22 @@
                 @endif
             </div>
         @endif
+
+        {{-- Row 27. Offered only when the guardian holds it, for the same
+             reason the tab strip filters. This is also the ONLY way in: the
+             meeting route had no link anywhere, so the screen existed but was
+             unreachable. --}}
+        @if (app(\App\Modules\Guardians\Policies\GuardianPortalPolicy::class)
+                ->allows(\App\Modules\Guardians\Domain\GuardianCapability::R27RequestGuardianMeeting, $studentId))
+            <div class="rounded border border-border-primary bg-surface-green p-4 sm:col-span-2">
+                <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.guardian_portal.meeting_title') }}</h2>
+                <p class="mt-1 text-sm text-charcoal/70">{{ __('opes.guardian_portal.meeting_intro') }}</p>
+
+                <a href="{{ route('portal.children.meeting', $studentId) }}"
+                   class="mt-3 inline-block rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
+                    {{ __('opes.guardian_portal.meeting_submit') }}
+                </a>
+            </div>
+        @endif
     </div>
 </div>

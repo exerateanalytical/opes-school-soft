@@ -1897,6 +1897,11 @@ return [
 
     // Phase 12 (docs/plans/phase-12-13.md 12.2) : le portail parent, son
     // habillage minimal propre et ses cinq écrans par enfant.
+    'errors' => [
+        'forbidden_title' => 'Vous n\'avez pas acces a cette page',
+        'forbidden_body' => 'Si vous pensez qu\'il s\'agit d\'une erreur, demandez a un administrateur de verifier votre role.',
+    ],
+
     'guardian_portal' => [
         'brand_title' => 'Portail Parent',
         'brand_suffix' => 'Portail Famille',
@@ -2058,6 +2063,8 @@ return [
         'account_school_managed' => 'Seule l\'école peut modifier ces informations. Contactez le secrétariat en cas d\'erreur.',
         'account_saved' => 'Vos coordonnées ont été enregistrées.',
         'account_save' => 'Enregistrer',
+        'denied_title' => 'Votre ecole ne partage pas cette rubrique avec vous',
+        'denied_body' => 'Cette partie du portail est ouverte par le secretariat, pour chaque tuteur et chaque enfant. Rien n\'est en panne — contactez le secretariat si vous pensez devoir y acceder.',
 
         // Phase 12-P3b : l'espace compte, construit d'apres
         // mobile/parent-profile.png et mobile/account-settings.png.

@@ -41,6 +41,29 @@
 
             <div class="flex items-center gap-3 text-sm">
                 @if ($portalUser !== null)
+                    @php
+                        // The bell is the only way into the notifications feed
+                        // - it had no link at all before, so the screen was
+                        // routed but unreachable.
+                        $portalUnread = app(\App\Modules\Guardians\Support\Portal\GuardianInbox::class)
+                            ->unreadNotificationCount((int) $portalUser->getKey());
+                    @endphp
+
+                    <a href="{{ route('portal.notifications') }}"
+                       class="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
+                       aria-label="{{ __('opes.guardian_portal.notifications_title') }}">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+
+                        @if ($portalUnread > 0)
+                            <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-heritage-red px-1 text-[10px] font-bold text-white">
+                                {{ $portalUnread > 99 ? '99+' : $portalUnread }}
+                            </span>
+                        @endif
+                    </a>
+
                     <span class="hidden sm:inline text-white/85">{{ $portalUser->name }}</span>
                 @endif
 
