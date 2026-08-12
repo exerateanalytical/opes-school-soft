@@ -70,8 +70,13 @@ Two architectural principles the proposals stressed are **already honoured**:
 | 6 | **School setup wizard** | `SchoolProfile` is a single `Setting` model | The structures it would configure already exist; this is a guided wizard over them, not new subsystems |
 | 7 | **Receipt format family & payment state machine** | Receipt exists; format variants do not | A4 / A5 / half-A4 / 80mm / 58mm as **separate templates**, plus explicit payment states rather than paid yes/no |
 | 8 | **Recurring journals** | No model or action | Only genuine Layer-1 accounting gap |
+| 9 | **Boarding roll call** | No `RollCall` model | `Hostel`/`Room`/`Bed`/`Allocation`/`Inspection` all exist; the recurring residence roll call — and its unaccounted-student alert — does not |
+| 10 | **Student leave / off-campus permission** | No `StudentLeave` or `HostelLeave` | Staff leave is fully built (`LeaveType`/`Request`/`Accrual`); the *student* boarding equivalent, with parent authorisation and late-return alerting, is absent |
+| 11 | **Meal management** | No `Meal` model | Meal counts, dietary flags, dining attendance |
 
-**Roughly eight real items out of ~1,200 proposed.**
+**Roughly eleven real items out of ~1,500 proposed across 21 module designs.**
+
+Modules 23–26 (boarding, inventory, HR/payroll, accounting) added only rows 9–11. Everything else in them was already built: `VisitorLog`, `HostelInspection`, `StockTake`, asset maintenance requests, `SalaryGrade`, `PayrollRun`, and the entire accounting engine.
 
 ### 2.3 Deliberately not gaps
 
