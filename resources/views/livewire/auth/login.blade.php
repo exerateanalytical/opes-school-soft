@@ -85,10 +85,13 @@
                 bg-[radial-gradient(130%_110%_at_42%_18%,#0F4630_0%,#0A3121_42%,#041D12_100%)]"
          aria-hidden="true"></div>
 
-    {{-- The motif washes faintly across the whole field, not just the margin -
-         in the reference it is visible behind the headline too. --}}
-    <div class="pointer-events-none absolute inset-0 text-portal-gold opacity-[0.07]" aria-hidden="true">
-        <x-portal.motif scale="90" opacity="1"/>
+    {{-- A whisper of the motif across the field. It was at 0.07 with a 90px
+         tile, which rendered as a busy lattice of large diamonds over the
+         whole page - the reference's field is essentially CLEAN, carrying the
+         weave only in the left margin and the footer course. Halved and
+         finer, it now reads as texture rather than pattern. --}}
+    <div class="pointer-events-none absolute inset-0 text-portal-gold opacity-[0.035]" aria-hidden="true">
+        <x-portal.motif scale="64" opacity="1"/>
     </div>
 
     {{-- The dense left margin band. --}}
@@ -123,32 +126,57 @@
                  is what produces the reference's single sweeping arc down the
                  photograph's left side. --}}
             <img src="{{ asset('images/login-hero.jpg') }}" alt=""
-                 class="h-full w-full object-cover object-top [clip-path:ellipse(88%_128%_at_100%_50%)]">
+                 class="h-full w-full object-cover object-top [clip-path:ellipse(88%_90%_at_100%_50%)]">
         @endif
 
         {{-- The arc itself, drawn whether or not the photograph is there. --}}
         <svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100" fill="none"
              preserveAspectRatio="none">
-            <ellipse cx="100" cy="50" rx="88" ry="128" stroke="var(--color-portal-gold)" stroke-width="1.6"
+            {{-- ry 90, not 128. At 128 the ellipse is so tall that the arc
+                 reads as a straight vertical line over a 1024px viewport - it
+                 bulged 40px where the reference sweeps about 100. Shortening
+                 the vertical radius is what puts the curve back. --}}
+            <ellipse cx="100" cy="50" rx="88" ry="90" stroke="var(--color-portal-gold)" stroke-width="1.6"
                      vector-effect="non-scaling-stroke" opacity="0.9"/>
-            <ellipse cx="103" cy="50" rx="88" ry="128" stroke="var(--color-portal-gold)" stroke-width="0.6"
+            <ellipse cx="103" cy="50" rx="88" ry="90" stroke="var(--color-portal-gold)" stroke-width="0.6"
                      vector-effect="non-scaling-stroke" opacity="0.35"/>
         </svg>
 
         {{-- A green veil where the photograph meets the brand column, so the
-             headline keeps its contrast. --}}
-        <div class="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-portal-green via-portal-green/70 to-transparent"></div>
+             headline keeps its contrast.
+
+             ONLY when there is a photograph. Painted unconditionally it laid
+             flat #012A17 over the radial field, and because the two greens
+             differ at that point it drew a hard vertical seam straight down
+             the page - a line the reference does not have, and the most
+             visible flaw in the render. With no photograph there is nothing
+             to veil. --}}
+        @if ($hasHero)
+            <div class="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-portal-green via-portal-green/70 to-transparent"></div>
+        @endif
     </div>
 
     {{-- ===================================================== CONTENT === --}}
+    {{-- `lg:items-stretch`, not `items-center`. In the reference the brand
+         column SPANS the viewport - crest at the top edge, contact strip at
+         the foot - and centring it as a block instead floated the whole
+         column into the middle and pushed the contact strip off the bottom of
+         the page. The card is centred within its own column below. --}}
     <div class="relative z-10 mx-auto flex min-h-screen w-full max-w-[94rem] flex-col justify-center gap-10
-                px-5 py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-[4.25rem]">
+                px-5 py-10 lg:flex-row lg:items-stretch lg:justify-between lg:gap-10 lg:px-[4.25rem]">
 
         {{-- ------------------------------------------ brand column (lg+) -- --}}
-        <div class="hidden min-w-0 shrink-0 lg:block">
+        <div class="hidden min-w-0 shrink-0 lg:flex lg:flex-col lg:justify-between">
+            {{-- TWO groups, not three. In the reference the crest, headline,
+                 rule, body and tiles are one CONTINUOUS block running from the
+                 top edge down, with only the contact strip pushed to the foot.
+                 Spacing the crest apart from the headline as its own group
+                 opened a gap the design does not have. --}}
+            <div>
             <x-portal.crest-mark size="xl" on="dark" class="text-white"/>
 
-            <h1 class="mt-9 font-serif text-[1.75rem] font-bold uppercase leading-[1.38] tracking-[0.01em] text-white">
+            <div class="mt-9">
+            <h1 class="font-serif text-[1.75rem] font-bold uppercase leading-[1.38] tracking-[0.01em] text-white">
                 {{ __('opes.auth.hero_line_one') }}<br>
                 {{ __('opes.auth.hero_line_two') }}<br>
                 {{ __('opes.auth.hero_line_three') }}<br>
@@ -193,10 +221,12 @@
                         </span>
                     </span>
                 </div>
-            </div>
+            </div>{{-- tiles grid --}}
+            </div>{{-- headline + rule + body + tiles --}}
+            </div>{{-- top group: crest through tiles --}}
 
             {{-- ------------------------------------------------ contact -- --}}
-            <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.8rem] text-white/80">
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.8rem] text-white/80">
                 <span class="flex items-center gap-2">
                     <x-portal.icon name="pin" bare size="sm" class="text-portal-gold"/>
                     {{ config('opes.vendor.city') }}
@@ -222,9 +252,11 @@
         {{-- `pb-10` on the wrapper leaves the trust bar room to sit beneath the
              card while overlapping its lower corner, as it does in the
              reference. --}}
-        <div class="relative mx-auto w-full max-w-[33rem] shrink-0 lg:mx-0">
+        {{-- `justify-center` centres the card in its own full-height column,
+             which is what the stretched row above gives up. --}}
+        <div class="relative mx-auto flex w-full max-w-[33rem] shrink-0 flex-col justify-center lg:mx-0">
 
-            <div class="relative rounded-[1.6rem] border border-white/60 bg-white/90 px-6 pb-9 pt-12
+            <div class="relative rounded-[1.6rem] border border-white/60 bg-white/90 px-6 pb-10 pt-14
                         shadow-[0_45px_120px_-25px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:px-[2.5rem]">
 
                 {{-- The specular sheen across the card's crown. --}}
@@ -241,9 +273,9 @@
                 </span>
 
                 <div class="relative flex flex-col items-center text-center">
-                    <x-portal.crest-mark size="md" on="light" class="text-portal-green"/>
+                    <x-portal.crest-mark size="lg" on="light" class="text-portal-green"/>
 
-                    <h2 class="mt-4 text-[1.85rem] font-bold leading-none text-portal-green">
+                    <h2 class="mt-5 text-[1.85rem] font-bold leading-none text-portal-green">
                         {{ __('opes.auth.welcome_back') }}
                     </h2>
 
@@ -266,14 +298,32 @@
                     </div>
                 @endif
 
-                <form wire:submit="authenticate" class="relative mt-7 space-y-4" novalidate>
+                <form wire:submit="authenticate" class="relative mt-8 space-y-5" novalidate>
                     <div>
                         <label for="email" class="mb-2.5 block text-[0.88rem] font-semibold text-charcoal">
                             {{ __('opes.auth.credential') }}
                         </label>
 
                         <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 flex w-[3.1rem] items-center
+                            {{--
+                                `z-10` IS LOAD-BEARING here, not tidiness.
+
+                                `backdrop-blur` on the input below creates a
+                                stacking context, promoting the input into the
+                                positioned-descendant paint layer at z-0. This
+                                icon is absolutely positioned at z-auto and
+                                comes FIRST in the DOM, so without the lift the
+                                input paints over it and its own bg-white/70
+                                veils the glyph. The icons rendered as pale
+                                ghosts while their computed colours were
+                                perfectly correct - which is why reading the
+                                CSS proved nothing and only looking at the
+                                pixels found it.
+
+                                Any glass surface with an icon laid over it
+                                needs the same lift.
+                            --}}
+                            <span class="pointer-events-none absolute inset-y-0 left-0 z-10 flex w-[3.1rem] items-center
                                          justify-center text-portal-green/45">
                                 <x-portal.icon name="user" bare size="md"/>
                             </span>
@@ -301,7 +351,7 @@
                         </div>
 
                         <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 flex w-[3.1rem] items-center
+                            <span class="pointer-events-none absolute inset-y-0 left-0 z-10 flex w-[3.1rem] items-center
                                          justify-center text-portal-green/70">
                                 <x-portal.icon name="lock" bare size="md"/>
                             </span>
@@ -331,13 +381,13 @@
                 </form>
 
                 {{-- The shield-on-a-rule divider. --}}
-                <div class="relative mt-7 flex items-center gap-4" aria-hidden="true">
+                <div class="relative mt-8 flex items-center gap-4" aria-hidden="true">
                     <span class="h-px flex-1 bg-portal-gold/55"></span>
                     <x-portal.icon name="shield" bare size="md" class="text-portal-green/45"/>
                     <span class="h-px flex-1 bg-portal-gold/55"></span>
                 </div>
 
-                <p class="relative mt-5 text-center text-[0.9rem] text-charcoal/70">
+                <p class="relative mt-6 text-center text-[0.9rem] text-charcoal/70">
                     {{ __('opes.auth.contact_admin_prompt') }}
                     <span class="font-bold text-portal-green">{{ __('opes.auth.contact_admin') }}</span>
                 </p>
