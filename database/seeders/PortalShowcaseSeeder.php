@@ -105,6 +105,55 @@ final class PortalShowcaseSeeder extends Seeder
             ->pluck('student_id')
             ->all();
 
+        /*
+         * The designs show a parent with several children, and the carousel is
+         * the first thing on the dashboard - with one card it reads as a list
+         * of one rather than as the child switcher it is.
+         *
+         * So link a SECOND existing student. An existing one, never a new one:
+         * a fresh student would need an enrollment, a class segment and a fee
+         * structure before any child screen had anything to show, whereas the
+         * already-seeded cohort has all three.
+         *
+         * The link is given the full flag set, because the second child exists
+         * to demonstrate the switcher and every tab behind it. The FIRST
+         * child's link is left exactly as the demo seeder made it.
+         */
+        if (count($linked) < 2) {
+            $spare = DB::table('students as s')
+                ->join('enrollments as e', 'e.student_id', '=', 's.id')
+                ->whereNotIn('s.id', $linked === [] ? [0] : $linked)
+                ->whereNotExists(function ($q) use ($guardian): void {
+                    $q->select(DB::raw(1))->from('student_guardians as sg')
+                        ->whereColumn('sg.student_id', 's.id')
+                        ->where('sg.guardian_id', $guardian->getKey());
+                })
+                ->orderBy('s.id')
+                ->value('s.id');
+
+            if ($spare !== null) {
+                DB::table('student_guardians')->insert([
+                    'student_id' => (int) $spare,
+                    'guardian_id' => $guardian->getKey(),
+                    'relationship' => 'mother',
+                    'is_primary' => false,
+                    'has_custody' => true,
+                    'receives_reports' => true,
+                    'receives_invoices' => true,
+                    'is_emergency_contact' => true,
+                    'is_authorised_for_pickup' => true,
+                    'is_fee_payer' => true,
+                    // Matches DemoDataSeeder's own value, so a re-seed agrees.
+                    'valid_from' => '2026-01-01',
+                    'valid_to' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $linked[] = (int) $spare;
+            }
+        }
+
         $cast = [
             ['first_name' => 'Emmanuel', 'last_name' => 'Ngo', 'matricule' => 'HBC24567', 'gender' => 'male'],
             ['first_name' => 'Esther', 'last_name' => 'Ngo', 'matricule' => 'HBC35678', 'gender' => 'female'],
