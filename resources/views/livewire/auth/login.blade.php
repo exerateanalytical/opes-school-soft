@@ -454,19 +454,39 @@
                     </p>
                     <p class="mt-1 text-xs text-white/70">{{ __('opes.auth.demo_choose_role') }}</p>
 
-                    {{-- One button per configured identity. Each signs in as a
+                    {{-- One OPTION per configured identity. Each signs in as a
                          REAL user holding that role through Spatie, so what the
                          visitor then sees is the product's own permission checks
-                         answering - not a demo mode. --}}
-                    <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        @foreach ($this->demoIdentities() as $identity)
-                            <button type="button" wire:click="demoLogin('{{ $identity['key'] }}')"
-                                    wire:key="demo-{{ $identity['key'] }}"
-                                    class="rounded-xl bg-white/10 px-3 py-2.5 text-left text-sm font-semibold text-white
-                                           ring-1 ring-portal-gold/30 hover:bg-white/20">
-                                {{ __('opes.auth.demo_sign_in_as', ['role' => $identity['label']]) }}
-                            </button>
-                        @endforeach
+                         answering - not a demo mode.
+
+                         A dropdown rather than a grid of buttons: the identity
+                         list is configuration and grows, and a button per role
+                         made the block taller than the sign-in form it sits
+                         under. One row stays one row however many roles are
+                         configured. --}}
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                        <label for="demo-role" class="sr-only">{{ __('opes.auth.demo_choose_role') }}</label>
+
+                        <select id="demo-role" wire:model="demoRole"
+                                class="min-w-0 flex-1 rounded-xl border-0 bg-white/10 px-3 py-2.5 text-sm font-semibold
+                                       text-white ring-1 ring-portal-gold/30 focus:outline-none focus:ring-portal-gold">
+                            @foreach ($this->demoIdentities() as $identity)
+                                {{-- The option's own colours are set explicitly:
+                                     a native dropdown list renders on the
+                                     system's popup surface, not the glass
+                                     panel, so white-on-transparent inherited
+                                     from the select would be white on white. --}}
+                                <option value="{{ $identity['key'] }}" class="bg-portal-green text-white">
+                                    {{ $identity['label'] }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <button type="button" wire:click="demoLoginSelected"
+                                class="shrink-0 rounded-xl bg-portal-gold px-4 py-2.5 text-sm font-bold text-portal-green
+                                       hover:brightness-110">
+                            {{ __('opes.auth.sign_in_title') }}
+                        </button>
                     </div>
 
                     <p class="mt-2 text-xs text-white/60">{{ __('opes.auth.demo_help') }}</p>

@@ -32,6 +32,43 @@ final class Login extends Component
 
     public bool $remember = false;
 
+    /**
+     * Which demo identity the demonstration dropdown has selected.
+     *
+     * Never trusted as a credential. `demoLogin()` still matches whatever
+     * arrives here against the CONFIGURED identities and aborts on anything
+     * else, so binding this to a `<select>` gives a replayed Livewire call no
+     * more reach than the button grid it replaces.
+     */
+    public string $demoRole = '';
+
+    public function mount(): void
+    {
+        // Default to the first configured identity so the dropdown always
+        // shows a real selection rather than an empty row that silently does
+        // nothing when submitted.
+        $identities = $this->demoIdentities();
+
+        $this->demoRole = $identities === [] ? '' : (string) $identities[0]['key'];
+    }
+
+    /**
+     * Sign in as whichever identity the dropdown is showing.
+     *
+     * A thin wrapper rather than a second implementation: `demoLogin()` keeps
+     * the availability guard, the configured-identity match and the audit
+     * entry, and this only supplies the argument the buttons used to pass
+     * literally.
+     */
+    public function demoLoginSelected(\App\Modules\Identity\Actions\WriteAuditEntry $audit): mixed
+    {
+        if ($this->demoRole === '') {
+            return null;
+        }
+
+        return $this->demoLogin($audit, $this->demoRole);
+    }
+
     public function authenticate(AuthenticateUser $authenticate): mixed
     {
         $this->validate();

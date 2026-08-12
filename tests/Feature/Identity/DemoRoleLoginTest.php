@@ -123,3 +123,42 @@ it('keeps the sidebar filtered to what each role may open', function () {
     expect($teacher)->toContain('students', 'classes', 'attendance', 'timetable')
         ->and($teacher)->not->toContain('ledger', 'finance', 'users', 'settings');
 });
+
+/*
+ * The demonstration block is a dropdown plus one button, not a button per
+ * role. These cover the wrapper that pairing introduced - the dropdown binds
+ * `demoRole`, and `demoLoginSelected()` is what the button calls.
+ */
+
+it('defaults the demo dropdown to the first configured identity', function () {
+    enableRoleDemoLogin();
+
+    Livewire::test(Login::class)->assertSet('demoRole', 'administrator');
+});
+
+it('signs in as whichever role the dropdown is showing', function () {
+    enableRoleDemoLogin();
+
+    Livewire::test(Login::class)
+        ->set('demoRole', 'accountant')
+        ->call('demoLoginSelected');
+
+    $user = User::query()->where('email', 'demo.accountant@opeschool.test')->firstOrFail();
+
+    expect(auth()->id())->toBe($user->getKey())
+        ->and($user->hasRole(Role::Accountant->value))->toBeTrue();
+});
+
+it('refuses a dropdown value the demo page never offered', function () {
+    enableRoleDemoLogin();
+
+    // The guard lives in demoLogin() and the wrapper must not bypass it: a
+    // replayed Livewire call can set any string on a public property, so
+    // `demoRole` is an input, never a credential.
+    Livewire::test(Login::class)
+        ->set('demoRole', 'super_admin')
+        ->call('demoLoginSelected')
+        ->assertForbidden();
+
+    expect(auth()->check())->toBeFalse();
+});
