@@ -4,39 +4,41 @@ declare(strict_types=1);
 
 namespace App\Modules\Accounting\Actions\Review;
 
+use App\Modules\Accounting\Actions\ReconcileAuxiliaryBalances;
 use App\Modules\Accounting\Domain\ControlCheck;
 use App\Modules\Accounting\Models\ChartOfAccount;
-use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Identity\Domain\Permission;
 use App\Support\Clock\BusinessDate;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * AR <-> GL and AP <-> GL, docs/specs/2026-08-12-accounting-finance-architecture.md §4.1.
+ * AR <-> GL and AP <-> GL for the Control Centre,
+ * docs/specs/2026-08-12-accounting-finance-architecture.md §4.1.
  *
- * The identity: for every collective account, the sum of its per-partner
- * balances equals the account's own balance. L8 (02-accounting.md §8.3)
- * guarantees a line on a collective account always carries a partner, so
- * both sides sum the same rows and any difference is a real integrity fault.
+ * THIS CLASS COMPUTES NOTHING. The L9 identity - "Σ auxiliary balances per
+ * collective account = that account's GL balance" (02-accounting.md §8.4) -
+ * has exactly ONE implementation, `ReconcileAuxiliaryBalances`, which carries
+ * the spec's §8.4 queries verbatim. This Action presents those rows as the
+ * `ControlCheck` value object the rest of the review subsystem speaks.
  *
- * Read path is scopePostedLedger()'s status list - both `posted` AND
- * `reversed`, so a reversal nets its original to zero (§9.3). Filtering on
- * `posted` alone would drop the original half of every reversed pair.
+ * Why that matters more than it looks. A second implementation was written
+ * here first, summing a collective account's lines and then summing the same
+ * lines filtered to `partner_id IS NOT NULL`. Because L8 (§8.3, enforced by
+ * an unconditional trigger) guarantees every line on a collective account
+ * carries a partner, those two sums are over the SAME ROWS - the check could
+ * only ever return zero. It would have reported "Reconciled" for a genuinely
+ * broken ledger, which is the precise failure mode this whole subsystem
+ * exists to prevent. The real identity groups by partner first, which is what
+ * the delegated Action does.
  *
- * This raw-query version reuses the identity already computed by
- * ReconcileAuxiliaryBalances (app/Modules/Accounting/Actions/
- * ReconcileAuxiliaryBalances.php, found per rule 5 before writing this
- * Action) but returns the shared ControlCheck value object this Review
- * subsystem's other checks use, rather than that Action's stdClass rows.
- *
- * Read-only. This Action decides nothing and writes nothing.
+ * Read-only. It presents; it never decides and never writes.
  */
 final readonly class AuxiliaryControlChecks
 {
     public const PERMISSION = Permission::LedgerView->value;
+
+    public function __construct(private ReconcileAuxiliaryBalances $reconcile) {}
 
     /**
      * @return Collection<int, ControlCheck>
@@ -47,40 +49,23 @@ final readonly class AuxiliaryControlChecks
 
         $asOf ??= BusinessDate::today();
 
-        return ChartOfAccount::query()
-            ->where('is_collective', true)
-            ->where('is_archived', false)
-            ->orderBy('code')
-            ->get()
-            ->map(fn (ChartOfAccount $account): ControlCheck => ControlCheck::reconciledOrBroken(
-                key: 'auxiliary_'.$account->code,
-                label: $account->code.' '.$account->name,
-                expected: $this->collectiveBalance($account, $asOf),
-                actual: $this->auxiliarySum($account, $asOf),
+        $rows = $this->reconcile->handle($asOf);
+
+        // One lookup for every label, rather than one per row.
+        $names = ChartOfAccount::query()
+            ->whereIn('id', $rows->pluck('account_id')->all())
+            ->pluck('name', 'id');
+
+        return $rows
+            ->sortBy('code')
+            ->map(fn (object $row): ControlCheck => ControlCheck::reconciledOrBroken(
+                key: 'auxiliary_'.$row->code,
+                label: trim($row->code.' '.($names[$row->account_id] ?? '')),
+                expected: (int) $row->gl_balance,
+                actual: (int) $row->auxiliary_sum,
                 axis: $axis,
                 asOf: $asOf,
             ))
             ->values();
-    }
-
-    private function collectiveBalance(ChartOfAccount $account, string $asOf): int
-    {
-        return (int) $this->linesUpTo($account, $asOf)->sum(DB::raw('debit - credit'));
-    }
-
-    private function auxiliarySum(ChartOfAccount $account, string $asOf): int
-    {
-        return (int) $this->linesUpTo($account, $asOf)
-            ->whereNotNull('journal_entry_lines.partner_id')
-            ->sum(DB::raw('debit - credit'));
-    }
-
-    private function linesUpTo(ChartOfAccount $account, string $asOf): Builder
-    {
-        return DB::table('journal_entry_lines')
-            ->join('journal_entries', 'journal_entries.id', '=', 'journal_entry_lines.journal_entry_id')
-            ->whereIn('journal_entries.status', JournalEntry::postedLedgerStatuses())
-            ->where('journal_entry_lines.account_id', $account->id)
-            ->whereDate('journal_entries.date', '<=', $asOf);
     }
 }
