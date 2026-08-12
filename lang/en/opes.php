@@ -23,6 +23,39 @@ return [
         'demo_sign_in_as' => 'Sign in as :role',
         'demo_rbac_help' => 'Each demo account holds a real role, so it sees only what that role is permitted to see.',
         'demo_help' => 'One click, no password. This button exists only on a local demonstration copy and never on a school\'s live system.',
+
+        /*
+         * The desktop sign-in artwork.
+         *
+         * This is the platform's ONLY login - a bursar, a teacher and a parent
+         * all arrive here - so every line below stays role-neutral. The
+         * reference design reads "Sign in to access your OPES School System
+         * account", which is already neutral; the crest's "School System"
+         * label likewise replaces the portal's "Family Portal", which would
+         * be wrong for most of the people who see this page.
+         */
+        'brand_suffix' => 'School System',
+        'welcome_back' => 'Welcome Back!',
+        'welcome_sub' => 'Sign in to access your :brand School System account',
+        'contact_admin_prompt' => 'Don\'t have an account?',
+        'contact_admin' => 'Contact your administrator',
+        'trust_line' => 'Trusted by Schools. Preferred by Educators. Loved by Parents.',
+
+        'hero_line_one' => 'One platform.',
+        'hero_line_two' => 'All solutions.',
+        'hero_line_three' => 'Better management.',
+        'hero_line_four' => 'Brighter future.',
+        'hero_body' => 'A complete school management system designed to simplify administration, improve learning and connect your entire school community.',
+
+        'feature_students' => 'Student Management',
+        'feature_academics' => 'Academic Management',
+        'feature_finance' => 'Finance Management',
+        'feature_attendance' => 'Attendance Tracking',
+        'feature_exams' => 'Examinations & Results',
+        'feature_reports' => 'Reports & Analytics',
+
+        'secure_title' => 'Secure. Reliable. Everywhere.',
+        'secure_body' => 'Your data is protected with enterprise-grade security and privacy.',
     ],
     // The shell: docs/specs/09-ui.md section 2. Every sidebar key in
     // App\Modules\Identity\Support\Navigation has a label here, including the

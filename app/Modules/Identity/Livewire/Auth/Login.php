@@ -18,7 +18,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-#[Layout('layouts.guest')]
+// The full-bleed shell, not `layouts.guest`: that one boxes its slot into a
+// centred max-w-md card, which a two-column sign-in cannot live inside. The
+// OTP and password-reset screens still render through `guest`.
+#[Layout('layouts.auth-wide')]
 final class Login extends Component
 {
     #[Validate('required|email')]

@@ -25,6 +25,36 @@ return [
         'demo_sign_in_as' => 'Se connecter en tant que :role',
         'demo_rbac_help' => 'Chaque compte de démonstration porte un rôle réel : il ne voit que ce que ce rôle est autorisé à voir.',
         'demo_help' => 'Un clic, sans mot de passe. Ce bouton n\'existe que sur une copie de démonstration locale, jamais sur le système en service d\'un établissement.',
+
+        /*
+         * L'écran de connexion bureau.
+         *
+         * C'est l'UNIQUE page de connexion de la plateforme - intendant,
+         * enseignant et parent y arrivent tous - donc chaque ligne reste
+         * neutre quant au rôle.
+         */
+        'brand_suffix' => 'Système scolaire',
+        'welcome_back' => 'Bon retour !',
+        'welcome_sub' => 'Connectez-vous à votre compte :brand',
+        'contact_admin_prompt' => 'Vous n\'avez pas de compte ?',
+        'contact_admin' => 'Contactez votre administrateur',
+        'trust_line' => 'La confiance des établissements. Le choix des enseignants. L\'appui des parents.',
+
+        'hero_line_one' => 'Une plateforme.',
+        'hero_line_two' => 'Toutes les solutions.',
+        'hero_line_three' => 'Une meilleure gestion.',
+        'hero_line_four' => 'Un avenir plus clair.',
+        'hero_body' => 'Un système complet de gestion scolaire conçu pour simplifier l\'administration, améliorer l\'apprentissage et relier toute la communauté éducative.',
+
+        'feature_students' => 'Gestion des élèves',
+        'feature_academics' => 'Gestion pédagogique',
+        'feature_finance' => 'Gestion financière',
+        'feature_attendance' => 'Suivi des présences',
+        'feature_exams' => 'Examens et résultats',
+        'feature_reports' => 'Rapports et analyses',
+
+        'secure_title' => 'Sûr. Fiable. Partout.',
+        'secure_body' => 'Vos données sont protégées par une sécurité et une confidentialité de niveau professionnel.',
     ],
     // Le shell : docs/specs/09-ui.md section 2. Chaque clé de la barre latérale
     // déclarée dans App\Modules\Identity\Support\Navigation possède ici un

@@ -173,4 +173,20 @@ return [
         'failed_jobs_amber' => (int) env('OPES_FAILED_JOBS_AMBER', 1),
         'failed_jobs_red' => (int) env('OPES_FAILED_JOBS_RED', 25),
     ],
+
+    /*
+     * Where to reach the people who supply the software - the strip along the
+     * foot of the sign-in artwork.
+     *
+     * Config rather than a lang file, because none of it is TRANSLATABLE: a
+     * phone number does not have a French rendering, and a reseller running
+     * their own deployment needs to change these without editing two
+     * translation files and hoping they stay in step. Env-overridable for
+     * exactly that reason, with the artwork's values as the default.
+     */
+    'vendor' => [
+        'city' => env('OPES_VENDOR_CITY', 'Douala, Cameroon'),
+        'website' => env('OPES_VENDOR_WEBSITE', 'www.opesschoolsystem.com'),
+        'phone' => env('OPES_VENDOR_PHONE', '+237 670 41 62 38'),
+    ],
 ];
