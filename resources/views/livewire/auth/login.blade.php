@@ -121,10 +121,39 @@
          meant almost no real laptop saw the centrepiece of the design. --}}
     <div class="pointer-events-none absolute inset-y-0 left-[26rem] right-[31rem] hidden overflow-hidden xl:block"
          aria-hidden="true">
+        {{--
+            THE CURVE, MEASURED OFF THE REFERENCE - and it is not an ellipse.
+
+            The gold arc's own pixels were detected in the artwork and its
+            geometry solved from them: it enters the top edge at x=585, sweeps
+            left to a vertex at (458, 270), and from there the photograph's
+            left edge runs very nearly STRAIGHT DOWN. Fitting those two
+            constraints gives a circle centred (808.5, 270) with r=350.5 in the
+            reference's 1536x1024 space.
+
+            So the shape is a D - a curved top-left shoulder over a straight
+            left flank. Every earlier attempt used a full-height ellipse, which
+            curves back IN towards the bottom and pinched the photograph shut
+            below the middle, where the reference keeps it open all the way
+            down to the tiles. That is what made the curve read wrong.
+
+            Written in objectBoundingBox units (0..1 across the container) so it
+            holds at any viewport. The container spans x 442..1009 of the
+            reference, so x=585 is 0.252 across and the vertex x=458 is 0.028;
+            the vertex y=270 is 0.264 down. The radius scales per axis -
+            350.5/567 across, 350.5/1024 down - because objectBoundingBox scales
+            x and y independently, which turns the circle into those numbers
+            rather than one radius.
+        --}}
+        <svg width="0" height="0" class="absolute" aria-hidden="true">
+            <defs>
+                <clipPath id="portal-hero-arc" clipPathUnits="objectBoundingBox">
+                    <path d="M0.252,0 A0.618,0.342 0 0 0 0.028,0.264 L0.075,1 L1,1 L1,0 Z"/>
+                </clipPath>
+            </defs>
+        </svg>
+
         @if ($hasHero)
-            {{-- Clipped by a wide ellipse anchored off the right edge, which
-                 is what produces the reference's single sweeping arc down the
-                 photograph's left side. --}}
             {{-- clip-path as an INLINE STYLE, not a Tailwind arbitrary value.
                  `[clip-path:ellipse(88%_90%_at_100%_50%)]` did not survive
                  compilation - the percentages inside the function are not
@@ -132,35 +161,39 @@
                  with the arc floating uselessly beside it. Inline, it is not
                  something a build step can silently drop. --}}
             <img src="{{ asset('images/login-hero.jpg') }}" alt=""
-                 style="clip-path: ellipse(88% 90% at 100% 50%)"
+                 style="clip-path: url(#portal-hero-arc)"
                  class="h-full w-full object-cover object-top">
         @endif
 
-        {{-- The arc itself, drawn whether or not the photograph is there. --}}
+        {{-- The gold stroke traces the SAME geometry as the clip above, in
+             hundredths rather than fractions - every number here is its clip
+             counterpart times 100. Two descriptions of one curve drift apart
+             unless they are written to be compared. --}}
         <svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100" fill="none"
              preserveAspectRatio="none">
-            {{-- ry 90, not 128. At 128 the ellipse is so tall that the arc
-                 reads as a straight vertical line over a 1024px viewport - it
-                 bulged 40px where the reference sweeps about 100. Shortening
-                 the vertical radius is what puts the curve back. --}}
-            <ellipse cx="100" cy="50" rx="88" ry="90" stroke="var(--color-portal-gold)" stroke-width="1.6"
-                     vector-effect="non-scaling-stroke" opacity="0.9"/>
-            <ellipse cx="103" cy="50" rx="88" ry="90" stroke="var(--color-portal-gold)" stroke-width="0.6"
-                     vector-effect="non-scaling-stroke" opacity="0.35"/>
+            <path d="M25.2,0 A61.8,34.2 0 0 0 2.8,26.4 L7.5,100"
+                  stroke="var(--color-portal-gold)" stroke-width="2.6"
+                  vector-effect="non-scaling-stroke" opacity="1"/>
+            <path d="M28.4,0 A61.8,34.2 0 0 0 6.0,26.4"
+                  stroke="var(--color-portal-gold)" stroke-width="1"
+                  vector-effect="non-scaling-stroke" opacity="0.45"/>
         </svg>
 
-        {{-- A green veil where the photograph meets the brand column, so the
-             headline keeps its contrast.
+        {{--
+            THE GREEN VEIL IS GONE, and its removal is the fix, not a tidy-up.
 
-             ONLY when there is a photograph. Painted unconditionally it laid
-             flat #012A17 over the radial field, and because the two greens
-             differ at that point it drew a hard vertical seam straight down
-             the page - a line the reference does not have, and the most
-             visible flaw in the render. With no photograph there is nothing
-             to veil. --}}
-        @if ($hasHero)
-            <div class="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-portal-green via-portal-green/70 to-transparent"></div>
-        @endif
+            It was added to protect the headline's contrast where the
+            photograph approached the brand column. It covered the container's
+            left 40% - x 442..663 - and it was the LAST child, so it painted
+            over the gold arc at x 457..581 as well as the photograph behind
+            it. That is why the arc looked like a pale hairline while the DOM
+            reported it as 2.6px of fully opaque gold, and why the photograph
+            read hazy next to the reference's crisp one.
+
+            It is not needed now. With the measured D-shaped clip the
+            photograph starts at x=457 and the headline ends near x=430, so
+            they no longer meet and there is nothing left to veil.
+        --}}
     </div>
 
     {{-- ===================================================== CONTENT === --}}
