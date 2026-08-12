@@ -34,6 +34,25 @@ return [
          * label likewise replaces the portal's "Family Portal", which would
          * be wrong for most of the people who see this page.
          */
+        /*
+         * The sign-in card's own wording, kept separate from the keys the OTP
+         * and reset screens share.
+         *
+         * `credential` is the artwork's "Username or Email". It is used as
+         * drawn, but be clear what it promises: `users` has no username
+         * column and AuthenticateUser resolves an email address, so today
+         * only an email signs in. Making the label true is a schema change in
+         * Identity - a migration, a unique index and a resolver that tries
+         * both - not a wording decision, and it should be done before a
+         * school ever sees this page.
+         */
+        'credential' => 'Username or Email',
+        'credential_placeholder' => 'Enter your username or email',
+        'password_placeholder' => 'Enter your password',
+        'forgot_short' => 'Forgot password?',
+        'remember_short' => 'Remember me',
+        'sign_in_title' => 'Sign In',
+
         'brand_suffix' => 'School System',
         'welcome_back' => 'Welcome Back!',
         'welcome_sub' => 'Sign in to access your :brand School System account',

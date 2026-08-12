@@ -45,6 +45,10 @@
         'mail' => 'M3 6h18v12H3zM3 7l9 6 9-6',
         'phone' => 'M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z',
         'check' => 'M20 6L9 17l-5-5',
+        // The padlock the sign-in artwork uses on the password field, the
+        // submit button and the card's gold tab. `shield` was standing in for
+        // it, which read as a different mark at those three sizes.
+        'lock' => 'M5 11h14a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8a1 1 0 011-1zM8 11V7a4 4 0 118 0v4M12 15v2',
         'dot' => 'M12 13a1 1 0 100-2 1 1 0 000 2z',
     ];
 
@@ -58,15 +62,19 @@
         'onChrome' => 'bg-white/10 text-portal-gold',
     ];
 
+    // `xl` exists for the sign-in artwork's security panel, whose shield is
+    // noticeably larger than any icon the portal screens use.
     $circle = match ($size) {
         'sm' => 'h-8 w-8',
         'lg' => 'h-12 w-12',
+        'xl' => 'h-14 w-14',
         default => 'h-10 w-10',
     };
 
     $glyph = match ($size) {
         'sm' => 'h-4 w-4',
         'lg' => 'h-6 w-6',
+        'xl' => 'h-8 w-8',
         default => 'h-5 w-5',
     };
 @endphp

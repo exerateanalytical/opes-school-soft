@@ -33,6 +33,16 @@ return [
          * enseignant et parent y arrivent tous - donc chaque ligne reste
          * neutre quant au rôle.
          */
+        // `credential` reprend le libellé de la maquette. Attention : la table
+        // `users` n'a pas de colonne d'identifiant, donc seule l'adresse
+        // e-mail permet de se connecter aujourd'hui.
+        'credential' => 'Identifiant ou e-mail',
+        'credential_placeholder' => 'Saisissez votre identifiant ou e-mail',
+        'password_placeholder' => 'Saisissez votre mot de passe',
+        'forgot_short' => 'Mot de passe oublié ?',
+        'remember_short' => 'Se souvenir de moi',
+        'sign_in_title' => 'Se connecter',
+
         'brand_suffix' => 'Système scolaire',
         'welcome_back' => 'Bon retour !',
         'welcome_sub' => 'Connectez-vous à votre compte :brand',

@@ -30,8 +30,8 @@
     $box = match ($size) {
         'sm' => 'w-24',
         'md' => 'w-32',
-        'xl' => 'w-56',
-        default => 'w-40',
+        'xl' => 'w-[12.6rem]',
+        default => 'w-[8.8rem]',
     };
 
     $onDark = $on === 'dark';
