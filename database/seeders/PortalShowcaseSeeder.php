@@ -58,6 +58,7 @@ final class PortalShowcaseSeeder extends Seeder
         $this->seedConversations($userId, $children);
         $this->seedNotifications($userId, $children);
         $this->seedAttendance($children);
+        $this->seedMedical($children);
         $this->seedFees($guardian, $children);
 
         $this->command?->info('Portal showcase: '.$guardian->fullName().' with '.count($children).' children.');
@@ -451,6 +452,62 @@ final class PortalShowcaseSeeder extends Seeder
             \Illuminate\Support\Facades\Auth::logout();
         } else {
             \Illuminate\Support\Facades\Auth::login($previous);
+        }
+    }
+
+    /**
+     * The medical records behind Health, Medical history, Immunisations and
+     * the Health ID card.
+     *
+     * `is_emergency_relevant` is what splits rows 3 and 4, so the set
+     * deliberately spans both: a blood group and an allergy an emergency
+     * contact must see, and a clinical note only a custodial guardian may
+     * read. Seeding only one kind would make the scope split invisible, which
+     * is the single most important thing these screens demonstrate.
+     */
+    private function seedMedical(array $children): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('student_medical_records')) {
+            return;
+        }
+
+        /*
+         * `condition_type` and `severity` are both ENUMs - allergy /
+         * chronic_condition / medication / disability / immunisation /
+         * incident, and low / moderate / high. Inventing values outside them
+         * fails at insert, so these are the schema's own.
+         */
+        $records = [
+            ['allergy', 'Peanut allergy - carries an auto-injector', 'Adrenaline auto-injector kept in the school bag and with the nurse. Notify the clinic immediately on exposure.', 'high', true],
+            ['chronic_condition', 'Blood group O+', 'Recorded at admission. No transfusion history on file.', 'low', true],
+            ['immunisation', 'BCG, Polio and Measles - complete', 'Administered under the national schedule. Booster due next academic year.', 'low', false],
+            ['immunisation', 'Yellow fever - administered', 'Given at the district clinic; certificate held by the school office.', 'low', false],
+            ['chronic_condition', 'Mild asthma', 'Inhaler kept with the school nurse. Exercise tolerance normal; no restriction on sport.', 'moderate', false],
+        ];
+
+        foreach ($children as $studentId) {
+            foreach ($records as [$type, $summary, $detail, $severity, $emergency]) {
+                $exists = DB::table('student_medical_records')
+                    ->where('student_id', $studentId)
+                    ->where('summary', $summary)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                DB::table('student_medical_records')->insert([
+                    'student_id' => $studentId,
+                    'condition_type' => $type,
+                    'summary' => $summary,
+                    'detail' => $detail,
+                    'severity' => $severity,
+                    'is_emergency_relevant' => $emergency,
+                    'recorded_at' => now()->subMonths(3),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 
