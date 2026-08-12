@@ -16,14 +16,27 @@ use Illuminate\Support\Facades\Route;
  * past the point where eyeballing it is reliable.
  */
 
-it('resolves every portal route referenced from a portal view', function () {
-    $viewPath = resource_path('views/livewire/guardians/portal');
-    $layout = resource_path('views/layouts/portal.blade.php');
-
+/**
+ * Every Blade file that can reference a portal route: the screens, the shared
+ * layout, and the `x-portal.*` components the restyle introduced (the avatar
+ * builds a photo URL, so a corpus that skipped components would report that
+ * route as an orphan).
+ *
+ * @return list<string>
+ */
+function portalViewFiles(): array
+{
     $files = array_merge(
-        glob($viewPath.DIRECTORY_SEPARATOR.'*.blade.php') ?: [],
-        file_exists($layout) ? [$layout] : [],
+        glob(resource_path('views/livewire/guardians/portal').DIRECTORY_SEPARATOR.'*.blade.php') ?: [],
+        glob(resource_path('views/components/portal').DIRECTORY_SEPARATOR.'*.blade.php') ?: [],
+        [resource_path('views/layouts/portal.blade.php')],
     );
+
+    return array_values(array_filter($files, 'file_exists'));
+}
+
+it('resolves every portal route referenced from a portal view', function () {
+    $files = portalViewFiles();
 
     expect($files)->not->toBeEmpty('no portal views were found to check');
 
@@ -124,18 +137,21 @@ it('links to every portal screen from somewhere', function () {
      * caught, because they all navigate by route name rather than by
      * following what the UI actually offers.
      */
-    $viewPath = resource_path('views/livewire/guardians/portal');
-    $layout = resource_path('views/layouts/portal.blade.php');
-
     $corpus = '';
 
-    foreach (array_merge(glob($viewPath.DIRECTORY_SEPARATOR.'*.blade.php') ?: [], [$layout]) as $file) {
+    foreach (portalViewFiles() as $file) {
         $corpus .= (string) file_get_contents($file);
     }
 
-    // The dashboard is the portal's entry point and is linked from the shell
-    // itself; the thread detail is reached with a runtime id from the inbox.
-    $reachedElsewhere = ['portal.dashboard', 'portal.messages.thread'];
+    /*
+     * Not navigational destinations, so "is it linked" is the wrong question:
+     *
+     *   dashboard        the portal's entry point, reached from the shell.
+     *   messages.thread  reached with a runtime id from the inbox.
+     *   photo.child      an <img src> built per child from a route helper;
+     *                    a parent never "goes" there.
+     */
+    $reachedElsewhere = ['portal.dashboard', 'portal.messages.thread', 'portal.photo.child'];
 
     $orphans = [];
 

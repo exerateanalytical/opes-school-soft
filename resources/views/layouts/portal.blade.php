@@ -1,6 +1,29 @@
 @php
     /** @var \App\Modules\Identity\Models\User|null $portalUser */
     $portalUser = auth()->user();
+
+    $portalUnread = $portalUser === null ? 0 : app(\App\Modules\Guardians\Support\Portal\GuardianInbox::class)
+        ->unreadNotificationCount((int) $portalUser->getKey());
+
+    /*
+     * The portal's own navigation. Six destinations, in the order the mobile
+     * designs put them, so a parent who uses both meets one product.
+     *
+     * Rendered unconditionally: every screen re-authorizes on entry, so this
+     * is chrome, not a gate. That differs from the CHILD tab strip, which does
+     * filter - the difference is that these six are reachable by every portal
+     * principal, whereas a child tab can be closed for a particular link and
+     * offering it would be an invitation to a wall.
+     */
+    $portalNav = [
+        ['portal.dashboard', __('opes.guardian_portal.nav_children'), 'home'],
+        ['portal.payments', __('opes.guardian_portal.nav_payments'), 'card'],
+        ['portal.messages', __('opes.guardian_portal.nav_messages'), 'chat'],
+        ['portal.announcements', __('opes.guardian_portal.nav_announcements'), 'megaphone'],
+        ['portal.account', __('opes.guardian_portal.nav_account'), 'user'],
+    ];
+
+    $portalCurrent = request()->route()?->getName() ?? '';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
@@ -8,160 +31,145 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#012A17">
     <title>{{ $title ?? __('opes.guardian_portal.brand_title') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 {{--
-    The guardian/staff portal's OWN chrome (docs/plans/phase-12-13.md 12.2:
-    "entirely separate from the staff sidebar shell"). No sidebar, no module
-    navigation, no staff KPIs - a parent or a teacher checking their own
-    account from a phone gets one page, one back-link, one account menu. The
-    dark-chrome/gold palette matches the staff shell's tokens on purpose
-    (frontend images/Guardian profile.png) so the product still reads as one
-    system, just a narrower door into it.
+    The guardian portal's own chrome, built to mobile/parent-dashboard.png and
+    its siblings: a deep-green header closing on a gold wave, a NEAR-WHITE
+    canvas beneath it, and a floating bottom bar on small screens.
+
+    The canvas colour is measured, not chosen: the reference screens are
+    #FEFEFE behind the cards, not the warm sand this portal used before. Only
+    the identity card is tinted (#F5F8F6). See the portal palette in
+    resources/css/app.css.
+
+    Entirely separate from the staff sidebar shell (phase-12-13 12.2). A parent
+    gets one page, one back-link and one account menu - never a module nav.
 --}}
-<body class="min-h-screen bg-ivory font-sans text-charcoal antialiased">
+<body class="min-h-screen bg-portal-surface font-sans text-charcoal antialiased">
 <div class="flex min-h-screen flex-col">
-    <header class="shrink-0 bg-chrome px-4 py-3 text-white sm:px-6">
-        <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-            <a href="{{ route('portal.dashboard') }}" class="flex items-center gap-2">
-                <svg class="h-9 w-9 shrink-0" viewBox="0 0 64 64" fill="none" stroke="var(--color-heritage-yellow)"
-                     stroke-width="2" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M20 22h24v14c0 10-7 16-12 19-5-3-12-9-12-19V22z" stroke-linecap="round"/>
-                    <text x="32" y="40" text-anchor="middle" font-size="17" font-weight="700"
-                          fill="var(--color-heritage-yellow)" stroke="none" font-family="serif">O</text>
-                </svg>
-                <span class="leading-tight">
-                    <span class="block font-serif text-base font-bold tracking-wide text-heritage-yellow">{{ __('opes.shell.brand') }} {{ __('opes.guardian_portal.brand_suffix') }}</span>
-                    <span class="block text-[11px] text-white/70">{{ __('opes.guardian_portal.tagline') }}</span>
-                </span>
-            </a>
 
-            <div class="flex items-center gap-3 text-sm">
-                @if ($portalUser !== null)
-                    @php
-                        // The bell is the only way into the notifications feed
-                        // - it had no link at all before, so the screen was
-                        // routed but unreachable.
-                        $portalUnread = app(\App\Modules\Guardians\Support\Portal\GuardianInbox::class)
-                            ->unreadNotificationCount((int) $portalUser->getKey());
-                    @endphp
+    {{-- ---------------------------------------------------------- header -- --}}
+    <header class="shrink-0 bg-portal-green text-white">
+        <div class="mx-auto w-full max-w-5xl px-4 pb-1 pt-3 sm:px-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-2.5">
+                    <x-portal.crest size="md"/>
 
-                    <a href="{{ route('portal.notifications') }}"
-                       class="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
-                       aria-label="{{ __('opes.guardian_portal.notifications_title') }}">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
+                    <span class="min-w-0 leading-tight">
+                        <span class="block truncate font-serif text-base font-bold tracking-[0.12em] text-portal-gold">
+                            {{ __('opes.shell.brand') }}
+                        </span>
+                        <span class="block truncate text-[11px] text-white/65">
+                            {{ __('opes.guardian_portal.tagline') }}
+                        </span>
+                    </span>
+                </a>
 
-                        @if ($portalUnread > 0)
-                            <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-heritage-red px-1 text-[10px] font-bold text-white">
-                                {{ $portalUnread > 99 ? '99+' : $portalUnread }}
-                            </span>
-                        @endif
-                    </a>
+                <div class="ml-auto flex shrink-0 items-center gap-1.5">
+                    @if ($portalUser !== null)
+                        <a href="{{ route('portal.notifications') }}"
+                           class="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+                           aria-label="{{ __('opes.guardian_portal.notifications_title') }}">
+                            <x-portal.icon name="bell" bare size="md"/>
 
-                    <span class="hidden sm:inline text-white/85">{{ $portalUser->name }}</span>
-                @endif
+                            @if ($portalUnread > 0)
+                                <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-portal-danger px-1 text-[10px] font-bold text-white">
+                                    {{ $portalUnread > 99 ? '99+' : $portalUnread }}
+                                </span>
+                            @endif
+                        </a>
 
-                <div class="flex items-center gap-1" role="group" aria-label="{{ __('opes.shell.language') }}">
-                    @foreach (['en' => 'EN', 'fr' => 'FR'] as $code => $short)
-                        <form method="POST" action="/locale">
-                            @csrf
-                            <input type="hidden" name="locale" value="{{ $code }}">
-                            <button type="submit"
-                                    @if (app()->getLocale() === $code) aria-current="true" @endif
-                                    class="rounded px-2 py-1 text-xs font-semibold {{ app()->getLocale() === $code ? 'bg-heritage-yellow text-charcoal' : 'text-white/70 hover:bg-white/10' }}">
-                                {{ $short }}
-                            </button>
-                        </form>
-                    @endforeach
+                        <a href="{{ route('portal.search') }}"
+                           class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+                           aria-label="{{ __('opes.guardian_portal.search_title') }}">
+                            <x-portal.icon name="search" bare size="md"/>
+                        </a>
+
+                        <a href="{{ route('portal.account') }}"
+                           class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/10">
+                            <x-portal.avatar :name="$portalUser->name" size="sm" tone="gold"
+                                             :photo="route('portal.photo.self')"/>
+                            <span class="hidden text-sm text-white/85 sm:inline">{{ $portalUser->name }}</span>
+                        </a>
+                    @endif
+
+                    <div class="flex items-center gap-1" role="group" aria-label="{{ __('opes.shell.language') }}">
+                        @foreach (['en' => 'EN', 'fr' => 'FR'] as $code => $short)
+                            <form method="POST" action="/locale">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $code }}">
+                                <button type="submit"
+                                        @if (app()->getLocale() === $code) aria-current="true" @endif
+                                        class="rounded-full px-2 py-1 text-[11px] font-semibold {{ app()->getLocale() === $code
+                                            ? 'bg-portal-gold text-charcoal'
+                                            : 'text-white/60 hover:bg-white/10' }}">
+                                    {{ $short }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
                 </div>
-
-                <form method="POST" action="/logout">
-                    @csrf
-                    <button type="submit" class="rounded border border-white/30 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10">
-                        {{ __('opes.shell.sign_out') }}
-                    </button>
-                </form>
             </div>
+
+            {{-- Desktop nav sits inside the green band, as the designs do. --}}
+            <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}" class="mt-2 hidden gap-1 sm:flex">
+                @foreach ($portalNav as [$routeName, $label, $icon])
+                    @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
+                    <a href="{{ route($routeName) }}"
+                       @if ($isActive) aria-current="page" @endif
+                       class="flex items-center gap-2 rounded-t-xl px-3 py-2 text-sm font-medium {{ $isActive
+                           ? 'bg-portal-surface text-primary'
+                           : 'text-white/70 hover:bg-white/10' }}">
+                        <x-portal.icon :name="$icon" bare size="sm"/>
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </nav>
         </div>
     </header>
 
-    @php
-        /*
-         * The portal's own navigation. Six destinations, matching the mobile
-         * app's bottom bar so a parent who uses both does not have to learn two
-         * mental models of one product.
-         *
-         * Rendered unconditionally: every screen re-authorizes on entry
-         * (GuardianPortalPolicy), so this is chrome, not a gate - the same rule
-         * the child tab strip already follows. A destination a guardian may not
-         * use answers 403 on arrival rather than vanishing from the bar, which
-         * keeps the navigation stable for a family instead of shifting shape
-         * per capability.
-         */
-        $portalNav = [
-            ['portal.dashboard', __('opes.guardian_portal.nav_children'), 'M3 12l9-9 9 9M5 10v10h14V10'],
-            ['portal.payments', __('opes.guardian_portal.nav_payments'), 'M2 7h20v10H2zM2 11h20'],
-            ['portal.messages', __('opes.guardian_portal.nav_messages'), 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z'],
-            ['portal.announcements', __('opes.guardian_portal.nav_announcements'), 'M3 11l18-5v12L3 13v-2z'],
-            ['portal.search', __('opes.guardian_portal.nav_search'), 'M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z'],
-            ['portal.account', __('opes.guardian_portal.nav_account'), 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z'],
-        ];
-        $portalCurrent = request()->route()?->getName() ?? '';
-    @endphp
+    <x-portal.curve/>
 
-    {{-- Desktop and tablet: a horizontal strip under the header. --}}
-    <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
-         class="hidden shrink-0 border-b border-border-primary bg-white sm:block">
-        <div class="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6">
-            @foreach ($portalNav as [$routeName, $label, $path])
-                @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
-                <a href="{{ route($routeName) }}"
-                   @if ($isActive) aria-current="page" @endif
-                   class="border-b-2 px-3 py-3 text-sm font-medium {{ $isActive
-                       ? 'border-primary text-primary'
-                       : 'border-transparent text-charcoal/60 hover:text-charcoal' }}">
-                    {{ $label }}
-                </a>
-            @endforeach
-        </div>
-    </nav>
+    {{-- `pb-28` below sm keeps the last card clear of the floating bar. --}}
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-2 sm:px-6 sm:pb-10">
+        @if (session('portal-status'))
+            <p class="mb-4 rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">
+                {{ session('portal-status') }}
+            </p>
+        @endif
 
-    {{-- `pb-24` below `sm` keeps the last card clear of the fixed bar. --}}
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-24 sm:px-6 sm:pb-6">
         {{ $slot }}
     </main>
 
-    <footer class="hidden shrink-0 bg-chrome px-4 py-1.5 text-center text-xs text-white/70 sm:block">
+    <footer class="hidden shrink-0 px-4 py-4 text-center text-xs text-charcoal/45 sm:block">
         {{ __('opes.shell.brand') }} &middot; {{ __('opes.guardian_portal.footer_note') }}
     </footer>
 
     {{--
-        Mobile: a fixed bottom bar, because this portal is opened on a phone far
-        more often than on a desktop and a top nav puts every destination out of
-        thumb reach. The 28px top radius and the gold active state are the
-        mobile app's own tokens, deliberately.
+        Mobile: the floating bar from the designs. A parent opens this on a
+        phone far more often than on a desktop, and a top nav puts every
+        destination out of thumb reach.
     --}}
     <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
-         class="fixed inset-x-0 bottom-0 z-20 flex rounded-t-[28px] bg-chrome pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-4px_20px_rgba(0,45,23,0.25)] sm:hidden">
-        @foreach ($portalNav as [$routeName, $label, $path])
-            @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
-            <a href="{{ route($routeName) }}"
-               @if ($isActive) aria-current="page" @endif
-               class="flex flex-1 flex-col items-center gap-0.5 px-1 pb-2 text-[10px] {{ $isActive
-                   ? 'font-semibold text-heritage-yellow'
-                   : 'text-white/65' }}">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}"/>
-                </svg>
-                <span class="truncate">{{ $label }}</span>
-            </a>
-        @endforeach
+         class="fixed inset-x-0 bottom-0 z-30 rounded-t-[28px] bg-portal-green pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgba(0,45,23,0.3)] sm:hidden">
+        <div class="flex items-stretch px-1 pt-2">
+            @foreach ($portalNav as [$routeName, $label, $icon])
+                @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
+                <a href="{{ route($routeName) }}"
+                   @if ($isActive) aria-current="page" @endif
+                   class="flex flex-1 flex-col items-center gap-1 px-1 pb-2 pt-1 text-[10px] {{ $isActive
+                       ? 'font-semibold text-portal-gold'
+                       : 'text-white/60' }}">
+                    <x-portal.icon :name="$icon" bare size="md"/>
+                    <span class="truncate">{{ $label }}</span>
+                </a>
+            @endforeach
+        </div>
     </nav>
 </div>
 @livewireScripts

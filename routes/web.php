@@ -838,6 +838,17 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
     Route::get('/help', \App\Modules\Guardians\Livewire\Portal\HelpSupport::class)
         ->name('portal.help');
 
+    /*
+     * Photographs. A child's is gated on row 1 - the floor every valid link
+     * carries, which is the right bar: a parent entitled to know their child
+     * exists is entitled to see their face. An unlinked id answers 404, not
+     * 403, so it stays indistinguishable from one that does not exist.
+     */
+    Route::get('/photo/me', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'self'])
+        ->name('portal.photo.self');
+    Route::get('/photo/children/{student}', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'child'])
+        ->whereNumber('student')->name('portal.photo.child');
+
     // Not matrix territory at all - a notification is scoped by its own
     // `user_id`, a thread by participation. See GuardianInbox.
     Route::get('/notifications', \App\Modules\Guardians\Livewire\Portal\Notifications::class)

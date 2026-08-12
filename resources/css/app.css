@@ -7,6 +7,43 @@
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
+    /* --------------------------------------------------------------------
+       GUARDIAN PORTAL palette.
+
+       SAMPLED from the reference screens in mobile/*.png, not approximated
+       from the staff tokens below. The two sets are close but measurably
+       different, and the difference is visible side by side. The staff values
+       are left untouched: changing them would restyle the entire back office
+       as a side effect of skinning the parent portal.
+
+       Read with GD by pixel frequency over parent-dashboard.png,
+       fees-dashboard.png and parent-profile.png:
+
+         header / nav / summary panel   #012A17   (staff token is #002D17)
+         gold accent                    #E3A94B   (staff token is #D9A829)
+         gold deep (crest strokes)      #B77A12
+         success / "Paid"               #318538   (staff token is #198754)
+         danger / "Balance Due"         #EF404A   (staff token is #D64545)
+         danger tint                    #FEF3F4
+         page background                #FEFEFE   - near-WHITE. The designs do
+                                        NOT use a warm canvas; only the
+                                        identity card is tinted.
+         tinted card                    #F5F8F6
+         selected child card            #EFF6ED
+         active chip background         #D0E8CA
+       -------------------------------------------------------------------- */
+    --color-portal-green: #012A17;
+    --color-portal-green-soft: #0B3B2B;
+    --color-portal-gold: #E3A94B;
+    --color-portal-gold-deep: #B77A12;
+    --color-portal-success: #318538;
+    --color-portal-danger: #EF404A;
+    --color-portal-danger-soft: #FEF3F4;
+    --color-portal-surface: #FEFEFE;
+    --color-portal-tint: #F5F8F6;
+    --color-portal-selected: #EFF6ED;
+    --color-portal-chip: #D0E8CA;
+
     /* Heritage design system (docs/specs/00-core.md section 8 superseded by
        docs/superpowers/PROGRESS.md "Heritage Design System" - see that file
        for the full token rationale). Existing token NAMES are kept so every
