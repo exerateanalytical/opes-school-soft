@@ -165,6 +165,18 @@ final class JournalEntry extends Model
      */
     public function scopePostedLedger(Builder $query): Builder
     {
-        return $query->whereIn('status', [self::STATUS_POSTED, self::STATUS_REVERSED]);
+        return $query->whereIn('status', self::postedLedgerStatuses());
+    }
+
+    /**
+     * The same two statuses scopePostedLedger() admits, for the raw-query
+     * callers that cannot use an Eloquent scope. Both readers must stay in
+     * step, so they read from one constant pair - never a repeated literal.
+     *
+     * @return list<string>
+     */
+    public static function postedLedgerStatuses(): array
+    {
+        return [self::STATUS_POSTED, self::STATUS_REVERSED];
     }
 }
