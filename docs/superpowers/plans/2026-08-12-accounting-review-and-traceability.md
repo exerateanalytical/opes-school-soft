@@ -115,12 +115,41 @@ php artisan route:list --json | php -r "foreach(json_decode(file_get_contents('p
 
 ## Task 2: `SourceReference` and `ResolveSourceDocument`
 
+**Task 1 changed this task's design. Read this first.**
+
+Task 1 proved that `journal_entries.source_type` is always the literal string `'posting_event'`, and that **`source_id` is never populated at all**. A forward resolver keyed on those columns would resolve nothing.
+
+The real link runs the other way and is already populated: 36 document models carry a `journal_entry_id` foreign key, set by the module that posts them. So resolution is a **reverse lookup** — given an entry id, ask each registered document type whether it owns that entry.
+
+These six model/route pairs are **verified** — routes and parameters were read out of `routes/web.php`:
+
+| Model | Route name | Route param |
+|---|---|---|
+| `App\Modules\Accounting\Models\Expense` | `accounting.expenses.show` | `expense` |
+| `App\Modules\Assets\Models\Asset` | `assets.show` | `asset` |
+| `App\Modules\Payroll\Models\PayrollRun` | `payroll.runs.show` | `run` |
+| `App\Modules\Procurement\Models\PurchaseOrder` | `procurement.orders.show` | `order` |
+| `App\Modules\Procurement\Models\SupplierInvoice` | `procurement.invoices.show` | `invoice` |
+| `App\Modules\Procurement\Models\SupplierPayment` | `procurement.payments.show` | `payment` |
+
+**`Fees\Models\Invoice` and `Fees\Models\Payment` are deliberately absent** — they carry `journal_entry_id` but have **no web viewing route**. They render inert. Do not invent a route for them; report it instead.
+
 **Files:**
 - Create: `app/Modules/Accounting/Domain/SourceReference.php`
 - Create: `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`
 - Test: `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Confirm each registry model really carries the column**
+
+Run:
+
+```bash
+grep -l "journal_entry_id" app/Modules/Accounting/Models/Expense.php app/Modules/Assets/Models/Asset.php app/Modules/Payroll/Models/PayrollRun.php app/Modules/Procurement/Models/PurchaseOrder.php app/Modules/Procurement/Models/SupplierInvoice.php app/Modules/Procurement/Models/SupplierPayment.php
+```
+
+Expected: all six paths listed. If one is missing, drop it from the registry and say so in your report — do not keep it hoping it works.
+
+- [ ] **Step 2: Write the failing test**
 
 Create `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`:
 
@@ -130,10 +159,12 @@ Create `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`:
 declare(strict_types=1);
 
 use App\Modules\Accounting\Actions\Review\ResolveSourceDocument;
+use App\Modules\Accounting\Models\Expense;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Identity\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 
@@ -148,57 +179,67 @@ function resolveSourceUser(Role $role = Role::Accountant): User
     return $user->fresh() ?? $user;
 }
 
-it('returns an unlinked reference when the entry has no source document', function () {
+it('describes an entry no document owns as a manual entry', function () {
     actingAs(resolveSourceUser());
 
-    $reference = app(ResolveSourceDocument::class)->handle(null, null);
+    $entry = JournalEntry::factory()->create();
+
+    $reference = app(ResolveSourceDocument::class)->handle((int) $entry->id);
 
     expect($reference->isResolvable())->toBeFalse();
-    expect($reference->url())->toBeNull();
-    expect($reference->label())->toBe(__('opes.accounting.review.source_none'));
+    expect($reference->label())->toBe(__('opes.accounting.review.source_manual'));
 });
 
-it('renders an unmapped source type inertly, never as a raw class name', function () {
+it('never leaks a class name or a backslash into a label', function () {
     actingAs(resolveSourceUser());
 
-    $reference = app(ResolveSourceDocument::class)->handle('App\\Some\\Unmapped\\Model', 7);
+    $entry = JournalEntry::factory()->create();
 
-    expect($reference->isResolvable())->toBeFalse();
-    expect($reference->url())->toBeNull();
-    expect($reference->label())->not->toContain('\\');
-    expect($reference->label())->not->toContain('Unmapped');
+    expect(app(ResolveSourceDocument::class)->handle((int) $entry->id)->label())
+        ->not->toContain('\\');
 });
 
-it('never resolves without ledger.view', function () {
+it('links an entry owned by an expense to that expense', function () {
+    actingAs(resolveSourceUser());
+
+    $entry = JournalEntry::factory()->create();
+    $expense = Expense::factory()->create(['journal_entry_id' => $entry->id]);
+
+    $reference = app(ResolveSourceDocument::class)->handle((int) $entry->id);
+
+    expect($reference->isResolvable())->toBeTrue();
+    expect($reference->url())->toBe(route('accounting.expenses.show', ['expense' => $expense->id]));
+});
+
+it('resolves a batch in a bounded number of queries', function () {
+    actingAs(resolveSourceUser());
+
+    $entries = JournalEntry::factory()->count(25)->create();
+    $ids = $entries->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+    DB::enableQueryLog();
+    $references = app(ResolveSourceDocument::class)->forEntryIds($ids);
+    $queries = count(DB::getQueryLog());
+    DB::disableQueryLog();
+
+    expect($references)->toHaveCount(25);
+    // One query per registered model, never one per entry.
+    expect($queries)->toBeLessThanOrEqual(10);
+});
+
+it('refuses without ledger.view', function () {
     actingAs(resolveSourceUser(Role::Teacher));
 
-    app(ResolveSourceDocument::class)->handle(null, null);
+    app(ResolveSourceDocument::class)->handle(1);
 })->throws(Illuminate\Auth\Access\AuthorizationException::class);
-
-it('resolves every source type present in the ledger', function () {
-    actingAs(resolveSourceUser());
-
-    $action = app(ResolveSourceDocument::class);
-
-    $types = JournalEntry::query()
-        ->whereNotNull('source_type')
-        ->select('source_type')
-        ->distinct()
-        ->pluck('source_type');
-
-    foreach ($types as $type) {
-        expect($action->isMapped((string) $type))
-            ->toBeTrue("source_type [{$type}] is in the ledger but not in the registry");
-    }
-});
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **Step 3: Run the test to verify it fails**
 
 Run: `php vendor\bin\pest tests\Feature\Accounting\Review\ResolveSourceDocumentTest.php`
-Expected: FAIL — `Class "App\Modules\Accounting\Actions\Review\ResolveSourceDocument" does not exist`
+Expected: FAIL — `ResolveSourceDocument` does not exist
 
-- [ ] **Step 3: Create the value object**
+- [ ] **Step 4: Create the value object**
 
 Create `app/Modules/Accounting/Domain/SourceReference.php`:
 
@@ -213,10 +254,11 @@ namespace App\Modules\Accounting\Domain;
  * A resolved link from a journal entry to the document that caused it,
  * docs/specs/2026-08-12-accounting-finance-architecture.md §6.
  *
- * An unresolvable reference is a first-class case, not an error: a source
- * type with no viewing route, or an entry with no source at all (a manual
- * journal), is legitimate. It renders as inert labelled text so the chain
- * always terminates visibly rather than in a broken link or a raw class name.
+ * An unresolvable reference is a first-class case, not an error. A manual
+ * journal genuinely has no source document, and a document type with no
+ * viewing route (student invoices today) legitimately cannot be linked.
+ * Both render as inert labelled text so the chain always terminates visibly
+ * rather than in a broken link or a leaked class name.
  */
 final readonly class SourceReference
 {
@@ -252,9 +294,9 @@ final readonly class SourceReference
 }
 ```
 
-- [ ] **Step 4: Create the Action**
+- [ ] **Step 5: Create the Action**
 
-Create `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`. Replace the `REGISTRY` entries with the real findings from Task 1 — the two shown are the shape, not a guess to keep:
+Create `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`:
 
 ```php
 <?php
@@ -264,72 +306,130 @@ declare(strict_types=1);
 namespace App\Modules\Accounting\Actions\Review;
 
 use App\Modules\Accounting\Domain\SourceReference;
+use App\Modules\Accounting\Models\Expense;
+use App\Modules\Assets\Models\Asset;
 use App\Modules\Identity\Domain\Permission;
+use App\Modules\Payroll\Models\PayrollRun;
+use App\Modules\Procurement\Models\PurchaseOrder;
+use App\Modules\Procurement\Models\SupplierInvoice;
+use App\Modules\Procurement\Models\SupplierPayment;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route as RouteFacade;
 
 /**
- * Resolves `journal_entries.source_type`/`source_id` to a viewable document,
- * docs/specs/2026-08-12-accounting-finance-architecture.md §6.
+ * Resolves a journal entry to the document that caused it,
+ * docs/specs/2026-08-12-accounting-finance-architecture.md §6.1.
  *
- * This is the ONE place the source-type mapping lives. It requires no
- * migration: the columns already exist on the entry.
+ * THE LINK IS A REVERSE ONE. `journal_entries.source_type` is always the
+ * literal 'posting_event' and `source_id` is never populated - verified
+ * 2026-08-12. The usable link is the `journal_entry_id` foreign key that
+ * each document model carries, set by the module that posts it.
  *
- * An unmapped type is NOT an error - see SourceReference. What is forbidden
- * is leaking a class name to the operator or emitting a dead link, both of
- * which the tests assert against.
+ * Cost is one query per REGISTERED MODEL, not one per entry, so a page of
+ * 25 rows costs the same as a page of 200.
+ *
+ * A type absent from the registry renders inert. That is deliberate:
+ * Fees\Models\Invoice and Fees\Models\Payment carry the column but have no
+ * web viewing route, and inventing one to make the link look complete is
+ * exactly what §1.1 forbids.
  */
 final readonly class ResolveSourceDocument
 {
     public const PERMISSION = Permission::LedgerView->value;
 
     /**
-     * source_type => [route name, route parameter name, translation key].
+     * model class => [route name, route parameter, translation key].
      *
-     * Populated from Task 1's enumeration. A type absent here renders inert.
+     * Every route below was read out of routes/web.php. Adding a row asserts
+     * two things the tests verify: the model carries `journal_entry_id`, and
+     * the route exists.
      *
-     * @var array<string, array{route: string, param: string, label: string}>
+     * @var array<class-string, array{route: string, param: string, label: string}>
      */
     private const REGISTRY = [
-        // 'invoice' => ['route' => 'fees.invoices.show', 'param' => 'invoice', 'label' => 'opes.accounting.review.source_invoice'],
-        // 'expense' => ['route' => 'accounting.expenses.show', 'param' => 'expense', 'label' => 'opes.accounting.review.source_expense'],
+        Expense::class => ['route' => 'accounting.expenses.show', 'param' => 'expense', 'label' => 'opes.accounting.review.source_expense'],
+        Asset::class => ['route' => 'assets.show', 'param' => 'asset', 'label' => 'opes.accounting.review.source_asset'],
+        PayrollRun::class => ['route' => 'payroll.runs.show', 'param' => 'run', 'label' => 'opes.accounting.review.source_payroll_run'],
+        PurchaseOrder::class => ['route' => 'procurement.orders.show', 'param' => 'order', 'label' => 'opes.accounting.review.source_purchase_order'],
+        SupplierInvoice::class => ['route' => 'procurement.invoices.show', 'param' => 'invoice', 'label' => 'opes.accounting.review.source_supplier_invoice'],
+        SupplierPayment::class => ['route' => 'procurement.payments.show', 'param' => 'payment', 'label' => 'opes.accounting.review.source_supplier_payment'],
     ];
 
-    public function handle(?string $sourceType, ?int $sourceId): SourceReference
+    public function handle(int $journalEntryId): SourceReference
+    {
+        return $this->forEntryIds([$journalEntryId])[$journalEntryId];
+    }
+
+    /**
+     * @param  list<int>  $journalEntryIds
+     * @return array<int, SourceReference>
+     */
+    public function forEntryIds(array $journalEntryIds): array
     {
         Gate::authorize(self::PERMISSION);
 
-        if ($sourceType === null || $sourceId === null) {
-            return SourceReference::inert(__('opes.accounting.review.source_none'));
+        $resolved = [];
+
+        foreach (self::REGISTRY as $model => $meta) {
+            if ($journalEntryIds === [] || ! RouteFacade::has($meta['route'])) {
+                continue;
+            }
+
+            $rows = $model::query()
+                ->whereIn('journal_entry_id', $journalEntryIds)
+                ->get(['id', 'journal_entry_id']);
+
+            foreach ($rows as $row) {
+                $entryId = (int) $row->journal_entry_id;
+
+                // First registered owner wins. An entry owned by two documents
+                // would be a data fault; picking deterministically beats
+                // rendering a different answer on each page load.
+                $resolved[$entryId] ??= SourceReference::linked(
+                    __($meta['label'], ['id' => $row->id]),
+                    route($meta['route'], [$meta['param'] => $row->id]),
+                );
+            }
         }
 
-        $entry = self::REGISTRY[$sourceType] ?? null;
-
-        if ($entry === null || ! RouteFacade::has($entry['route'])) {
-            return SourceReference::inert(__('opes.accounting.review.source_unmapped'));
+        foreach ($journalEntryIds as $id) {
+            $resolved[$id] ??= SourceReference::inert(__('opes.accounting.review.source_manual'));
         }
 
-        return SourceReference::linked(
-            __($entry['label'], ['id' => $sourceId]),
-            route($entry['route'], [$entry['param'] => $sourceId]),
-        );
+        return $resolved;
     }
 
-    public function isMapped(string $sourceType): bool
+    /**
+     * @return list<class-string>
+     */
+    public static function registeredModels(): array
     {
-        return array_key_exists($sourceType, self::REGISTRY);
+        return array_keys(self::REGISTRY);
+    }
+
+    /**
+     * @return array<class-string, array{route: string, param: string, label: string}>
+     */
+    public static function registry(): array
+    {
+        return self::REGISTRY;
     }
 }
 ```
 
-- [ ] **Step 5: Add the translation keys**
+- [ ] **Step 6: Add the translation keys**
 
 In `lang/en/opes.php`, under the `accounting` key, add a `review` block:
 
 ```php
 'review' => [
-    'source_none' => 'No source document',
-    'source_unmapped' => 'Source document not viewable',
+    'source_manual' => 'Manual entry — no source document',
+    'source_expense' => 'Expense #:id',
+    'source_asset' => 'Asset #:id',
+    'source_payroll_run' => 'Payroll run #:id',
+    'source_purchase_order' => 'Purchase order #:id',
+    'source_supplier_invoice' => 'Supplier invoice #:id',
+    'source_supplier_payment' => 'Supplier payment #:id',
 ],
 ```
 
@@ -337,19 +437,26 @@ In `lang/fr/opes.php`, the same block:
 
 ```php
 'review' => [
-    'source_none' => 'Aucune pièce justificative',
-    'source_unmapped' => 'Pièce justificative non consultable',
+    'source_manual' => 'Écriture manuelle — aucune pièce justificative',
+    'source_expense' => 'Dépense n° :id',
+    'source_asset' => 'Immobilisation n° :id',
+    'source_payroll_run' => 'Traitement de paie n° :id',
+    'source_purchase_order' => 'Bon de commande n° :id',
+    'source_supplier_invoice' => 'Facture fournisseur n° :id',
+    'source_supplier_payment' => 'Règlement fournisseur n° :id',
 ],
 ```
 
-`LocalisationTest` requires both files to carry every key. Add each new key to both in the same commit, every time.
+`LocalisationTest` requires both files to carry every key. Add each new key to both, in the same commit, every time.
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [ ] **Step 7: Run the tests to verify they pass**
 
 Run: `php vendor\bin\pest tests\Feature\Accounting\Review\ResolveSourceDocumentTest.php`
-Expected: PASS, 4 tests
+Expected: PASS, 5 tests.
 
-- [ ] **Step 7: Run the guard**
+If the `Expense` factory does not exist or does not accept `journal_entry_id`, check `database/factories/` for the real factory name and adjust the test. Do not create a factory the codebase does not already have without saying so in your report.
+
+- [ ] **Step 8: Run the guard**
 
 Run:
 
@@ -360,11 +467,11 @@ php vendor\bin\phpstan analyse --memory-limit=1G
 
 Expected: as green as when you started.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add app/Modules/Accounting/Domain/SourceReference.php app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php lang/en/opes.php lang/fr/opes.php
-git commit -m "feat(accounting): resolve a journal entry to its source document"
+git commit -m "feat(accounting): resolve a journal entry to the document that caused it"
 ```
 
 ---
@@ -1459,10 +1566,10 @@ final class Journals extends Component
         return view('livewire.accounting.review.journals', [
             'entries' => $entries,
             'counts' => app(JournalExceptions::class)->counts(),
-            'references' => $entries->getCollection()->mapWithKeys(
-                fn (JournalEntry $entry): array => [
-                    $entry->id => $resolver->handle($entry->source_type, $entry->source_id),
-                ],
+            // ONE batched resolve for the whole page - never one call per row.
+            // See Task 2: cost is one query per registered model, not per entry.
+            'references' => $resolver->forEntryIds(
+                $entries->getCollection()->pluck('id')->map(fn ($id): int => (int) $id)->all(),
             ),
         ]);
     }

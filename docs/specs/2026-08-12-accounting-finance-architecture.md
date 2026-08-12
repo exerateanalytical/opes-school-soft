@@ -360,15 +360,56 @@ Statement line  →  account(s)  →  journal entries  →  journal line
                              expense, asset, bill…)               under which rule version)
 ```
 
-**This requires no migration.** `JournalEntry` already carries `source_type`,
-`source_id`, `posting_rule_id`, `posting_rule_version`, `piece_no`, `created_by`,
-`posted_by`, `approved_by`, `posted_at`, `approved_at`, `reverses_entry_id` and
-`reversed_by_entry_id`. The work is a resolver plus presentation.
+### 6.1 The link is a reverse one — corrected 2026-08-12
 
-Implementation: one `Actions\Review\ResolveSourceDocument` mapping
-`source_type` → a route and a human label, with an explicit registry per module.
-An unmapped `source_type` renders as an inert, labelled reference — never a
-broken link, never a raw class name.
+An earlier draft of this section asserted that `journal_entries.source_type` and
+`source_id` identify the originating document. **Investigation during
+implementation proved otherwise, and the correction matters:**
+
+- `source_type` is written in exactly one place, `Accounting\Actions\PostFromEvent`,
+  and is always the literal string `'posting_event'` — never the `PostingEvent`
+  case (`fee.invoice.issued` and so on).
+- **`source_id` is never populated on a journal entry at all.** The only writes
+  are `ReverseJournalEntry` copying a parent's value (itself always null) and two
+  `HR` Actions writing to `LeaveAccrual`, a different table entirely.
+- No `morphMap` is registered anywhere in `app/`.
+
+A forward resolver keyed on those columns would therefore resolve nothing. It
+would also have been the kind of plausible-looking dead code §1.1 exists to
+prevent.
+
+**The real link runs the other way, and it is already populated.** Thirty-six
+document models across `Fees`, `Procurement`, `Assets`, `Payroll`, `Inventory`,
+`Tax`, `Library`, `Operations` and `Accounting` carry a `journal_entry_id`
+foreign key — `Invoice`, `Payment`, `CreditNote`, `SupplierInvoice`,
+`SupplierPayment`, `PurchaseOrder`, `Asset`, `AssetDisposal`, `DepreciationRun`,
+`PayrollRun`, `PayrollPayment`, `Expense`, `StockMovement`, `LibraryFine` and
+more. The module that creates the document sets it when it posts.
+
+So resolution is a **reverse lookup**: given an entry, ask each registered
+document type whether it owns that entry.
+
+**This still requires no migration, and no change to the posting engine** —
+which keeps §3's non-goal intact.
+
+Implementation: `Actions\Review\ResolveSourceDocument` holds a registry of
+`model class → route name → route parameter → label key`. For a page of entries
+it issues one `whereIn('journal_entry_id', $ids)` query per registered model, so
+cost is bounded by the size of the registry, not by the number of rows shown.
+
+Two rules the registry must keep:
+
+1. **Registration is explicit and additive.** A document type absent from the
+   registry renders inert — a labelled, non-clickable reference. Never a broken
+   link, never a raw class name, never a guessed route.
+2. **The registry is not a schema claim.** Adding a model to it asserts only
+   that this model carries `journal_entry_id` and has a viewing route, both of
+   which the tests in §9.2 verify against the live route table.
+
+Where no document owns the entry — a genuine manual journal — the chain
+terminates at `posting_rule_id` + `posting_rule_version` + `created_by`/
+`posted_by`, which *are* reliably stamped, and the reference reads "manual
+entry". That is a complete answer, not a gap.
 
 Aggregate figures (a statement line, a KPI) expose their **account composition**
 first, then per account the entries. Depth is bounded so the chain terminates.
