@@ -76,9 +76,22 @@ it('restricts a link holding only row 16 to receipts, best-effort matched to the
     $component = Livewire::test(Fees::class, ['student' => $studentId]);
     $component->assertSet('canWide', false);
 
-    $html = $component->html();
-    expect($html)->toContain('20');
-    expect($html)->not->toContain('99');
+    /*
+     * Livewire stamps a RANDOM component id into the markup
+     * (`wire:key="lw-765053699-0"`), so asserting on the bare digits "99"
+     * fails whenever that id happens to contain them - which it does, about
+     * a fifth of the time. Strip the framework's own attributes first, then
+     * assert on the formatted AMOUNTS, which is what the assertion was
+     * always trying to say: this guardian sees their own 20 000 receipt and
+     * not the other payer's 99 000 one.
+     */
+    $html = (string) preg_replace('/\s(?:wire:key|wire:id|id)="[^"]*"/', '', $component->html());
+
+    // The screen groups thousands with a NARROW NO-BREAK SPACE via
+    // App\Support\Money\Money, not a comma, so the expectation is built the
+    // same way the view builds it rather than guessed.
+    expect($html)->toContain("20\u{202F}000");
+    expect($html)->not->toContain("99\u{202F}000");
 });
 
 it('denies the fees screen for a child the guardian is not linked to - row 32', function () {

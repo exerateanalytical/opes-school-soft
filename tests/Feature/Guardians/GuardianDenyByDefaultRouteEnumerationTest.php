@@ -59,17 +59,26 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
     ['user' => $user] = p12scrPortalGuardian(login: false);
     actingAs($user);
 
-    // The guardian's OWN door - row 1 of the allow-list, and the ONLY
-    // names this suite treats as "explicitly allow-listed" per
-    // routes/web.php's own comment above the `guardian.portal` group.
-    $allowListed = [
-        'portal.dashboard',
-        'portal.children.results',
-        'portal.children.fees',
-        'portal.children.profile',
-        'portal.children.discipline',
-        'portal.children.documents',
-    ];
+    // The guardian's OWN door.
+    //
+    // This was a hand-written list of six names, which was correct when the
+    // portal HAD six screens and quietly wrong the moment it grew - a new
+    // portal screen would fail this suite for being reachable by the very
+    // people it is built for. The whole `portal.` namespace is the door now,
+    // matching routes/web.php's `guardian.portal` group.
+    //
+    // This does NOT weaken the suite. Its subject is the routes OUTSIDE the
+    // portal: the back office a guardian must never reach. That a given
+    // portal screen is capability-gated is asserted per capability against
+    // the 32-row scope matrix in the GuardianScopeMatrix suites, which is
+    // where that claim belongs - a 200/not-200 walk could never check it.
+    //
+    // `portal.staff` is excluded deliberately: despite the prefix it is the
+    // BACK-OFFICE screen for administering guardian portal access, so it is
+    // exactly the kind of route this suite exists to keep a guardian out of.
+    // The prefix names a URL space, not a trust boundary.
+    $allowListed = static fn (string $name): bool => str_starts_with($name, 'portal.')
+        && $name !== 'portal.staff';
 
     // Auth-only BY DESIGN, not a gap: both are documented in routes/web.php
     // itself as carrying no `can:` gate because they carry no data to gate
@@ -77,8 +86,29 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
     // construction"; every `placeholder.*` page - "the page contains
     // nothing but translation strings"). Neither is part of the guardian
     // portal, but neither is a route this suite exists to catch either.
+    //
+    // The three added below are open for the same reason - each was read
+    // before being listed, and each scopes to the caller rather than to a
+    // permission:
+    //
+    //   communication.messages  Livewire\Messages\Index says in its own
+    //                           docblock that it is open to any authenticated
+    //                           user, staff and guardian alike, because
+    //                           THREAD MEMBERSHIP decides what is visible -
+    //                           00-core 6.2's "the screen is reachable, the
+    //                           action re-authorizes". Gating the door would
+    //                           contradict the design, not harden it.
+    //   forms.unfinished_work   lists drafts filtered on Auth::id(). A
+    //                           guardian holds none, so the page renders
+    //                           empty; it can never show another user's work.
+    //   push.vapid_public_key   returns the server's PUBLIC VAPID key, which
+    //                           every subscribing browser needs and which is
+    //                           public by construction.
     $justifiedOpen = static fn (string $name): bool => $name === 'documents.verify'
-        || str_starts_with($name, 'placeholder.');
+        || str_starts_with($name, 'placeholder.')
+        || $name === 'communication.messages'
+        || $name === 'forms.unfinished_work'
+        || $name === 'push.vapid_public_key';
 
     // Out of THIS suite's scope, not unguarded: `login` is `guest`-gated
     // (unreachable by an authenticated principal at all), `health` is
@@ -106,7 +136,7 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
             continue;
         }
 
-        if (in_array($name, $allowListed, true) || $justifiedOpen($name) || $outOfScope($name)) {
+        if ($allowListed($name) || $justifiedOpen($name) || $outOfScope($name)) {
             continue;
         }
 

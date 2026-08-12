@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Modules\Guardians\Models\Guardian;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * The demo family from the reference screens in `mobile/*.png`.
@@ -62,6 +63,7 @@ final class PortalShowcaseSeeder extends Seeder
         $this->seedFees($guardian, $children);
         $this->seedPublishedResults($children);
         $this->seedPhotos($guardian, $children);
+        $this->seedDocuments($children);
 
         $this->command?->info('Portal showcase: '.$guardian->fullName().' with '.count($children).' children.');
     }
@@ -809,6 +811,81 @@ final class PortalShowcaseSeeder extends Seeder
         $guardianPath = 'demo/photos/guardian-'.$guardian->getKey().'.png';
         $make($initialsOf($guardian->fullName()), $guardianPath, [11, 59, 43]);
         $guardian->forceFill(['photo_path' => $guardianPath])->save();
+    }
+
+    /**
+     * The shelf behind `child-documents.png` and `medical-documents.png` -
+     * row 23, the paperwork a GUARDIAN supplied.
+     *
+     * Row 22 (school-issued) is deliberately not seeded here: those are
+     * `issued_documents`, minted by Reporting when a template is rendered, and
+     * fabricating serials and QR tokens directly in the table would put codes
+     * in front of a parent that the public /documents/verify page would then
+     * fail to resolve. An unverifiable verification code is worse than an
+     * empty shelf.
+     *
+     * The bytes are written for real, because the download route streams from
+     * the disk and a row whose file is absent exercises the storage-failure
+     * branch rather than the success one.
+     */
+    private function seedDocuments(array $children): void
+    {
+        if (! Schema::hasTable('student_documents')) {
+            return;
+        }
+
+        $disk = \Illuminate\Support\Facades\Storage::disk((string) config('filesystems.default'));
+
+        // The three states the list screen renders differently: verified,
+        // awaiting the registrar, and one carrying an expiry date.
+        $shelf = [
+            ['Birth certificate', 'verified', '2014-03-18', null],
+            ['Vaccination card', 'verified', '2025-09-02', '2027-09-02'],
+            ['Previous school report', 'unverified', '2025-07-15', null],
+            ['Passport photograph', 'verified', '2026-01-10', null],
+        ];
+
+        foreach ($children as $studentId) {
+            foreach ($shelf as $index => [$title, $status, $issuedOn, $expiresOn]) {
+                if (DB::table('student_documents')
+                    ->where('student_id', $studentId)->where('title', $title)->exists()) {
+                    continue;
+                }
+
+                // A minimal but genuinely valid single-page PDF, so a parent
+                // clicking Download gets a file their reader opens rather than
+                // four bytes named .pdf.
+                $body = "BT /F1 16 Tf 60 760 Td (".$title.") Tj ET";
+                $pdf = "%PDF-1.4\n"
+                    ."1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+                    ."2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+                    ."3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]"
+                    ."/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj\n"
+                    ."4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n"
+                    ."5 0 obj<</Length ".strlen($body).">>stream\n".$body."\nendstream endobj\n"
+                    ."trailer<</Root 1 0 R>>\n%%EOF\n";
+
+                $path = 'demo/documents/student-'.$studentId.'-'.($index + 1).'.pdf';
+                $disk->put($path, $pdf);
+
+                DB::table('student_documents')->insert([
+                    'student_id' => $studentId,
+                    'document_type_id' => null,
+                    'title' => $title,
+                    'file_path' => $path,
+                    'file_hash' => hash('sha256', $pdf),
+                    'mime' => 'application/pdf',
+                    'size_bytes' => strlen($pdf),
+                    'issued_on' => $issuedOn,
+                    'expires_on' => $expiresOn,
+                    'verification_status' => $status,
+                    'verified_at' => $status === 'verified' ? now() : null,
+                    'is_archived' => false,
+                    'created_at' => now()->subDays(30 - $index),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**
