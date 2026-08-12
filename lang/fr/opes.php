@@ -2063,6 +2063,7 @@ return [
         'account_school_managed' => 'Seule l\'école peut modifier ces informations. Contactez le secrétariat en cas d\'erreur.',
         'account_saved' => 'Vos coordonnées ont été enregistrées.',
         'account_save' => 'Enregistrer',
+        'switch_child' => "Changer d'enfant",
         'view_all' => 'Tout voir',
         'status_active' => 'Actif',
         'dashboard_welcome' => 'Bon retour, :name',

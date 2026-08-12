@@ -2071,6 +2071,7 @@ return [
         'account_school_managed' => 'Only the school can change these details. Contact the office if something is wrong.',
         'account_saved' => 'Your details have been saved.',
         'account_save' => 'Save changes',
+        'switch_child' => 'Switch child',
         'view_all' => 'View all',
         'status_active' => 'Active',
         'dashboard_welcome' => 'Welcome back, :name',
