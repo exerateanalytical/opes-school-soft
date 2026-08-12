@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.children.fees', $studentId) }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,12 +8,12 @@
             {{ $childName }} &middot; {{ __('opes.guardian_portal.tab_fees') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">
             {{ $invoice->invoice_no ?? '#'.$invoice->id }}
         </h1>
     </div>
 
-    <section aria-labelledby="portal-invoice-head" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+    <section aria-labelledby="portal-invoice-head" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
         <h2 id="portal-invoice-head" class="sr-only">{{ __('opes.guardian_portal.fees_tab_invoices') }}</h2>
 
         <dl class="divide-y divide-border-secondary text-sm">
@@ -30,7 +30,7 @@
         </dl>
     </section>
 
-    <section aria-labelledby="portal-invoice-lines" class="rounded border border-border-primary bg-white shadow-sm">
+    <section aria-labelledby="portal-invoice-lines" class="rounded-2xl border border-border-primary bg-white shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
         <h2 id="portal-invoice-lines" class="border-b border-border-secondary px-4 py-3 text-sm font-semibold text-charcoal">
             {{ __('opes.guardian_portal.invoice_lines') }}
         </h2>

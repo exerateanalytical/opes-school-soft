@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.children.profile', $studentId) }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,21 +8,21 @@
             {{ $childName }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.meeting_title') }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.meeting_title') }}</h1>
     </div>
 
     @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
+        <p class="rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">{{ session('portal-status') }}</p>
     @endif
 
     {{-- Said before they submit, not after: the time is a preference. A parent
          who believed they had reserved a slot and arrived to an empty office
          would rightly be furious. --}}
-    <p class="rounded border border-border-secondary bg-surface-green px-4 py-3 text-sm text-charcoal/70">
+    <p class="rounded-2xl border border-border-secondary bg-portal-tint px-4 py-3 text-sm text-charcoal/70">
         {{ __('opes.guardian_portal.meeting_intro') }}
     </p>
 
-    <form wire:submit="submit" class="space-y-4 rounded border border-border-primary bg-white p-4 shadow-sm">
+    <form wire:submit="submit" class="space-y-4 rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
         <div>
             <p class="text-xs font-medium text-charcoal/70">{{ __('opes.guardian_portal.meeting_child') }}</p>
             <p class="text-sm font-semibold text-charcoal">{{ $childName }}</p>
@@ -35,7 +35,7 @@
             <input id="portal-meeting-when" type="datetime-local" wire:model="preferredAt"
                    class="mt-1 w-full rounded border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none sm:w-72">
             @error('preferredAt')
-                <p class="mt-1 text-xs text-danger">{{ $message }}</p>
+                <p class="mt-1 text-xs text-portal-danger">{{ $message }}</p>
             @enderror
         </div>
 
@@ -50,7 +50,7 @@
                 @endforeach
             </select>
             @error('meetingType')
-                <p class="mt-1 text-xs text-danger">{{ $message }}</p>
+                <p class="mt-1 text-xs text-portal-danger">{{ $message }}</p>
             @enderror
         </div>
 
@@ -61,13 +61,13 @@
             <textarea id="portal-meeting-agenda" wire:model="agenda" rows="4" maxlength="2000"
                       class="mt-1 w-full rounded border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none"></textarea>
             @error('agenda')
-                <p class="mt-1 text-xs text-danger">{{ $message }}</p>
+                <p class="mt-1 text-xs text-portal-danger">{{ $message }}</p>
             @enderror
         </div>
 
         <div class="flex justify-end">
             <button type="submit"
-                    class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-portal-green-soft">
                 {{ __('opes.guardian_portal.meeting_submit') }}
             </button>
         </div>

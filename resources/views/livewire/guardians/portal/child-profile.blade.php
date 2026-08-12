@@ -1,96 +1,122 @@
-@php
-    $childName = $student ? trim($student->first_name.' '.$student->last_name) : '';
-@endphp
-<div class="min-w-0 space-y-4">
-    @include('livewire.guardians.portal._child-tabs', ['studentId' => $studentId, 'childName' => $childName, 'active' => 'profile'])
+{{--
+    `/portal/children/{s}/profile` - built to mobile/child-profile.png and
+    child-overview.png.
 
-    <div class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded border border-border-primary bg-white p-4">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.guardian_portal.profile_identity') }}</h2>
-            <dl class="mt-2 space-y-1 text-sm">
-                <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_matricule') }}</dt><dd class="font-mono">{{ $student->matricule ?? '—' }}</dd></div>
-                <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_class') }}</dt><dd>{{ $className ?? '—' }}</dd></div>
-            </dl>
+    Row 1 is the floor - identity, always. Row 2 adds the detail block, and its
+    absence is a school decision rather than a gap, so the screen says so
+    instead of showing a page of dashes.
+--}}
+<div class="min-w-0 space-y-5">
+    @include('livewire.guardians.portal._child-tabs', [
+        'studentId' => $studentId,
+        'childName' => trim($student->first_name.' '.$student->last_name),
+        'active' => 'profile',
+    ])
 
-            @if ($canDetail)
-                <dl class="mt-3 space-y-1 border-t border-border-primary pt-3 text-sm">
-                    <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_dob') }}</dt><dd>{{ $student->date_of_birth ?? '—' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_gender') }}</dt><dd>{{ $student->gender ?? '—' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_nationality') }}</dt><dd>{{ $student->nationality ?? '—' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_address') }}</dt>
-                        <dd class="text-right">{{ collect([$student->address_line ?? null, $student->city ?? null, $student->region ?? null])->filter()->implode(', ') ?: '—' }}</dd>
-                    </div>
-                </dl>
-
-                @if ($canFullMedical)
-                    <dl class="mt-3 space-y-1 border-t border-border-primary pt-3 text-sm">
-                        <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_blood_group') }}</dt><dd>{{ $student->blood_group ?? '—' }}</dd></div>
-                        <div class="flex justify-between gap-3"><dt class="text-charcoal/60">{{ __('opes.guardian_portal.profile_genotype') }}</dt><dd>{{ $student->genotype ?? '—' }}</dd></div>
-                    </dl>
-                @endif
-            @else
-                <p class="mt-3 border-t border-border-primary pt-3 text-xs text-charcoal/50">{{ __('opes.guardian_portal.profile_detail_restricted') }}</p>
-            @endif
+    {{-- Identity - row 1, granted on every valid link. --}}
+    <x-portal.card :padded="false">
+        <div class="p-4 sm:p-5">
+            <x-portal.section :title="__('opes.guardian_portal.profile_identity')" icon="id"/>
         </div>
 
-        @if ($canEmergencyMedical || $canFullMedical)
-            <div class="rounded border border-border-primary bg-white p-4">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.guardian_portal.profile_medical') }}</h2>
+        <dl class="divide-y divide-border-secondary px-4 pb-2 text-sm sm:px-5">
+            @foreach (array_filter([
+                ['id', __('opes.guardian_portal.profile_matricule'), $student->matricule],
+                ['book', __('opes.guardian_portal.profile_class'), $className],
+                ['calendar', __('opes.guardian_portal.profile_dob'), $canDetail ? $student->date_of_birth : null],
+                ['user', __('opes.guardian_portal.profile_gender'), $student->gender ?? null],
+                ['globe', __('opes.guardian_portal.profile_nationality'), $canDetail ? ($student->nationality ?? null) : null],
+                ['pin', __('opes.guardian_portal.profile_address'), $canDetail ? ($student->address_line ?? null) : null],
+            ], fn (array $row): bool => $row[2] !== null && $row[2] !== '') as $index => [$icon, $label, $value])
+                <div class="flex items-center gap-3 py-3" wire:key="ident-{{ $index }}">
+                    <x-portal.icon :name="$icon" tone="primary" size="sm"/>
+                    <dt class="min-w-0 flex-1 text-charcoal/70">{{ $label }}</dt>
+                    <dd class="shrink-0 text-right font-semibold text-charcoal">{{ $value }}</dd>
+                </div>
+            @endforeach
+        </dl>
 
-                @php $records = $canFullMedical ? $fullMedical : $emergencyMedical; @endphp
+        @unless ($canDetail)
+            <p class="px-4 pb-4 text-xs text-charcoal/55 sm:px-5">
+                {{ __('opes.guardian_portal.profile_detail_restricted') }}
+            </p>
+        @endunless
+    </x-portal.card>
 
-                @if ($records->isEmpty())
-                    <p class="mt-2 text-sm text-charcoal/60">{{ __('opes.guardian_portal.profile_medical_empty') }}</p>
-                @else
-                    <ul class="mt-2 space-y-2 text-sm">
-                        @foreach ($records as $record)
-                            <li class="rounded border border-border-primary/70 bg-sand/20 p-2">
-                                <p class="font-medium text-charcoal">{{ $record->condition_type }} <span class="font-normal text-charcoal/60">({{ $record->severity }})</span></p>
-                                <p class="text-charcoal/80">{{ $record->summary }}</p>
-                                @if ($canFullMedical && ($record->detail ?? null))
-                                    <p class="mt-1 text-xs text-charcoal/60">{{ $record->detail }}</p>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+    {{-- Medical - rows 3 and 4. The emergency scope is a complete answer for
+         an emergency contact, not a degraded one. --}}
+    @if ($canEmergencyMedical || $canFullMedical)
+        <x-portal.card :padded="false">
+            <div class="p-4 sm:p-5">
+                <x-portal.section :title="__('opes.guardian_portal.profile_medical')" icon="heart"
+                                  :action="__('opes.guardian_portal.health_title')"
+                                  :href="route('portal.children.health', $studentId)"/>
             </div>
-        @endif
 
-        @if ($canOtherGuardians)
-            <div class="rounded border border-border-primary bg-white p-4 sm:col-span-2">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">{{ __('opes.guardian_portal.profile_other_guardians') }}</h2>
+            @php $records = $canFullMedical ? $fullMedical : $emergencyMedical; @endphp
 
-                @if ($otherGuardians->isEmpty())
-                    <p class="mt-2 text-sm text-charcoal/60">{{ __('opes.guardian_portal.profile_other_guardians_empty') }}</p>
-                @else
-                    <ul class="mt-2 divide-y divide-border-primary text-sm">
-                        @foreach ($otherGuardians as $other)
-                            <li class="flex items-center justify-between py-1.5">
-                                <span>{{ trim($other->first_name.' '.$other->last_name) }}</span>
-                                <span class="text-charcoal/60">{{ __('opes.guardians_screen.relationship_'.$other->relationship) }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+            @if ($records === null || $records->isEmpty())
+                <p class="px-4 pb-5 text-sm text-charcoal/60 sm:px-5">{{ __('opes.guardian_portal.profile_medical_empty') }}</p>
+            @else
+                <div class="divide-y divide-border-secondary pb-1">
+                    @foreach ($records as $record)
+                        <x-portal.row wire:key="med-{{ $loop->index }}"
+                                      :title="$record->summary ?? $record->condition_type"
+                                      :subtitle="$record->condition_type ?? null"
+                                      icon="heart"
+                                      :tone="($record->is_emergency_relevant ?? false) ? 'danger' : 'primary'"
+                                      :trailing="$record->severity ?? null"
+                                      trailingTone="warning"
+                                      :chevron="false"/>
+                    @endforeach
+                </div>
+            @endif
+        </x-portal.card>
+    @endif
+
+    {{-- Row 31: names and relationship ONLY. The server sends no phone, no
+         email, no ID number - a parent may know who else is on the record
+         without getting a directory of the other family. --}}
+    @if ($canOtherGuardians)
+        <x-portal.card :padded="false">
+            <div class="p-4 sm:p-5">
+                <x-portal.section :title="__('opes.guardian_portal.profile_other_guardians')" icon="users"/>
             </div>
-        @endif
 
-        {{-- Row 27. Offered only when the guardian holds it, for the same
-             reason the tab strip filters. This is also the ONLY way in: the
-             meeting route had no link anywhere, so the screen existed but was
-             unreachable. --}}
-        @if (app(\App\Modules\Guardians\Policies\GuardianPortalPolicy::class)
-                ->allows(\App\Modules\Guardians\Domain\GuardianCapability::R27RequestGuardianMeeting, $studentId))
-            <div class="rounded border border-border-primary bg-surface-green p-4 sm:col-span-2">
-                <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.guardian_portal.meeting_title') }}</h2>
-                <p class="mt-1 text-sm text-charcoal/70">{{ __('opes.guardian_portal.meeting_intro') }}</p>
+            @if ($otherGuardians->isEmpty())
+                <p class="px-4 pb-5 text-sm text-charcoal/60 sm:px-5">{{ __('opes.guardian_portal.profile_other_guardians_empty') }}</p>
+            @else
+                <div class="divide-y divide-border-secondary pb-1">
+                    @foreach ($otherGuardians as $other)
+                        @php $name = trim($other->first_name.' '.$other->last_name); @endphp
+                        <div wire:key="og-{{ $loop->index }}" class="flex items-center gap-3 px-4 py-3 sm:px-5">
+                            <x-portal.avatar :name="$name" tone="green"/>
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-charcoal">{{ $name }}</span>
+                            <span class="shrink-0 rounded-full bg-portal-tint px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                {{ __('opes.guardians_screen.relationship_'.$other->relationship) }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </x-portal.card>
+    @endif
 
-                <a href="{{ route('portal.children.meeting', $studentId) }}"
-                   class="mt-3 inline-block rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
-                    {{ __('opes.guardian_portal.meeting_submit') }}
-                </a>
+    {{-- Row 27. The only way into the meeting screen. --}}
+    @if (app(\App\Modules\Guardians\Policies\GuardianPortalPolicy::class)
+            ->allows(\App\Modules\Guardians\Domain\GuardianCapability::R27RequestGuardianMeeting, $studentId))
+        <x-portal.card tone="green" class="flex flex-wrap items-center gap-4">
+            <x-portal.icon name="calendar" tone="primary" size="lg"/>
+
+            <div class="min-w-0 flex-1">
+                <p class="text-base font-bold text-charcoal">{{ __('opes.guardian_portal.meeting_title') }}</p>
+                <p class="mt-0.5 text-sm text-charcoal/70">{{ __('opes.guardian_portal.meeting_intro') }}</p>
             </div>
-        @endif
-    </div>
+
+            <a href="{{ route('portal.children.meeting', $studentId) }}"
+               class="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-portal-green-soft">
+                {{ __('opes.guardian_portal.meeting_submit') }}
+            </a>
+        </x-portal.card>
+    @endif
 </div>

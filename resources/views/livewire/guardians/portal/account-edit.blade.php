@@ -1,13 +1,13 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div>
-        <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.account_title') }}</h1>
+        <h1 class="text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.account_title') }}</h1>
         @if ($guardian)
             <p class="mt-1 text-sm text-charcoal/70">{{ $guardian->fullName() }}</p>
         @endif
     </div>
 
     @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
+        <p class="rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">{{ session('portal-status') }}</p>
     @endif
 
     {{--
@@ -18,7 +18,7 @@
         and audits an attempt independently of this form.
     --}}
     <form wire:submit="save" class="space-y-4">
-        <section aria-labelledby="portal-account-contact" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+        <section aria-labelledby="portal-account-contact" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
             <h2 id="portal-account-contact" class="text-sm font-semibold text-charcoal">
                 {{ __('opes.guardian_portal.account_contact') }}
             </h2>
@@ -41,14 +41,14 @@
                         <input id="portal-{{ $field }}" type="{{ $inputType }}" wire:model="{{ $field }}"
                                class="mt-1 w-full rounded border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none">
                         @error($field)
-                            <p class="mt-1 text-xs text-danger">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-portal-danger">{{ $message }}</p>
                         @enderror
                     </div>
                 @endforeach
             </div>
         </section>
 
-        <section aria-labelledby="portal-account-notify" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+        <section aria-labelledby="portal-account-notify" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
             <h2 id="portal-account-notify" class="text-sm font-semibold text-charcoal">
                 {{ __('opes.guardian_portal.account_notify') }}
             </h2>
@@ -71,7 +71,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <p class="text-xs text-charcoal/60">{{ __('opes.guardian_portal.account_school_managed') }}</p>
             <button type="submit"
-                    class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-portal-green-soft">
                 {{ __('opes.guardian_portal.account_save') }}
             </button>
         </div>

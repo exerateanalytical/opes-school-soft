@@ -93,7 +93,7 @@
                                              evidentiary and the server refuses
                                              to rewrite it. --}}
                                         <button type="button" wire:click="acknowledge({{ $sanction->id }})"
-                                                class="shrink-0 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-chrome-light">
+                                                class="shrink-0 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-portal-green-soft">
                                             {{ __('opes.guardian_portal.ack_button') }}
                                         </button>
                                     @else

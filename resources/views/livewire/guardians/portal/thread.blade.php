@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.messages') }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,11 +8,11 @@
             {{ __('opes.guardian_portal.messages_title') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ $title }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ $title }}</h1>
     </div>
 
     @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
+        <p class="rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">{{ session('portal-status') }}</p>
     @endif
 
     <section aria-label="{{ __('opes.guardian_portal.messages_title') }}" class="space-y-3">
@@ -24,7 +24,7 @@
                 <div wire:key="msg-{{ $message->id }}" @class(['flex', 'justify-end' => $mine])>
                     <div @class([
                         'max-w-[85%] rounded-lg px-3 py-2 text-sm',
-                        'bg-chrome text-white' => $mine,
+                        'bg-portal-green text-white' => $mine,
                         'border border-border-primary bg-white text-charcoal' => ! $mine,
                     ])>
                         @unless ($mine)
@@ -49,12 +49,12 @@
                   class="w-full rounded border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none"></textarea>
 
         @error('body')
-            <p class="mt-1 text-xs text-danger">{{ $message }}</p>
+            <p class="mt-1 text-xs text-portal-danger">{{ $message }}</p>
         @enderror
 
         <div class="mt-2 flex justify-end">
             <button type="submit"
-                    class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
+                    class="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-portal-green-soft">
                 {{ __('opes.guardian_portal.messages_send') }}
             </button>
         </div>

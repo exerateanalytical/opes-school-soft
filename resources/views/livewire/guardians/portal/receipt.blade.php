@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.payments') }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,15 +8,15 @@
             {{ __('opes.guardian_portal.payments_title') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.receipt_title') }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.receipt_title') }}</h1>
         <p class="mt-1 text-sm text-charcoal/70">{{ $childName }}</p>
     </div>
 
-    <section aria-labelledby="portal-receipt" class="rounded border border-border-primary bg-white shadow-sm">
+    <section aria-labelledby="portal-receipt" class="rounded-2xl border border-border-primary bg-white shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
         <h2 id="portal-receipt" class="sr-only">{{ __('opes.guardian_portal.receipt_title') }}</h2>
 
-        <div class="rounded-t bg-chrome px-4 py-3 text-center">
-            <p class="text-sm font-bold tracking-widest text-heritage-yellow">{{ __('opes.shell.brand') }}</p>
+        <div class="rounded-t-2xl bg-portal-green px-4 py-3 text-center">
+            <p class="text-sm font-bold tracking-widest text-portal-gold">{{ __('opes.shell.brand') }}</p>
             <p class="text-xs text-white/70">{{ __('opes.guardian_portal.receipt_title') }}</p>
         </div>
 
@@ -47,7 +47,7 @@
              gated on a staff permission. The number IS what the front desk
              checks, so that is what a parent is given. --}}
         <div class="border-t border-border-secondary p-4">
-            <div class="rounded border-2 border-heritage-yellow bg-gold-100 px-4 py-3 text-center">
+            <div class="rounded border-2 border-portal-gold bg-portal-gold/15 px-4 py-3 text-center">
                 <p class="text-xs uppercase tracking-wide text-charcoal/60">
                     {{ __('opes.guardian_portal.receipt_verify') }}
                 </p>

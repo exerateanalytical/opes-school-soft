@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.account') }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,14 +8,14 @@
             {{ __('opes.guardian_portal.account_title') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.help_title') }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.help_title') }}</h1>
     </div>
 
     {{-- The answers are written against what this product actually does. The
          commonest call this portal will generate is "why can't I see my
          child's fees", and the true answer is that the school controls it per
          guardian - "try refreshing" would send that parent round in circles. --}}
-    <section aria-labelledby="portal-help-faq" class="rounded border border-border-primary bg-white shadow-sm">
+    <section aria-labelledby="portal-help-faq" class="rounded-2xl border border-border-primary bg-white shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
         <h2 id="portal-help-faq" class="border-b border-border-secondary px-4 py-3 text-sm font-semibold text-charcoal">
             {{ __('opes.guardian_portal.help_title') }}
         </h2>
@@ -38,7 +38,7 @@
         </ul>
     </section>
 
-    <section aria-labelledby="portal-help-contact" class="rounded border border-border-primary bg-white shadow-sm">
+    <section aria-labelledby="portal-help-contact" class="rounded-2xl border border-border-primary bg-white shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
         <h2 id="portal-help-contact" class="border-b border-border-secondary px-4 py-3 text-sm font-semibold text-charcoal">
             {{ __('opes.guardian_portal.help_contact') }}
         </h2>

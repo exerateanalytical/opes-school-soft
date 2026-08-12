@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.account.settings') }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,14 +8,14 @@
             {{ __('opes.guardian_portal.account_settings_title') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.account_notify') }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.account_notify') }}</h1>
     </div>
 
     @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
+        <p class="rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">{{ session('portal-status') }}</p>
     @endif
 
-    <form wire:submit="save" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+    <form wire:submit="save" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
         <fieldset>
             <legend class="text-sm font-semibold text-charcoal">{{ __('opes.guardian_portal.account_notify') }}</legend>
 
@@ -35,7 +35,7 @@
         </fieldset>
 
         <div class="mt-4 flex justify-end">
-            <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-chrome-light">
+            <button type="submit" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-portal-green-soft">
                 {{ __('opes.guardian_portal.account_save') }}
             </button>
         </div>
@@ -44,7 +44,7 @@
     {{-- Per-TYPE preferences and quiet hours are in the reference design but
          are P1 (spec §7). Stated, not rendered as switches that would do
          nothing. --}}
-    <p class="rounded border border-border-secondary bg-surface-green px-4 py-3 text-sm text-charcoal/70">
+    <p class="rounded-2xl border border-border-secondary bg-portal-tint px-4 py-3 text-sm text-charcoal/70">
         {{ __('opes.guardian_portal.account_notifications_hint') }}
     </p>
 </div>

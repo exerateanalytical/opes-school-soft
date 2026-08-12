@@ -1,4 +1,4 @@
-<div class="min-w-0 space-y-4">
+<div class="min-w-0 space-y-5">
     <div class="min-w-0">
         <a href="{{ route('portal.account') }}"
            class="inline-flex items-center gap-1 text-xs font-medium text-charcoal/60 hover:text-primary">
@@ -8,7 +8,7 @@
             {{ __('opes.guardian_portal.account_title') }}
         </a>
 
-        <h1 class="mt-1 text-xl font-semibold text-charcoal">{{ __('opes.guardian_portal.security_title') }}</h1>
+        <h1 class="mt-1 text-2xl font-bold text-charcoal">{{ __('opes.guardian_portal.security_title') }}</h1>
         @if ($lastLoginAt)
             <p class="mt-1 text-sm text-charcoal/70">
                 {{ __('opes.guardian_portal.account_last_login') }}: {{ $lastLoginAt }}
@@ -17,13 +17,13 @@
     </div>
 
     @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
+        <p class="rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">{{ session('portal-status') }}</p>
     @endif
 
     {{-- Mobile app installations holding a live 30-day token. Revoking one is
          the honest answer to "I lost my phone": access ends now, not in a
          month. --}}
-    <section aria-labelledby="portal-security-devices" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+    <section aria-labelledby="portal-security-devices" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
         <h2 id="portal-security-devices" class="text-sm font-semibold text-charcoal">
             {{ __('opes.guardian_portal.security_devices') }}
         </h2>
@@ -43,7 +43,7 @@
                         </span>
 
                         <button type="button" wire:click="revokeDevice({{ $device->id }})"
-                                class="shrink-0 rounded border border-danger/50 px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger-bg">
+                                class="shrink-0 rounded border border-danger/50 px-3 py-1.5 text-xs font-semibold text-portal-danger hover:bg-portal-danger-soft">
                             {{ __('opes.guardian_portal.security_revoke') }}
                         </button>
                     </li>
@@ -57,7 +57,7 @@
     {{-- Browsers signed in right now. The current one is flagged rather than
          hidden: a list where every row looks equally foreign invites a parent
          to revoke the wrong one. --}}
-    <section aria-labelledby="portal-security-sessions" class="rounded border border-border-primary bg-white p-4 shadow-sm">
+    <section aria-labelledby="portal-security-sessions" class="rounded-2xl border border-border-primary bg-white p-4 shadow-[0_2px_10px_rgba(0,45,23,0.06)] sm:p-5">
         <h2 id="portal-security-sessions" class="text-sm font-semibold text-charcoal">
             {{ __('opes.guardian_portal.security_sessions') }}
         </h2>
@@ -80,7 +80,7 @@
                         </span>
 
                         @if ($session->is_current)
-                            <span class="shrink-0 rounded bg-success-bg px-2 py-0.5 text-xs font-medium text-success">
+                            <span class="shrink-0 rounded bg-portal-chip px-2 py-0.5 text-xs font-medium text-portal-success">
                                 {{ __('opes.guardian_portal.security_current') }}
                             </span>
                         @endif
@@ -90,7 +90,7 @@
         @endif
     </section>
 
-    <p class="rounded border border-border-secondary bg-surface-green px-4 py-3 text-sm text-charcoal/70">
+    <p class="rounded-2xl border border-border-secondary bg-portal-tint px-4 py-3 text-sm text-charcoal/70">
         {{ __('opes.guardian_portal.account_no_2fa') }}
     </p>
 </div>
