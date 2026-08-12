@@ -41,6 +41,20 @@
 
     $portalChildMatricule = \Illuminate\Support\Facades\DB::table('students')
         ->where('id', $studentId)->value('matricule');
+
+    /*
+     * The deeper screens behind each tab. Kept out of the strip itself - eight
+     * tabs is already the most a phone can scroll comfortably - and surfaced
+     * as a second row so they are reachable rather than orphaned.
+     */
+    $portalMore = array_filter([
+        ['portal.children.academics', __('opes.guardian_portal.academics_report_card'), 'file', $cap::R05ViewReportCard],
+        ['portal.children.assignments', __('opes.guardian_portal.academics_assignments'), 'book', $cap::R26ViewTimetableAndAnnouncements],
+        ['portal.children.fee-detail', __('opes.guardian_portal.fees_structure_title'), 'card', $cap::R16ViewOwnPayments],
+        ['portal.children.health-detail', __('opes.guardian_portal.health_id_title'), 'heart', $cap::R03ViewChildEmergencyMedical],
+        ['portal.children.id-card', __('opes.guardian_portal.id_card_title'), 'id', $cap::R01ViewChildIdentity],
+        ['portal.children.contacts', __('opes.guardian_portal.contacts_title'), 'phone', $cap::R31ViewOtherGuardiansOfChild],
+    ], fn (array $item): bool => $portalPolicy->allows($item[3], $studentId));
 @endphp
 
 <div class="min-w-0 space-y-4 pt-2">
@@ -98,4 +112,18 @@
             @endforeach
         </div>
     </nav>
+
+    @if ($portalMore !== [])
+        <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <div class="inline-flex gap-2">
+                @foreach ($portalMore as [$routeName, $label, $icon, $capability])
+                    <a href="{{ route($routeName, $studentId) }}"
+                       class="flex shrink-0 items-center gap-1.5 rounded-full border border-border-primary bg-white px-3 py-1.5 text-xs font-medium text-charcoal/70 hover:border-primary/40 hover:text-primary">
+                        <x-portal.icon :name="$icon" bare size="sm"/>
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>

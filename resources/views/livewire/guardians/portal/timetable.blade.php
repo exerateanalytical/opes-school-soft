@@ -15,7 +15,7 @@
         </x-portal.card>
     @else
         <div class="space-y-4">
-            @foreach ($byDay as $day => $slots)
+            @foreach ($byDay as $day => $daySlots)
                 <x-portal.card wire:key="tt-day-{{ $day }}" :padded="false">
                     <div class="flex items-center gap-3 rounded-t-2xl bg-portal-tint px-4 py-3">
                         <x-portal.icon name="calendar" tone="primary" size="sm"/>
@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="divide-y divide-border-secondary">
-                        @foreach ($slots as $slot)
+                        @foreach ($daySlots as $slot)
                             <div wire:key="tt-{{ $day }}-{{ $loop->index }}"
                                  class="flex items-center gap-3 px-4 py-3">
                                 <span class="w-24 shrink-0 text-xs font-semibold tabular-nums text-charcoal/60">

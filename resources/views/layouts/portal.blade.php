@@ -155,6 +155,7 @@
 
                 <div class="!mt-3 border-t border-border-secondary pt-3">
                     @foreach ([
+                        ['portal.school-life', __('opes.guardian_portal.activities_title'), 'megaphone'],
                         ['portal.account.settings', __('opes.guardian_portal.account_settings_title'), 'gear'],
                         ['portal.help', __('opes.guardian_portal.help_title'), 'help'],
                     ] as [$routeName, $label, $icon])

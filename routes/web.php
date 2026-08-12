@@ -844,6 +844,43 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
      * exists is entitled to see their face. An unlinked id answers 404, not
      * 403, so it stays indistinguishable from one that does not exist.
      */
+    /*
+     * Phase 12-P4: the screens the mobile designs have that the portal lacked.
+     *
+     * Grouped by the reader they share rather than one route per PNG - the
+     * academic views all read the same published snapshots, the fee views the
+     * same statement, the health views the same records. Six near-identical
+     * components would be six chances for one capability check to drift.
+     */
+    Route::get('/children/{student}/academics/{view?}', \App\Modules\Guardians\Livewire\Portal\Academics::class)
+        ->whereNumber('student')
+        ->whereIn('view', ['subjects', 'analytics', 'terms', 'report-card', 'bulletin', 'transcript'])
+        ->name('portal.children.academics');                                   // rows 5, 9, 10
+
+    Route::get('/children/{student}/assignments', \App\Modules\Guardians\Livewire\Portal\Assignments::class)
+        ->whereNumber('student')->name('portal.children.assignments');         // row 26
+
+    Route::get('/children/{student}/fee-detail/{view?}', \App\Modules\Guardians\Livewire\Portal\FeeDetail::class)
+        ->whereNumber('student')->whereIn('view', ['structure', 'outstanding', 'pay'])
+        ->name('portal.children.fee-detail');                                  // rows 13/14/16/18
+
+    Route::get('/children/{student}/health-detail/{view?}', \App\Modules\Guardians\Livewire\Portal\HealthDetail::class)
+        ->whereNumber('student')->whereIn('view', ['history', 'immunisations', 'documents', 'card'])
+        ->name('portal.children.health-detail');                               // rows 3, 4, 23
+
+    Route::get('/children/{student}/id-card', \App\Modules\Guardians\Livewire\Portal\SchoolIdCard::class)
+        ->whereNumber('student')->name('portal.children.id-card');             // row 1
+
+    Route::get('/children/{student}/contacts', \App\Modules\Guardians\Livewire\Portal\Contacts::class)
+        ->whereNumber('student')->name('portal.children.contacts');            // row 31
+
+    Route::get('/school-life/{view?}', \App\Modules\Guardians\Livewire\Portal\SchoolLife::class)
+        ->whereIn('view', ['activities', 'excursions', 'sports', 'school'])
+        ->name('portal.school-life');                                          // row 26
+    Route::get('/school-life/activity/{activity}', \App\Modules\Guardians\Livewire\Portal\SchoolLife::class)
+        ->whereNumber('activity')->defaults('view', 'detail')
+        ->name('portal.school-life.detail');
+
     Route::get('/photo/me', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'self'])
         ->name('portal.photo.self');
     Route::get('/photo/children/{student}', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'child'])
