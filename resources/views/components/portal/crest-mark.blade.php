@@ -5,26 +5,35 @@
 ])
 
 {{--
-    The OPES crest, traced from the supplied logo artwork: gold star, a laurel
-    wreath of two mirrored branches, a green shield carrying a white
-    mortarboard with a gold tassel, and the ribbon banner reading OPES with
-    "SCHOOL SYSTEM" set beneath.
+    The OPES crest: gold star, laurel wreath, green shield carrying a white
+    mortarboard with a gold tassel, the OPES ribbon, and "SCHOOL SYSTEM" set
+    beneath.
+
+    THE REAL ARTWORK when it is installed, a drawn fallback when it is not.
+
+    `public/images/opes-crest.png` and `opes-crest-dark.png` are cut from the
+    supplied logo sheet, with the white ground removed by a FLOOD FILL from
+    the border rather than a "make white transparent" pass - the mortarboard
+    is white and the ribbon face is cream, so a global colour test would punch
+    holes through the middle of the mark.
+
+    `on` names the BACKGROUND the crest sits on, not the crest's own colour,
+    and it selects between two files. The artwork is drawn for white paper:
+    its laurels, shield fill and wordmark are all the same dark green, so on
+    the sign-in page's green field the wreath and the wordmark simply
+    disappear. The dark-ground file re-inks the leaves gold and the wordmark
+    cream while leaving the shield, ribbon and cap exactly as drawn - which is
+    the variant the reference mockup itself shows.
+
+    THE FALLBACK IS NOT DECORATION. If the assets are absent the SVG below
+    renders instead, so a deployment that has not installed brand files still
+    gets a crest rather than a broken image. It is a fair likeness, not a
+    trace: the wreath is one branch mirrored by transform with leaf angles
+    from trigonometry, which is the only way the halves stay true mirrors.
 
     Deliberately a SECOND component rather than a rewrite of `x-portal.crest`.
     That one is the 32-44px mark in the portal header, drawn as a silhouette
-    because this much detail at that size is mud. This renders at 100px and up,
-    where the mortarboard, the individual leaves and the ribbon all read.
-
-    `on` names the BACKGROUND the crest sits on, not the crest's own colour.
-    The artwork is a green-and-gold mark made for white paper; on the sign-in
-    page's deep green field the green leaves and green shield rim would vanish
-    into it, so those strokes go cream while the gold and the white cap stay
-    exactly as drawn. Same mark, legible on both grounds.
-
-    The wreath is built from ONE branch mirrored by transform rather than two
-    hand-placed sets of leaves: it is the only way the halves stay true
-    mirrors, and it halves what has to be got right. Leaf angles come from
-    trigonometry for the same reason - 11 hand-tuned rotations would drift.
+    because this much detail at that size is mud.
 --}}
 @php
     $box = match ($size) {
@@ -33,6 +42,19 @@
         'xl' => 'w-[12.6rem]',
         default => 'w-[8.8rem]',
     };
+
+    // The file carries "SCHOOL SYSTEM" inside the artwork, so the HTML label
+    // below is suppressed whenever the image is used - printing it twice is
+    // the obvious failure here.
+    $asset = $on === 'dark' ? 'images/opes-crest-dark.png' : 'images/opes-crest.png';
+    $hasAsset = is_file(public_path($asset));
+@endphp
+
+@if ($hasAsset)
+    <img src="{{ asset($asset) }}" alt="{{ __('opes.shell.brand') }} {{ __('opes.auth.brand_suffix') }}"
+         {{ $attributes->merge(['class' => 'block h-auto '.$box]) }}>
+@else
+@php
 
     $onDark = $on === 'dark';
 
@@ -159,3 +181,4 @@
         </span>
     @endif
 </span>
+@endif

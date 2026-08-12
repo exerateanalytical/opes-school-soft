@@ -125,8 +125,15 @@
             {{-- Clipped by a wide ellipse anchored off the right edge, which
                  is what produces the reference's single sweeping arc down the
                  photograph's left side. --}}
+            {{-- clip-path as an INLINE STYLE, not a Tailwind arbitrary value.
+                 `[clip-path:ellipse(88%_90%_at_100%_50%)]` did not survive
+                 compilation - the percentages inside the function are not
+                 emitted - so the photograph rendered as a hard-edged rectangle
+                 with the arc floating uselessly beside it. Inline, it is not
+                 something a build step can silently drop. --}}
             <img src="{{ asset('images/login-hero.jpg') }}" alt=""
-                 class="h-full w-full object-cover object-top [clip-path:ellipse(88%_90%_at_100%_50%)]">
+                 style="clip-path: ellipse(88% 90% at 100% 50%)"
+                 class="h-full w-full object-cover object-top">
         @endif
 
         {{-- The arc itself, drawn whether or not the photograph is there. --}}
