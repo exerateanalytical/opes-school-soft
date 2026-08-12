@@ -58,6 +58,7 @@ final class PortalShowcaseSeeder extends Seeder
         $this->seedConversations($userId, $children);
         $this->seedNotifications($userId, $children);
         $this->seedAttendance($children);
+        $this->seedFees($guardian, $children);
 
         $this->command?->info('Portal showcase: '.$guardian->fullName().' with '.count($children).' children.');
     }
@@ -235,6 +236,172 @@ final class PortalShowcaseSeeder extends Seeder
                 'created_at' => now()->subDays($index),
                 'updated_at' => now()->subDays($index),
             ]);
+        }
+    }
+
+    /**
+     * Fee activity a parent can actually see TODAY.
+     *
+     * DemoDataSeeder bills the 2026/2027 year on 2026-09-08. Today is earlier
+     * than that, and ChildFeeStatement filters `issue_date <= today`, so the
+     * portal correctly shows nothing owed - the year has not been billed yet.
+     * That is right, not a bug, and it is why the Outstanding tile reads zero.
+     *
+     * So this issues a SECOND invoice dated in the past rather than
+     * back-dating the existing one. Moving an issued invoice's date would
+     * desynchronise it from the journal entry that posted it, which is exactly
+     * the portal-disagrees-with-the-ledger failure this build has avoided
+     * throughout.
+     *
+     * Everything goes through the real Actions - GenerateInvoices, IssueInvoice,
+     * RecordPayment - so the posting rules fire and the books balance. A
+     * partial payment leaves a visible outstanding balance, as the designs show.
+     */
+    private function seedFees(Guardian $guardian, array $children): void
+    {
+        if ($children === []) {
+            return;
+        }
+
+        $accountant = DB::table('users')->where('email', 'demo.bursar@opeschool.test')->first();
+
+        if ($accountant === null) {
+            $this->command?->warn('Fees: demo bursar missing - run DemoDataSeeder first.');
+
+            return;
+        }
+
+        $bursar = \App\Modules\Identity\Models\User::query()->find($accountant->id);
+        $actor = $bursar?->toAuditActor();
+
+        if ($bursar === null || $actor === null) {
+            return;
+        }
+
+        /*
+         * The fee Actions call Gate::authorize, and a seeder has no
+         * authenticated user - so without this every call answers "This action
+         * is unauthorized". DemoDataSeeder does the same thing for the same
+         * reason. Signing in as the BURSAR rather than an admin keeps the
+         * audit trail honest about who issued these invoices.
+         */
+        $previous = auth()->user();
+        \Illuminate\Support\Facades\Auth::login($bursar);
+
+        foreach ($children as $studentId) {
+            // `fiscal_year_id` lives on the INVOICE, not the enrollment - the
+            // two calendars are deliberately separate (02-accounting).
+            $enrollment = DB::table('enrollments')->where('student_id', $studentId)
+                ->orderByDesc('id')->first(['id', 'academic_year_id']);
+
+            if ($enrollment === null) {
+                continue;
+            }
+
+            $fiscalYearId = DB::table('invoices')->where('enrollment_id', $enrollment->id)
+                ->value('fiscal_year_id')
+                ?? DB::table('fiscal_years')->orderByDesc('id')->value('id');
+
+            if ($fiscalYearId === null) {
+                continue;
+            }
+
+            $key = 'showcase-invoice-'.$enrollment->id;
+
+            if (DB::table('invoices')->where('idempotency_key', $key)->exists()) {
+                continue;
+            }
+
+            try {
+                $result = app(\App\Modules\Fees\Actions\GenerateInvoices::class)->forEnrollments(
+                    [(int) $enrollment->id],
+                    [
+                        'academic_year_id' => (int) $enrollment->academic_year_id,
+                        'fiscal_year_id' => (int) $fiscalYearId,
+                        'term_id' => null,
+                        // Billed a month ago, due a fortnight ago: an overdue
+                        // balance is what the reference dashboard shows.
+                        'issue_date' => now()->subMonth()->toDateString(),
+                        'due_date' => now()->subDays(14)->toDateString(),
+                    ],
+                    $actor,
+                );
+
+                $created = $result['created'] ?? [];
+
+                if ($created === []) {
+                    /*
+                     * GenerateInvoices refuses to bill an enrollment twice for
+                     * the same academic year, which is correct - and it means
+                     * this showcase CANNOT add current-dated fees on top of
+                     * DemoDataSeeder's future-dated ones.
+                     *
+                     * So the Outstanding tile reads zero, and that is the
+                     * truth rather than a gap: the 2026/2027 year is billed on
+                     * 2026-09-08, today is earlier, and a parent genuinely owes
+                     * nothing yet. Making it show a balance would require
+                     * moving the demo billing date AND the journal entry that
+                     * posted it - an accounting change, not a cosmetic one,
+                     * and not something a showcase seeder should do quietly.
+                     */
+                    $this->command?->warn(
+                        'Fees: enrollment '.$enrollment->id.' is already billed for its year '
+                        .'(issue date '.(DB::table('invoices')->where('enrollment_id', $enrollment->id)->value('issue_date') ?? '?')
+                        .'). Nothing owed until then, so the Outstanding tile stays at zero.'
+                    );
+
+                    continue;
+                }
+
+                $issued = app(\App\Modules\Fees\Actions\IssueInvoice::class)->handle($created, $actor);
+
+                foreach ($issued as $invoice) {
+                    $gross = (int) DB::table('invoice_lines')->where('invoice_id', $invoice->id)->sum('amount');
+
+                    if ($gross <= 0) {
+                        continue;
+                    }
+
+                    // 60% paid - the proportion the fees dashboard shows.
+                    $paid = (int) round($gross * 0.6);
+                    $treasury = DB::table('chart_of_accounts')->where('code', '571')->value('id');
+
+                    app(\App\Modules\Fees\Actions\RecordPayment::class)->handle(
+                        studentId: (int) $invoice->student_id,
+                        academicYearId: (int) $enrollment->academic_year_id,
+                        fiscalYearId: (int) $fiscalYearId,
+                        method: \App\Modules\Fees\Domain\PaymentMethod::Cash,
+                        amount: \App\Support\Money\Money::of($paid),
+                        payerName: $guardian->fullName(),
+                        valueDate: now()->subDays(20)->toDateString(),
+                        actor: $actor,
+                        feeAmount: \App\Support\Money\Money::zero(),
+                        feeBearer: \App\Modules\Fees\Domain\FeeBearer::None,
+                        reference: null,
+                        // The guardian's OWN number, so row 16's best-effort
+                        // phone match marks this receipt as theirs.
+                        payerPhone: $guardian->phone,
+                        enrollmentId: (int) $invoice->enrollment_id,
+                        targets: null,
+                        idempotencyKey: 'showcase-payment-'.$invoice->id,
+                        notes: 'Portal showcase payment',
+                        treasuryAccountId: is_numeric($treasury) ? (int) $treasury : null,
+                    );
+                }
+            } catch (\Throwable $e) {
+                // Reported, not swallowed: fee posting depends on rules and a
+                // chart of accounts this seeder does not own, and a silent
+                // skip would leave a reviewer wondering why the tile is empty.
+                $this->command?->warn('Fees for student '.$studentId.': '.$e->getMessage());
+            }
+        }
+
+        // Put the guard back as it was, so a caller that chained seeders after
+        // this one is not silently left signed in as the bursar.
+        if ($previous === null) {
+            \Illuminate\Support\Facades\Auth::logout();
+        } else {
+            \Illuminate\Support\Facades\Auth::login($previous);
         }
     }
 
