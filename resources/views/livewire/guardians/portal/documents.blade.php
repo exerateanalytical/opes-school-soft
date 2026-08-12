@@ -30,10 +30,21 @@
             @else
                 <ul class="mt-2 divide-y divide-border-primary text-sm">
                     @foreach ($guardianSupplied as $document)
-                        <li class="flex items-center justify-between gap-2 py-1.5">
-                            <span>{{ $document->title }}</span>
-                            <x-status-pill :status="$document->verification_status === 'verified' ? 'ok' : ($document->verification_status === 'rejected' ? 'red' : 'amber')"
-                                           :label="$document->verification_status"/>
+                        <li class="flex flex-wrap items-center justify-between gap-2 py-1.5">
+                            <span class="min-w-0 flex-1 truncate">{{ $document->title }}</span>
+
+                            <span class="flex shrink-0 items-center gap-2">
+                                <x-status-pill :status="$document->verification_status === 'verified' ? 'ok' : ($document->verification_status === 'rejected' ? 'red' : 'amber')"
+                                               :label="$document->verification_status"/>
+
+                                {{-- Row 23 has real bytes - the guardian
+                                     uploaded them. Row 22 above deliberately
+                                     has no download; see ChildDocuments. --}}
+                                <a href="{{ route('portal.children.documents.download', [$studentId, 'supplied', $document->id]) }}"
+                                   class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:border-primary/50">
+                                    {{ __('opes.guardian_portal.documents_download') }}
+                                </a>
+                            </span>
                         </li>
                     @endforeach
                 </ul>

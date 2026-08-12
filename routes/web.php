@@ -791,6 +791,25 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
     Route::get('/children/{student}/meeting', \App\Modules\Guardians\Livewire\Portal\Meeting::class)
         ->whereNumber('student')->name('portal.children.meeting');             // row 27
 
+    // The three detail screens the API already served but the portal did not:
+    // invoice detail, receipt descriptor, and the document download. Each is
+    // resolved THROUGH the child's enrollment, so an id belonging to another
+    // family is simply not found - 404, never 403, which would confirm it
+    // exists somewhere.
+    Route::get('/children/{student}/invoices/{invoice}', \App\Modules\Guardians\Livewire\Portal\Invoice::class)
+        ->whereNumber('student')->whereNumber('invoice')
+        ->name('portal.children.invoice');                                     // row 13
+    Route::get('/children/{student}/receipts/{payment}', \App\Modules\Guardians\Livewire\Portal\Receipt::class)
+        ->whereNumber('student')->whereNumber('payment')
+        ->name('portal.children.receipt');                                     // row 15
+
+    // A controller, not a Livewire component: this returns BYTES, and Livewire
+    // renders HTML over the wire.
+    Route::get('/children/{student}/documents/{kind}/{document}/download',
+        [\App\Modules\Guardians\Http\Controllers\PortalDocumentController::class, 'download'])
+        ->whereNumber('student')->whereIn('kind', ['school', 'supplied'])->whereNumber('document')
+        ->name('portal.children.documents.download');                          // rows 22/23
+
     // Guardian-scoped, not child-scoped: rows 16/26/29 are granted on "any
     // valid link" without naming a child.
     Route::get('/payments', \App\Modules\Guardians\Livewire\Portal\Payments::class)

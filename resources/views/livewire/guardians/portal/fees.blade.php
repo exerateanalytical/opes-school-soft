@@ -76,7 +76,10 @@
                             @foreach ($invoices as $invoice)
                                 <tr>
                                     <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">{{ $invoice->issue_date }}</td>
-                                    <td class="px-3 py-2 font-mono text-xs text-charcoal/70">{{ $invoice->invoice_no }}</td>
+                                    <td class="px-3 py-2 font-mono text-xs">
+                                        <a href="{{ route('portal.children.invoice', [$studentId, $invoice->id]) }}"
+                                           class="text-primary underline-offset-2 hover:underline">{{ $invoice->invoice_no }}</a>
+                                    </td>
                                     <td class="px-3 py-2 text-charcoal/70">{{ $invoice->due_date }}</td>
                                     <td class="px-3 py-2 text-right font-mono text-charcoal">{{ Money::of((int) $invoice->total)->format() }}</td>
                                 </tr>
@@ -105,7 +108,10 @@
                             @foreach ($receipts as $receipt)
                                 <tr>
                                     <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">{{ $receipt->value_date }}</td>
-                                    <td class="px-3 py-2 font-mono text-xs text-charcoal/70">{{ $receipt->receipt_no }}</td>
+                                    <td class="px-3 py-2 font-mono text-xs">
+                                        <a href="{{ route('portal.children.receipt', [$studentId, $receipt->id]) }}"
+                                           class="text-primary underline-offset-2 hover:underline">{{ $receipt->receipt_no }}</a>
+                                    </td>
                                     <td class="px-3 py-2 text-charcoal/70">{{ $receipt->payment_method }}</td>
                                     <td class="px-3 py-2 text-right font-mono text-charcoal">{{ Money::of($receipt->amount)->format() }}</td>
                                 </tr>

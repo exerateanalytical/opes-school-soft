@@ -46,7 +46,8 @@
                     @foreach ($payments as $payment)
                         <tr wire:key="pay-row-{{ $payment['id'] }}">
                             <td class="px-4 py-2 font-mono text-xs text-charcoal">
-                                {{ $payment['receipt_no'] }}
+                                <a href="{{ route('portal.children.receipt', [$payment['student_id'], $payment['id']]) }}"
+                                   class="text-primary underline-offset-2 hover:underline">{{ $payment['receipt_no'] }}</a>
                                 @if ($payment['is_own'])
                                     <span class="ml-1 rounded bg-success-bg px-1.5 py-0.5 text-[10px] font-medium text-success">
                                         {{ __('opes.guardian_portal.payments_mine') }}
