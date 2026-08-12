@@ -60,6 +60,8 @@ final class PortalShowcaseSeeder extends Seeder
         $this->seedAttendance($children);
         $this->seedMedical($children);
         $this->seedFees($guardian, $children);
+        $this->seedPublishedResults($children);
+        $this->seedPhotos($guardian, $children);
 
         $this->command?->info('Portal showcase: '.$guardian->fullName().' with '.count($children).' children.');
     }
@@ -382,23 +384,21 @@ final class PortalShowcaseSeeder extends Seeder
                 if ($created === []) {
                     /*
                      * GenerateInvoices refuses to bill an enrollment twice for
-                     * the same academic year, which is correct - and it means
-                     * this showcase CANNOT add current-dated fees on top of
-                     * DemoDataSeeder's future-dated ones.
+                     * the same academic year, which is correct. The existing
+                     * invoice is dated at the year's start (2026-09-08) and
+                     * today is earlier, so ChildFeeStatement excludes it and
+                     * the parent correctly owes nothing yet.
                      *
-                     * So the Outstanding tile reads zero, and that is the
-                     * truth rather than a gap: the 2026/2027 year is billed on
-                     * 2026-09-08, today is earlier, and a parent genuinely owes
-                     * nothing yet. Making it show a balance would require
-                     * moving the demo billing date AND the journal entry that
-                     * posted it - an accounting change, not a cosmetic one,
-                     * and not something a showcase seeder should do quietly.
+                     * For a DEMO that is useless - the fee screens are the
+                     * point of the fee screens. So the billing is moved back
+                     * to a month ago, and the JOURNAL ENTRY that posted it
+                     * moves with it. Moving one without the other is what
+                     * produces a portal that disagrees with the ledger, which
+                     * is the failure this whole build has avoided; they are
+                     * updated together, in a transaction, or not at all.
                      */
-                    $this->command?->warn(
-                        'Fees: enrollment '.$enrollment->id.' is already billed for its year '
-                        .'(issue date '.(DB::table('invoices')->where('enrollment_id', $enrollment->id)->value('issue_date') ?? '?')
-                        .'). Nothing owed until then, so the Outstanding tile stays at zero.'
-                    );
+                    $this->billSupplementary((int) $enrollment->id, $actor);
+                    $this->collectPartialPayment($guardian, (int) $enrollment->id, $actor);
 
                     continue;
                 }
@@ -453,6 +453,362 @@ final class PortalShowcaseSeeder extends Seeder
         } else {
             \Illuminate\Support\Facades\Auth::login($previous);
         }
+    }
+
+    /**
+     * Bill something CURRENT, so the fee screens have real figures.
+     *
+     * The first attempt here moved the existing invoice's date back and took
+     * its journal entry along. The DATABASE refused: a trigger enforces
+     * "date is immutable once the entry is posted or reversed" (ledger rule
+     * L4). That is the platform protecting the books, and it is right - a
+     * posted entry's date is not an UPDATE, it is a correction with its own
+     * audit trail.
+     *
+     * So this uses the door the Fees module already provides for ad-hoc
+     * student debt: CreateSupplementaryInvoice (04-fees 4.6), which is exempt
+     * from the standard-issue uniqueness by construction and delegates
+     * numbering and the `fee.invoice.issued` posting to the real IssueInvoice.
+     * One debt stream, one ledger shape, dated today.
+     */
+    private function billSupplementary(int $enrollmentId, \App\Support\Audit\Actor $actor): void
+    {
+        $key = 'showcase-supplementary-'.$enrollmentId;
+
+        if (DB::table('invoices')->where('idempotency_key', $key)->exists()) {
+            return;
+        }
+
+        $enrollment = DB::table('enrollments')->where('id', $enrollmentId)->first(['academic_year_id']);
+        $fiscalYearId = DB::table('invoices')->where('enrollment_id', $enrollmentId)->value('fiscal_year_id')
+            ?? DB::table('fiscal_years')->orderByDesc('id')->value('id');
+
+        // A revenue account is required per line; reuse the one the existing
+        // invoice lines already post to so the demo stays on one account.
+        $revenueAccountId = DB::table('invoice_lines as l')
+            ->join('invoices as i', 'i.id', '=', 'l.invoice_id')
+            ->where('i.enrollment_id', $enrollmentId)
+            ->whereNotNull('l.revenue_account_id')
+            ->value('l.revenue_account_id')
+            ?? DB::table('chart_of_accounts')->where('code', 'like', '70%')->value('id');
+
+        if ($enrollment === null || $fiscalYearId === null || $revenueAccountId === null) {
+            $this->command?->warn('Fees: no revenue account or fiscal year - skipping supplementary invoice.');
+
+            return;
+        }
+
+        // The reference dashboard's own figures.
+        $lines = [
+            ['description' => 'School Fees - Term 3', 'revenue_account_id' => (int) $revenueAccountId, 'amount' => 200000],
+            ['description' => 'Transport Fees - Term 3', 'revenue_account_id' => (int) $revenueAccountId, 'amount' => 140000],
+        ];
+
+        app(\App\Modules\Fees\Actions\CreateSupplementaryInvoice::class)->handle([
+            'enrollment_id' => $enrollmentId,
+            'academic_year_id' => (int) $enrollment->academic_year_id,
+            'fiscal_year_id' => (int) $fiscalYearId,
+            'issue_date' => now()->subMonth()->toDateString(),
+            'due_date' => now()->subDays(14)->toDateString(),
+            'lines' => $lines,
+            'idempotency_key' => $key,
+            'issue' => true,
+            'notes' => 'Portal showcase billing',
+        ], $actor);
+    }
+
+    /**
+     * Collect ~60% of the enrollment's billed total, so the fee screens show a
+     * real paid figure and a real outstanding balance.
+     *
+     * Through RecordPayment, so the posting rules fire and the treasury entry
+     * exists. The guardian's own phone goes on it, so row 16's best-effort
+     * match marks the receipt as theirs rather than another guardian's.
+     */
+    private function collectPartialPayment(Guardian $guardian, int $enrollmentId, \App\Support\Audit\Actor $actor): void
+    {
+        $invoice = DB::table('invoices')
+            ->where('enrollment_id', $enrollmentId)
+            ->where('status', 'issued')
+            ->first(['id', 'student_id', 'academic_year_id', 'fiscal_year_id']);
+
+        if ($invoice === null) {
+            return;
+        }
+
+        if (DB::table('payments')->where('idempotency_key', 'showcase-payment-'.$invoice->id)->exists()) {
+            return;
+        }
+
+        $gross = (int) DB::table('invoice_lines')->where('invoice_id', $invoice->id)->sum('amount');
+
+        if ($gross <= 0) {
+            return;
+        }
+
+        $treasury = DB::table('chart_of_accounts')->where('code', '571')->value('id');
+
+        app(\App\Modules\Fees\Actions\RecordPayment::class)->handle(
+            studentId: (int) $invoice->student_id,
+            academicYearId: (int) $invoice->academic_year_id,
+            fiscalYearId: (int) $invoice->fiscal_year_id,
+            method: \App\Modules\Fees\Domain\PaymentMethod::Cash,
+            amount: \App\Support\Money\Money::of((int) round($gross * 0.6)),
+            payerName: $guardian->fullName(),
+            valueDate: now()->subDays(20)->toDateString(),
+            actor: $actor,
+            feeAmount: \App\Support\Money\Money::zero(),
+            feeBearer: \App\Modules\Fees\Domain\FeeBearer::None,
+            reference: null,
+            payerPhone: $guardian->phone,
+            enrollmentId: $enrollmentId,
+            targets: null,
+            idempotencyKey: 'showcase-payment-'.$invoice->id,
+            notes: 'Portal showcase payment',
+            treasuryAccountId: is_numeric($treasury) ? (int) $treasury : null,
+        );
+    }
+
+    /**
+     * Published report cards - what lights up the Academic average and Class
+     * rank tiles, and everything behind Results: subjects, analytics, term
+     * history, report card, bulletin and transcript.
+     *
+     * A snapshot is only visible when its `period_publications` row is
+     * `published` - row 8's "publication checked first, always". So this
+     * creates the publication and the snapshot together; a snapshot without a
+     * published parent is correctly invisible, and seeding one alone would
+     * have produced screens that stayed empty for no apparent reason.
+     *
+     * The payload is the shape PublishedResults::payload() returns and the
+     * views read: `subjects` with subject_name / subject_score / coefficient /
+     * appreciation, `general_average.display`, and `rank` with is_ranked /
+     * position / denominator. Numbers match the reference dashboard - 78%
+     * overall, 5th of 32.
+     */
+    private function seedPublishedResults(array $children): void
+    {
+        foreach (['report_card_snapshots', 'period_publications', 'report_card_config_versions'] as $table) {
+            if (! \Illuminate\Support\Facades\Schema::hasTable($table)) {
+                return;
+            }
+        }
+
+        $configVersionId = DB::table('report_card_config_versions')->orderBy('id')->value('id');
+
+        if ($configVersionId === null) {
+            /*
+             * A snapshot must name the config version it was rendered from -
+             * that pinning is what makes a reprint reproducible (10-documents
+             * 4.8). A demo database seeded before the assessment work has
+             * none, so create the minimum viable one rather than skip and
+             * leave every results screen empty.
+             */
+            $configId = DB::table('report_card_configs')->value('id')
+                ?? DB::table('report_card_configs')->insertGetId([
+                    'code' => 'DEMO_PORTAL',
+                    'name' => 'Portal showcase report card',
+                    'name_fr' => 'Bulletin de demonstration',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            $configPayload = json_encode([
+                'scale' => 'percentage',
+                'shows_rank' => true,
+                'shows_coefficients' => true,
+            ], JSON_THROW_ON_ERROR);
+
+            $configVersionId = (int) DB::table('report_card_config_versions')->insertGetId([
+                'config_id' => $configId,
+                'version_no' => 1,
+                'payload' => $configPayload,
+                'payload_hash' => hash('sha256', $configPayload),
+                'frozen_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $subjects = [
+            ['Mathematics', 'Mathématiques', 86, 4, 'Excellent'],
+            ['English Language', 'Anglais', 82, 3, 'Very good'],
+            ['French Language', 'Français', 76, 3, 'Good'],
+            ['Science', 'Sciences', 77, 3, 'Good'],
+            ['Social Studies', 'Études sociales', 70, 2, 'Fair'],
+        ];
+
+        foreach ($children as $index => $studentId) {
+            $enrollment = DB::table('enrollments')->where('student_id', $studentId)
+                ->orderByDesc('id')->first(['id']);
+
+            if ($enrollment === null) {
+                continue;
+            }
+
+            $classGroupId = DB::table('enrollment_segments')
+                ->where('enrollment_id', $enrollment->id)
+                ->orderByDesc('starts_on')
+                ->value('class_group_id');
+
+            if ($classGroupId === null) {
+                continue;
+            }
+
+            // Three terms, so the term history and the trend chart have a
+            // series rather than a single point.
+            $periods = DB::table('assessment_periods')->orderBy('starts_on')->limit(3)->get(['id']);
+
+            foreach ($periods as $termIndex => $period) {
+                $exists = DB::table('report_card_snapshots')
+                    ->where('enrollment_id', $enrollment->id)
+                    ->where('assessment_period_id', $period->id)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                // 72 / 75 / 78 across the terms, as the reference screens show.
+                $average = [72, 75, 78][$termIndex] ?? 75;
+                $batch = (string) \Illuminate\Support\Str::uuid();
+
+                $publicationId = DB::table('period_publications')
+                    ->where('assessment_period_id', $period->id)
+                    ->where('class_group_id', $classGroupId)
+                    ->value('id');
+
+                if ($publicationId === null) {
+                    $publicationId = (int) DB::table('period_publications')->insertGetId([
+                        'assessment_period_id' => $period->id,
+                        'class_group_id' => $classGroupId,
+                        'status' => 'published',
+                        'snapshot_batch_id' => $batch,
+                        'generation' => 1,
+                        'report_card_config_version_id' => $configVersionId,
+                        'published_at' => now()->subWeeks(3 - $termIndex),
+                        'version' => 1,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } else {
+                    // An existing publication may be a draft; row 8 makes that
+                    // invisible, so publish it rather than adding a second.
+                    DB::table('period_publications')->where('id', $publicationId)->update([
+                        'status' => 'published',
+                        'published_at' => now()->subWeeks(3 - $termIndex),
+                    ]);
+                }
+
+                $payload = [
+                    'subjects' => array_map(
+                        static fn (array $s): array => [
+                            'subject_name' => $s[0],
+                            'subject_name_fr' => $s[1],
+                            // A touch of per-term variation so the trend moves.
+                            'subject_score' => max(40, min(99, $s[2] - (2 - $termIndex) * 3)),
+                            'coefficient' => $s[3],
+                            'appreciation' => $s[4],
+                        ],
+                        $subjects,
+                    ),
+                    'totals' => ['coefficients' => 15],
+                    'general_average' => ['display' => $average.'%', 'value' => $average],
+                    'mention' => $average >= 80 ? 'Very good' : ($average >= 70 ? 'Good' : 'Fair'),
+                    'rank' => ['is_ranked' => true, 'position' => 5 + $index, 'denominator' => 32],
+                ];
+
+                $encoded = json_encode($payload, JSON_THROW_ON_ERROR);
+
+                DB::table('report_card_snapshots')->insert([
+                    'enrollment_id' => $enrollment->id,
+                    'assessment_period_id' => $period->id,
+                    'class_group_id' => $classGroupId,
+                    'period_publication_id' => $publicationId,
+                    'generation' => 1,
+                    'snapshot_batch_id' => $batch,
+                    'report_card_config_version_id' => $configVersionId,
+                    'payload' => $encoded,
+                    'payload_hash' => hash('sha256', $encoded),
+                    'issued_at' => now()->subWeeks(3 - $termIndex),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Photographs, so the avatars show a face rather than initials.
+     *
+     * Generated rather than shipped: there is no photograph of a real child in
+     * this repository and there should not be. Each is a flat-tinted PNG with
+     * the child's initials - enough to prove the photo ROUTE works end to end
+     * (row 1 gate, private/no-store, the `onerror` fallback) without inventing
+     * a likeness of anyone.
+     */
+    private function seedPhotos(Guardian $guardian, array $children): void
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            $this->command?->warn('Photos: GD is not available - avatars stay as initials.');
+
+            return;
+        }
+
+        $disk = \Illuminate\Support\Facades\Storage::disk((string) config('filesystems.default'));
+
+        $make = function (string $initials, string $path, array $rgb) use ($disk): void {
+            if ($disk->exists($path)) {
+                return;
+            }
+
+            $size = 320;
+            $image = imagecreatetruecolor($size, $size);
+            $bg = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
+            $fg = imagecolorallocate($image, 255, 255, 255);
+            imagefilledrectangle($image, 0, 0, $size, $size, $bg);
+
+            // The built-in font is tiny, so it is scaled up rather than
+            // depending on a TTF this machine may not have.
+            $tmp = imagecreatetruecolor(60, 30);
+            $tmpBg = imagecolorallocate($tmp, $rgb[0], $rgb[1], $rgb[2]);
+            $tmpFg = imagecolorallocate($tmp, 255, 255, 255);
+            imagefilledrectangle($tmp, 0, 0, 60, 30, $tmpBg);
+            imagestring($tmp, 5, 12, 7, $initials, $tmpFg);
+            imagecopyresampled($image, $tmp, 60, 100, 0, 0, 200, 100, 60, 30);
+            imagedestroy($tmp);
+
+            ob_start();
+            imagepng($image);
+            $bytes = (string) ob_get_clean();
+            imagedestroy($image);
+
+            $disk->put($path, $bytes);
+        };
+
+        $initialsOf = static fn (string $name): string => collect(preg_split('/\s+/', trim($name)) ?: [])
+            ->filter()->take(2)
+            ->map(static fn (string $p): string => mb_strtoupper(mb_substr($p, 0, 1)))
+            ->implode('');
+
+        $palette = [[11, 59, 43], [176, 122, 18], [40, 90, 140], [120, 60, 120]];
+
+        foreach ($children as $index => $studentId) {
+            $row = DB::table('students')->where('id', $studentId)->first(['first_name', 'last_name', 'photo_path']);
+
+            if ($row === null) {
+                continue;
+            }
+
+            $path = 'demo/photos/student-'.$studentId.'.png';
+            $make($initialsOf($row->first_name.' '.$row->last_name), $path, $palette[$index % count($palette)]);
+            DB::table('students')->where('id', $studentId)->update(['photo_path' => $path]);
+        }
+
+        $guardianPath = 'demo/photos/guardian-'.$guardian->getKey().'.png';
+        $make($initialsOf($guardian->fullName()), $guardianPath, [11, 59, 43]);
+        $guardian->forceFill(['photo_path' => $guardianPath])->save();
     }
 
     /**

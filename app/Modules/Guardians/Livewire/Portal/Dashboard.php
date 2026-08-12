@@ -113,14 +113,23 @@ final class Dashboard extends Component
         // 13.3).
         if ($policy->allows(GuardianCapability::R05ViewReportCard, $studentId)) {
             $snapshot = app(PublishedResults::class)->snapshots($studentId)->first();
-            $average = $snapshot === null
-                ? null
-                : (app(PublishedResults::class)->payload($snapshot, false)['general_average'] ?? null);
+            $payload = $snapshot === null ? [] : app(PublishedResults::class)->payload($snapshot, false);
 
-            if ($average !== null) {
+            /*
+             * `general_average` is an ARRAY - ['display' => '78%', 'value' =>
+             * 78] - not a scalar. This tile assumed a scalar and cast it to
+             * string, which is an "Array to string conversion" the moment a
+             * snapshot exists. It never fired while the demo had no published
+             * results, so nothing caught it until the data was seeded.
+             */
+            $average = is_array($payload['general_average'] ?? null)
+                ? ($payload['general_average']['display'] ?? null)
+                : ($payload['general_average'] ?? null);
+
+            if ($average !== null && $average !== '') {
                 $tiles[] = [
                     'label' => __('opes.guardian_portal.tile_average'),
-                    'value' => rtrim(rtrim((string) $average, '0'), '.').'%',
+                    'value' => (string) $average,
                     'caption' => __('opes.guardian_portal.tile_average_caption'),
                     'icon' => 'chart',
                     'tone' => 'primary',
@@ -172,10 +181,16 @@ final class Dashboard extends Component
             $snapshot = app(PublishedResults::class)->snapshots($studentId)->first();
             $payload = $snapshot === null ? [] : app(PublishedResults::class)->payload($snapshot, true);
 
-            if (($payload['rank_position'] ?? null) !== null) {
+            // Same shape trap as the average: `rank` is a nested array with
+            // is_ranked / position / denominator, not flat `rank_position`
+            // keys. `is_ranked` is checked because a snapshot can carry a rank
+            // block that explicitly says the child was NOT ranked.
+            $rank = is_array($payload['rank'] ?? null) ? $payload['rank'] : null;
+
+            if ($rank !== null && ($rank['is_ranked'] ?? false) && ($rank['position'] ?? null) !== null) {
                 $tiles[] = [
                     'label' => __('opes.guardian_portal.tile_rank', ['name' => $childName]),
-                    'value' => $payload['rank_position'].' / '.($payload['rank_denominator'] ?? '—'),
+                    'value' => $rank['position'].' / '.($rank['denominator'] ?? '—'),
                     'caption' => null,
                     'icon' => 'chart',
                     'tone' => 'primary',
