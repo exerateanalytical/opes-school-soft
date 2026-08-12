@@ -1,55 +1,67 @@
-<div class="min-w-0 space-y-4">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-xl font-semibold text-charcoal">
-            {{ __('opes.guardian_portal.notifications_title') }}
+{{-- `/portal/notifications` - built to mobile/notifications.png. --}}
+<div class="min-w-0 space-y-5">
+
+    <div class="flex flex-wrap items-center gap-3 pt-2">
+        <x-portal.icon name="bell" tone="primary"/>
+
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-charcoal">
+                {{ __('opes.guardian_portal.notifications_title') }}
+            </h1>
             @if ($unread > 0)
-                <span class="ml-1 rounded-full bg-danger px-2 py-0.5 align-middle text-xs font-semibold text-white">{{ $unread }}</span>
+                <p class="text-sm text-charcoal/60">
+                    {{ __('opes.guardian_portal.dashboard_unread', ['count' => $unread]) }}
+                </p>
             @endif
-        </h1>
+        </div>
 
         @if ($unread > 0)
             <button type="button" wire:click="markAllRead"
-                    class="rounded border border-border-primary px-3 py-1.5 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    class="shrink-0 rounded-xl border border-primary px-3 py-2 text-xs font-semibold text-primary hover:bg-portal-tint">
                 {{ __('opes.guardian_portal.notifications_mark_all') }}
             </button>
         @endif
     </div>
 
-    @if (session('portal-status'))
-        <p class="rounded border border-success/30 bg-success-bg px-4 py-2 text-sm text-success">{{ session('portal-status') }}</p>
-    @endif
-
     @if ($notifications->isEmpty())
-        <x-empty-state :message="__('opes.guardian_portal.notifications_empty')"/>
+        <x-portal.card>
+            <div class="flex flex-col items-center gap-3 py-6 text-center">
+                <x-portal.icon name="bell" tone="primary" size="lg"/>
+                <p class="text-sm text-charcoal/60">{{ __('opes.guardian_portal.notifications_empty') }}</p>
+            </div>
+        </x-portal.card>
     @else
-        <ul class="space-y-2">
+        <div class="space-y-3">
             @foreach ($notifications as $notification)
-                <li wire:key="notif-{{ $notification->id }}"
-                    @class([
-                        'rounded border bg-white p-4 shadow-sm',
-                        'border-heritage-yellow/50' => $notification->read_at === null,
-                        'border-border-primary' => $notification->read_at !== null,
-                    ])>
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p @class(['text-sm text-charcoal', 'font-semibold' => $notification->read_at === null])>
-                                {{ $notification->title }}
-                            </p>
+                <x-portal.card wire:key="notif-{{ $notification->id }}"
+                               :tone="$notification->read_at === null ? 'green' : 'white'">
+                    <div class="flex items-start gap-3">
+                        <x-portal.icon name="bell"
+                                       :tone="$notification->read_at === null ? 'gold' : 'primary'"/>
+
+                        <div class="min-w-0 flex-1">
+                            <p @class([
+                                'text-sm text-charcoal',
+                                'font-bold' => $notification->read_at === null,
+                                'font-medium' => $notification->read_at !== null,
+                            ])>{{ $notification->title }}</p>
+
                             @if ($notification->body)
                                 <p class="mt-1 text-sm text-charcoal/70">{{ $notification->body }}</p>
                             @endif
+
                             <p class="mt-2 text-xs text-charcoal/50">{{ $notification->created_at }}</p>
                         </div>
 
                         @if ($notification->read_at === null)
                             <button type="button" wire:click="markRead({{ $notification->id }})"
-                                    class="shrink-0 rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                    class="shrink-0 rounded-lg border border-border-primary bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:border-primary/50">
                                 {{ __('opes.guardian_portal.notifications_mark_all') }}
                             </button>
                         @endif
                     </div>
-                </li>
+                </x-portal.card>
             @endforeach
-        </ul>
+        </div>
     @endif
 </div>
