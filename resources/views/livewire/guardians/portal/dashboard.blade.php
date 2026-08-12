@@ -53,7 +53,7 @@
                     </a>
                 @endforeach
 
-                <a href="{{ route('portal.account') }}"
+                <a href="{{ route('portal.children.index') }}"
                    class="flex w-32 shrink-0 snap-start flex-col items-center justify-center gap-2 rounded-2xl border border-border-primary bg-portal-tint p-3 text-center">
                     <x-portal.icon name="users" tone="primary"/>
                     <span class="text-xs font-semibold text-primary">

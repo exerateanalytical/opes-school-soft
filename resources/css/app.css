@@ -34,6 +34,9 @@
        -------------------------------------------------------------------- */
     --color-portal-green: #012A17;
     --color-portal-green-soft: #0B3B2B;
+    /* The auth screens' warm field, from login-welcome-back.png - the only
+       place the portal is NOT near-white behind its cards. */
+    --color-portal-cream: #F7F5EF;
     --color-portal-gold: #E3A94B;
     --color-portal-gold-deep: #B77A12;
     --color-portal-success: #318538;

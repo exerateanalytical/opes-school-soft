@@ -16,6 +16,19 @@ Route::redirect('/', '/dashboard');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
+
+    /*
+     * The pre-session screens from the mobile designs: splash, onboarding,
+     * the password-reset explanation and the OTP placeholder. Guest-only, so
+     * they never drag the portal chrome in front of someone not signed in.
+     *
+     * Reset and OTP deliberately carry no form: this platform sends no
+     * password emails and has no 2FA (spec 1 non-goals), and a field that
+     * posted nowhere would be worse than a sentence saying who to ask.
+     */
+    Route::get('/welcome/{view?}', \App\Modules\Guardians\Livewire\Portal\Entry::class)
+        ->whereIn('view', ['splash', 'welcome', 'reset', 'otp'])
+        ->name('portal.entry');
 });
 
 Route::post('/logout', function () {
@@ -880,6 +893,13 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
     Route::get('/school-life/activity/{activity}', \App\Modules\Guardians\Livewire\Portal\SchoolLife::class)
         ->whereNumber('activity')->defaults('view', 'detail')
         ->name('portal.school-life.detail');
+
+    // mobile/my-children.png and child-overview.png - the list and the per-child
+    // hub, which the dashboard carousel and the profile tab only half covered.
+    Route::get('/children', \App\Modules\Guardians\Livewire\Portal\Children::class)
+        ->name('portal.children.index');                                       // row 1
+    Route::get('/children/{student}/overview', \App\Modules\Guardians\Livewire\Portal\ChildOverview::class)
+        ->whereNumber('student')->name('portal.children.overview');            // row 1
 
     Route::get('/photo/me', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'self'])
         ->name('portal.photo.self');

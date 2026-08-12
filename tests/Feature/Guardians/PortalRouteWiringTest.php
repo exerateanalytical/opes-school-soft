@@ -29,7 +29,13 @@ function portalViewFiles(): array
     $files = array_merge(
         glob(resource_path('views/livewire/guardians/portal').DIRECTORY_SEPARATOR.'*.blade.php') ?: [],
         glob(resource_path('views/components/portal').DIRECTORY_SEPARATOR.'*.blade.php') ?: [],
-        [resource_path('views/layouts/portal.blade.php')],
+        [
+            resource_path('views/layouts/portal.blade.php'),
+            // The login screen links to the portal's pre-session screens
+            // (password reset, onboarding), so it is part of the corpus even
+            // though it lives under auth/.
+            resource_path('views/livewire/auth/login.blade.php'),
+        ],
     );
 
     return array_values(array_filter($files, 'file_exists'));

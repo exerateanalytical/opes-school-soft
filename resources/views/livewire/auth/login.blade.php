@@ -1,11 +1,25 @@
-<div>
-    <h1 class="text-center text-xl font-semibold text-charcoal">{{ __('opes.auth.sign_in') }}</h1>
+{{--
+    Built to mobile/login-welcome-back.png: crest and wordmark on a cream
+    field, the green band closing on the gold wave, and the two reassurance
+    lines in the footer.
+
+    The COPY stays role-neutral. This page is the platform's only login - staff
+    reach the back office through it too - so the design's "Login to your
+    Parent Account" would be wrong for half the people who see it. The brand
+    treatment is shared; the wording is not.
+
+    Every wire binding is unchanged: `authenticate`, `email`, `password`,
+    `remember`, and the demo block's `demoLogin()`. This is a restyle, not a
+    rewrite - the auth path is the last thing that should be casually edited.
+--}}
+<x-portal.auth-frame :title="__('opes.guardian_portal.auth_welcome_back')"
+                     :subtitle="__('opes.auth.sign_in')">
 
     {{-- The error sits ABOVE the form so a screen reader meets it before the
          fields, and so it is visible without scrolling on a small screen. --}}
     @if ($errors->any())
         <div role="alert" aria-live="assertive"
-             class="mt-4 rounded border-l-4 border-heritage-red bg-heritage-red/5 px-4 py-3 text-sm text-charcoal">
+             class="mb-4 rounded-xl border-l-4 border-portal-danger bg-portal-danger-soft px-4 py-3 text-sm text-charcoal">
             <ul class="list-none space-y-1">
                 @foreach ($errors->all() as $message)
                     <li>{{ $message }}</li>
@@ -14,39 +28,60 @@
         </div>
     @endif
 
-    <form wire:submit="authenticate" class="mt-6 space-y-5" novalidate>
+    <form wire:submit="authenticate"
+          class="space-y-4 rounded-2xl border border-border-primary bg-white p-5 shadow-[0_2px_10px_rgba(0,45,23,0.06)]"
+          novalidate>
         <div>
-            <label for="email" class="block text-sm font-medium text-charcoal">
+            <label for="email" class="mb-1 block text-sm font-medium text-charcoal">
                 {{ __('opes.auth.email') }}
             </label>
-            <input id="email" name="email" type="email" wire:model="email"
-                   autocomplete="username" required autofocus
-                   @error('email') aria-invalid="true" @enderror
-                   class="mt-1 block w-full rounded border border-border-primary bg-white px-3 py-2 text-charcoal
-                          focus:border-primary focus:outline-none">
+
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-charcoal/35">
+                    <x-portal.icon name="mail" bare size="md"/>
+                </span>
+
+                <input id="email" name="email" type="email" wire:model="email"
+                       autocomplete="username" required autofocus
+                       @error('email') aria-invalid="true" @enderror
+                       class="block w-full rounded-xl border border-border-primary bg-white py-3 pl-11 pr-3 text-charcoal
+                              focus:border-primary focus:outline-none">
+            </div>
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-charcoal">
+            <label for="password" class="mb-1 block text-sm font-medium text-charcoal">
                 {{ __('opes.auth.password') }}
             </label>
-            <input id="password" name="password" type="password" wire:model="password"
-                   autocomplete="current-password" required
-                   class="mt-1 block w-full rounded border border-border-primary bg-white px-3 py-2 text-charcoal
-                          focus:border-primary focus:outline-none">
+
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-charcoal/35">
+                    <x-portal.icon name="shield" bare size="md"/>
+                </span>
+
+                <input id="password" name="password" type="password" wire:model="password"
+                       autocomplete="current-password" required
+                       class="block w-full rounded-xl border border-border-primary bg-white py-3 pl-11 pr-3 text-charcoal
+                              focus:border-primary focus:outline-none">
+            </div>
         </div>
 
-        <div class="flex items-center gap-2">
-            <input id="remember" name="remember" type="checkbox" wire:model="remember"
-                   class="h-4 w-4 rounded border-border-primary text-primary">
-            <label for="remember" class="text-sm text-charcoal">
+        <div class="flex items-center justify-between gap-3">
+            <label for="remember" class="flex items-center gap-2 text-sm text-charcoal">
+                <input id="remember" name="remember" type="checkbox" wire:model="remember"
+                       class="h-4 w-4 rounded border-border-primary text-primary">
                 {{ __('opes.auth.remember') }}
             </label>
+
+            <a href="{{ route('portal.entry', 'reset') }}" class="text-sm font-semibold text-primary hover:underline">
+                {{ __('opes.guardian_portal.auth_forgot') }}
+            </a>
         </div>
 
         <button type="submit"
-                class="w-full rounded border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white
-                       hover:bg-primary/90">
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-portal-green px-4 py-3 text-sm font-semibold text-white
+                       hover:brightness-110">
+            <x-portal.icon name="shield" bare size="sm"/>
             {{ __('opes.auth.sign_in') }}
         </button>
     </form>
@@ -56,7 +91,7 @@
          environment - see config/opes.php. On any real deployment this whole
          block is absent from the HTML, not merely hidden by CSS. --}}
     @if ($this->demoLoginAvailable())
-        <div class="mt-6 rounded border border-dashed border-heritage-yellow bg-heritage-yellow/10 p-4">
+        <div class="mt-5 rounded-2xl border border-dashed border-portal-gold bg-portal-gold/10 p-4">
             <p class="text-xs font-semibold uppercase tracking-wide text-charcoal/70">
                 {{ __('opes.auth.demo_heading') }}
             </p>
@@ -66,12 +101,12 @@
                  user holding that role through Spatie, so what the visitor
                  then sees is the product's own permission checks answering -
                  not a demo mode. --}}
-            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 @foreach ($this->demoIdentities() as $identity)
                     <button type="button" wire:click="demoLogin('{{ $identity['key'] }}')"
                             wire:key="demo-{{ $identity['key'] }}"
-                            class="rounded border border-chrome bg-chrome px-3 py-2 text-left text-sm font-semibold text-white
-                                   hover:bg-chrome-light">
+                            class="rounded-xl bg-portal-green px-3 py-2.5 text-left text-sm font-semibold text-white
+                                   hover:brightness-110">
                         {{ __('opes.auth.demo_sign_in_as', ['role' => $identity['label']]) }}
                     </button>
                 @endforeach
@@ -84,8 +119,8 @@
 
     {{-- 00-core 9.3: no SMTP in most schools, so no self-service reset link.
          Say so plainly rather than offering a link that would never arrive. --}}
-    <div class="mt-6 border-t border-border-primary pt-4">
-        <p class="text-sm font-medium text-charcoal">{{ __('opes.auth.forgot') }}</p>
+    <div class="mt-5 rounded-2xl border border-border-secondary bg-portal-tint px-4 py-3">
+        <p class="text-sm font-semibold text-charcoal">{{ __('opes.auth.forgot') }}</p>
         <p class="mt-1 text-sm text-charcoal/70">{{ __('opes.auth.forgot_help') }}</p>
     </div>
-</div>
+</x-portal.auth-frame>
