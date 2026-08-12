@@ -116,47 +116,80 @@
                 </div>
             </div>
 
-            {{-- Desktop nav sits inside the green band, as the designs do. --}}
-            <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}" class="mt-2 hidden gap-1 sm:flex">
-                @foreach ($portalNav as [$routeName, $label, $icon])
-                    @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
-                    <a href="{{ route($routeName) }}"
-                       @if ($isActive) aria-current="page" @endif
-                       class="flex items-center gap-2 rounded-t-xl px-3 py-2 text-sm font-medium {{ $isActive
-                           ? 'bg-portal-surface text-primary'
-                           : 'text-white/70 hover:bg-white/10' }}">
-                        <x-portal.icon :name="$icon" bare size="sm"/>
-                        {{ $label }}
-                    </a>
-                @endforeach
-            </nav>
         </div>
     </header>
 
     <x-portal.curve/>
 
-    {{-- `pb-28` below sm keeps the last card clear of the floating bar. --}}
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-2 sm:px-6 sm:pb-10">
-        @if (session('portal-status'))
-            <p class="mb-4 rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">
-                {{ session('portal-status') }}
-            </p>
-        @endif
+    {{--
+        Below lg this is the phone design and nothing else: full-width content,
+        floating bottom bar. From lg up it becomes a sidebar shell, because a
+        393px-wide column stretched across a 1400px monitor is not "the same
+        design" - it is the design misused. Same cards, same palette, same
+        components; the navigation simply moves from the thumb to the left rail.
+    --}}
+    <div class="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 pb-28 pt-2 sm:px-6 lg:pb-10">
 
-        {{ $slot }}
-    </main>
+        {{-- Desktop sidebar. Hidden entirely on phones, where the bottom bar
+             is the navigation. --}}
+        <aside class="hidden w-60 shrink-0 lg:block">
+            <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
+                 class="sticky top-4 space-y-1 rounded-2xl border border-border-primary bg-white p-3 shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
+                @foreach ($portalNav as [$routeName, $label, $icon])
+                    @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
+                    <a href="{{ route($routeName) }}"
+                       @if ($isActive) aria-current="page" @endif
+                       class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {{ $isActive
+                           ? 'bg-portal-green text-white'
+                           : 'text-charcoal/70 hover:bg-portal-tint hover:text-primary' }}">
+                        <x-portal.icon :name="$icon" bare size="md"/>
+                        <span class="truncate">{{ $label }}</span>
+
+                        @if ($routeName === 'portal.messages' && $portalUnread > 0)
+                            <span class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-portal-danger px-1.5 text-[11px] font-bold text-white">
+                                {{ $portalUnread }}
+                            </span>
+                        @endif
+                    </a>
+                @endforeach
+
+                <div class="!mt-3 border-t border-border-secondary pt-3">
+                    @foreach ([
+                        ['portal.account.settings', __('opes.guardian_portal.account_settings_title'), 'gear'],
+                        ['portal.help', __('opes.guardian_portal.help_title'), 'help'],
+                    ] as [$routeName, $label, $icon])
+                        <a href="{{ route($routeName) }}"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-charcoal/70 hover:bg-portal-tint hover:text-primary">
+                            <x-portal.icon :name="$icon" bare size="md"/>
+                            <span class="truncate">{{ $label }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </nav>
+        </aside>
+
+        <main class="min-w-0 flex-1">
+            @if (session('portal-status'))
+                <p class="mb-4 rounded-xl border border-success/30 bg-portal-chip px-4 py-3 text-sm font-medium text-portal-success">
+                    {{ session('portal-status') }}
+                </p>
+            @endif
+
+            {{ $slot }}
+        </main>
+    </div>
 
     <footer class="hidden shrink-0 px-4 py-4 text-center text-xs text-charcoal/45 sm:block">
         {{ __('opes.shell.brand') }} &middot; {{ __('opes.guardian_portal.footer_note') }}
     </footer>
 
     {{--
-        Mobile: the floating bar from the designs. A parent opens this on a
-        phone far more often than on a desktop, and a top nav puts every
-        destination out of thumb reach.
+        The floating bar from the designs, up to lg - which is where the
+        sidebar takes over. Tablets keep it too: a thumb is still the pointing
+        device at 900px.
     --}}
     <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
-         class="fixed inset-x-0 bottom-0 z-30 rounded-t-[28px] bg-portal-green pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgba(0,45,23,0.3)] sm:hidden">
+         class="fixed inset-x-0 bottom-0 z-30 rounded-t-[28px] bg-portal-green pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgba(0,45,23,0.3)] lg:hidden">
         <div class="flex items-stretch px-1 pt-2">
             @foreach ($portalNav as [$routeName, $label, $icon])
                 @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
