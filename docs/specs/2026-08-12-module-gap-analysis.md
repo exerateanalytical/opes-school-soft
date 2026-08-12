@@ -81,7 +81,19 @@ Two architectural principles the proposals stressed are **already honoured**:
 | 15 | **Consent management** | No `Consent` model | Trip/media/medical/activity consent, with versioned parent decisions and an audit record |
 | 16 | **Parent requests centre** | No `DocumentRequest` or `ParentRequest` | A tracked queue for transcript requests, attendance disputes, school letters — status, owner, resolution |
 
-**Roughly sixteen real items out of ~2,100 proposed across 24 module designs.**
+| 17 | **Student portal** | No student-facing surface | 39 `portal.*` routes exist but all are **guardian**-scoped. A student has no login of their own — timetable, assignments, own results, own attendance |
+| 18 | **Graduation cohort & clearance** | No `GraduationCohort` or `Certificate` | `PromotionOutcome` reaches *graduated* and `enrollments.financial_clearance` exists, so the pieces are there; the cohort, the multi-department clearance workflow, the ceremony and the certificate are not |
+| 19 | **Government compliance engine** | No reporting-schema, mapping or submission model | The matricule is modelled and `PromoteMatriculeToOfficial` exists. A versioned reporting schema, field mapping, validation, submission register and resubmission history do not |
+| 20 | **Multi-campus** | **No `campus_id` anywhere in migrations** | The schema is single-school throughout. This is the largest item on the list by far: retrofitting a campus dimension touches every table, every query and every authorisation scope. It is an architectural change, not a feature |
+| 21 | **API client & integration registry** | No `ApiClient` or `Integration` model | Sanctum tokens and abilities exist; a registry of external integrations with scopes, rate limits, credential rotation, sync state and conflict handling does not. `WebhookEndpoint`/`WebhookDelivery` exist as a partial start |
+
+**Roughly twenty-one real items out of ~2,900 proposed across 29 module designs.**
+
+Modules 30–34 added rows 17–21. Notably **module 34 was already substantially built**: `Backup`, `RestoreDrill` (recovery testing — the spec rightly insists a backup is worthless unless a restore is proven), `Licence`, `WebhookEndpoint`/`Delivery`, plus the audit and permission infrastructure from module 28.
+
+### A note on gap 20
+
+Multi-campus deserves separating from the rest of this list. Every other item is additive — a new model, a new screen, a new workflow. Multi-campus is **retroactive**: it adds a dimension that every existing table, query, index and authorisation scope would need to respect, in a codebase where authorisation is already enforced per-route and per-record. Attempting it late is materially harder than the other twenty items combined, and attempting it *carelessly* creates exactly the cross-tenant leak module 33 §93 warns about. If a school network is a real near-term requirement, it should be planned before more single-school surface area is added.
 
 Module 29 (parent mobile app) was the **best-covered of all** and added only rows 15–16. Its backend is complete — nine guardian API controllers (`Me`, `Children`, `Academics`, `Fees`, `Communication`, `Documents`, `Engagement`, `Profile`, `Search`), scoped per-child per-link by `GuardianScopeMatrix`, and the Expo application exists at `mobile/app`. Even the item that spec flags as critical — payment idempotency so a parent tapping *Pay* twice on a slow network cannot double-charge — is already built as `Identity\Http\Middleware\EnforceIdempotency` (24-hour key retention, replays 2xx, 409 on same-key-different-body).
 
