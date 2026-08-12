@@ -78,7 +78,14 @@ Two architectural principles the proposals stressed are **already honoured**:
 | 13 | **Two-factor authentication** | No TOTP/2FA anywhere in `app/` or `config/` | `RecoveryCredential` exists; a second factor does not. Module 28 rightly wants MFA compulsory for privileged accounts — that cannot be configured today |
 | 14 | **Access review / privilege-creep detection** | No `AccessReview` model | Roles, granular permissions, scoped authorisation and an immutable hash-chained audit trail (`AuditLog` + `AuditChainAnchor`) are all built. Periodic recertification of who still needs what is not |
 
-**Roughly fourteen real items out of ~1,900 proposed across 23 module designs.**
+| 15 | **Consent management** | No `Consent` model | Trip/media/medical/activity consent, with versioned parent decisions and an audit record |
+| 16 | **Parent requests centre** | No `DocumentRequest` or `ParentRequest` | A tracked queue for transcript requests, attendance disputes, school letters — status, owner, resolution |
+
+**Roughly sixteen real items out of ~2,100 proposed across 24 module designs.**
+
+Module 29 (parent mobile app) was the **best-covered of all** and added only rows 15–16. Its backend is complete — nine guardian API controllers (`Me`, `Children`, `Academics`, `Fees`, `Communication`, `Documents`, `Engagement`, `Profile`, `Search`), scoped per-child per-link by `GuardianScopeMatrix`, and the Expo application exists at `mobile/app`. Even the item that spec flags as critical — payment idempotency so a parent tapping *Pay* twice on a slow network cannot double-charge — is already built as `Identity\Http\Middleware\EnforceIdempotency` (24-hour key retention, replays 2xx, 409 on same-key-different-body).
+
+Online payment initiation remains deliberately unbuilt: `04-fees.md` records that v1 payments are taken at the cash desk, and the API returns `501` until a gateway exists. That is a product decision, not an oversight.
 
 Modules 23–26 added rows 9–11; modules 27–28 added rows 12–14. Everything else in them was already built: `VisitorLog`, `HostelInspection`, `StockTake`, asset maintenance, `SalaryGrade`, `PayrollRun`, the accounting engine, and — for module 28 specifically — the identity/role/permission model, per-route `can:` enforcement, scoped authorisation via `GuardianScopeMatrix`, and a **hash-chained immutable audit trail**, which is stronger than the module asked for.
 
