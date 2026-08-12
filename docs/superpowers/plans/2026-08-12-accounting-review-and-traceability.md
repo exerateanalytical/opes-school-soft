@@ -49,8 +49,11 @@ php vendor\bin\phpstan analyse --memory-limit=1G
 
 | File | Responsibility |
 |---|---|
-| `app/Modules/Accounting/Domain/SourceReference.php` | Value object: a resolved (or deliberately inert) link to a source document |
-| `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php` | Maps `source_type` → route + human label. The only place that mapping lives |
+| `app/Support/Ledger/SourceReference.php` | Shared-kernel value object: a resolved (or deliberately inert) link to a source document. In the kernel for the same reason `Audit\Actor` is — it crosses module lines |
+| `app/Support/Ledger/ResolvesLedgerSource.php` | The contract each module implements for its own documents |
+| `app/Support/Ledger/LedgerSourceRegistry.php` | Collects the resolvers; first registered claim wins |
+| `app/Modules/{Accounting,Assets,Payroll,Procurement}/Support/*LedgerSource.php` | Per-module resolvers, each importing only its own models |
+| `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php` | Accounting's façade over the registry; falls back to "manual entry" |
 | `resources/views/components/accounting/source-link.blade.php` | Renders a `SourceReference` — a link when resolvable, inert labelled text otherwise |
 | `app/Modules/Accounting/Domain/ControlStatus.php` | Enum: `Reconciled` \| `Difference` \| `NotConfigured` |
 | `app/Modules/Accounting/Domain/ControlCheck.php` | Value object: one control row (key, label, expected, actual, difference, status, blocking gate) |
@@ -113,43 +116,59 @@ php artisan route:list --json | php -r "foreach(json_decode(file_get_contents('p
 
 ---
 
-## Task 2: `SourceReference` and `ResolveSourceDocument`
+## Task 2: The ledger-source contract and its resolvers
 
-**Task 1 changed this task's design. Read this first.**
+**This task was redesigned twice. Read the history — it explains the shape.**
 
-Task 1 proved that `journal_entries.source_type` is always the literal string `'posting_event'`, and that **`source_id` is never populated at all**. A forward resolver keyed on those columns would resolve nothing.
+**First finding (Task 1):** `journal_entries.source_type` is always the literal `'posting_event'`, and `source_id` is never populated. A forward resolver keyed on those columns resolves nothing. The usable link is the reverse one: 36 document models carry a `journal_entry_id` foreign key, set by the module that posts them.
 
-The real link runs the other way and is already populated: 36 document models carry a `journal_entry_id` foreign key, set by the module that posts them. So resolution is a **reverse lookup** — given an entry id, ask each registered document type whether it owns that entry.
+**Second finding (first attempt at this task):** a single Action in `Accounting` importing `Assets\Models\Asset`, `Procurement\Models\SupplierInvoice` etc. **violates `tests/Architecture/ModuleBoundaryTest.php`**, which forbids any module importing another module's `\Models` namespace, with no exceptions.
 
-These six model/route pairs are **verified** — routes and parameters were read out of `routes/web.php`:
+Do **not** work around that by querying `DB::table('assets')` with hard-coded table names. That evades the test rather than respecting the rule, and couples `Accounting` to other modules' table names with no type safety.
 
-| Model | Route name | Route param |
-|---|---|---|
-| `App\Modules\Accounting\Models\Expense` | `accounting.expenses.show` | `expense` |
-| `App\Modules\Assets\Models\Asset` | `assets.show` | `asset` |
-| `App\Modules\Payroll\Models\PayrollRun` | `payroll.runs.show` | `run` |
-| `App\Modules\Procurement\Models\PurchaseOrder` | `procurement.orders.show` | `order` |
-| `App\Modules\Procurement\Models\SupplierInvoice` | `procurement.invoices.show` | `invoice` |
-| `App\Modules\Procurement\Models\SupplierPayment` | `procurement.payments.show` | `payment` |
+**The codebase already solved this exact tension once.** `App\Support\Audit\Actor` is a shared-kernel value object created precisely because `WriteAuditEntry` needed a user across a module boundary. Read its docblock — it states the reasoning. Follow that precedent:
 
-**`Fees\Models\Invoice` and `Fees\Models\Payment` are deliberately absent** — they carry `journal_entry_id` but have **no web viewing route**. They render inert. Do not invent a route for them; report it instead.
+- The **contract and the value object live in the shared kernel** (`App\Support\Ledger`).
+- **Each module implements the contract for its own documents**, importing only its own models — which is legal.
+- **`Accounting` depends on the contract only**, never on another module's models.
 
-**Files:**
-- Create: `app/Modules/Accounting/Domain/SourceReference.php`
-- Create: `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`
-- Test: `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`
-
-- [ ] **Step 1: Confirm each registry model really carries the column**
-
-Run:
-
-```bash
-grep -l "journal_entry_id" app/Modules/Accounting/Models/Expense.php app/Modules/Assets/Models/Asset.php app/Modules/Payroll/Models/PayrollRun.php app/Modules/Procurement/Models/PurchaseOrder.php app/Modules/Procurement/Models/SupplierInvoice.php app/Modules/Procurement/Models/SupplierPayment.php
+```
+App\Support\Ledger\SourceReference        (value object, crosses boundaries)
+App\Support\Ledger\ResolvesLedgerSource   (interface)
+App\Support\Ledger\LedgerSourceRegistry   (asks each registered resolver)
+        ▲                    ▲                    ▲
+        │                    │                    │
+Accounting\Support\   Assets\Support\      Procurement\Support\   Payroll\Support\
+ExpenseLedgerSource   AssetLedgerSource    ProcurementLedgerSource PayrollLedgerSource
+   (imports only its own module's models — legal)
 ```
 
-Expected: all six paths listed. If one is missing, drop it from the registry and say so in your report — do not keep it hoping it works.
+**Files:**
+- Create: `app/Support/Ledger/SourceReference.php`
+- Create: `app/Support/Ledger/ResolvesLedgerSource.php`
+- Create: `app/Support/Ledger/LedgerSourceRegistry.php`
+- Create: `app/Modules/Accounting/Support/ExpenseLedgerSource.php`
+- Create: `app/Modules/Assets/Support/AssetLedgerSource.php`
+- Create: `app/Modules/Payroll/Support/PayrollLedgerSource.php`
+- Create: `app/Modules/Procurement/Support/ProcurementLedgerSource.php`
+- Create: `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`
+- Modify: `app/Providers/AppServiceProvider.php` (register the resolvers)
+- Test: `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`
 
-- [ ] **Step 2: Write the failing test**
+The verified model/route pairs (routes and parameters read out of `routes/web.php`):
+
+| Module | Model | Route name | Route param |
+|---|---|---|---|
+| Accounting | `Expense` | `accounting.expenses.show` | `expense` |
+| Assets | `Asset` | `assets.show` | `asset` |
+| Payroll | `PayrollRun` | `payroll.runs.show` | `run` |
+| Procurement | `PurchaseOrder` | `procurement.orders.show` | `order` |
+| Procurement | `SupplierInvoice` | `procurement.invoices.show` | `invoice` |
+| Procurement | `SupplierPayment` | `procurement.payments.show` | `payment` |
+
+**`Fees\Models\Invoice` and `Fees\Models\Payment` are deliberately absent** — they carry `journal_entry_id` but have **no web viewing route**. They render inert. Do not invent a route for them.
+
+- [ ] **Step 1: Write the failing test**
 
 Create `tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php`:
 
@@ -211,7 +230,7 @@ it('links an entry owned by an expense to that expense', function () {
     expect($reference->url())->toBe(route('accounting.expenses.show', ['expense' => $expense->id]));
 });
 
-it('resolves a batch in a bounded number of queries', function () {
+it('resolves a batch without querying once per entry', function () {
     actingAs(resolveSourceUser());
 
     $entries = JournalEntry::factory()->count(25)->create();
@@ -223,7 +242,7 @@ it('resolves a batch in a bounded number of queries', function () {
     DB::disableQueryLog();
 
     expect($references)->toHaveCount(25);
-    // One query per registered model, never one per entry.
+    // Bounded by the number of registered resolvers, not the number of rows.
     expect($queries)->toBeLessThanOrEqual(10);
 });
 
@@ -234,31 +253,36 @@ it('refuses without ledger.view', function () {
 })->throws(Illuminate\Auth\Access\AuthorizationException::class);
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [ ] **Step 2: Run the test to verify it fails**
 
 Run: `php vendor\bin\pest tests\Feature\Accounting\Review\ResolveSourceDocumentTest.php`
-Expected: FAIL — `ResolveSourceDocument` does not exist
+Expected: FAIL — class does not exist
 
-- [ ] **Step 4: Create the value object**
+- [ ] **Step 3: Create the shared-kernel value object**
 
-Create `app/Modules/Accounting/Domain/SourceReference.php`:
+Create `app/Support/Ledger/SourceReference.php`:
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Modules\Accounting\Domain;
+namespace App\Support\Ledger;
 
 /**
- * A resolved link from a journal entry to the document that caused it,
- * docs/specs/2026-08-12-accounting-finance-architecture.md §6.
+ * A link from a journal entry to the document that caused it.
+ *
+ * Lives in the shared kernel for the same reason App\Support\Audit\Actor
+ * does: docs/specs/00-core.md 6.2 forbids a module importing another
+ * module's Models, but the ledger must be able to name a document that
+ * belongs to Assets, Procurement or Payroll. A plain value object crosses
+ * the boundary; a model never does.
  *
  * An unresolvable reference is a first-class case, not an error. A manual
  * journal genuinely has no source document, and a document type with no
  * viewing route (student invoices today) legitimately cannot be linked.
- * Both render as inert labelled text so the chain always terminates visibly
- * rather than in a broken link or a leaked class name.
+ * Both render as inert labelled text, so the chain always terminates
+ * visibly rather than in a broken link or a leaked class name.
  */
 final readonly class SourceReference
 {
@@ -294,7 +318,149 @@ final readonly class SourceReference
 }
 ```
 
-- [ ] **Step 5: Create the Action**
+- [ ] **Step 4: Create the contract**
+
+Create `app/Support/Ledger/ResolvesLedgerSource.php`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\Ledger;
+
+/**
+ * A module's offer to name the documents it owns for a set of journal
+ * entries, docs/specs/2026-08-12-accounting-finance-architecture.md 6.1.
+ *
+ * Each module implements this for its OWN models only. That is what keeps
+ * the reverse lookup legal under the module boundary rule - Accounting asks
+ * the registry, never another module's Models.
+ *
+ * Implementations MUST resolve a batch in a bounded number of queries. One
+ * query per entry would make every ledger screen quadratic.
+ */
+interface ResolvesLedgerSource
+{
+    /**
+     * @param  list<int>  $journalEntryIds
+     * @return array<int, SourceReference>  keyed by journal entry id; entries
+     *                                      this module does not own are absent
+     */
+    public function forEntryIds(array $journalEntryIds): array;
+}
+```
+
+- [ ] **Step 5: Create the registry**
+
+Create `app/Support/Ledger/LedgerSourceRegistry.php`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\Ledger;
+
+/**
+ * Collects every module's ledger-source resolver.
+ *
+ * Registration order is resolution priority: the first resolver to claim an
+ * entry wins. An entry claimed by two documents would be a data fault, and
+ * a deterministic answer beats one that changes between page loads.
+ */
+final class LedgerSourceRegistry
+{
+    /** @var list<ResolvesLedgerSource> */
+    private array $resolvers = [];
+
+    public function register(ResolvesLedgerSource $resolver): void
+    {
+        $this->resolvers[] = $resolver;
+    }
+
+    /**
+     * @param  list<int>  $journalEntryIds
+     * @return array<int, SourceReference>
+     */
+    public function forEntryIds(array $journalEntryIds): array
+    {
+        if ($journalEntryIds === []) {
+            return [];
+        }
+
+        $resolved = [];
+
+        foreach ($this->resolvers as $resolver) {
+            foreach ($resolver->forEntryIds($journalEntryIds) as $entryId => $reference) {
+                $resolved[$entryId] ??= $reference;
+            }
+        }
+
+        return $resolved;
+    }
+
+    /** @return list<ResolvesLedgerSource> */
+    public function resolvers(): array
+    {
+        return $this->resolvers;
+    }
+}
+```
+
+- [ ] **Step 6: Create the four module resolvers**
+
+Each is the same shape. Write `app/Modules/Accounting/Support/ExpenseLedgerSource.php` first:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Accounting\Support;
+
+use App\Modules\Accounting\Models\Expense;
+use App\Support\Ledger\ResolvesLedgerSource;
+use App\Support\Ledger\SourceReference;
+use Illuminate\Support\Facades\Route as RouteFacade;
+
+/**
+ * Names the expense that caused a journal entry.
+ *
+ * Imports only this module's own model, which is what makes the reverse
+ * lookup legal under the boundary rule.
+ */
+final readonly class ExpenseLedgerSource implements ResolvesLedgerSource
+{
+    private const ROUTE = 'accounting.expenses.show';
+
+    public function forEntryIds(array $journalEntryIds): array
+    {
+        if (! RouteFacade::has(self::ROUTE)) {
+            return [];
+        }
+
+        $resolved = [];
+
+        foreach (Expense::query()->whereIn('journal_entry_id', $journalEntryIds)->get(['id', 'journal_entry_id']) as $row) {
+            $resolved[(int) $row->journal_entry_id] = SourceReference::linked(
+                __('opes.accounting.review.source_expense', ['id' => $row->id]),
+                route(self::ROUTE, ['expense' => $row->id]),
+            );
+        }
+
+        return $resolved;
+    }
+}
+```
+
+Now write the other three by the same pattern:
+
+- `app/Modules/Assets/Support/AssetLedgerSource.php` — model `App\Modules\Assets\Models\Asset`, route `assets.show`, param `asset`, label key `opes.accounting.review.source_asset`.
+- `app/Modules/Payroll/Support/PayrollLedgerSource.php` — model `App\Modules\Payroll\Models\PayrollRun`, route `payroll.runs.show`, param `run`, label key `opes.accounting.review.source_payroll_run`.
+- `app/Modules/Procurement/Support/ProcurementLedgerSource.php` — **three** models in one resolver: `PurchaseOrder` (route `procurement.orders.show`, param `order`, key `source_purchase_order`), `SupplierInvoice` (route `procurement.invoices.show`, param `invoice`, key `source_supplier_invoice`), `SupplierPayment` (route `procurement.payments.show`, param `payment`, key `source_supplier_payment`). Query each model once and merge, using `??=` so the first claim wins.
+
+- [ ] **Step 7: Create the Accounting-facing Action**
 
 Create `app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php`:
 
@@ -305,55 +471,32 @@ declare(strict_types=1);
 
 namespace App\Modules\Accounting\Actions\Review;
 
-use App\Modules\Accounting\Domain\SourceReference;
-use App\Modules\Accounting\Models\Expense;
-use App\Modules\Assets\Models\Asset;
 use App\Modules\Identity\Domain\Permission;
-use App\Modules\Payroll\Models\PayrollRun;
-use App\Modules\Procurement\Models\PurchaseOrder;
-use App\Modules\Procurement\Models\SupplierInvoice;
-use App\Modules\Procurement\Models\SupplierPayment;
+use App\Support\Ledger\LedgerSourceRegistry;
+use App\Support\Ledger\SourceReference;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Route as RouteFacade;
 
 /**
  * Resolves a journal entry to the document that caused it,
- * docs/specs/2026-08-12-accounting-finance-architecture.md §6.1.
+ * docs/specs/2026-08-12-accounting-finance-architecture.md 6.1.
  *
- * THE LINK IS A REVERSE ONE. `journal_entries.source_type` is always the
- * literal 'posting_event' and `source_id` is never populated - verified
- * 2026-08-12. The usable link is the `journal_entry_id` foreign key that
- * each document model carries, set by the module that posts it.
+ * THE LINK IS A REVERSE ONE. journal_entries.source_type is always the
+ * literal 'posting_event' and source_id is never populated - verified
+ * 2026-08-12. The usable link is the journal_entry_id foreign key each
+ * document model carries.
  *
- * Cost is one query per REGISTERED MODEL, not one per entry, so a page of
- * 25 rows costs the same as a page of 200.
+ * This Action asks the shared-kernel registry rather than importing other
+ * modules' models, so the reverse lookup stays legal under the boundary
+ * rule (00-core 6.2) - the same reasoning that put Audit\Actor in the
+ * shared kernel.
  *
- * A type absent from the registry renders inert. That is deliberate:
- * Fees\Models\Invoice and Fees\Models\Payment carry the column but have no
- * web viewing route, and inventing one to make the link look complete is
- * exactly what §1.1 forbids.
+ * Read-only. It resolves and presents; it never writes.
  */
 final readonly class ResolveSourceDocument
 {
     public const PERMISSION = Permission::LedgerView->value;
 
-    /**
-     * model class => [route name, route parameter, translation key].
-     *
-     * Every route below was read out of routes/web.php. Adding a row asserts
-     * two things the tests verify: the model carries `journal_entry_id`, and
-     * the route exists.
-     *
-     * @var array<class-string, array{route: string, param: string, label: string}>
-     */
-    private const REGISTRY = [
-        Expense::class => ['route' => 'accounting.expenses.show', 'param' => 'expense', 'label' => 'opes.accounting.review.source_expense'],
-        Asset::class => ['route' => 'assets.show', 'param' => 'asset', 'label' => 'opes.accounting.review.source_asset'],
-        PayrollRun::class => ['route' => 'payroll.runs.show', 'param' => 'run', 'label' => 'opes.accounting.review.source_payroll_run'],
-        PurchaseOrder::class => ['route' => 'procurement.orders.show', 'param' => 'order', 'label' => 'opes.accounting.review.source_purchase_order'],
-        SupplierInvoice::class => ['route' => 'procurement.invoices.show', 'param' => 'invoice', 'label' => 'opes.accounting.review.source_supplier_invoice'],
-        SupplierPayment::class => ['route' => 'procurement.payments.show', 'param' => 'payment', 'label' => 'opes.accounting.review.source_supplier_payment'],
-    ];
+    public function __construct(private LedgerSourceRegistry $registry) {}
 
     public function handle(int $journalEntryId): SourceReference
     {
@@ -368,110 +511,92 @@ final readonly class ResolveSourceDocument
     {
         Gate::authorize(self::PERMISSION);
 
-        $resolved = [];
+        $resolved = $this->registry->forEntryIds($journalEntryIds);
 
-        foreach (self::REGISTRY as $model => $meta) {
-            if ($journalEntryIds === [] || ! RouteFacade::has($meta['route'])) {
-                continue;
-            }
-
-            $rows = $model::query()
-                ->whereIn('journal_entry_id', $journalEntryIds)
-                ->get(['id', 'journal_entry_id']);
-
-            foreach ($rows as $row) {
-                $entryId = (int) $row->journal_entry_id;
-
-                // First registered owner wins. An entry owned by two documents
-                // would be a data fault; picking deterministically beats
-                // rendering a different answer on each page load.
-                $resolved[$entryId] ??= SourceReference::linked(
-                    __($meta['label'], ['id' => $row->id]),
-                    route($meta['route'], [$meta['param'] => $row->id]),
-                );
-            }
-        }
-
+        // Every requested id gets an answer. An entry no document owns is a
+        // manual journal - a complete answer, not a gap.
         foreach ($journalEntryIds as $id) {
             $resolved[$id] ??= SourceReference::inert(__('opes.accounting.review.source_manual'));
         }
 
         return $resolved;
     }
-
-    /**
-     * @return list<class-string>
-     */
-    public static function registeredModels(): array
-    {
-        return array_keys(self::REGISTRY);
-    }
-
-    /**
-     * @return array<class-string, array{route: string, param: string, label: string}>
-     */
-    public static function registry(): array
-    {
-        return self::REGISTRY;
-    }
 }
 ```
 
-- [ ] **Step 6: Add the translation keys**
+- [ ] **Step 8: Register the resolvers**
 
-In `lang/en/opes.php`, under the `accounting` key, add a `review` block:
-
-```php
-'review' => [
-    'source_manual' => 'Manual entry — no source document',
-    'source_expense' => 'Expense #:id',
-    'source_asset' => 'Asset #:id',
-    'source_payroll_run' => 'Payroll run #:id',
-    'source_purchase_order' => 'Purchase order #:id',
-    'source_supplier_invoice' => 'Supplier invoice #:id',
-    'source_supplier_payment' => 'Supplier payment #:id',
-],
-```
-
-In `lang/fr/opes.php`, the same block:
+In `app/Providers/AppServiceProvider.php`, register the registry as a singleton with all four resolvers. Follow the file's existing registration style. Something equivalent to:
 
 ```php
-'review' => [
-    'source_manual' => 'Écriture manuelle — aucune pièce justificative',
-    'source_expense' => 'Dépense n° :id',
-    'source_asset' => 'Immobilisation n° :id',
-    'source_payroll_run' => 'Traitement de paie n° :id',
-    'source_purchase_order' => 'Bon de commande n° :id',
-    'source_supplier_invoice' => 'Facture fournisseur n° :id',
-    'source_supplier_payment' => 'Règlement fournisseur n° :id',
-],
+$this->app->singleton(LedgerSourceRegistry::class, function (): LedgerSourceRegistry {
+    $registry = new LedgerSourceRegistry();
+
+    // Registration order is resolution priority.
+    $registry->register(new ExpenseLedgerSource());
+    $registry->register(new ProcurementLedgerSource());
+    $registry->register(new AssetLedgerSource());
+    $registry->register(new PayrollLedgerSource());
+
+    return $registry;
+});
 ```
 
-`LocalisationTest` requires both files to carry every key. Add each new key to both, in the same commit, every time.
+`AppServiceProvider` lives in `App\Providers`, not `App\Modules`, so importing several modules' Support classes here does **not** violate the boundary rule. Confirm that by re-reading the arch test if unsure.
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [ ] **Step 9: Translation keys**
+
+The keys were already added to `lang/en/opes.php` and `lang/fr/opes.php` by a previous attempt at this task. **Verify they are present and correct** before assuming:
+
+```bash
+grep -n "source_manual\|source_expense\|source_asset\|source_payroll_run\|source_purchase_order\|source_supplier_invoice\|source_supplier_payment" lang/en/opes.php lang/fr/opes.php
+```
+
+Expected: seven keys in each file. If any are missing, add them. English values:
+
+```php
+'source_manual' => 'Manual entry — no source document',
+'source_expense' => 'Expense #:id',
+'source_asset' => 'Asset #:id',
+'source_payroll_run' => 'Payroll run #:id',
+'source_purchase_order' => 'Purchase order #:id',
+'source_supplier_invoice' => 'Supplier invoice #:id',
+'source_supplier_payment' => 'Supplier payment #:id',
+```
+
+French:
+
+```php
+'source_manual' => 'Écriture manuelle — aucune pièce justificative',
+'source_expense' => 'Dépense n° :id',
+'source_asset' => 'Immobilisation n° :id',
+'source_payroll_run' => 'Traitement de paie n° :id',
+'source_purchase_order' => 'Bon de commande n° :id',
+'source_supplier_invoice' => 'Facture fournisseur n° :id',
+'source_supplier_payment' => 'Règlement fournisseur n° :id',
+```
+
+- [ ] **Step 10: Run the tests**
 
 Run: `php vendor\bin\pest tests\Feature\Accounting\Review\ResolveSourceDocumentTest.php`
 Expected: PASS, 5 tests.
 
-If the `Expense` factory does not exist or does not accept `journal_entry_id`, check `database/factories/` for the real factory name and adjust the test. Do not create a factory the codebase does not already have without saying so in your report.
+If the `Expense` factory does not exist or does not accept `journal_entry_id`, check `database/factories/` for the real factory name and adapt the test. Do not create a factory the codebase lacks without saying so in your report.
 
-- [ ] **Step 8: Run the guard**
-
-Run:
+- [ ] **Step 11: Run the guard — the boundary test especially**
 
 ```powershell
 php vendor\bin\pest tests\Feature\Accounting tests\Architecture tests\Feature\LocalisationTest.php
 php vendor\bin\phpstan analyse --memory-limit=1G
 ```
 
-Expected: as green as when you started.
+`ModuleBoundaryTest` **must** pass. If it does not, the design has been compromised somewhere — report it, do not add an exception to the test.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 12: Commit**
 
 ```bash
-git add app/Modules/Accounting/Domain/SourceReference.php app/Modules/Accounting/Actions/Review/ResolveSourceDocument.php tests/Feature/Accounting/Review/ResolveSourceDocumentTest.php lang/en/opes.php lang/fr/opes.php
-git commit -m "feat(accounting): resolve a journal entry to the document that caused it"
+git add app/Support/Ledger app/Modules/Accounting/Support app/Modules/Assets/Support app/Modules/Payroll/Support app/Modules/Procurement/Support app/Modules/Accounting/Actions/Review app/Providers/AppServiceProvider.php tests/Feature/Accounting/Review lang/en/opes.php lang/fr/opes.php
+git commit -m "feat(accounting): name the document behind a journal entry, across module lines"
 ```
 
 ---
@@ -491,7 +616,7 @@ Create `tests/Feature/Accounting/Review/SourceLinkComponentTest.php`:
 
 declare(strict_types=1);
 
-use App\Modules\Accounting\Domain\SourceReference;
+use App\Support\Ledger\SourceReference;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 

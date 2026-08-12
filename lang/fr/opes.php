@@ -2924,4 +2924,16 @@ return [
         'save' => 'Enregistrer la couleur',
         'saved' => 'Couleur de marque mise à jour.',
     ],
+
+    'accounting' => [
+        'review' => [
+            'source_manual' => 'Écriture manuelle — aucune pièce justificative',
+            'source_expense' => 'Dépense n° :id',
+            'source_asset' => 'Immobilisation n° :id',
+            'source_payroll_run' => 'Traitement de paie n° :id',
+            'source_purchase_order' => 'Bon de commande n° :id',
+            'source_supplier_invoice' => 'Facture fournisseur n° :id',
+            'source_supplier_payment' => 'Règlement fournisseur n° :id',
+        ],
+    ],
 ];
