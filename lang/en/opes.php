@@ -2963,7 +2963,6 @@ return [
             'source_expense' => 'Expense #:id',
             'source_asset' => 'Asset #:id',
             'source_payroll_run' => 'Payroll run #:id',
-            'source_purchase_order' => 'Purchase order #:id',
             'source_supplier_invoice' => 'Supplier invoice #:id',
             'source_supplier_payment' => 'Supplier payment #:id',
         ],

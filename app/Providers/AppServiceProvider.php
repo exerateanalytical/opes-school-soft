@@ -101,6 +101,11 @@ use App\Modules\Welfare\Livewire\Medical\Index as MedicalIndex;
 use App\Modules\Welfare\Livewire\Transport\Index as TransportIndex;
 use App\Modules\Welfare\Livewire\Transport\VehicleShow as TransportVehicleShow;
 use App\Modules\Welfare\Livewire\Visitors\Index as VisitorsIndex;
+use App\Modules\Accounting\Support\ExpenseLedgerSource;
+use App\Modules\Assets\Support\AssetLedgerSource;
+use App\Modules\Payroll\Support\PayrollLedgerSource;
+use App\Modules\Procurement\Support\ProcurementLedgerSource;
+use App\Support\Ledger\LedgerSourceRegistry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -114,7 +119,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Accounting Review's ledger-source contract, docs/specs/2026-08-12-
+        // accounting-finance-architecture.md 6.1. Each module's resolver
+        // imports only its own models (legal under ModuleBoundaryTest);
+        // Accounting depends on the registry, never on the resolvers'
+        // concrete classes. Registration order is resolution priority.
+        $this->app->singleton(LedgerSourceRegistry::class, function (): LedgerSourceRegistry {
+            $registry = new LedgerSourceRegistry();
+
+            $registry->register(new ExpenseLedgerSource());
+            $registry->register(new ProcurementLedgerSource());
+            $registry->register(new AssetLedgerSource());
+            $registry->register(new PayrollLedgerSource());
+
+            return $registry;
+        });
     }
 
     /**
