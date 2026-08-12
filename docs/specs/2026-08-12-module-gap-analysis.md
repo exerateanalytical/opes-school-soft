@@ -74,9 +74,13 @@ Two architectural principles the proposals stressed are **already honoured**:
 | 10 | **Student leave / off-campus permission** | No `StudentLeave` or `HostelLeave` | Staff leave is fully built (`LeaveType`/`Request`/`Accrual`); the *student* boarding equivalent, with parent authorisation and late-return alerting, is absent |
 | 11 | **Meal management** | No `Meal` model | Meal counts, dietary flags, dining attendance |
 
-**Roughly eleven real items out of ~1,500 proposed across 21 module designs.**
+| 12 | **Cross-module analytics / KPI engine** | No `Kpi`, `ReportDefinition`, `SavedReport` or `ScheduledReport` | Per-module dashboards exist (`FinanceDashboard`, `PayablesDashboard`, `TaxDashboard`). A configurable KPI engine, report builder, saved/scheduled reports and a cross-module exception centre do not |
+| 13 | **Two-factor authentication** | No TOTP/2FA anywhere in `app/` or `config/` | `RecoveryCredential` exists; a second factor does not. Module 28 rightly wants MFA compulsory for privileged accounts — that cannot be configured today |
+| 14 | **Access review / privilege-creep detection** | No `AccessReview` model | Roles, granular permissions, scoped authorisation and an immutable hash-chained audit trail (`AuditLog` + `AuditChainAnchor`) are all built. Periodic recertification of who still needs what is not |
 
-Modules 23–26 (boarding, inventory, HR/payroll, accounting) added only rows 9–11. Everything else in them was already built: `VisitorLog`, `HostelInspection`, `StockTake`, asset maintenance requests, `SalaryGrade`, `PayrollRun`, and the entire accounting engine.
+**Roughly fourteen real items out of ~1,900 proposed across 23 module designs.**
+
+Modules 23–26 added rows 9–11; modules 27–28 added rows 12–14. Everything else in them was already built: `VisitorLog`, `HostelInspection`, `StockTake`, asset maintenance, `SalaryGrade`, `PayrollRun`, the accounting engine, and — for module 28 specifically — the identity/role/permission model, per-route `can:` enforcement, scoped authorisation via `GuardianScopeMatrix`, and a **hash-chained immutable audit trail**, which is stronger than the module asked for.
 
 ### 2.3 Deliberately not gaps
 
