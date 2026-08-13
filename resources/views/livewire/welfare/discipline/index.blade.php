@@ -49,17 +49,36 @@
     </div>
 
     {{-- ── KPI row ──────────────────────────────────────────────────────── --}}
+    {{-- Slots, not `:icon="'<svg …>'"`: Blade does not entity-decode an
+         attribute expression, so the `&quot;` in that form reached the browser
+         verbatim and the SVG parsed as `class="&quot;h-5"` with no viewBox and
+         no stroke. All five badges rendered as empty coloured discs. --}}
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <x-kpi-card :label="__('discipline.kpi_total')" :value="$totalCases" icon-bg="bg-primary"
-                    :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M9 12h6m-6 4h6M9 8h6M5 4h14v16H5z&quot;/></svg>'"/>
-        <x-kpi-card :label="__('discipline.kpi_open')" :value="$statusCounts['open'] ?? 0" icon-bg="bg-heritage-red"
-                    :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z&quot;/></svg>'"/>
-        <x-kpi-card :label="__('discipline.kpi_investigating')" :value="$statusCounts['under_investigation'] ?? 0" icon-bg="bg-heritage-yellow"
-                    :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z&quot;/></svg>'"/>
-        <x-kpi-card :label="__('discipline.kpi_positive')" :value="$positiveCount" icon-bg="bg-badge-blue"
-                    :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3&quot;/></svg>'"/>
-        <x-kpi-card :label="__('discipline.kpi_unacknowledged')" :value="$unacknowledged" icon-bg="bg-charcoal"
-                    :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z&quot;/></svg>'"/>
+        <x-kpi-card :label="__('discipline.kpi_total')" :value="$totalCases" icon-bg="bg-primary">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M9 12h6m-6 4h6M9 8h6M5 4h14v16H5z"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('discipline.kpi_open')" :value="$statusCounts['open'] ?? 0" icon-bg="bg-heritage-red">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('discipline.kpi_investigating')" :value="$statusCounts['under_investigation'] ?? 0" icon-bg="bg-heritage-yellow">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('discipline.kpi_positive')" :value="$positiveCount" icon-bg="bg-badge-blue">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('discipline.kpi_unacknowledged')" :value="$unacknowledged" icon-bg="bg-charcoal">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
     </div>
 
     {{-- ── Open Case form ───────────────────────────────────────────────── --}}

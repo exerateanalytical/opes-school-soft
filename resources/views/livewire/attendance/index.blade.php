@@ -44,17 +44,38 @@
         <x-empty-state :message="__('attendance.no_year')"/>
     @else
         {{-- ── KPI row ────────────────────────────────────────────────── --}}
+        {{-- The icons are passed as a SLOT, not as an `:icon="'<svg …>'"`
+             string. Blade does not entity-decode an attribute expression, so
+             the `&quot;` in that form reached the browser verbatim: the SVG
+             parsed as `class="&quot;h-5"` with no valid viewBox and no stroke,
+             and every one of these five badges rendered as an empty coloured
+             disc. The circles looked deliberate, which is why it survived. --}}
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <x-kpi-card :label="__('attendance.kpi_total')" :value="$totalStudents" icon-bg="bg-primary"
-                        :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z&quot;/></svg>'"/>
-            <x-kpi-card :label="__('attendance.kpi_present_today')" :value="$presentToday" icon-bg="bg-primary"
-                        :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M5 13l4 4L19 7&quot;/></svg>'"/>
-            <x-kpi-card :label="__('attendance.kpi_absent_today')" :value="$absentToday" icon-bg="bg-heritage-red"
-                        :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M6 18L18 6M6 6l12 12&quot;/></svg>'"/>
-            <x-kpi-card :label="__('attendance.kpi_late_today')" :value="$lateToday" icon-bg="bg-heritage-yellow"
-                        :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/></svg>'"/>
-            <x-kpi-card :label="__('attendance.kpi_month_rate')" :value="$pct($monthRate)" icon-bg="bg-badge-blue"
-                        :icon="'<svg class=&quot;h-5 w-5&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; d=&quot;M3 3v18h18M8 17V9m4 8V5m4 12v-6&quot;/></svg>'"/>
+            <x-kpi-card :label="__('attendance.kpi_total')" :value="$totalStudents" icon-bg="bg-primary">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+            <x-kpi-card :label="__('attendance.kpi_present_today')" :value="$presentToday" icon-bg="bg-primary">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+            <x-kpi-card :label="__('attendance.kpi_absent_today')" :value="$absentToday" icon-bg="bg-heritage-red">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+            <x-kpi-card :label="__('attendance.kpi_late_today')" :value="$lateToday" icon-bg="bg-heritage-yellow">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+            <x-kpi-card :label="__('attendance.kpi_month_rate')" :value="$pct($monthRate)" icon-bg="bg-badge-blue">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M3 3v18h18M8 17V9m4 8V5m4 12v-6"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
         </div>
 
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
