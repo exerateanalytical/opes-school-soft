@@ -47,13 +47,13 @@
         <x-kpi-card :label="__('opes.dashboard.tile_users')"
                     :value="$activeUsers"
                     :href="$canViewUsers ? '/users' : null"
-                    icon-bg="bg-primary">
+                    tone="green">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
             </x-slot:icon>
         </x-kpi-card>
 
-        <x-kpi-card :label="__('opes.dashboard.tile_roles')" :value="$roleCount" icon-bg="bg-badge-blue">
+        <x-kpi-card :label="__('opes.dashboard.tile_roles')" :value="$roleCount" tone="blue">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
             </x-slot:icon>
@@ -80,7 +80,7 @@
              backup.run - the operator right that makes the figure
              actionable. --}}
         @if ($canViewBackup)
-        <x-kpi-card :label="__('opes.dashboard.tile_backup')" :value="$lastBackupAge" icon-bg="bg-badge-orange">
+        <x-kpi-card :label="__('opes.dashboard.tile_backup')" :value="$lastBackupAge" tone="amber">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3.5 2"/></svg>
             </x-slot:icon>
@@ -96,7 +96,7 @@
             <x-kpi-card :label="__('opes.dashboard.tile_attendance')"
                         :value="$todaysAttendanceRate"
                         href="/attendance"
-                        icon-bg="bg-badge-teal">
+                        tone="purple">
                 <x-slot:icon>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
                 </x-slot:icon>

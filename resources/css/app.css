@@ -76,6 +76,25 @@
     --color-gold-300: #E8C86A;
     --color-gold-100: #FFF7DE;
 
+    /* --------------------------------------------------------------------
+       KPI tints, sampled from `frontend images/student management.png` and
+       `finance dashboard.png`. The reference stat cards are NOT white: each
+       carries a low-saturation wash with a solid icon badge in the matching
+       hue, which is what stops a row of five reading as one grey slab. The
+       wash is ~4% saturation so text contrast is untouched; the badge is the
+       saturated version of the same hue.
+       -------------------------------------------------------------------- */
+    --color-kpi-green: #EAF6EC;
+    --color-kpi-green-solid: #1F9D55;
+    --color-kpi-blue: #EAF1FB;
+    --color-kpi-blue-solid: #2563C9;
+    --color-kpi-pink: #FCEBF1;
+    --color-kpi-pink-solid: #D6336C;
+    --color-kpi-amber: #FDF3E3;
+    --color-kpi-amber-solid: #E0912F;
+    --color-kpi-purple: #F1ECFB;
+    --color-kpi-purple-solid: #7C4DBE;
+
     --color-surface-white: #FFFFFF;
     --color-surface-primary: #FDFEFE;
     --color-surface-secondary: #F5F7F6;
