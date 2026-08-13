@@ -221,7 +221,7 @@ final class RenderDocument
             ->lockForUpdate()
             ->first();
 
-        $snapshot = $this->loadSnapshot($template, $snapshotId, $data);
+        $snapshot = $this->loadSnapshot($template, $snapshotId, $data, $issued);
         $chrome = $this->schoolChrome($template, $schoolSectionId, $snapshot['payload']);
         $actor = $this->currentActor();
 
@@ -410,6 +410,9 @@ final class RenderDocument
             'subject_id' => $subjectId,
             'snapshot_type' => $template->snapshot_source ?? $subjectType,
             'snapshot_id' => $snapshotId,
+            'payload_snapshot' => ($template->snapshot_source !== null && SnapshotSourceMap::has($template->snapshot_source))
+                ? null
+                : $snapshot['payload'],
             'language' => $lang->value,
             'content_hash' => $hash,
             'qr_token' => null, // D2 wires the OPES1 signing stack (10-documents 17).
@@ -655,7 +658,7 @@ final class RenderDocument
      * @param  array<string, mixed>  $callerData
      * @return array{payload: array<string, mixed>, version: int|null}
      */
-    private function loadSnapshot(DocumentTemplate $template, int $snapshotId, array $callerData): array
+    private function loadSnapshot(DocumentTemplate $template, int $snapshotId, array $callerData, ?IssuedDocument $issued): array
     {
         $source = $template->snapshot_source;
 
@@ -687,6 +690,17 @@ final class RenderDocument
         // row pair the calling Action read; the payload it assembled from
         // those rows is the render input, and the content-hash comparison on
         // reprint is what holds that Action to determinism.
+        //
+        // On a reprint, re-deriving that payload from live tables is exactly
+        // the bug this freezes: a legitimate later correction (a renamed
+        // student, a re-allocated payment) changes what gets re-derived,
+        // which then permanently breaks reprintability with a
+        // DocumentReproducibilityViolation. Once a payload was frozen at
+        // issue time, read it back instead of re-deriving it.
+        if ($issued !== null && $issued->payload_snapshot !== null) {
+            return ['payload' => $issued->payload_snapshot, 'version' => null];
+        }
+
         return ['payload' => $callerData, 'version' => null];
     }
 
