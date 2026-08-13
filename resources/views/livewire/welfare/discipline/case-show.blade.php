@@ -133,7 +133,7 @@
                                 {{ __('discipline.severity') }} {{ $case->category->severity }}/5
                                 @if ($case->category->default_sanction_type)
                                     · {{ __('opes.welfare_detail.default_sanction', [
-                                        'type' => __('discipline.sanction.'.$case->category->default_sanction_type),
+                                        'type' => __('discipline.sanction.'.$case->category->default_sanction_type->value),
                                     ]) }}
                                 @endif
                             </span>
