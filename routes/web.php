@@ -688,6 +688,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/accounting/review', \App\Modules\Accounting\Livewire\Review\ControlCentre::class)
         ->middleware('can:ledger.view')->name('accounting.review');
 
+    Route::get('/accounting/review/journals', \App\Modules\Accounting\Livewire\Review\Journals::class)
+        ->middleware('can:ledger.view')->name('accounting.review.journals');
+
     /*
      * Bank / mobile-money reconciliation (02-accounting §13). Each float
      * reconciles against its own operator statement - which is the whole

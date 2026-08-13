@@ -128,6 +128,9 @@ final class Navigation
             // surface - control accounts, and which statutory gates are still
             // open. Read-only; it reports and never posts.
             ['key' => 'accounting_review', 'route' => '/accounting/review', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // The journal worklist sits beside it: every category is legal,
+            // they are simply the entries an auditor asks about first.
+            ['key' => 'accounting_review_journals', 'route' => '/accounting/review/journals', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // Procurement (Phase 5): lands on the supplier register; the
             // rest of the P2P chain (requisitions, orders, receipts,
             // invoices, payments) hangs off it. Gated on procurement.view,
