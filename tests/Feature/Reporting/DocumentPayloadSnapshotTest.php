@@ -100,3 +100,39 @@ it('refuses to let payload_snapshot be mutated after issue, the same as content_
     expect(fn () => $issued->update(['payload_snapshot' => ['tampered' => true]]))
         ->toThrow(RuntimeException::class, 'append-only');
 });
+
+it('backfills a legacy document that still reproduces, so the next correction cannot strand it', function (): void {
+    $cashier = p13moneyUserAs(Role::Bursar, Role::Accountant);
+    $cal = ledgerCalendar('2031-03-15');
+    p13moneySaveCashPaymentRule($cashier);
+
+    $studentId = Student::factory()->create(['first_name' => 'Legacy', 'last_name' => 'Case'])->id;
+    $payment = p13moneyRecordCash($studentId, null, $cal, $cashier, 20_000);
+    app(PrintReceipt::class)->handle($payment->id);
+
+    // Reproduce a document issued BEFORE payload freezing existed: the row
+    // is stripped back to payload_snapshot = NULL through the query builder,
+    // which is the only way past the model's append-only guard.
+    $issuedId = (int) DB::table('issued_documents')
+        ->where('subject_type', 'Payment')->where('subject_id', $payment->id)->value('id');
+    DB::table('issued_documents')->where('id', $issuedId)->update(['payload_snapshot' => null]);
+
+    // Its source rows have NOT moved, so the reprint still reproduces the
+    // recorded hash - and that is exactly when freezing it is provably safe.
+    app(PrintReceipt::class)->handle($payment->id);
+
+    $backfilled = DB::table('issued_documents')->where('id', $issuedId)->value('payload_snapshot');
+    expect($backfilled)->not->toBeNull();
+
+    /** @var array<string, mixed> $decoded */
+    $decoded = json_decode((string) $backfilled, true);
+    expect($decoded['receipt']['student_name'] ?? null)->toBe('Legacy Case');
+
+    // And now that it is frozen, the correction that used to strand it is
+    // survivable: the reprint keeps reporting the name recorded at issue.
+    DB::table('students')->where('id', $studentId)->update(['first_name' => 'Renamed']);
+
+    $reprint = app(PrintReceipt::class)->handle($payment->id);
+    expect($reprint->html)->toContain('Legacy Case');
+    expect($reprint->html)->not->toContain('Renamed Case');
+});

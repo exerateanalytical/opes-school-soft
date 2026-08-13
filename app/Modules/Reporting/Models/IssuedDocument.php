@@ -86,6 +86,18 @@ final class IssuedDocument extends Model
             ];
 
             foreach (array_keys($document->getDirty()) as $column) {
+                // One-way backfill, for documents issued BEFORE payload
+                // freezing existed: NULL -> value is allowed exactly once,
+                // and only from RenderDocument's reprint path, which writes
+                // it *after* re-rendering has already reproduced the
+                // recorded content_hash byte for byte. So what gets frozen
+                // is provably the original artefact's own payload, not
+                // today's live data. value -> anything else stays refused,
+                // exactly like content_hash.
+                if ($column === 'payload_snapshot' && $document->getOriginal('payload_snapshot') === null) {
+                    continue;
+                }
+
                 if (! in_array($column, $mutable, true)) {
                     throw new RuntimeException(sprintf(
                         'IssuedDocument %s is append-only outside its lifecycle columns; [%s] cannot change. '

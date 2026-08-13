@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Reporting\Domain;
 
-use RuntimeException;
+use DomainException;
 
 /**
  * docs/specs/10-documents.md 4.5 - a reprint of a snapshot-backed document
@@ -12,8 +12,14 @@ use RuntimeException;
  * pin or the snapshot has been violated; the print is refused, never
  * silently produced, because the paper in the parent's hand and the paper
  * about to leave the office would disagree.
+ *
+ * A DomainException, not a RuntimeException: refusing this print is a
+ * business RULE firing exactly as designed, not a fault. The print
+ * controllers already answer DomainException with a 422 carrying the
+ * message, so the operator reads why the document was refused instead of
+ * meeting a bare 500 page that reads like the platform broke.
  */
-final class DocumentReproducibilityViolation extends RuntimeException
+final class DocumentReproducibilityViolation extends DomainException
 {
     public static function forSerial(?string $serial, string $storedHash, string $recomputedHash): self
     {

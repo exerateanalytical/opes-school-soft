@@ -264,6 +264,18 @@ final class RenderDocument
             throw DocumentReproducibilityViolation::forSerial($issued->serial, $issued->content_hash, $hash);
         }
 
+        // Backfill for documents issued before payload freezing existed.
+        // Reaching this line means the payload just re-rendered to the SAME
+        // bytes recorded at issue, so it IS the original artefact's payload
+        // and freezing it now is safe - it protects this document from the
+        // next legitimate correction to its source rows, which is exactly
+        // what would otherwise strand it as unreprintable. Only ever
+        // NULL -> value (IssuedDocument's guard refuses anything else).
+        if ($issued->payload_snapshot === null && $snapshot['payload'] !== []) {
+            $issued->payload_snapshot = $snapshot['payload'];
+            $issued->save();
+        }
+
         // is_duplicate: derived, in-transaction, under the row lock (4.5).
         $priorPrints = DocumentPrintLog::query()
             ->where('issued_document_id', $issued->getKey())
