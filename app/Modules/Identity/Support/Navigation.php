@@ -124,6 +124,10 @@ final class Navigation
             ['key' => 'reconciliation', 'route' => '/accounting/reconciliation', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // 02-accounting §16: budget and budget-vs-actual.
             ['key' => 'budgets', 'route' => '/accounting/budgets', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // 2026-08-12-accounting-finance-architecture §4: the integrity
+            // surface - control accounts, and which statutory gates are still
+            // open. Read-only; it reports and never posts.
+            ['key' => 'accounting_review', 'route' => '/accounting/review', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // Procurement (Phase 5): lands on the supplier register; the
             // rest of the P2P chain (requisitions, orders, receipts,
             // invoices, payments) hangs off it. Gated on procurement.view,

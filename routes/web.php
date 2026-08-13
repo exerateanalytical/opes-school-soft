@@ -680,6 +680,15 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:ledger.view')->name('accounting.books');
 
     /*
+     * Accounting Review, 2026-08-12-accounting-finance-architecture.md §4.
+     * Read-only assurance: the control-account identities, and the §22
+     * configuration gates that are still open. Gated exactly as the other
+     * ledger screens - the sidebar hides, the route refuses.
+     */
+    Route::get('/accounting/review', \App\Modules\Accounting\Livewire\Review\ControlCentre::class)
+        ->middleware('can:ledger.view')->name('accounting.review');
+
+    /*
      * Bank / mobile-money reconciliation (02-accounting §13). Each float
      * reconciles against its own operator statement - which is the whole
      * point of having split MTN 5521 from Orange 5522 in the first place.
