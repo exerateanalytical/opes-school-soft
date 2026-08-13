@@ -31,10 +31,18 @@ Read from `student management.png`, `admission wizard.png`, `finance dashboard.p
 
 ## What I saw wrong in ours (screenshots at 1440×900)
 
-- **Content occupies ~55% of the viewport.** A large empty region sits right
-  and below on `/dashboard` and `/finance/invoices`. This is the "doesn't fit
-  the screen" complaint — a container/max-width and missing-rail problem, and
-  the highest-impact single fix.
+- ⚠️ **"Content occupies ~55% of the viewport" — DISPUTED, re-verify before acting.**
+  Read off a screenshot of `/dashboard` and `/finance/invoices`. A later DOM
+  measurement at the same 1440×900 viewport **contradicts it**: `main` measured
+  1169.8px of 1440 (sidebar ~255) and the KPI row 1118.8px — i.e. the width is
+  being used correctly, and `layouts/app.blade.php`'s `<main>` carries no
+  `max-w` at all (`min-w-0 flex-1 … px-4 py-6 sm:px-6`).
+  One of the two observations is wrong and it was not resolved — the browser
+  pane stopped compositing before a confirming screenshot could be taken.
+  **Do not start step 2 on the width premise until a working screenshot at
+  1440×900 settles it.** If the measurement is right, step 2 is not a width
+  fix at all; the perceived emptiness is then density/hierarchy (small type,
+  flat surfaces, sparse content), which is steps 3–4 and 6.
 - **Accountant `/dashboard` shows no stat cards at all** (all permission-gated
   away) and falls back to "Nothing needs your attention right now." An empty
   dashboard is the "amateur" complaint. Every role needs a populated default.
