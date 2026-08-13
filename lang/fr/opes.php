@@ -1474,6 +1474,7 @@ return [
         'receipt_no' => 'Numéro de reçu',
         'view_statement' => "Voir le relevé de l'élève",
         'print_receipt' => 'Imprimer le reçu',
+        'print_receipt_pos' => 'Imprimer le reçu thermique',
         'print_invoice' => 'Imprimer la facture',
         'download_pdf' => 'Télécharger le PDF',
         'amount_invalid' => 'Saisissez un montant de paiement supérieur à zéro.',
