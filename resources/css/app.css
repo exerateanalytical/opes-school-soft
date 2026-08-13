@@ -278,3 +278,29 @@ html {
 .opes-app :is(input, textarea)::placeholder {
     color: var(--color-text-muted);
 }
+
+/* ---------------------------------------------------------------------------
+   PAGE TITLE - one size, because right now there are two.
+
+   57 h1 elements render at `text-xl font-semibold` (~22px) and 27 at
+   `text-2xl font-bold` (~25px), so which weight a page title carries depends
+   on which week its screen was written. Against a 22px title the KPI numerals
+   beneath it are 32px, which inverts the hierarchy outright: the page
+   announces itself more quietly than any single statistic on it.
+
+   1.75rem is ~30px at the 17px root, matching the reference screens' titles in
+   proportion to the canvas. It sits between --text-2xl and --text-3xl because
+   the scale has no step there; it is not worth a new token for one selector.
+
+   Unlayered, like the field block above, so it genuinely unifies rather than
+   losing to whichever utility each screen happens to carry - `data-heading-raw`
+   opts an h1 out. x-list-screen's own h1 carries matching utilities so the
+   component most screens compose is self-consistent when read on its own; the
+   other screens are corrected here and need no edit.
+   --------------------------------------------------------------------------- */
+.opes-app h1:where(:not([data-heading-raw])) {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+}

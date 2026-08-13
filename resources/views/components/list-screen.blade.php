@@ -111,7 +111,9 @@
 
     {{-- ── Title + header actions ───────────────────────────────────────── --}}
     <div class="flex flex-wrap items-start justify-between gap-3">
-        <h1 class="min-w-0 text-xl font-semibold text-charcoal">{{ $title }}</h1>
+        {{-- Sized to match the h1 rule in app.css, so the component reads
+             honestly on its own rather than declaring 22px and rendering 30. --}}
+        <h1 class="min-w-0 text-2xl font-bold tracking-tight text-charcoal">{{ $title }}</h1>
 
         @isset($actions)
             <div class="flex flex-wrap items-center gap-2">
