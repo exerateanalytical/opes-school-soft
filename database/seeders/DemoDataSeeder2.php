@@ -133,6 +133,7 @@ final class DemoDataSeeder2 extends Seeder
         $this->section('Assessment', fn () => $this->seedAssessment());
         $this->section('Identity users', fn () => $this->seedUsers());
         $this->section('Guardian portal', fn () => $this->seedGuardianPortal());
+        $this->section('Staff portal', fn () => $this->seedStaffPortal());
 
         $this->command?->info('DemoDataSeeder2 complete.');
     }
@@ -1638,6 +1639,36 @@ final class DemoDataSeeder2 extends Seeder
                 );
             } catch (Throwable) {
             }
+        }
+    }
+
+    // ── Staff portal ──────────────────────────────────────────────────
+
+    private function seedStaffPortal(): void
+    {
+        $actor = Auth::user();
+
+        if ($actor === null) {
+            return;
+        }
+
+        if (User::query()->where('email', 'demo.staffportal@opeschool.test')->exists()) {
+            return;
+        }
+
+        $staffId = DB::table('staff_members')->whereNull('portal_user_id')->orderBy('id')->value('id');
+
+        if ($staffId === null) {
+            return;
+        }
+
+        try {
+            app(\App\Modules\HR\Actions\GrantStaffPortalAccess::class)->handle(
+                (int) $staffId,
+                'demo.staffportal@opeschool.test',
+                $actor,
+            );
+        } catch (Throwable) {
         }
     }
 }

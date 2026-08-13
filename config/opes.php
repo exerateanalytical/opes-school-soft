@@ -124,6 +124,18 @@ return [
                 'email' => 'demo.guardian1@opeschool.test',
                 'name' => 'Demo Guardian',
             ],
+            // The staff portal (/portal/staff) has existed since
+            // Phase 12-13 with a real Show screen (profile, timetable,
+            // leave, payslip PDF), but nothing ever granted any user the
+            // staff_portal role - demo.staffportal@opeschool.test is
+            // created by DemoDataSeeder2::seedStaffPortal() via the same
+            // GrantStaffPortalAccess Action a real admin now uses from
+            // /staff.
+            [
+                'role' => 'staff_portal',
+                'email' => 'demo.staffportal@opeschool.test',
+                'name' => 'Demo Staff',
+            ],
         ],
     ],
 
