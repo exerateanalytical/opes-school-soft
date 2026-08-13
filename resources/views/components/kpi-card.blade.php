@@ -82,7 +82,12 @@
         @endif
 
         <div class="min-w-0 flex-1">
-            <p class="truncate text-xs font-semibold uppercase tracking-wide text-charcoal/55">{{ $label }}</p>
+            {{-- Wraps to a second line rather than truncating: "UNPAID
+                 INVOIC…" and "OUTSTANDING …" are the label doing none of its
+                 job, and a clipped word reads as a broken build. Two short
+                 lines cost nothing here - the card's height is set by the
+                 numeral beside it. --}}
+            <p class="text-xs font-semibold uppercase leading-tight tracking-wide text-balance text-charcoal/55">{{ $label }}</p>
 
             <p class="mt-1 text-3xl font-bold leading-tight tracking-tight text-charcoal">
                 @if ($hasValue)

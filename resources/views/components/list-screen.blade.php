@@ -120,10 +120,18 @@
         @endisset
     </div>
 
-    {{-- ── KPI strip. 2-up and scrollable below md, 3-up at md, 5-up at lg. --}}
+    {{-- ── KPI strip. 2-up and scrollable below md, 3-up at md, then as many
+         as fit at lg.
+
+         `auto-fit` rather than a hard `grid-cols-5`: most screens supply
+         three or four KPIs, and a fixed five-column track left the spare
+         cells empty on the right - which is what made these pages read as
+         half-finished even though the page body was using its full width.
+         Tracks now divide the row between however many cards a screen
+         actually supplies, so four cards fill the row as four. --}}
     @isset($kpis)
         <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            <div class="grid min-w-max grid-cols-2 gap-3 sm:min-w-0 md:grid-cols-3 lg:grid-cols-5">
+            <div class="grid min-w-max grid-cols-2 gap-3 sm:min-w-0 md:grid-cols-3 lg:min-w-0 lg:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
                 {{ $kpis }}
             </div>
         </div>
