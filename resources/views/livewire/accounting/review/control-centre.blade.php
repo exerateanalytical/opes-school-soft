@@ -83,6 +83,20 @@
     </section>
 
     <section>
+        <h2 class="mb-1 text-lg font-medium text-charcoal">{{ __('opes.accounting.review.suspense_heading') }}</h2>
+        <p class="mb-3 text-sm text-charcoal/60">{{ __('opes.accounting.review.suspense_explainer') }}</p>
+
+        @forelse ($suspense as $row)
+            <div class="flex justify-between border-t border-charcoal/10 py-2 text-sm">
+                <span><span class="font-mono text-xs text-charcoal/60">{{ $row->code }}</span> {{ $row->name }}</span>
+                <span class="tabular-nums font-medium text-amber-700">{{ number_format($row->balance) }}</span>
+            </div>
+        @empty
+            <p class="text-sm text-emerald-700">&check; {{ __('opes.accounting.review.suspense_empty') }}</p>
+        @endforelse
+    </section>
+
+    <section>
         <h2 class="mb-1 text-lg font-medium text-charcoal">{{ __('opes.accounting.review.gates_heading') }}</h2>
         <p class="mb-3 text-sm text-charcoal/60">{{ __('opes.accounting.review.gates_explainer') }}</p>
 

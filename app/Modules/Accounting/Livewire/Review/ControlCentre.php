@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Accounting\Livewire\Review;
 
-use App\Modules\Accounting\Actions\Review\AuxiliaryControlChecks;
+use App\Modules\Accounting\Actions\Review\ControlAccountChecks;
 use App\Modules\Accounting\Actions\Review\ConfigurationGates;
+use App\Modules\Accounting\Actions\Review\SuspenseBalances;
 use App\Modules\Identity\Domain\Permission;
 use App\Support\Clock\BusinessDate;
 use Illuminate\Support\Facades\Gate;
@@ -55,12 +56,13 @@ final class ControlCentre extends Component
 
     public function render(): mixed
     {
-        $checks = app(AuxiliaryControlChecks::class)->handle($this->asOf, $this->axis);
+        $checks = app(ControlAccountChecks::class)->handle($this->asOf, $this->axis);
         $gates = app(ConfigurationGates::class)->handle();
 
         return view('livewire.accounting.review.control-centre', [
             'checks' => $checks,
             'gates' => $gates,
+            'suspense' => app(SuspenseBalances::class)->handle($this->asOf),
             'brokenCount' => $checks->filter(fn ($c): bool => $c->difference !== 0)->count(),
             'openGateCount' => count(array_filter($gates, fn (array $g): bool => ! $g['configured'])),
         ]);
