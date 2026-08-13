@@ -144,7 +144,14 @@ it('applies the VOID overlay and refuses a first-ever print of an already-voided
 
     // A SECOND payment, voided before it was ever printed once: no original
     // is issued for money that no longer stands (04-fees §11.5).
-    $secondCashier = p13moneyUserAs(Role::Bursar);
+    // Bursar AND Accountant, like every other payment-recording user in this
+    // file: RecordPayment posts the collection to the ledger through
+    // PostFromEvent -> DraftJournalEntry, which gates on `ledger.post` - a
+    // permission Role::Bursar deliberately does not hold. What this half of
+    // the test segregates is the VOID (recorder must not be the voider,
+    // 04-fees §11.5), not the posting right, so the recorder needs the same
+    // pair the earlier $cashier holds.
+    $secondCashier = p13moneyUserAs(Role::Bursar, Role::Accountant);
     $neverPrinted = p13moneyRecordCash(Student::factory()->create()->id, null, $cal, $secondCashier, 15_000);
 
     $secondVoider = p13moneyUserAs(Role::Accountant);

@@ -29,6 +29,7 @@ use RuntimeException;
  * @property int $subject_id
  * @property string $snapshot_type
  * @property int $snapshot_id
+ * @property array<string, mixed>|null $payload_snapshot
  * @property string $language
  * @property string $content_hash
  * @property string|null $qr_token
@@ -54,7 +55,7 @@ final class IssuedDocument extends Model
         'document_template_id', 'template_version',
         'series_code', 'serial',
         'subject_type', 'subject_id',
-        'snapshot_type', 'snapshot_id',
+        'snapshot_type', 'snapshot_id', 'payload_snapshot',
         'language', 'content_hash', 'qr_token',
         'issued_by', 'issued_at', 'issued_by_name_at_time',
         'status', 'revoked_by', 'revoked_at', 'revoked_reason',
@@ -70,6 +71,7 @@ final class IssuedDocument extends Model
             'template_version' => 'integer',
             'subject_id' => 'integer',
             'snapshot_id' => 'integer',
+            'payload_snapshot' => 'array',
             'issued_at' => 'datetime',
             'revoked_at' => 'datetime',
         ];

@@ -116,6 +116,13 @@ final class Index extends Component
 
     public string $terminateLastWorkingDay = '';
 
+    // ── Grant staff portal access (per-row, Staff tab) ──────────────────
+    public ?int $portalAccessStaffId = null;
+
+    public string $portalAccessEmail = '';
+
+    public ?string $portalAccessTemporaryPassword = null;
+
     public function mount(): void
     {
         Gate::authorize(HrPermission::VIEW);
@@ -356,6 +363,61 @@ final class Index extends Component
         session()->flash('status', 'Contract terminated.');
     }
 
+    // ── Grant staff portal access ────────────────────────────────────────
+
+    public function togglePortalAccessForm(int $staffMemberId): void
+    {
+        Gate::authorize(HrPermission::MANAGE);
+
+        $this->portalAccessStaffId = $this->portalAccessStaffId === $staffMemberId ? null : $staffMemberId;
+        $this->portalAccessEmail = '';
+        $this->portalAccessTemporaryPassword = null;
+    }
+
+    public function grantPortalAccess(\App\Modules\HR\Actions\GrantStaffPortalAccess $grant): void
+    {
+        Gate::authorize(HrPermission::MANAGE);
+
+        if ($this->portalAccessStaffId === null) {
+            return;
+        }
+
+        /** @var \App\Modules\Identity\Models\User $actorUser */
+        $actorUser = auth()->user();
+
+        try {
+            $result = $grant->handle($this->portalAccessStaffId, $this->portalAccessEmail === '' ? null : $this->portalAccessEmail, $actorUser);
+        } catch (ValidationException $e) {
+            $this->addError('portalAccess', implode(' ', $e->validator->errors()->all()));
+
+            return;
+        } catch (\DomainException $e) {
+            $this->addError('portalAccess', $e->getMessage());
+
+            return;
+        } catch (\Illuminate\Database\QueryException $e) {
+            // The exists() check inside GrantStaffPortalAccess is TOCTOU-racy
+            // against the users.email unique constraint: two admins granting
+            // the same email concurrently can both pass that check, and the
+            // loser hits this constraint at insert time instead of the
+            // friendly ValidationException. Only THAT specific failure (MySQL
+            // 1062, duplicate entry) degrades to the same form error - any
+            // other query failure (deadlock, FK violation, truncation) is a
+            // real bug and must not be mislabeled as "email already exists".
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+                $this->addError('portalAccess', 'A user with that email already exists.');
+
+                return;
+            }
+
+            throw $e;
+        }
+
+        $this->portalAccessTemporaryPassword = $result['temporary_password'];
+        session()->flash('status', 'Portal access granted.');
+        $this->resetPage();
+    }
+
     private function actor(): \App\Support\Audit\Actor
     {
         /** @var \App\Modules\Identity\Models\User $user */
@@ -406,7 +468,7 @@ final class Index extends Component
             ->orderBy('sm.first_name')
             ->select([
                 'sm.id', 'sm.staff_no', 'sm.first_name', 'sm.last_name', 'sm.phone',
-                'sm.email', 'sm.status',
+                'sm.email', 'sm.status', 'sm.portal_user_id',
             ])
             ->selectSub(
                 DB::table('staff_contracts as sc')

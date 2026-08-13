@@ -1489,6 +1489,7 @@ return [
         'receipt_no' => 'Receipt number',
         'view_statement' => 'View student statement',
         'print_receipt' => 'Print receipt',
+        'print_receipt_pos' => 'Print thermal receipt',
         'print_invoice' => 'Print invoice',
         'download_pdf' => 'Download PDF',
         'amount_invalid' => 'Enter a payment amount greater than zero.',

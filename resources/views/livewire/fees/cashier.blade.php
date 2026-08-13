@@ -46,12 +46,18 @@
                     </a>
                 @endif
                 {{-- Phase 13 D3 (10-documents §10.1): the real receipt
-                     template now exists - Print opens the A5 PDF in a new
-                     tab; the request re-authorizes documents.print itself. --}}
+                     template now exists in two formats - Print opens the A5
+                     PDF, Print (thermal) the 80mm POS variant, both in a
+                     new tab; each request re-authorizes documents.print
+                     itself. --}}
                 @if (is_int($lastPaymentId))
                     <a href="{{ route('fees.payments.receipt', ['payment' => $lastPaymentId]) }}" target="_blank" rel="noopener"
                        class="inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
                         {{ __('opes.fees_screen.print_receipt') }}
+                    </a>
+                    <a href="{{ route('fees.payments.receipt', ['payment' => $lastPaymentId, 'variant' => 'pos']) }}" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1 text-sm font-medium text-primary underline hover:no-underline">
+                        {{ __('opes.fees_screen.print_receipt_pos') }}
                     </a>
                 @endif
             </div>

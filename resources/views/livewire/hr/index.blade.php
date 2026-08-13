@@ -172,6 +172,7 @@
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Position</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Phone</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Status</th>
+                <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Action</th>
             @elseif ($tab === 'contracts')
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Staff</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Role</th>
@@ -203,6 +204,16 @@
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->phone }}</td>
                 <td class="px-4 py-2.5">
                     <x-status-pill :status="$staffTone[$row->status] ?? 'ok'" :label="$staffLabel[$row->status] ?? $row->status"/>
+                </td>
+                <td class="px-4 py-2.5">
+                    @if ($row->portal_user_id === null)
+                        <button type="button" wire:click="togglePortalAccessForm({{ $row->id }})"
+                                class="rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20">
+                            Enable portal access
+                        </button>
+                    @else
+                        <span class="text-charcoal/40">Portal linked</span>
+                    @endif
                 </td>
             @elseif ($tab === 'contracts')
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</td>
@@ -257,6 +268,12 @@
                         <x-status-pill :status="$staffTone[$row->status] ?? 'ok'" :label="$staffLabel[$row->status] ?? $row->status"/>
                     </div>
                     <p class="mt-1 text-sm text-charcoal/70">{{ $row->staff_no }} · {{ $row->department_name ?? 'No department' }} · {{ $row->position_name ?? 'No position' }}</p>
+                    @if ($row->portal_user_id === null)
+                        <button type="button" wire:click="togglePortalAccessForm({{ $row->id }})"
+                                class="mt-2 rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20">
+                            Enable portal access
+                        </button>
+                    @endif
                 @elseif ($tab === 'contracts')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>
@@ -471,6 +488,31 @@
                             Confirm Termination
                         </button>
                     </div>
+                </section>
+            @endif
+
+            @if ($portalAccessStaffId !== null)
+                <section aria-label="Grant staff portal access" class="rounded border border-border-primary bg-white p-3">
+                    <h3 class="mb-2 text-sm font-semibold text-charcoal">Enable Portal Access</h3>
+
+                    @if ($portalAccessTemporaryPassword !== null)
+                        <p class="mb-2 rounded border border-primary/40 bg-primary/10 p-2 text-xs text-charcoal">
+                            Access granted. Temporary password (give this to the staff member; it is shown once):
+                            <span class="mt-1 block font-mono text-sm font-bold text-charcoal">{{ $portalAccessTemporaryPassword }}</span>
+                        </p>
+                    @else
+                        <div class="space-y-2">
+                            <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+                                Portal login email
+                                <input type="email" wire:model="portalAccessEmail" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+                            </label>
+                            @error('portalAccess')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </div>
+                        <button type="button" wire:click="grantPortalAccess" wire:confirm="Grant this staff member portal access?"
+                                class="mt-3 w-full rounded bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90">
+                            Grant Access
+                        </button>
+                    @endif
                 </section>
             @endif
 
