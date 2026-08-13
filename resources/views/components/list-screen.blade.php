@@ -203,24 +203,65 @@
                 @endisset
 
                 {{-- Rule 4: the wide thing scrolls inside ITSELF. The page body
-                     never scrolls horizontally (09-ui 10). --}}
-                <div class="{{ isset($cards) ? 'hidden md:block ' : '' }}min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
-                    <table class="w-full min-w-[40rem] border-collapse text-sm">
-                        @isset($head)
-                            <thead class="border-b border-border-primary bg-sand/40 text-left">
-                                {{ $head }}
-                            </thead>
-                        @endisset
-                        <tbody class="divide-y divide-border-primary">
-                            {{ $slot }}
-                        </tbody>
-                    </table>
+                     never scrolls horizontally (09-ui 10).
+
+                     `rounded-xl`, not `rounded`: at 4px this container was the
+                     one square-cornered surface in a column of 12px cards, and
+                     a single mismatched radius is enough to make the whole page
+                     read as assembled rather than designed. --}}
+                <div class="{{ isset($cards) ? 'hidden md:block ' : '' }}min-w-0 overflow-hidden rounded-xl border border-border-primary bg-white shadow-[0_1px_2px_rgba(0,45,23,0.04)]">
+                    <div class="min-w-0 overflow-x-auto">
+                        <table class="w-full min-w-[40rem] border-collapse text-sm">
+                            @isset($head)
+                                {{-- The reference screens' deep-green header row is
+                                     what turns a data dump into a designed table,
+                                     so it is the DEFAULT here rather than something
+                                     each screen has to remember. 31 of the 44 list
+                                     screens already set `bg-chrome text-white` on
+                                     their own <tr> - for them this changes nothing;
+                                     the remaining bare <tr> screens stop being the
+                                     odd ones out.
+
+                                     `whitespace-nowrap` on the cells is the other
+                                     half: "DATE OF BIRTH" was breaking across three
+                                     lines on /students, which inflated every header
+                                     to a triple-height block and was the single
+                                     ugliest thing on the screen. A header label is
+                                     two or three words - it should push the column,
+                                     not stack inside it. --}}
+                                <thead class="border-b border-border-primary bg-chrome text-left text-white [&_th]:whitespace-nowrap">
+                                    {{ $head }}
+                                </thead>
+                            @endisset
+
+                            {{-- Hover is not decoration on a 25-row table: it is how
+                                 an operator keeps their eye on one pupil's row while
+                                 tracking across six columns. Divider softened to the
+                                 secondary border so the rows read as rhythm rather
+                                 than as a grid of boxes. --}}
+                            <tbody class="divide-y divide-border-secondary [&>tr]:transition-colors [&>tr:hover]:bg-sand/60 [&_td]:align-middle">
+                                {{ $slot }}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             @endif
         </div>
 
         @isset($rail)
-            <aside class="w-full shrink-0 lg:w-72"
+            {{-- w-56, not w-72. Note the root font-size is 17px, so these are
+                 238px and 306px respectively, not the 224/288 the Tailwind
+                 names suggest.
+
+                 At 306px the rail took 27% of the body on a 1440 screen where
+                 the reference rails take ~16%, and it was starving the table
+                 beside it: /students had to break "DATE OF BIRTH" across three
+                 lines to fit, and once the headers were told not to stack the
+                 table overflowed by 66px and clipped its own ACTIONS column.
+                 238px matches the references, still holds the counts and quick
+                 actions a rail actually carries, and hands the table back
+                 exactly the width it was missing. --}}
+            <aside class="w-full shrink-0 lg:w-56"
                    @if (is_string($railTitle) && $railTitle !== '') aria-label="{{ $railTitle }}" @endif>
                 @if (is_string($railTitle) && $railTitle !== '')
                     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
