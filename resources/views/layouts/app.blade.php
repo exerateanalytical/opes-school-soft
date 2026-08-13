@@ -67,7 +67,11 @@
         </style>
     @endif
 </head>
-<body class="min-h-screen bg-ivory font-sans text-charcoal antialiased">
+{{-- `opes-app` is the scope hook for the shared form-control treatment in
+     app.css. It is deliberately ONLY on this layout: the auth screens and the
+     guardian portal carry their own approved designs, and a platform-wide
+     field restyle must not reach into them. --}}
+<body class="opes-app min-h-screen bg-ivory font-sans text-charcoal antialiased">
 {{-- The top bar is white; the sidebar is dark chrome-green running the full
      viewport height beside it (00-core 8.2 - one continuous chrome surface,
      just no longer painted the same colour top-to-bottom). The drawer state

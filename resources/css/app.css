@@ -187,3 +187,94 @@ html {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
+
+/* ---------------------------------------------------------------------------
+   FORM CONTROLS - one treatment for ~900 fields across 98 view files.
+
+   There is no shared x-input/x-select component in this codebase; every screen
+   hand-writes its markup, and the dominant string is
+   `rounded border border-border-primary px-2 py-1.5 text-sm` - a 4px corner on
+   a ~30px-tall box. Against KPI cards at 12px corners and 14px padding, that
+   reads as the "cramped, boxy, amateur" complaint more than any single screen
+   does. Editing 900 tags by hand is not a change anyone can review, so the
+   treatment lives here instead.
+
+   WHY THIS BLOCK IS NOT IN @layer: Tailwind v4 puts utilities in
+   `@layer utilities`, and unlayered CSS beats every layered rule regardless of
+   specificity. A layered rule would lose to the very `rounded`/`px-2`/`py-1.5`
+   utilities it needs to correct, which would make it a no-op. Unlayered is the
+   only cascade position that works here.
+
+   TWO ESCAPE HATCHES, because a blanket override that cannot be opted out of
+   is a trap for the next person:
+     - `.rounded-full`   a control that deliberately chose a pill has a
+                         considered design (the top-bar search, with an icon
+                         inset via pl-9). Those are exempt WHOLESALE - padding
+                         included - so the icon never collides with the text.
+     - `data-field-raw`  explicit per-element opt-out for anything else.
+
+   WHY EVERY EXCLUSION SITS IN `:where()`: it contributes zero specificity, so
+   all four rules below weigh exactly (0,1,1) and SOURCE ORDER decides between
+   them. Written as bare `:not()` chains the first rule scored (0,13,1) and
+   silently outranked the chevron rule beneath it - `padding-inline: 0.75rem`
+   beat `padding-inline-end: 2.25rem` and the chevron printed on top of the
+   selected text. Being unlayered already guarantees the win over utilities;
+   specificity only ever needed to be settled among these four.
+   --------------------------------------------------------------------------- */
+
+.opes-app
+    :is(input, select, textarea):where(
+        :not(.rounded-full):not([data-field-raw]):not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']):not([type='range']):not([type='submit']):not([type='button']):not([type='image']):not([type='color'])
+    ) {
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-white);
+    color: var(--color-charcoal);
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+    transition:
+        border-color 120ms ease,
+        box-shadow 120ms ease;
+}
+
+/* Height is what separates a field that looks placed from one that looks
+   squeezed in. Single-line controls only - a textarea's height is its `rows`. */
+.opes-app
+    :is(input, select):where(
+        :not(.rounded-full):not([data-field-raw]):not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']):not([type='range']):not([type='submit']):not([type='button']):not([type='image']):not([type='color'])
+    ) {
+    min-height: 2.5rem;
+}
+
+/* The reference screens' chevron. The native Windows select arrow is a grey
+   system triangle that instantly dates the page beside a designed field.
+   `size`/`multiple` selects are list boxes, not dropdowns - no chevron. */
+.opes-app select:where(:not(.rounded-full):not([data-field-raw]):not([multiple]):not([size])) {
+    appearance: none;
+    padding-inline-end: 2.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2352615A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.05rem;
+}
+
+/* A green ring rather than the browser's blue one, and on `focus` not only
+   `focus-visible` so a pointer user also sees which field is live. */
+.opes-app
+    :is(input, select, textarea):where(
+        :not(.rounded-full):not([data-field-raw]):not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='submit']):not([type='button'])
+    ):focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
+    outline: none;
+}
+
+.opes-app :is(input, select, textarea):disabled {
+    background-color: var(--color-surface-secondary);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+}
+
+.opes-app :is(input, textarea)::placeholder {
+    color: var(--color-text-muted);
+}
