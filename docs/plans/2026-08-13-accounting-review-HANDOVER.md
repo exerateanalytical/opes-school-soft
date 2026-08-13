@@ -34,8 +34,11 @@ The rule adopted as a result, now binding and enforced by test:
 > becomes system data.**
 
 A field may read **Not configured** indefinitely. That is correct behaviour.
-`tests/Architecture/AccountingReviewTest.php` (Task 9, not yet written) is
-specified to fail if any seeder, factory or migration introduces one.
+`tests/Architecture/AccountingReviewTest.php` **now enforces this** — six
+guards, 1 282 assertions, sweeping every file in the Accounting module and the
+seeders. It fails if the rejected codes reappear, if the review layer writes,
+if anything filters on a bare `posted`, or if Accounting imports another
+module's models.
 
 ---
 
@@ -52,10 +55,30 @@ rewritten.
 | 4 | `AuxiliaryControlChecks` (+ tautology fix) | 4, 12 assertions |
 | 5 | `ConfigurationGates` register | 8, 77 assertions |
 | 6 | `Livewire\Review\ControlCentre` at `/accounting/review` | 6 |
+| 7 | `JournalExceptions` + `Livewire\Review\Journals` worklist | 10 |
+| 8 | `ControlAccountChecks` matrix + `SuspenseBalances` | 7 |
+| 9 | `tests/Architecture/AccountingReviewTest.php` — six guards | 6, 1 282 assertions |
+| 10 | Verification; specs marked delivered | — |
 
-**Remaining: Tasks 7–10** — journal exceptions worklist, full control matrix +
-suspense balances, architecture guard tests, full verification. All are fully
-specified in the plan, with code.
+**ALL TEN TASKS COMPLETE.** Final run: **54 passed, 1 906 assertions** across
+the review suite, the architecture guards and localisation.
+
+### Two screens now exist
+
+- `/accounting/review` — control matrix, suspense balances, gate register
+- `/accounting/review/journals` — the five journal exception categories,
+  each row drilling to the document that caused it
+
+### What is deliberately NOT finished
+
+Seven of the nine controls — bank, cash, electronic money, payroll, fixed
+assets, inventory, tax — report **NotConfigured**. Each needs a subledger
+figure from another module that this build did not verify. That is a
+deliberate stop, not an omission: a zero difference is a positive claim that
+the books agree, and emitting one from an uncomputed control is the exact
+false assurance §3.1 describes. Wiring one up is small — verify the subledger
+figure, then replace its row in `ControlAccountChecks::PENDING` with a real
+computation.
 
 ---
 
@@ -118,7 +141,11 @@ is how the discrepancy surfaced.**
    value object (`App\Support\Audit\Actor`); `App\Support\Ledger\` follows it.
 4. **Never run two test processes at once.** Parallel runs corrupted the test
    database twice, requiring a full rebuild. Use one foreground run.
-5. **PHP casts numeric string array keys to int.** `$a['707']` becomes
+5. **Architecture tests do not boot the app.** No container, so no
+   `base_path()` and no `File` facade. Walk the tree with plain PHP.
+6. **A posted entry must carry a `piece_no`** (`ck_je_piece_when_posted`) —
+   the gapless-sequence invariant. Factory-made posted entries need one.
+7. **PHP casts numeric string array keys to int.** `$a['707']` becomes
    `$a[707]`, and `str_starts_with()` then raises.
 
 ---
@@ -155,12 +182,13 @@ Any **other** failure is yours.
 
 From the backlog in `2026-08-12-module-gap-analysis.md`:
 
-1. **Finish Tasks 7–10** — half-built, fully specified, cheapest remaining value.
-2. **Admissions** — thinnest genuinely real module (3 models, 2 screens).
+1. **Admissions** — thinnest genuinely real module (3 models, 2 screens).
    Missing: interview, entrance exam, decision workflow, admission letter, and
    the **applicant → student conversion**, which is unenforced today. That last
    one is a correctness gap, not a missing feature.
-3. Then Activities (largest greenfield), curriculum framework, Alumni.
+2. Then Activities (largest greenfield), curriculum framework, Alumni.
+3. Optionally wire one of the seven pending controls — small, self-contained,
+   and each one measurably increases how much of the ledger is assured.
 
 ### The decision that outranks the backlog
 

@@ -177,7 +177,7 @@ the build in §10 targets only the `MISSING` and `THIN` rows.
 | Notes annexes | **BLOCKED** by §22 gate 13 — correct behaviour per §1.3 |
 | Statutory books (AUDCIF Art. 19) | **BUILT** (`StatutoryBook`, `Livewire\Books\Index`) |
 | Documentation du système comptable | **BUILT** (`SystemDocumentationSnapshot`) — statutory artifact, **not** the operator guide of §7 |
-| **Statement → line → account → journal → source drill-down** | **MISSING (UI only)** | see §6 |
+| **Statement → line → account → journal → source drill-down** | **BUILT 2026-08-13** | see §6.1 — reverse link |
 
 **Layer 4 — Tax / DSF / statutory**
 
