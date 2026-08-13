@@ -82,8 +82,25 @@
     <div x-show="nav" x-cloak class="fixed inset-0 z-20 bg-charcoal/50 md:hidden"
          x-on:click="nav = false" aria-hidden="true"></div>
 
+    {{-- `md:sticky md:top-0 md:h-screen md:self-start`, NOT `md:static`.
+
+         The nav lists up to 50 modules. As a static flex item it grew to its
+         content height - 2585px measured on an administrator's /dashboard -
+         and because it is a sibling of <main> in a flex row it dragged the
+         whole PAGE to 2585px. Actual dashboard content is 911px, so every
+         screen in the product carried ~1700px of blank canvas below the fold
+         that no amount of restyling the content could fill. That is most of
+         what "dashboards empty" was describing, and it was never a dashboard
+         bug.
+
+         `overflow-y-auto` was already here and never fired, because nothing
+         constrained the height for it to overflow. h-screen supplies the
+         constraint; self-start stops the flex row stretching it back out
+         (align-items defaults to stretch, which would silently undo h-screen);
+         sticky keeps it in view while the page scrolls. Below md the drawer is
+         `fixed inset-y-0` and is untouched. --}}
     <nav id="opes-sidebar" aria-label="{{ __('opes.shell.primary_navigation') }}"
-         class="fixed inset-y-0 left-0 z-20 hidden w-60 shrink-0 flex-col overflow-y-auto bg-chrome pb-4 md:static md:z-auto md:flex"
+         class="fixed inset-y-0 left-0 z-20 hidden w-60 shrink-0 flex-col overflow-y-auto bg-chrome pb-4 md:sticky md:top-0 md:z-auto md:flex md:h-screen md:self-start"
          :class="{ 'hidden': ! nav, 'flex': nav }">
 
         {{-- Crest: shield + crown + laurel wreath, gold line-art on the dark
