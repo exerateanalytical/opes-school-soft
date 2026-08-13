@@ -60,20 +60,21 @@
         </x-kpi-card>
         @endif
 
+        {{-- Health carries a status pill rather than a number, which is why it
+             used to be hand-rolled - and why it rendered as the one plain white
+             rectangle in a row of tinted cards. x-kpi-card's `display` slot
+             covers the non-numeric case now, so this tile is a real KPI card
+             and picks up the same surface, radius and badge as its neighbours.
+             `iconBg` keeps the teal circle it has always had. --}}
         @if ($canViewHealth)
-        <div class="flex items-start gap-3 rounded border border-border-primary bg-white px-4 py-3">
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-badge-teal text-white">
+        <x-kpi-card :label="__('opes.dashboard.tile_health')" icon-bg="bg-badge-teal">
+            <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-            </span>
-            <div class="min-w-0">
-                <p class="text-xs font-medium uppercase tracking-wide text-charcoal/60">
-                    {{ __('opes.dashboard.tile_health') }}
-                </p>
-                <p class="mt-2">
-                    <x-status-pill :status="$healthSummary->value"/>
-                </p>
-            </div>
-        </div>
+            </x-slot:icon>
+            <x-slot:display>
+                <x-status-pill :status="$healthSummary->value"/>
+            </x-slot:display>
+        </x-kpi-card>
         @endif
 
         {{-- Null, not zero: see Dashboard::lastBackupAge(). Gated on

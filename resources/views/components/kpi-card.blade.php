@@ -89,14 +89,25 @@
                  numeral beside it. --}}
             <p class="text-xs font-semibold uppercase leading-tight tracking-wide text-balance text-charcoal/55">{{ $label }}</p>
 
-            <p class="mt-1 text-3xl font-bold leading-tight tracking-tight text-charcoal">
-                @if ($hasValue)
-                    {{ $value }}
-                @else
-                    <span title="{{ __('opes.ui.no_data') }}">—</span>
-                    <span class="sr-only">{{ __('opes.ui.no_data') }}</span>
-                @endif
-            </p>
+            {{-- `display` is for a KPI whose headline is not a numeral - a
+                 status pill, a rating, a short chip. Without it those tiles get
+                 hand-rolled as a plain white div beside the tinted cards, which
+                 is exactly what the dashboard's SYSTEM HEALTH tile was doing:
+                 one white rectangle in a row of five, and the only thing on the
+                 screen that looked unfinished. A slot costs less than the
+                 duplicate. --}}
+            @isset($display)
+                <div class="mt-2">{{ $display }}</div>
+            @else
+                <p class="mt-1 text-3xl font-bold leading-tight tracking-tight text-charcoal">
+                    @if ($hasValue)
+                        {{ $value }}
+                    @else
+                        <span title="{{ __('opes.ui.no_data') }}">—</span>
+                        <span class="sr-only">{{ __('opes.ui.no_data') }}</span>
+                    @endif
+                </p>
+            @endisset
 
             @if ($sub !== null && $sub !== '')
                 <p class="mt-0.5 truncate text-xs text-charcoal/55">{{ $sub }}</p>
