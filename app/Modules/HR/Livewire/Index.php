@@ -400,11 +400,17 @@ final class Index extends Component
             // against the users.email unique constraint: two admins granting
             // the same email concurrently can both pass that check, and the
             // loser hits this constraint at insert time instead of the
-            // friendly ValidationException. Degrade to the same form error
-            // rather than a Livewire crash page.
-            $this->addError('portalAccess', 'A user with that email already exists.');
+            // friendly ValidationException. Only THAT specific failure (MySQL
+            // 1062, duplicate entry) degrades to the same form error - any
+            // other query failure (deadlock, FK violation, truncation) is a
+            // real bug and must not be mislabeled as "email already exists".
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+                $this->addError('portalAccess', 'A user with that email already exists.');
 
-            return;
+                return;
+            }
+
+            throw $e;
         }
 
         $this->portalAccessTemporaryPassword = $result['temporary_password'];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\Fees\Actions\IssueInvoice;
 use App\Modules\Fees\Actions\PrintReceipt;
 use App\Modules\Identity\Domain\Role;
+use App\Modules\Reporting\Models\IssuedDocument;
 use App\Modules\Students\Models\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -75,4 +76,27 @@ it('reprints the invoice line frozen at issue, even after the payment is later r
     $reprint = app(PrintReceipt::class)->handle($payment->id);
     expect($reprint->html)->toContain($issued->invoice_no ?? '');
     expect($reprint->isDuplicate)->toBeTrue();
+});
+
+it('refuses to let payload_snapshot be mutated after issue, the same as content_hash', function (): void {
+    $cashier = p13moneyUserAs(Role::Bursar, Role::Accountant);
+    $cal = ledgerCalendar('2031-03-15');
+    p13moneySaveCashPaymentRule($cashier);
+
+    $payment = p13moneyRecordCash(Student::factory()->create()->id, null, $cal, $cashier, 25_000);
+    app(PrintReceipt::class)->handle($payment->id);
+
+    $issued = IssuedDocument::query()
+        ->where('subject_type', 'Payment')
+        ->where('subject_id', $payment->id)
+        ->firstOrFail();
+
+    expect($issued->payload_snapshot)->not->toBeNull();
+
+    // The whole fix depends on this column being append-only, exactly like
+    // content_hash - if a future edit ever adds it to booted()'s $mutable
+    // list (or something bypasses save() to write it directly), the frozen
+    // payload stops being trustworthy and this test is what catches it.
+    expect(fn () => $issued->update(['payload_snapshot' => ['tampered' => true]]))
+        ->toThrow(RuntimeException::class, 'append-only');
 });
