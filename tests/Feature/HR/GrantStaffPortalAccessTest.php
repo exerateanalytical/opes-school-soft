@@ -9,6 +9,7 @@ use App\Modules\Identity\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -68,4 +69,32 @@ it('refuses to grant portal access twice to the same staff member', function ():
 
     expect(fn () => app(GrantStaffPortalAccess::class)->handle((int) $staffMember->id, 'awa2@opeschool.test', $admin))
         ->toThrow(DomainException::class, 'already has portal access');
+});
+
+it('refuses when the staff member has no email on file and none is supplied', function (): void {
+    $admin = hrTestAdmin();
+    $this->actingAs($admin);
+
+    $staffMember = app(HireStaffMember::class)->handle(
+        firstName: 'Paul', lastName: 'Mbarga', gender: 'male', dateOfBirth: '1992-03-03',
+        phone: '677000002', hiredOn: '2026-01-01', email: null,
+    );
+
+    expect(fn () => app(GrantStaffPortalAccess::class)->handle((int) $staffMember->id, null, $admin))
+        ->toThrow(ValidationException::class);
+});
+
+it('refuses when the requested email already belongs to another user', function (): void {
+    $admin = hrTestAdmin();
+    $this->actingAs($admin);
+
+    User::factory()->create(['email' => 'taken@opeschool.test']);
+
+    $staffMember = app(HireStaffMember::class)->handle(
+        firstName: 'Sonia', lastName: 'Eyenga', gender: 'female', dateOfBirth: '1991-07-07',
+        phone: '677000003', hiredOn: '2026-01-01', email: null,
+    );
+
+    expect(fn () => app(GrantStaffPortalAccess::class)->handle((int) $staffMember->id, 'taken@opeschool.test', $admin))
+        ->toThrow(ValidationException::class);
 });

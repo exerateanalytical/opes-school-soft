@@ -395,6 +395,16 @@ final class Index extends Component
             $this->addError('portalAccess', $e->getMessage());
 
             return;
+        } catch (\Illuminate\Database\QueryException $e) {
+            // The exists() check inside GrantStaffPortalAccess is TOCTOU-racy
+            // against the users.email unique constraint: two admins granting
+            // the same email concurrently can both pass that check, and the
+            // loser hits this constraint at insert time instead of the
+            // friendly ValidationException. Degrade to the same form error
+            // rather than a Livewire crash page.
+            $this->addError('portalAccess', 'A user with that email already exists.');
+
+            return;
         }
 
         $this->portalAccessTemporaryPassword = $result['temporary_password'];
