@@ -139,14 +139,18 @@
 
     {{-- ── Filter bar. ALWAYS ends with Filter | Reset (09-ui 4). ───────── --}}
     @isset($filters)
+        {{-- Radius and surface match the KPI cards above deliberately: the
+             strip was `rounded` (4px) against their 12px, and mixed corner
+             radii inside one column is most of what reads as "generic" even
+             when every individual piece is fine. --}}
         <section aria-label="{{ __('opes.ui.filters') }}"
-                 class="rounded border border-border-primary bg-white p-3">
+                 class="rounded-xl border border-border-primary bg-white p-3.5 shadow-[0_1px_2px_rgba(0,45,23,0.04)]">
             <div class="flex flex-wrap items-end gap-3">
                 {{ $filters }}
 
                 <div class="ml-auto flex items-center gap-2">
                     <button type="submit" wire:click="$refresh"
-                            class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            class="rounded-lg border border-primary bg-primary px-3.5 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(0,45,23,0.12)] transition hover:bg-primary/90">
                         {{ __('opes.ui.filter') }}
                     </button>
 
@@ -155,12 +159,12 @@
                          blank screen the operator reads as "no data". --}}
                     @if (is_string($resetUrl) && $resetUrl !== '')
                         <a href="{{ $resetUrl }}"
-                           class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                           class="rounded-lg border border-border-primary px-3.5 py-2 text-sm font-medium text-charcoal transition hover:border-primary/50 hover:bg-sand hover:text-primary">
                             {{ __('opes.ui.reset') }}
                         </a>
                     @else
                         <button type="button" wire:click="{{ $resetAction }}"
-                                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                class="rounded-lg border border-border-primary px-3.5 py-2 text-sm font-medium text-charcoal transition hover:border-primary/50 hover:bg-sand hover:text-primary">
                             {{ __('opes.ui.reset') }}
                         </button>
                     @endif
