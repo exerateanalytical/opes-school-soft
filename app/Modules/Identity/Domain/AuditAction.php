@@ -18,4 +18,9 @@ enum AuditAction: string
     case RoleAssigned = 'role_assigned';
     case PermissionGranted = 'permission_granted';
     case SettingChanged = 'setting_changed';
+
+    // 10-documents §19: a clearance/discipline gate override on a Transfer/
+    // Leaving/Character certificate is "printed nowhere but logged
+    // everywhere" - this is the everywhere.
+    case GateOverridden = 'gate_overridden';
 }

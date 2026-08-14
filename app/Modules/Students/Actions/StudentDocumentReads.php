@@ -177,6 +177,27 @@ final class StudentDocumentReads
     }
 
     /**
+     * True when an IssuedDocument already exists for this exact (template,
+     * subject, snapshot) - i.e. the requested render is a REPRINT. Print
+     * Actions use this to skip their ISSUE-time gates (clearance,
+     * discipline, live-enrollment): the gate was passed when the original
+     * was issued, the payload is frozen on issued_documents.payload_snapshot,
+     * and refusing the duplicate of a document that lawfully exists would be
+     * a new rule §4.5 does not state. RenderDocument still applies its own
+     * reprint permission and the DUPLICATA/void watermark.
+     */
+    public function alreadyIssued(string $templateCode, string $subjectType, int $subjectId, int $snapshotId): bool
+    {
+        return DB::table('issued_documents as doc')
+            ->join('document_templates as dt', 'dt.id', '=', 'doc.document_template_id')
+            ->where('dt.code', $templateCode)
+            ->where('doc.subject_type', $subjectType)
+            ->where('doc.subject_id', $subjectId)
+            ->where('doc.snapshot_id', $snapshotId)
+            ->exists();
+    }
+
+    /**
      * §7.11's computation, on §7 C5's real denominator: registers actually
      * taken for the class groups this enrollment occupied on each date.
      * `late` re-adds as present per 07-students §9.6; every other exception
