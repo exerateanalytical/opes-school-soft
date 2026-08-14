@@ -51,4 +51,9 @@ final class AlumniEngagement extends Model
     {
         return $this->belongsTo(AlumnusRecord::class);
     }
+
+    protected static function newFactory(): \Database\Factories\AlumniEngagementFactory
+    {
+        return \Database\Factories\AlumniEngagementFactory::new();
+    }
 }

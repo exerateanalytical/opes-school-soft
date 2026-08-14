@@ -72,4 +72,9 @@ final class AlumnusRecord extends Model
     {
         return $this->contact_email !== null || $this->contact_phone !== null;
     }
+
+    protected static function newFactory(): \Database\Factories\AlumnusRecordFactory
+    {
+        return \Database\Factories\AlumnusRecordFactory::new();
+    }
 }
