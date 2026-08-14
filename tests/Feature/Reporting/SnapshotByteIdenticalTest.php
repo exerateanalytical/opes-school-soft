@@ -108,6 +108,16 @@ it('throws DocumentReproducibilityViolation when the render inputs really moved,
     $original = app(RenderDocument::class)->handle(...$args);
     $logsAfterIssue = (int) DB::table('document_print_logs')->count();
 
+    // A document issued BEFORE render_envelope existed: for anything issued
+    // since, the chrome is frozen at issue and read back, so a profile edit
+    // CANNOT move the bytes any more - that is the Phase 2 fix, and the
+    // sibling test above proves it. The violation now only has one honest
+    // trigger left: a legacy document with no envelope whose live inputs
+    // moved. The query builder is the only way past the append-only guard.
+    DB::table('issued_documents')
+        ->where('id', $original->issuedDocumentId)
+        ->update(['render_envelope' => null]);
+
     // Move the live chrome the template renders from.
     p13coreDocumentProfile(['ministry_en' => 'THE LETTERHEAD HAS CHANGED']);
 

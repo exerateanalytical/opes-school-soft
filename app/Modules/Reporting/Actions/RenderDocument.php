@@ -222,7 +222,22 @@ final class RenderDocument
             ->first();
 
         $snapshot = $this->loadSnapshot($template, $snapshotId, $data, $issued);
-        $chrome = $this->schoolChrome($template, $schoolSectionId, $snapshot['payload']);
+
+        // The envelope is the OTHER two render inputs - the letterhead and
+        // the subject label. `payload_snapshot` freezes the payload, but for
+        // a template with a REGISTERED SnapshotSourceMap entry the payload is
+        // immutable by construction and deliberately not copied, which left
+        // these two being re-derived LIVE on every reprint and rendered into
+        // the hashed bytes. Renaming an assessment period therefore refused
+        // every bulletin issued under the old name, permanently.
+        $envelope = is_array($issued?->render_envelope) ? $issued->render_envelope : null;
+
+        $chrome = $this->schoolChrome($template, $schoolSectionId, $snapshot['payload'], $envelope);
+
+        if ($envelope !== null && is_string($envelope['subject_label'] ?? null)) {
+            $subjectLabel = $envelope['subject_label'];
+        }
+
         $actor = $this->currentActor();
 
         if ($issued === null) {
@@ -273,6 +288,15 @@ final class RenderDocument
         // NULL -> value (IssuedDocument's guard refuses anything else).
         if ($issued->payload_snapshot === null && $snapshot['payload'] !== []) {
             $issued->payload_snapshot = $snapshot['payload'];
+            $issued->save();
+        }
+
+        // Same proof as the payload backfill directly above: control only
+        // reaches here because the re-render reproduced the recorded hash
+        // byte for byte, so this envelope IS the original artefact's. Only
+        // ever NULL -> value; IssuedDocument's guard refuses anything else.
+        if ($issued->render_envelope === null) {
+            $issued->render_envelope = ['subject_label' => $subjectLabel, 'school' => $chrome];
             $issued->save();
         }
 
@@ -425,6 +449,12 @@ final class RenderDocument
             'payload_snapshot' => ($template->snapshot_source !== null && SnapshotSourceMap::has($template->snapshot_source))
                 ? null
                 : $snapshot['payload'],
+            // Frozen for EVERY snapshot-backed issue, mapped or not. Receipt-
+            // pattern payloads already carry `school`, so for them this half
+            // is belt-and-braces - but `subject_label` is re-derived live for
+            // them too, and one unbranched write is less to get wrong than a
+            // condition that has already been got wrong once.
+            'render_envelope' => ['subject_label' => $subjectLabel, 'school' => $chrome],
             'language' => $lang->value,
             'content_hash' => $hash,
             'qr_token' => null, // D2 wires the OPES1 signing stack (10-documents 17).
@@ -565,15 +595,29 @@ final class RenderDocument
 
     /**
      * The chrome every document shares: state header, school identity,
-     * fiscal identity, branding. Snapshot payloads that captured a `school`
-     * block at issue OVERRIDE the live profile - that is what makes a years-
-     * later reprint carry the letterhead as at issue.
+     * fiscal identity, branding.
+     *
+     * Precedence, strongest first: the envelope frozen onto the issued
+     * document at issue; then a `school` block the snapshot payload captured
+     * itself (the receipt pattern); then a live read. Anything but the live
+     * read is what makes a years-later reprint carry the letterhead AS AT
+     * ISSUE rather than today's - which is the difference between a reprint
+     * and a forgery, and, because the chrome is inside the hashed bytes,
+     * between a reprint and a permanent 422.
      *
      * @param  array<string, mixed>  $payload
+     * @param  array{subject_label?: string, school?: array<string, mixed>}|null  $envelope
      * @return array<string, mixed>
      */
-    private function schoolChrome(DocumentTemplate $template, ?int $schoolSectionId, array $payload): array
+    private function schoolChrome(DocumentTemplate $template, ?int $schoolSectionId, array $payload, ?array $envelope = null): array
     {
+        if (is_array($envelope['school'] ?? null)) {
+            /** @var array<string, mixed> $frozen */
+            $frozen = $envelope['school'];
+
+            return $frozen;
+        }
+
         if (isset($payload['school']) && is_array($payload['school'])) {
             /** @var array<string, mixed> $captured */
             $captured = $payload['school'];
