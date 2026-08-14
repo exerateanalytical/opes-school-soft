@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 use App\Modules\Assessment\Actions\PrintReportCard;
 use App\Modules\Assessment\Actions\PublishPeriod;
-use App\Modules\Identity\Domain\Permission as PermissionEnum;
-use App\Modules\Identity\Models\User;
 use App\Modules\Reporting\Models\IssuedDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 
@@ -18,86 +15,21 @@ require_once __DIR__.'/../Reporting/P13MoneyHelpers.php';
 
 uses(RefreshDatabase::class);
 
-beforeEach(function (): void {
-    p13moneyDocumentProfile();
-    p13moneyConfirmedFiscalIdentity();
-});
-
-/**
+/*
  * A published report card that a later rename makes UNPRINTABLE is the only
  * defect in the 2026-08-13 audits that destroys a statutory record for good.
  * The reprint re-renders and compares hashes; the school chrome is re-derived
  * LIVE into those bytes for every card (the registered payload carries no
  * `school` block), and the subject label is re-derived live too - it lands in
  * the bytes whenever the payload carries no `student` block, which is exactly
- * the shape of the documents stranded in production. So renaming a period or
- * editing the school profile made every card already issued refuse forever.
+ * the shape of the documents stranded in production (see
+ * reportCardMinimalSnapshotId in AssessmentTestHelpers.php).
  */
-function reportCardPublisher(): User
-{
-    $user = assessmentPublisher();
 
-    foreach ([
-        PermissionEnum::AcademicsView,
-        PermissionEnum::DocumentsPrint,
-        PermissionEnum::DocumentsReprint,
-    ] as $permission) {
-        $user->givePermissionTo($permission->value);
-    }
-
-    return $user->fresh() ?? $user;
-}
-
-/**
- * A snapshot in the EXACT shape of the two documents stranded in production
- * (SCH/2026/RPT/000001-2, written by PortalShowcaseSeeder): the payload has
- * no `student` and no `period` block, so the bulletin's identity row falls
- * back to `$subject['label']` - the one render input PrintReportCard
- * re-derives live on every call. A snapshot from today's PublishPeriod
- * carries both blocks, which would keep the label OUT of the bytes and make
- * a rename invisible to this test; production's stranded documents are not
- * that shape, so the test must not be either.
- *
- * @param  array{period_id: int, class_group_ids: list<int>, config_version_id: int}  $fx
- */
-function reportCardMinimalSnapshotId(array $fx, int $enrollmentId): int
-{
-    $publicationId = (int) DB::table('period_publications')
-        ->where('assessment_period_id', $fx['period_id'])
-        ->where('class_group_id', $fx['class_group_ids'][0])
-        ->value('id');
-
-    $payload = json_encode([
-        'subjects' => [[
-            'subject_name' => 'Mathematics',
-            'subject_name_fr' => 'Mathématiques',
-            'subject_score' => '15.00',
-            'coefficient' => '4.00',
-            'appreciation' => 'Bien',
-        ]],
-        'totals' => ['coefficients' => 4],
-        'general_average' => ['display' => '15,00'],
-        'mention' => 'Bien',
-        'rank' => ['is_ranked' => true, 'position' => 1, 'denominator' => 1],
-    ], JSON_THROW_ON_ERROR);
-
-    // Generation 2 with nothing superseding it, so PrintReportCard's
-    // orderByDesc(generation) resolves THIS snapshot as the current card.
-    return (int) DB::table('report_card_snapshots')->insertGetId([
-        'enrollment_id' => $enrollmentId,
-        'assessment_period_id' => $fx['period_id'],
-        'class_group_id' => $fx['class_group_ids'][0],
-        'period_publication_id' => $publicationId,
-        'generation' => 2,
-        'snapshot_batch_id' => (string) Str::uuid(),
-        'report_card_config_version_id' => $fx['config_version_id'],
-        'payload' => $payload,
-        'payload_hash' => hash('sha256', $payload),
-        'issued_at' => now(),
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-}
+beforeEach(function (): void {
+    p13moneyDocumentProfile();
+    p13moneyConfirmedFiscalIdentity();
+});
 
 it('reprints a report card after the assessment period is renamed', function (): void {
     actingAs(reportCardPublisher());

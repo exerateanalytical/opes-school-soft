@@ -21,6 +21,77 @@ use Spatie\Permission\PermissionRegistrar;
  * has no factory ON PURPOSE, so every test that needs an issued bulletin has
  * to run a real publication. Extracted from PublicationTest, unchanged.
  */
+if (! function_exists('reportCardPublisher')) {
+    /** An assessmentPublisher() who may also print and reprint documents. */
+    function reportCardPublisher(): User
+    {
+        $user = assessmentPublisher();
+
+        foreach ([
+            PermissionEnum::AcademicsView,
+            PermissionEnum::DocumentsPrint,
+            PermissionEnum::DocumentsReprint,
+        ] as $permission) {
+            $user->givePermissionTo($permission->value);
+        }
+
+        return $user->fresh() ?? $user;
+    }
+}
+
+if (! function_exists('reportCardMinimalSnapshotId')) {
+    /**
+     * A snapshot in the EXACT shape of the two documents stranded in
+     * production (SCH/2026/RPT/000001-2, written by PortalShowcaseSeeder):
+     * the payload has no `student` and no `period` block, so the bulletin's
+     * identity row falls back to `$subject['label']` - the one render input
+     * PrintReportCard re-derives live on every call. A snapshot from today's
+     * PublishPeriod carries both blocks, which would keep the label OUT of
+     * the bytes and make a rename invisible to a test; production's stranded
+     * documents are not that shape, so the tests must not be either.
+     *
+     * @param  array{period_id: int, class_group_ids: list<int>, config_version_id: int}  $fx
+     */
+    function reportCardMinimalSnapshotId(array $fx, int $enrollmentId): int
+    {
+        $publicationId = (int) DB::table('period_publications')
+            ->where('assessment_period_id', $fx['period_id'])
+            ->where('class_group_id', $fx['class_group_ids'][0])
+            ->value('id');
+
+        $payload = json_encode([
+            'subjects' => [[
+                'subject_name' => 'Mathematics',
+                'subject_name_fr' => 'Mathématiques',
+                'subject_score' => '15.00',
+                'coefficient' => '4.00',
+                'appreciation' => 'Bien',
+            ]],
+            'totals' => ['coefficients' => 4],
+            'general_average' => ['display' => '15,00'],
+            'mention' => 'Bien',
+            'rank' => ['is_ranked' => true, 'position' => 1, 'denominator' => 1],
+        ], JSON_THROW_ON_ERROR);
+
+        // Generation 2 with nothing superseding it, so PrintReportCard's
+        // orderByDesc(generation) resolves THIS snapshot as the current card.
+        return (int) DB::table('report_card_snapshots')->insertGetId([
+            'enrollment_id' => $enrollmentId,
+            'assessment_period_id' => $fx['period_id'],
+            'class_group_id' => $fx['class_group_ids'][0],
+            'period_publication_id' => $publicationId,
+            'generation' => 2,
+            'snapshot_batch_id' => (string) Str::uuid(),
+            'report_card_config_version_id' => $fx['config_version_id'],
+            'payload' => $payload,
+            'payload_hash' => hash('sha256', $payload),
+            'issued_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+}
+
 if (! function_exists('assessmentTruncateAll')) {
     /**
      * TRUNCATE, not DELETE: `report_card_snapshots` carries a BEFORE DELETE

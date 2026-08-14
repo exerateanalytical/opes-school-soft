@@ -629,6 +629,50 @@ final class RenderDocument
     }
 
     /**
+     * Recovery half of the envelope freeze: re-render one issued document
+     * with a CANDIDATE subject label and return the envelope only if the
+     * bytes reproduce the hash recorded at issue. Returns null otherwise -
+     * an envelope that does not reproduce is not the original's, and writing
+     * it would replace an honest refusal with a quiet forgery.
+     *
+     * The chrome half of the candidate is whatever schoolChrome() resolves
+     * today (the payload's own `school` block where one was captured, else
+     * the live profile) - there is no per-document audit record of the
+     * chrome to recover from, so a document whose chrome moved since issue
+     * stays unrecoverable rather than guessed at.
+     *
+     * @return array{subject_label: string, school: array<string, mixed>}|null
+     */
+    public function rebuildEnvelope(IssuedDocument $issued, string $candidateLabel): ?array
+    {
+        /** @var DocumentTemplate $template */
+        $template = DocumentTemplate::query()->findOrFail($issued->document_template_id);
+
+        $lang = DocumentLanguage::from($issued->language);
+        $snapshot = $this->loadSnapshot($template, $issued->snapshot_id, [], $issued);
+        $chrome = $this->schoolChrome($template, null, $snapshot['payload']);
+
+        $html = $this->renderHtml($template, $issued->template_version, $issued->serial, $lang, $chrome, $snapshot['payload'], $candidateLabel, [
+            'watermark' => null,
+            'issued_at' => $issued->issued_at,
+            'copy_no' => 1,
+        ]);
+
+        $stamp = new PdfStamp(
+            $issued->issued_at->format('YmdHis'),
+            $this->stampSeed($template, $issued->subject_type, $issued->subject_id, $issued->snapshot_id, $issued->serial),
+        );
+
+        $bytes = $this->pdf->render($html, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
+
+        if (! hash_equals($issued->content_hash, hash('sha256', $bytes))) {
+            return null;
+        }
+
+        return ['subject_label' => $candidateLabel, 'school' => $chrome];
+    }
+
+    /**
      * The public half of schoolChrome(): callers OUTSIDE this pipeline that
      * assemble their own snapshot payload (phase-12-13 D3's "receipt
      * pattern" - Fees/Tax/Procurement Actions whose subject already has its
