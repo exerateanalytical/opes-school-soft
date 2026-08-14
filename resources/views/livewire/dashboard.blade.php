@@ -31,14 +31,12 @@
          no "vs last term" comparison exists for any of these four figures
          yet - inventing one would violate the no-fabricated-data rule. ───── --}}
     @if ($tileCount > 0)
-    <div @class([
-        'grid grid-cols-1 gap-3 sm:grid-cols-2',
-        'xl:grid-cols-1' => $tileCount === 1,
-        'xl:grid-cols-2' => $tileCount === 2,
-        'xl:grid-cols-3' => $tileCount === 3,
-        'xl:grid-cols-4' => $tileCount === 4,
-        'xl:grid-cols-5' => $tileCount >= 5,
-    ])>
+    {{-- The same capped auto-fit track as list-screen's KPI strip, so the two
+         cannot disagree. The old per-count column arms had no ceiling either:
+         a teacher's single-tile dashboard stretched one card - carrying one em
+         dash - across the full page width, which reads as a layout accident
+         rather than a stat. --}}
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] xl:[&>*]:max-w-[22rem]">
         {{-- Identity tiles: gated on user.view, the same permission the
              /users screen behind them is gated on. The tile links there only
              for someone allowed to open it. A link that guarantees a 403 is

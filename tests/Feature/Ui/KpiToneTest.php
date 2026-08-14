@@ -47,6 +47,20 @@ it('falls back to green for an icon-bg nobody mapped', function (): void {
     expect($html)->toContain('bg-kpi-green');
 });
 
+it('caps each KPI card so a single one cannot span the page', function (): void {
+    // NOT minmax(12rem,22rem): auto-fit counts its repetitions by the MAX
+    // sizing function, so a 22rem track ceiling would collapse a 1130px row
+    // to two columns and wrap five KPIs 2-2-1 beside an empty right half.
+    // The track stays 1fr (rows keep filling the width); the ceiling lives
+    // on the child, which is what stops one lone card spanning the page.
+    $listScreen = (string) file_get_contents(resource_path('views/components/list-screen.blade.php'));
+    $dashboard = (string) file_get_contents(resource_path('views/livewire/dashboard.blade.php'));
+
+    expect($listScreen)->toContain('minmax(12rem,1fr)');
+    expect($listScreen)->toContain('max-w-[22rem]');
+    expect($dashboard)->toContain('max-w-[22rem]');
+});
+
 it('reserves a two-line label box so a short label does not raise its numeral', function (): void {
     $short = Blade::render('<x-kpi-card label="TOTAL CASES" value="0" />');
     $long = Blade::render('<x-kpi-card label="AWAITING GUARDIAN SIGNATURE" value="0" />');

@@ -133,7 +133,24 @@
          actually supplies, so four cards fill the row as four. --}}
     @isset($kpis)
         <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            <div class="grid min-w-max grid-cols-2 gap-3 sm:min-w-0 md:grid-cols-3 lg:min-w-0 lg:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
+            {{-- No `min-w-max` at any width. It forced the strip to the cards'
+                 natural width, so at 375px the strip was wider than the screen
+                 and cut card 2 in half behind a scrollbar - the first thing a
+                 phone user saw on every list screen. Without it, grid-cols-2
+                 sizes to the viewport and wraps further cards into rows, all
+                 fully visible.
+
+                 The CARD has a ceiling now, not the track. A 22rem ceiling on
+                 the TRACK (minmax(12rem,22rem)) would be wrong twice over:
+                 auto-fit counts repetitions by the MAX sizing function, so a
+                 1130px row would fit only two 374px columns and five KPIs
+                 would wrap 2-2-1 beside an empty right half. Keeping the
+                 track at 1fr keeps rows of four or five filling the width
+                 exactly as before; capping each CHILD at 22rem is what stops
+                 the degenerate case - /users shipped `TOTAL USERS 37` alone
+                 across the full 1133px, which reads as a layout accident
+                 rather than a stat. --}}
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] lg:[&>*]:max-w-[22rem]">
                 {{ $kpis }}
             </div>
         </div>
