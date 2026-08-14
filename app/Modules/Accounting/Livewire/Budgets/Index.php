@@ -28,6 +28,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response;
@@ -230,6 +231,20 @@ final class Index extends Component
 
     public function saveLine(): void
     {
+        // A missing selection is an operator state, not an exceptional one:
+        // it must produce the same refusal every other form produces, not a
+        // framework stack trace on a screen the operator cannot back out of.
+        // budgetId is a bound <select> value, so "nothing chosen" is the
+        // empty string; casting that to (int) 0 and handing it to
+        // SaveBudgetLine made its firstOrFail() throw ModelNotFoundException,
+        // which guardedCall() does not catch - it only catches DomainException
+        // - so the exception escaped as a 500.
+        if ($this->budgetId === '' || ! Budget::query()->whereKey((int) $this->budgetId)->exists()) {
+            throw ValidationException::withMessages([
+                'budgetId' => __('opes.budgets_screen.select_a_budget_first'),
+            ]);
+        }
+
         $this->guardedCall(function (): void {
             $profile = PhasingProfile::tryFrom($this->linePhasingProfile) ?? PhasingProfile::Equal;
 

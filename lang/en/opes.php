@@ -2403,6 +2403,7 @@ return [
     'budgets_screen' => [
         'title' => 'Budget',
         'breadcrumb' => 'Dashboard / Ledger / Budget',
+        'select_a_budget_first' => 'Choose a budget before adding a line to it.',
         'current_approved' => 'Current approved budget',
         'fiscal_year' => 'Fiscal year',
         'code' => 'Code',

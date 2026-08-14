@@ -2381,6 +2381,7 @@ return [
     'budgets_screen' => [
         'title' => 'Budget',
         'breadcrumb' => 'Tableau de bord / Grand livre / Budget',
+        'select_a_budget_first' => 'Choisissez un budget avant d’y ajouter une ligne.',
         'current_approved' => 'Budget approuvé en cours',
         'fiscal_year' => 'Exercice',
         'code' => 'Code',
