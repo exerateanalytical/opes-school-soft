@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\HR\Actions;
 
 use App\Modules\HR\Domain\HrPermission;
-use App\Modules\Identity\Actions\CreateUser;
+use App\Modules\Identity\Actions\FindUserIdByEmail;
+use App\Modules\Identity\Actions\ProvisionPortalUser;
 use App\Modules\Identity\Domain\Role;
-use App\Modules\Identity\Models\User;
+use App\Support\Audit\Actor;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -32,12 +33,22 @@ use Illuminate\Validation\ValidationException;
  */
 final class GrantStaffPortalAccess
 {
-    public function __construct(private readonly CreateUser $createUser) {}
+    public function __construct(
+        private readonly ProvisionPortalUser $provisionPortalUser,
+        private readonly FindUserIdByEmail $findUserIdByEmail,
+    ) {}
 
     /**
-     * @return array{user: User, temporary_password: string}
+     * No textual reference to the Identity User model crosses this module -
+     * the same rule every sibling HR Action states, and the one this file
+     * broke. The actor is an `App\Support\Audit\Actor`, exactly as
+     * ApproveLeave, ValidateTimesheet and ComputeTerminationSettlement take
+     * one, and the return carries an ID rather than a model for the same
+     * reason (00-core §6.2 rule 2).
+     *
+     * @return array{user_id: int, temporary_password: string}
      */
-    public function handle(int $staffMemberId, ?string $email, User $actor): array
+    public function handle(int $staffMemberId, ?string $email, Actor $actor): array
     {
         Gate::authorize(HrPermission::MANAGE);
 
@@ -61,7 +72,7 @@ final class GrantStaffPortalAccess
             ]);
         }
 
-        if (User::query()->where('email', $resolvedEmail)->exists()) {
+        if ($this->findUserIdByEmail->handle($resolvedEmail) !== null) {
             throw ValidationException::withMessages([
                 'email' => "A user with email {$resolvedEmail} already exists.",
             ]);
@@ -70,22 +81,23 @@ final class GrantStaffPortalAccess
         $password = Str::random(16).'Aa1!';
 
         return DB::transaction(function () use ($staff, $resolvedEmail, $password, $actor): array {
-            $user = $this->createUser->handle(
+            $user = $this->provisionPortalUser->handle(
                 trim($staff->first_name.' '.$staff->last_name),
                 $resolvedEmail,
                 Role::StaffPortal,
                 $password,
                 $actor,
+                mustChangePassword: true,
             );
 
-            $user->forceFill(['must_change_password_at' => now()])->save();
+            $userId = (int) $user->getKey();
 
             DB::table('staff_members')->where('id', $staff->id)->update([
-                'portal_user_id' => $user->id,
+                'portal_user_id' => $userId,
                 'updated_at' => now(),
             ]);
 
-            return ['user' => $user, 'temporary_password' => $password];
+            return ['user_id' => $userId, 'temporary_password' => $password];
         });
     }
 }

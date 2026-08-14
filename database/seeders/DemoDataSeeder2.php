@@ -1666,7 +1666,7 @@ final class DemoDataSeeder2 extends Seeder
             app(\App\Modules\HR\Actions\GrantStaffPortalAccess::class)->handle(
                 (int) $staffId,
                 'demo.staffportal@opeschool.test',
-                $actor,
+                $actor->toAuditActor(),
             );
         } catch (Throwable) {
         }

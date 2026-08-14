@@ -382,11 +382,17 @@ final class Index extends Component
             return;
         }
 
-        /** @var \App\Modules\Identity\Models\User $actorUser */
-        $actorUser = auth()->user();
+        // Also an Identity Models reference, fully-qualified rather than
+        // imported - which the arch test's `use`-statement check does not
+        // catch but 00-core §6.2 rule 2 forbids just the same.
+        $actor = auth()->user()?->toAuditActor();
+
+        if ($actor === null) {
+            abort(403);
+        }
 
         try {
-            $result = $grant->handle($this->portalAccessStaffId, $this->portalAccessEmail === '' ? null : $this->portalAccessEmail, $actorUser);
+            $result = $grant->handle($this->portalAccessStaffId, $this->portalAccessEmail === '' ? null : $this->portalAccessEmail, $actor);
         } catch (ValidationException $e) {
             $this->addError('portalAccess', implode(' ', $e->validator->errors()->all()));
 
