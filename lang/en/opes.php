@@ -118,6 +118,7 @@ return [
         'tax' => 'Tax & declarations',
         'library' => 'Library',
         'inventory' => 'Inventory',
+        'activities' => 'Activities',
         'transport' => 'Transport',
         'hostel' => 'Hostel',
         'medical' => 'Medical',
@@ -539,6 +540,8 @@ return [
         'declaration.file' => 'Record statutory declaration filings',
         'expense.record' => 'Record and submit expense vouchers',
         'expense.approve' => 'Approve submitted expense vouchers',
+        'activity.view' => 'View activities',
+        'activity.manage' => 'Manage activities',
     ],
     // Assessment framework families, 01-assessment 3.2.
     'framework_family' => [

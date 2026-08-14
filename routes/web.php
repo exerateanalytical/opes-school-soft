@@ -597,6 +597,20 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/welfare/insurance/policies/{policy}', \App\Modules\Welfare\Livewire\Insurance\PolicyShow::class)
         ->middleware('can:insurance.view')->whereNumber('policy')->name('insurance.policies.show');
 
+    // ── Activities module ──────────────────────────────────────────────
+    // Gap-analysis 2026-08-12 #1: clubs, sports teams, events, excursions.
+    // Gated on activity.view, matching Navigation::items(), per this file's
+    // nav-and-route-agree-by-construction contract; the writes (create,
+    // enrol, sessions, attendance, excursion consent - row 15) are gated
+    // harder (activity.manage) inside the components and re-authorized in
+    // the Actions, the same screen-vs-write split every module above uses.
+    Route::get('/activities', \App\Modules\Activities\Livewire\Index::class)
+        ->middleware('can:activity.view')->name('activities.index');
+
+    Route::get('/activities/{activity}', \App\Modules\Activities\Livewire\Show::class)
+        ->middleware('can:activity.view')->whereNumber('activity')->name('activities.show');
+    // ── End Activities module ──────────────────────────────────────────
+
     /*
      * Phase 9 (Assets/Inventory/Library) and Phase 11 (HR/Payroll): screens
      * built and module-tested overnight but never routed/wired into the

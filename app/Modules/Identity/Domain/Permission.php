@@ -280,6 +280,17 @@ enum Permission: string
     case ExpenseRecord = 'expense.record';
     case ExpenseApprove = 'expense.approve';
 
+    // Activities (gap-analysis 2026-08-12 #1): clubs, sports teams, events
+    // and excursions. Mirrors Activities\Domain\ActivityPermission's string
+    // constants, same pattern as the Welfare/Phase 9 blocks above - the
+    // module's Actions and screens gate on the strings, this enum is their
+    // compile-time face. Two segments only, like every case above. The
+    // view/manage split is the usual screen-vs-write pair: a Teacher reads
+    // the registers; enrolment, sessions, attendance and excursion consent
+    // (row 15) stay with the office roles.
+    case ActivityView = 'activity.view';
+    case ActivityManage = 'activity.manage';
+
     public function label(string $locale = 'en'): string
     {
         // Permission values contain a dot ('user.view'), and the translator

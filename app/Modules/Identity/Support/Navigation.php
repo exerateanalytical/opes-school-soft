@@ -152,6 +152,12 @@ final class Navigation
             // Phase 9 F1-F2/wiring pass: the asset register + depreciation
             // screen.
             ['key' => 'assets', 'route' => '/assets', 'permission' => Permission::AssetView, 'enabled' => true, 'built' => true],
+            // Activities (gap-analysis #1): clubs, sports teams, events and
+            // excursions at /activities. Gated on activity.view, matching
+            // its route, per this file's nav-and-route-agree-by-construction
+            // contract; creating/enrolling/consent are gated harder
+            // (activity.manage) inside the screens and Actions.
+            ['key' => 'activities', 'route' => '/activities', 'permission' => Permission::ActivityView, 'enabled' => true, 'built' => true],
             // Phase 10 W1/W5: the Transport Management screen now lives at
             // this URL, so the nav flips to built => true with the
             // permission that gates the route above - nav and route agree by
