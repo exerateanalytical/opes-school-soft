@@ -82,7 +82,7 @@ final class Show extends Component
             title: 'Cash Desk Close-out '.$session['session_no'],
             headers: ['Receipt', 'Time', 'Student', 'Payer', 'Amount'],
             rows: $rows,
-            filename: 'cash-desk-'.str_replace('/', '-', $session['session_no']).'.pdf',
+            filename: 'cash-desk-'.$session['session_no'].'.pdf',
         );
     }
 

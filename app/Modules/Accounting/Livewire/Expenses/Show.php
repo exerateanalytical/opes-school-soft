@@ -64,7 +64,7 @@ final class Show extends Component
             title: 'Expense Voucher '.$expense->expense_no,
             headers: ['#', 'Label', 'Account', 'Analytic', 'Amount'],
             rows: $rows,
-            filename: 'expense-'.str_replace('/', '-', $expense->expense_no).'.pdf',
+            filename: 'expense-'.$expense->expense_no.'.pdf',
         );
     }
 
