@@ -107,6 +107,10 @@ enum Role: string
                 Permission::ProcurementView, Permission::ProcurementRequisitionApprove,
                 Permission::ProcurementOrderApprove, Permission::ProcurementPaymentApprove,
                 Permission::TaxView,
+                // Alumni: the Proviseur reads the register (his graduates,
+                // his ceremonies); the record-keeping stays with the
+                // registrar's office.
+                Permission::AlumniView,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -200,6 +204,10 @@ enum Role: string
                 // Phase 8: the registrar reads the timetable (scheduling
                 // context for enrolment) but never edits it.
                 Permission::TimetableView,
+                // Alumni: the registrar owns the student record end to end,
+                // and the alumni register is that record's final chapter -
+                // conversion, contact upkeep, the engagement log.
+                Permission::AlumniView, Permission::AlumniManage,
             ],
 
             // 00-core 9.1: these three read the academic structure (year,

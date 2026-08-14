@@ -280,6 +280,14 @@ enum Permission: string
     case ExpenseRecord = 'expense.record';
     case ExpenseApprove = 'expense.approve';
 
+    // Alumni (gap #3, 2026-08-12 gap analysis): the relationship kept with a
+    // graduate after the enrollment graph closes. View reads the register;
+    // manage is the conversion door plus contact updates, the engagement log
+    // and the one-way deceased flag. Two segments only, like every case
+    // above.
+    case AlumniView = 'alumni.view';
+    case AlumniManage = 'alumni.manage';
+
     public function label(string $locale = 'en'): string
     {
         // Permission values contain a dot ('user.view'), and the translator

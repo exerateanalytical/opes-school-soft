@@ -624,6 +624,18 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/library/members/{member}', \App\Modules\Library\Livewire\MemberShow::class)
         ->middleware('can:library.view')->whereNumber('member')->name('library.members.show');
 
+    // ── Alumni module ──────────────────────────────────────────────────────
+    // Gap #3 (2026-08-12 gap analysis): the register of graduates after the
+    // enrollment graph closes. Gated on alumni.view, matching
+    // Navigation::items(); the write doors (convert, engage, mark deceased)
+    // are gated harder (alumni.manage) inside the screens and Actions.
+    Route::get('/alumni', \App\Modules\Alumni\Livewire\Index::class)
+        ->middleware('can:alumni.view')->name('alumni.index');
+
+    Route::get('/alumni/{alumnus}', \App\Modules\Alumni\Livewire\Show::class)
+        ->middleware('can:alumni.view')->whereNumber('alumnus')->name('alumni.show');
+    // ── End Alumni module ──────────────────────────────────────────────────
+
     Route::get('/staff', \App\Modules\HR\Livewire\Index::class)
         ->middleware('can:staff.view')->name('hr.index');
 

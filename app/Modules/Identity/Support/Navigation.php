@@ -61,6 +61,12 @@ final class Navigation
             // route's outer gate (the apply step is gated harder inside the
             // component), per this file's nav-and-route-agree contract.
             ['key' => 'promotion', 'route' => '/students/promotion', 'permission' => Permission::PromotionEvaluate, 'enabled' => true, 'built' => true],
+            // Alumni (gap #3, 2026-08-12 gap analysis): the register of
+            // graduates the school stays in touch with. Sits directly after
+            // promotion because conversion is the step after graduating.
+            // Gated on alumni.view to match its route, per this file's
+            // nav-and-route-agree-by-construction contract.
+            ['key' => 'alumni', 'route' => '/alumni', 'permission' => Permission::AlumniView, 'enabled' => true, 'built' => true],
             // Phase 11 F1/wiring pass: staff directory.
             ['key' => 'staff', 'route' => '/staff', 'permission' => Permission::StaffView, 'enabled' => true, 'built' => true],
             // Phase 11 F2/wiring pass: payroll runs.
