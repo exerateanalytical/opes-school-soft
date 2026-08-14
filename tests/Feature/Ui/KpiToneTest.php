@@ -46,3 +46,11 @@ it('falls back to green for an icon-bg nobody mapped', function (): void {
 
     expect($html)->toContain('bg-kpi-green');
 });
+
+it('reserves a two-line label box so a short label does not raise its numeral', function (): void {
+    $short = Blade::render('<x-kpi-card label="TOTAL CASES" value="0" />');
+    $long = Blade::render('<x-kpi-card label="AWAITING GUARDIAN SIGNATURE" value="0" />');
+
+    expect($short)->toContain('min-h-[2.4em]');
+    expect($long)->toContain('min-h-[2.4em]');
+});

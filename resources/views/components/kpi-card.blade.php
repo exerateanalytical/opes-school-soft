@@ -99,10 +99,17 @@
         <div class="min-w-0 flex-1">
             {{-- Wraps to a second line rather than truncating: "UNPAID
                  INVOIC…" and "OUTSTANDING …" are the label doing none of its
-                 job, and a clipped word reads as a broken build. Two short
-                 lines cost nothing here - the card's height is set by the
-                 numeral beside it. --}}
-            <p class="text-xs font-semibold uppercase leading-tight tracking-wide text-balance text-charcoal/55">{{ $label }}</p>
+                 job, and a clipped word reads as a broken build.
+
+                 A fixed two-line box, not just a wrapping one. A one-line
+                 label used to pull its numeral 20-40px above its neighbours'
+                 and the row read ragged - three zeros on /welfare/discipline
+                 sat at three different heights. Reserving the box costs
+                 nothing on the short labels and buys one shared baseline
+                 across the row. A third line still wraps rather than
+                 clipping: a truncated label is the label doing none of its
+                 job. --}}
+            <p class="flex min-h-[2.4em] items-start text-xs font-semibold uppercase leading-tight tracking-wide text-balance text-charcoal/55">{{ $label }}</p>
 
             {{-- `display` is for a KPI whose headline is not a numeral - a
                  status pill, a rating, a short chip. Without it those tiles get
