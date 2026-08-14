@@ -178,6 +178,17 @@ final class Form extends Component
 
     public function pickAccount(int $index, int $accountId): void
     {
+        // $index arrives from a wire:click argument, so it is attacker-
+        // controlled and it also goes stale legitimately: removeLine() is
+        // wired on the same rows, so removing a line while a later line's
+        // picker is open lands here with an index that no longer exists.
+        // Writing it would mint a partial row with no debit/credit key and
+        // the NEXT render dies in runningTotals(), which is a 500 the
+        // operator cannot connect to anything they did.
+        if (! isset($this->lines[$index])) {
+            return;
+        }
+
         $account = ChartOfAccount::query()->find($accountId);
 
         if ($account === null) {
