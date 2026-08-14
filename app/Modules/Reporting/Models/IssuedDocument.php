@@ -30,6 +30,7 @@ use RuntimeException;
  * @property string $snapshot_type
  * @property int $snapshot_id
  * @property array<string, mixed>|null $payload_snapshot
+ * @property array{subject_label?: string, school?: array<string, mixed>}|null $render_envelope
  * @property string $language
  * @property string $content_hash
  * @property string|null $qr_token
@@ -55,7 +56,7 @@ final class IssuedDocument extends Model
         'document_template_id', 'template_version',
         'series_code', 'serial',
         'subject_type', 'subject_id',
-        'snapshot_type', 'snapshot_id', 'payload_snapshot',
+        'snapshot_type', 'snapshot_id', 'payload_snapshot', 'render_envelope',
         'language', 'content_hash', 'qr_token',
         'issued_by', 'issued_at', 'issued_by_name_at_time',
         'status', 'revoked_by', 'revoked_at', 'revoked_reason',
@@ -72,6 +73,7 @@ final class IssuedDocument extends Model
             'subject_id' => 'integer',
             'snapshot_id' => 'integer',
             'payload_snapshot' => 'array',
+            'render_envelope' => 'array',
             'issued_at' => 'datetime',
             'revoked_at' => 'datetime',
         ];
@@ -95,6 +97,15 @@ final class IssuedDocument extends Model
                 // today's live data. value -> anything else stays refused,
                 // exactly like content_hash.
                 if ($column === 'payload_snapshot' && $document->getOriginal('payload_snapshot') === null) {
+                    continue;
+                }
+
+                // Same one-way backfill as payload_snapshot above, for the
+                // same reason and under the same proof: RenderDocument writes
+                // this only AFTER a re-render has reproduced the recorded
+                // content_hash byte for byte, so what gets frozen is provably
+                // the envelope the original artefact was rendered with.
+                if ($column === 'render_envelope' && $document->getOriginal('render_envelope') === null) {
                     continue;
                 }
 
