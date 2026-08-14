@@ -41,6 +41,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/dashboard');
         $middleware->redirectGuestsTo('/login');
 
+        // Trust forwarded headers ONLY when the request physically arrives
+        // from this machine - i.e. from a local reverse proxy or tunnel
+        // daemon (Cloudflare quick tunnel, ngrok, a fronting nginx on the
+        // same host). A remote client can never present a loopback peer
+        // address, so this trusts no header any outsider can forge, while
+        // letting Laravel see the real scheme/host behind an HTTPS edge -
+        // without it, every redirect and absolute URL behind the tunnel is
+        // generated as http:// and the browser refuses the mixed content.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
+
         // The operator's UI language, chosen per session. Appended to the web
         // group so it runs after StartSession - it reads session('locale'), so
         // it cannot run before the session exists.
