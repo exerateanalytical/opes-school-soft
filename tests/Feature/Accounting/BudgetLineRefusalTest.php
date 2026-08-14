@@ -21,8 +21,7 @@ uses(RefreshDatabase::class);
 it('refuses a budget line with a validation message when no budget is selected', function (): void {
     $user = p13moneyUserAs(Role::Accountant);
 
-    Livewire::actingAs($user)
-        ->test(Index::class)
+    Livewire::test(Index::class)
         ->set('budgetId', '')
         ->call('saveLine')
         ->assertHasErrors('budgetId');
@@ -31,8 +30,7 @@ it('refuses a budget line with a validation message when no budget is selected',
 it('refuses a budget line whose budget id does not exist', function (): void {
     $user = p13moneyUserAs(Role::Accountant);
 
-    Livewire::actingAs($user)
-        ->test(Index::class)
+    Livewire::test(Index::class)
         ->set('budgetId', '999999')
         ->call('saveLine')
         ->assertHasErrors('budgetId');

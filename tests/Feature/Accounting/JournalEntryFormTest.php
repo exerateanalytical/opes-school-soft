@@ -25,8 +25,7 @@ it('ignores an account pick for a line index that does not exist', function (): 
 
     expect($accountId)->toBeGreaterThan(0);
 
-    Livewire::actingAs($user)
-        ->test(Form::class)
+    Livewire::test(Form::class)
         ->call('pickAccount', 99, $accountId)
         ->assertHasNoErrors()
         ->assertOk();

@@ -14,6 +14,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+use function Pest\Laravel\actingAs;
+
 uses(RefreshDatabase::class);
 
 if (! function_exists('hrTestAdmin')) {
@@ -36,7 +38,7 @@ if (! function_exists('hrTestAdmin')) {
 
 it('grants a staff member their own portal login and links staff_members.portal_user_id', function (): void {
     $admin = hrTestAdmin();
-    $this->actingAs($admin);
+    actingAs($admin);
 
     $staffMember = app(HireStaffMember::class)->handle(
         firstName: 'Jean',
@@ -68,7 +70,7 @@ it('grants a staff member their own portal login and links staff_members.portal_
 
 it('refuses to grant portal access twice to the same staff member', function (): void {
     $admin = hrTestAdmin();
-    $this->actingAs($admin);
+    actingAs($admin);
 
     $staffMember = app(HireStaffMember::class)->handle(
         firstName: 'Awa', lastName: 'Bello', gender: 'female', dateOfBirth: '1988-05-05',
@@ -83,7 +85,7 @@ it('refuses to grant portal access twice to the same staff member', function ():
 
 it('refuses when the staff member has no email on file and none is supplied', function (): void {
     $admin = hrTestAdmin();
-    $this->actingAs($admin);
+    actingAs($admin);
 
     $staffMember = app(HireStaffMember::class)->handle(
         firstName: 'Paul', lastName: 'Mbarga', gender: 'male', dateOfBirth: '1992-03-03',
@@ -107,7 +109,7 @@ it('refuses an actor who does not hold user.manage', function (): void {
     // passes and the ONLY thing left to refuse the call is the user.manage
     // check inside Identity.
     $admin = hrTestAdmin();
-    $this->actingAs($admin);
+    actingAs($admin);
 
     $unprivileged = User::factory()->create();
 
@@ -132,7 +134,7 @@ it('refuses an actor who does not hold user.manage', function (): void {
 
 it('refuses when the requested email already belongs to another user', function (): void {
     $admin = hrTestAdmin();
-    $this->actingAs($admin);
+    actingAs($admin);
 
     User::factory()->create(['email' => 'taken@opeschool.test']);
 

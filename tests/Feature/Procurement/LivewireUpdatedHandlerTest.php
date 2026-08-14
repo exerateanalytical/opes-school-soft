@@ -39,8 +39,7 @@ it('opens the amend form on a purchase order instead of 500-ing', function (): v
     $supplier = f2ProcSupplier([], $user);
     $po = f2ProcPurchaseOrder($user, $supplier, $calendar);
 
-    Livewire::actingAs($user)
-        ->test(PurchaseOrdersIndex::class)
+    Livewire::test(PurchaseOrdersIndex::class)
         ->call('startAmend', (int) $po->id)
         ->assertHasNoErrors()
         ->assertSet('amendingId', (int) $po->id);
@@ -56,8 +55,7 @@ it('fills the supplier when a purchase order is picked on a goods receipt', func
     $supplier = f2ProcSupplier([], $user);
     $po = f2ProcPurchaseOrder($user, $supplier, $calendar);
 
-    Livewire::actingAs($user)
-        ->test(GoodsReceiptsIndex::class)
+    Livewire::test(GoodsReceiptsIndex::class)
         ->set('formPurchaseOrderId', (int) $po->id)
         ->assertSet('formSupplierId', (int) $supplier->id);
 });
@@ -90,8 +88,7 @@ it('fills the supplier when an invoice is picked for a credit note', function ()
         'updated_at' => now(),
     ]);
 
-    Livewire::actingAs($user)
-        ->test(SupplierInvoicesIndex::class)
+    Livewire::test(SupplierInvoicesIndex::class)
         ->set('creditNoteInvoiceId', $invoiceId)
         ->assertSet('creditNoteSupplierId', (int) $supplier->id);
 });

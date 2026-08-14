@@ -42,13 +42,11 @@ it('does not offer a payslip control on a cancelled payroll item', function (): 
     // Sanity: while the item is live the run screen DOES offer the control,
     // so the assertion below is about cancellation and not about the screen
     // simply never rendering a link.
-    Livewire::actingAs($approver)
-        ->test(Show::class, ['run' => $run])
+    Livewire::test(Show::class, ['run' => $run])
         ->assertSeeHtml('/payroll/payslips/'.$item->id.'/print');
 
     DB::table('payroll_items')->where('id', $item->id)->update(['is_cancelled' => true]);
 
-    Livewire::actingAs($approver)
-        ->test(Show::class, ['run' => $run])
+    Livewire::test(Show::class, ['run' => $run])
         ->assertDontSeeHtml('/payroll/payslips/'.$item->id.'/print');
 });
