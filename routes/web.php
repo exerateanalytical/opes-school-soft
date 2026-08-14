@@ -502,6 +502,16 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:setting.edit')->name('settings.branding');
 
     /*
+     * The school's DOCUMENT identity - letterhead contacts, ministry state
+     * header, crest/logo/signature paths. RenderDocument reads this row for
+     * every printed document; before this screen existed the table had zero
+     * rows and no writer, so every document printed bare. `setting.edit`,
+     * matching /settings/branding beside it.
+     */
+    Route::get('/settings/school-identity', \App\Modules\SchoolProfile\Livewire\DocumentProfile::class)
+        ->middleware('can:setting.edit')->name('settings.school-identity');
+
+    /*
      * Withholding Attestation print button, 03-tax-procurement §6.6 /
      * 10-documents §15's WHT-CERT (phase-12-13 D3) - gated tax.view, the
      * same read right the Tax dashboard uses.

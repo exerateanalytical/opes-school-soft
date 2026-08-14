@@ -7,8 +7,13 @@ use App\Modules\SchoolProfile\Actions\SaveDocumentProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 require_once __DIR__.'/../Reporting/P13MoneyHelpers.php';
+require_once __DIR__.'/../Assessment/AssessmentTestHelpers.php';
 
 uses(RefreshDatabase::class);
 
@@ -60,4 +65,58 @@ it('refuses a state header switched on with no ministry named', function (): voi
         'ministry_en' => '',
         'ministry_fr' => '',
     ], $user->toAuditActor()))->toThrow(ValidationException::class);
+});
+
+it('loads the school identity screen and saves it', function (): void {
+    // Pest's actingAs (inside p13moneyUserAs) + Livewire::test, never
+    // Livewire::actingAs()->test(): the manager's test() is a template over a
+    // union PHPStan cannot resolve at level 8 (see DashboardTest).
+    p13moneyUserAs(Role::Administrator);
+
+    Livewire::test(App\Modules\SchoolProfile\Livewire\DocumentProfile::class)
+        ->set('city', 'Bafoussam')
+        ->set('phone', '+237 233 111 111')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(DB::table('school_document_profiles')->where('id', 1)->value('city'))->toBe('Bafoussam');
+});
+
+it('answers 200 at /settings/school-identity', function (): void {
+    p13moneyUserAs(Role::Administrator);
+
+    get('/settings/school-identity')->assertOk();
+});
+
+it('reprints an already-issued report card unchanged after the profile is saved through this screen', function (): void {
+    // The second stranding vector, exercised through the REAL writer: the
+    // render envelope frozen at issue (Phase 2) is what makes shipping this
+    // screen safe, and this test is that claim under the exact code path an
+    // administrator now has a button for.
+    $user = reportCardPublisher();
+    $user->givePermissionTo(App\Modules\Identity\Domain\Permission::SettingEdit->value);
+    $user = $user->fresh() ?? $user;
+    actingAs($user);
+    p13moneyConfirmedFiscalIdentity();
+
+    $fx = assessmentFixture(['groups' => 1, 'students' => 1]);
+    app(App\Modules\Assessment\Actions\PublishPeriod::class)->handle($fx['period_id'], $fx['class_group_ids'], $fx['config_id']);
+
+    $enrollmentId = $fx['enrollments'][$fx['class_group_ids'][0]][0];
+    $original = app(App\Modules\Assessment\Actions\PrintReportCard::class)->handle($enrollmentId, $fx['period_id']);
+
+    app(SaveDocumentProfile::class)->handle([
+        'address_line1' => 'BP 9999, Nouvelle Adresse',
+        'city' => 'Garoua',
+        'phone' => '+237 699 999 999',
+    ], $user->toAuditActor());
+
+    $reprint = app(App\Modules\Assessment\Actions\PrintReportCard::class)->handle($enrollmentId, $fx['period_id']);
+
+    // Not toBe($original->html): a reprint legitimately adds the DUPLICATA
+    // watermark and copy line. The frozen-envelope claim is that the
+    // LETTERHEAD is the one issued with - today's profile must not leak in.
+    expect($reprint->isDuplicate)->toBeTrue();
+    expect($reprint->html)->not->toContain('Nouvelle Adresse');
+    expect($original->html)->not->toContain('Nouvelle Adresse');
 });
