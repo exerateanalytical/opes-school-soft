@@ -2993,6 +2993,9 @@ return [
         'school_stamp_path' => 'School stamp path',
         'default_document_language' => 'Default document language',
         'bilingual_documents' => 'Issue documents bilingually',
+        'fiscal_provisional_title' => 'The fiscal identity is still a specimen',
+        'fiscal_provisional_body' => 'Until the NIU is confirmed, every invoice, receipt and attestation prints with a SPECIMEN watermark.',
+        'fiscal_provisional_action' => 'Confirm the fiscal identity',
     ],
 
     'accounting' => [

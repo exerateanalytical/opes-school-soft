@@ -157,8 +157,23 @@ final class DocumentProfile extends Component
         session()->flash('status', __('opes.school_identity.saved'));
     }
 
+    /**
+     * The go-live blocker nobody could find: the shipped fiscal identity is a
+     * SPECIMEN, so every money document carries the SPECIMEN watermark - and
+     * /settings/fiscal-identity, the screen that clears it, had zero inbound
+     * links anywhere in the product.
+     */
+    public function fiscalIdentityIsProvisional(): bool
+    {
+        $row = DB::table('fiscal_identities')->where('id', 1)->first();
+
+        return $row === null || $row->fiscal_identity_confirmed_at === null;
+    }
+
     public function render(): mixed
     {
-        return view('livewire.schoolprofile.document-profile');
+        return view('livewire.schoolprofile.document-profile', [
+            'fiscalProvisional' => $this->fiscalIdentityIsProvisional(),
+        ]);
     }
 }

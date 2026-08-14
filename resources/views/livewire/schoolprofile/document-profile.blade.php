@@ -15,6 +15,18 @@
         <p class="mt-1 text-sm text-text-secondary">{{ __('opes.school_identity.subtitle') }}</p>
     </div>
 
+    @if ($fiscalProvisional)
+        <div class="rounded-xl border border-heritage-yellow/60 bg-heritage-yellow/15 px-4 py-3 text-sm text-charcoal">
+            <p class="font-semibold">{{ __('opes.school_identity.fiscal_provisional_title') }}</p>
+            <p class="mt-1">{{ __('opes.school_identity.fiscal_provisional_body') }}</p>
+            @can('ledger.configure')
+                <a href="{{ route('tax.fiscal-identity') }}" class="mt-2 inline-block font-medium text-primary hover:underline">
+                    {{ __('opes.school_identity.fiscal_provisional_action') }}
+                </a>
+            @endcan
+        </div>
+    @endif
+
     @if (session('status'))
         <div class="rounded-xl border border-success/30 bg-success-bg px-4 py-3 text-sm font-medium text-success">
             {{ session('status') }}

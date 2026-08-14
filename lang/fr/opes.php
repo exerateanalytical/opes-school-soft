@@ -2961,6 +2961,9 @@ return [
         'school_stamp_path' => 'Chemin du cachet de l’établissement',
         'default_document_language' => 'Langue par défaut des documents',
         'bilingual_documents' => 'Émettre les documents en version bilingue',
+        'fiscal_provisional_title' => 'L’identité fiscale est encore un spécimen',
+        'fiscal_provisional_body' => 'Tant que le NIU n’est pas confirmé, chaque facture, reçu et attestation s’imprime avec le filigrane SPECIMEN.',
+        'fiscal_provisional_action' => 'Confirmer l’identité fiscale',
     ],
 
     'accounting' => [

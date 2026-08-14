@@ -88,6 +88,26 @@ it('answers 200 at /settings/school-identity', function (): void {
     get('/settings/school-identity')->assertOk();
 });
 
+it('warns about an unconfirmed fiscal identity and links the screen that confirms it', function (): void {
+    p13moneyUserAs(Role::Administrator);
+    p13moneyConfirmedFiscalIdentity([
+        'niu' => 'SPECIMEN0000A',
+        'fiscal_identity_confirmed_by' => null,
+        'fiscal_identity_confirmed_at' => null,
+    ]);
+
+    Livewire::test(App\Modules\SchoolProfile\Livewire\DocumentProfile::class)
+        ->assertSee('/settings/fiscal-identity', escape: false);
+});
+
+it('shows no fiscal warning once the identity is confirmed', function (): void {
+    p13moneyUserAs(Role::Administrator);
+    p13moneyConfirmedFiscalIdentity();
+
+    Livewire::test(App\Modules\SchoolProfile\Livewire\DocumentProfile::class)
+        ->assertDontSee('/settings/fiscal-identity', escape: false);
+});
+
 it('reprints an already-issued report card unchanged after the profile is saved through this screen', function (): void {
     // The second stranding vector, exercised through the REAL writer: the
     // render envelope frozen at issue (Phase 2) is what makes shipping this
