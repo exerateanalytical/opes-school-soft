@@ -307,6 +307,10 @@ final class Show extends Component
             ->orderBy('sm.first_name')
             ->get([
                 'pi.id as payroll_item_id', 'pi.gross', 'pi.total_employee_deductions', 'pi.net',
+                // Needed by the view: a cancelled line has no payslip, so the
+                // print control must not be offered for it. isIssuable() is a
+                // property of the RUN and cannot answer this per item.
+                'pi.is_cancelled',
                 'sm.first_name', 'sm.last_name',
                 DB::raw("CONCAT(sm.first_name, ' ', sm.last_name) as staff_name"),
             ])

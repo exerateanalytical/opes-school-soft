@@ -242,7 +242,13 @@
                                  routes/web.php. Only offered on an approved
                                  run - a draft calculation is a working figure,
                                  not a pay document. --}}
-                            @if ($isIssuable)
+                            @if ($isIssuable && ! $staffRow->is_cancelled)
+                                {{-- Also gated on the ITEM, not just the run:
+                                     a cancelled line has no payslip to issue
+                                     and PrintPayslip correctly answers 422.
+                                     Offering a control that can only fail is
+                                     worse than offering none - the operator
+                                     reads the refusal as a bug. --}}
                                 <a href="{{ url('/payroll/payslips/'.$staffRow->payroll_item_id.'/print') }}"
                                    target="_blank" rel="noopener"
                                    class="text-sm font-medium text-primary hover:underline">
