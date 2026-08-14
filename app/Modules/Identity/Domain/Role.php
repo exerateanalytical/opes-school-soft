@@ -197,6 +197,12 @@ enum Role: string
                 Permission::StudentsView, Permission::StudentsManage,
                 Permission::StudentsMatriculeFinalise,
                 Permission::GuardiansManage, Permission::AdmissionsManage,
+                // 10-documents §7/§19: the registrar is the office that issues
+                // the daily student paperwork (bonafide, attendance
+                // attestation, info sheet) and reprints a lost one. Never the
+                // financial-reprint right, and never the override gate - both
+                // stay with the money offices and the principal.
+                Permission::DocumentsPrint, Permission::DocumentsReprint,
                 // Phase 8: the registrar reads the timetable (scheduling
                 // context for enrolment) but never edits it.
                 Permission::TimetableView,

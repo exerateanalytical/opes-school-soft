@@ -182,6 +182,25 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/students/import', \App\Modules\Students\Livewire\Import\Index::class)
         ->middleware('can:students.manage')->name('students.import');
 
+    // ── Student documents ──────────────────────────────────────────────
+    // docs/specs/10-documents.md §7 - the eight front-desk documents,
+    // printed from the student profile's Documents tab. Gated on
+    // documents.print (the render right itself, §19); RenderDocument
+    // re-checks it and adds documents.reprint on a second render of the
+    // same certificate. The blank admission-form route MUST precede
+    // /students/{student}: "documents" would otherwise match as an id.
+    Route::get('/students/documents/admission-form/print', \App\Modules\Students\Http\Controllers\PrintBlankAdmissionFormController::class)
+        ->middleware('can:documents.print')->name('students.documents.admission-form');
+
+    Route::get('/students/{student}/documents/{document}/print', \App\Modules\Students\Http\Controllers\PrintStudentDocumentController::class)
+        ->middleware('can:documents.print')->whereNumber('student')
+        ->whereIn('document', [
+            'admission-form', 'info-sheet', 'transfer-certificate', 'leaving-certificate',
+            'character-certificate', 'testimonial', 'bonafide', 'attendance-certificate',
+        ])
+        ->name('students.documents.print');
+    // ── End student documents ──────────────────────────────────────────
+
     Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
         ->middleware('can:students.view')->name('students.show');
 

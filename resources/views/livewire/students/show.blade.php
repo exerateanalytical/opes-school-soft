@@ -477,6 +477,126 @@
 
     {{-- ── Documents ───────────────────────────────────────────────────── --}}
     @if ($tab === 'documents')
+        {{-- Printable documents (docs/specs/10-documents.md §7): the eight
+             front-desk documents, rendered inline as PDF by the
+             students.documents.* routes so the operator previews before
+             printing. Visible only to documents.print holders - the same
+             gate the routes carry. Refusals (clearance, discipline, empty
+             attendance denominator) come back as a plain-text 422 message
+             in the opened tab; the override inputs feed the
+             documents.override_gate path (§19). --}}
+        @can('documents.print')
+            <section class="mb-4 space-y-3 rounded border border-border-primary bg-white p-4">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+                    {{ __('opes.students_screen.print_documents_heading') }}
+                </h2>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('students.documents.print', [$student->id, 'info-sheet']) }}" target="_blank"
+                       class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_info_sheet') }}
+                    </a>
+                    <a href="{{ route('students.documents.print', [$student->id, 'bonafide']) }}" target="_blank"
+                       class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_bonafide') }}
+                    </a>
+                    <a href="{{ route('students.documents.print', [$student->id, 'admission-form']) }}" target="_blank"
+                       class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_admission_form') }}
+                    </a>
+                    <a href="{{ route('students.documents.admission-form') }}" target="_blank"
+                       class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_admission_form_blank') }}
+                    </a>
+                </div>
+
+                {{-- Attendance attestation: §7.11 needs the stated range. --}}
+                <form method="GET" target="_blank"
+                      action="{{ route('students.documents.print', [$student->id, 'attendance-certificate']) }}"
+                      class="flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
+                    <div>
+                        <label class="text-xs text-charcoal/55" for="doc_att_from">{{ __('opes.students_screen.print_attendance_from') }}</label>
+                        <input id="doc_att_from" name="from" type="date" required
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <div>
+                        <label class="text-xs text-charcoal/55" for="doc_att_to">{{ __('opes.students_screen.print_attendance_to') }}</label>
+                        <input id="doc_att_to" name="to" type="date" required
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <button type="submit"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_attendance_cert') }}
+                    </button>
+                </form>
+
+                {{-- Testimonial: §7.9's authored narrative. --}}
+                <form method="GET" target="_blank"
+                      action="{{ route('students.documents.print', [$student->id, 'testimonial']) }}"
+                      class="flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
+                    <div class="min-w-[20rem] flex-1">
+                        <label class="text-xs text-charcoal/55" for="doc_testimonial_body">{{ __('opes.students_screen.print_testimonial_body') }}</label>
+                        <textarea id="doc_testimonial_body" name="body" rows="2" required
+                                  class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"></textarea>
+                    </div>
+                    <button type="submit"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_testimonial') }}
+                    </button>
+                </form>
+
+                {{-- Departure and conduct certificates: gated documents whose
+                     refusal message names the block; the override reason is
+                     honoured only for documents.override_gate holders. --}}
+                <form method="GET" target="_blank"
+                      action="{{ route('students.documents.print', [$student->id, 'transfer-certificate']) }}"
+                      class="flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
+                    <div class="min-w-[14rem] flex-1">
+                        <label class="text-xs text-charcoal/55" for="doc_transfer_reason">{{ __('opes.students_screen.print_transfer_reason') }}</label>
+                        <input id="doc_transfer_reason" name="reason" type="text"
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <div class="min-w-[14rem] flex-1">
+                        <label class="text-xs text-charcoal/55" for="doc_transfer_override">{{ __('opes.students_screen.print_override_reason') }}</label>
+                        <input id="doc_transfer_override" name="override_reason" type="text"
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <button type="submit"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_transfer_cert') }}
+                    </button>
+                </form>
+
+                <form method="GET" target="_blank"
+                      action="{{ route('students.documents.print', [$student->id, 'leaving-certificate']) }}"
+                      class="flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
+                    <div class="min-w-[14rem] flex-1">
+                        <label class="text-xs text-charcoal/55" for="doc_leaving_override">{{ __('opes.students_screen.print_override_reason') }}</label>
+                        <input id="doc_leaving_override" name="override_reason" type="text"
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <button type="submit"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_leaving_cert') }}
+                    </button>
+                </form>
+
+                <form method="GET" target="_blank"
+                      action="{{ route('students.documents.print', [$student->id, 'character-certificate']) }}"
+                      class="flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
+                    <div class="min-w-[14rem] flex-1">
+                        <label class="text-xs text-charcoal/55" for="doc_char_override">{{ __('opes.students_screen.print_override_reason') }}</label>
+                        <input id="doc_char_override" name="override_reason" type="text"
+                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </div>
+                    <button type="submit"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_char_cert') }}
+                    </button>
+                </form>
+            </section>
+        @endcan
+
         <section class="space-y-3">
             <div class="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
