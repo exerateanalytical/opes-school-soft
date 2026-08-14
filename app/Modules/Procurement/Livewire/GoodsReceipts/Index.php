@@ -88,7 +88,10 @@ final class Index extends Component
         }
 
         /** @var object{supplier_id: int}|null $po */
-        $po = DB::table('purchase_orders')->whereKey($this->formPurchaseOrderId)->first(['supplier_id']);
+        // where('id') not whereKey(): a DB::table() query builder has no
+        // whereKey, and the magic where{Column} fallback turns it into
+        // `where 'key' = ?`.
+        $po = DB::table('purchase_orders')->where('id', $this->formPurchaseOrderId)->first(['supplier_id']);
 
         if ($po !== null) {
             $this->formSupplierId = (int) $po->supplier_id;

@@ -88,7 +88,11 @@ final class Index extends Component
         Gate::authorize(ProcurementPermission::ORDER_APPROVE);
 
         /** @var object{version: int}|null $po */
-        $po = DB::table('purchase_orders')->whereKey($purchaseOrderId)->first(['version']);
+        // NOT whereKey(): DB::table() returns a Query builder, which has no
+        // such method, so Laravel's dynamic where{Column} magic rewrites it to
+        // `where 'key' = ?` and the click 500s. Eloquent builders have
+        // whereKey(); query builders never do.
+        $po = DB::table('purchase_orders')->where('id', $purchaseOrderId)->first(['version']);
 
         if ($po === null) {
             return;

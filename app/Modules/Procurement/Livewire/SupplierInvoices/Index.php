@@ -145,7 +145,10 @@ final class Index extends Component
         }
 
         /** @var object{supplier_id: int}|null $invoice */
-        $invoice = DB::table('supplier_invoices')->whereKey($this->creditNoteInvoiceId)->first(['supplier_id']);
+        // where('id') not whereKey(): a DB::table() query builder has no
+        // whereKey, and the magic where{Column} fallback turns it into
+        // `where 'key' = ?`.
+        $invoice = DB::table('supplier_invoices')->where('id', $this->creditNoteInvoiceId)->first(['supplier_id']);
 
         if ($invoice !== null) {
             $this->creditNoteSupplierId = (int) $invoice->supplier_id;
