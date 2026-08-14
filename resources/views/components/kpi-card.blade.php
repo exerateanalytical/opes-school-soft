@@ -6,7 +6,7 @@
     'href' => null,
     'icon' => null,
     'iconBg' => null,   // legacy escape hatch; `tone` is the supported way now
-    'tone' => 'green',  // green | blue | pink | amber | purple
+    'tone' => null,     // green | blue | pink | amber | purple; null derives from $iconBg
     'spark' => null,    // list<int|float> - drawn as the reference's mini trend line
     'trend' => null,    // 'up' | 'down' | null - only when $delta traces to real data
 ])
@@ -19,7 +19,22 @@
     $isLink = is_string($href) && $href !== '';
 
     $trend = in_array($trend, ['up', 'down'], true) ? $trend : null;
-    $tone = in_array($tone, ['green', 'blue', 'pink', 'amber', 'purple'], true) ? $tone : 'green';
+    // The legacy escape hatch recoloured the BADGE only, so 39 of the 42
+    // callers left the card surface on the default mint - which is why
+    // /finance/invoices shipped four identical cards carrying a green, an
+    // orange, a blue and a purple badge. An explicit `tone` still wins; where
+    // there is none, the legacy prop names the hue the caller already chose,
+    // so the surface can be derived from it and all 42 screens repaint from
+    // this one arm list. Anything unmapped keeps today's green.
+    $tone = in_array($tone, ['green', 'blue', 'pink', 'amber', 'purple'], true)
+        ? $tone
+        : match ($iconBg) {
+            'bg-badge-blue' => 'blue',
+            'bg-badge-orange', 'bg-heritage-yellow' => 'amber',
+            'bg-heritage-red' => 'pink',
+            'bg-badge-purple' => 'purple',
+            default => 'green',
+        };
 
     // Literal class strings so Tailwind's scanner sees every one of them.
     [$surface, $badge, $sparkStroke] = match ($tone) {
