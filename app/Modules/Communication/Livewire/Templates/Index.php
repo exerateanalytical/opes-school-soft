@@ -9,9 +9,9 @@ use App\Modules\Communication\Domain\MessageChannel;
 use App\Modules\Communication\Models\MessageTemplate;
 use App\Modules\Communication\Support\MergeFields;
 use App\Modules\Identity\Domain\Permission;
-use App\Modules\Identity\Models\User;
 use App\Modules\Reporting\Support\ExcelExport;
 use App\Support\Audit\Actor;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -286,10 +286,18 @@ final class Index extends Component
 
     private function actor(): Actor
     {
-        /** @var User $user */
-        $user = auth()->user();
+        // No import and no /** @var User */ cast: Larastan resolves
+        // auth()->user() to the configured auth model on its own, which is
+        // how Reporting\Actions\RenderDocument::currentActor() has always
+        // done this. The docblock that used to sit here was the ONLY reason
+        // this module named Identity's model at all.
+        $actor = auth()->user()?->toAuditActor();
 
-        return $user->toAuditActor();
+        if ($actor === null) {
+            throw new AuthorizationException('This action requires an authenticated user.');
+        }
+
+        return $actor;
     }
 
     private function resetPage(): void

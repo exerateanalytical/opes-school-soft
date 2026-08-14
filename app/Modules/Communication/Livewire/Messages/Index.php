@@ -10,7 +10,7 @@ use App\Modules\Communication\Actions\Messaging\PostMessage;
 use App\Modules\Communication\Actions\Messaging\StartThread;
 use App\Modules\Communication\Models\MessageThread;
 use App\Modules\Communication\Models\MessageThreadParticipant;
-use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Actions\FindUserIdByEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -83,9 +83,12 @@ final class Index extends Component
     {
         $this->error = '';
 
-        $recipient = User::query()->where('email', trim($this->newRecipient))->first();
+        // Identity's door, not Identity's model: StartThread already speaks
+        // in user IDs, so nothing here ever needed the record (00-core §6.2
+        // rule 2).
+        $recipientId = app(FindUserIdByEmail::class)->handle($this->newRecipient);
 
-        if ($recipient === null) {
+        if ($recipientId === null) {
             $this->error = __('opes.messages_screen.recipient_not_found');
 
             return;
@@ -95,7 +98,7 @@ final class Index extends Component
             $thread = app(StartThread::class)->handle(
                 (int) Auth::id(),
                 $this->newTitle !== '' ? $this->newTitle : __('opes.messages_screen.default_title'),
-                [(int) $recipient->getKey()],
+                [$recipientId],
                 $this->newBody,
             );
 
