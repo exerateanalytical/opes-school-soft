@@ -43,6 +43,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     /*
+     * The staff shell's own-account screen. NO `can:` middleware by design:
+     * every authenticated user may read their own record and set their own
+     * password, and gating it on any permission would reproduce the gap it
+     * exists to close - a teacher unable to change their own password.
+     */
+    Route::get('/account', \App\Modules\Identity\Livewire\Account::class)->name('account.index');
+
+    /*
      * The operator's UI language, not the school's document language - see
      * Identity\Http\Middleware\SetLocale. Only `en` and `fr` are accepted; a
      * rejected value comes back as a validation error rather than silently

@@ -291,6 +291,23 @@ return [
         'guardian' => 'Guardian',
         'staff_portal' => 'Staff',
     ],
+    'account' => [
+        'title' => 'My account',
+        'subtitle' => 'Your own record, and the one place you change your own password.',
+        'who_you_are' => 'Who you are',
+        'name' => 'Name',
+        'email' => 'Email',
+        'roles' => 'Roles',
+        'name_changes_via_admin' => 'Name or email changes go through an administrator, who edits them from User Management.',
+        'change_password' => 'Change password',
+        'current_password' => 'Current password',
+        'new_password' => 'New password',
+        'confirm_new_password' => 'Confirm new password',
+        'password_current_wrong' => 'That is not your current password.',
+        'password_mismatch' => 'The new password and its confirmation do not match.',
+        'password_too_short' => 'The new password must be at least 8 characters.',
+        'password_changed' => 'Your password has been changed.',
+    ],
     // Operational health checks, app/Modules/Operations/Health/Checks/*. These
     // strings land on an authenticated dashboard AND (detail/label only, never
     // remedy) on the unauthenticated /up endpoint, so translate but do not add
@@ -2996,6 +3013,22 @@ return [
         'fiscal_provisional_title' => 'The fiscal identity is still a specimen',
         'fiscal_provisional_body' => 'Until the NIU is confirmed, every invoice, receipt and attestation prints with a SPECIMEN watermark.',
         'fiscal_provisional_action' => 'Confirm the fiscal identity',
+    ],
+
+    'settings_hub' => [
+        'heading' => 'Settings screens',
+        'school_identity_title' => 'School identity',
+        'school_identity_body' => 'The letterhead every printed document wears — address, contacts, ministry header, crest and signatures.',
+        'branding_title' => 'Branding',
+        'branding_body' => 'The one brand colour this school runs the platform under.',
+        'tax_title' => 'Tax configuration',
+        'tax_body' => 'Tax treatment, prorata and the declaration calendar.',
+        'fiscal_identity_title' => 'Fiscal identity',
+        'fiscal_identity_body' => 'NIU, RCCM and tax centre — confirming these unblocks money documents.',
+        'academics_title' => 'Academic settings',
+        'academics_body' => 'Years, terms, sections and the academic calendar.',
+        'licence_title' => 'Licence',
+        'licence_body' => 'The platform licence this deployment runs under.',
     ],
 
     'accounting' => [

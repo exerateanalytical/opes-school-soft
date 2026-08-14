@@ -281,6 +281,23 @@ return [
         'guardian' => 'Parent / Tuteur',
         'staff_portal' => 'Personnel',
     ],
+    'account' => [
+        'title' => 'Mon compte',
+        'subtitle' => 'Votre propre fiche, et le seul endroit où changer votre propre mot de passe.',
+        'who_you_are' => 'Qui vous êtes',
+        'name' => 'Nom',
+        'email' => 'Courriel',
+        'roles' => 'Rôles',
+        'name_changes_via_admin' => 'Les changements de nom ou de courriel passent par un administrateur, depuis la gestion des utilisateurs.',
+        'change_password' => 'Changer le mot de passe',
+        'current_password' => 'Mot de passe actuel',
+        'new_password' => 'Nouveau mot de passe',
+        'confirm_new_password' => 'Confirmer le nouveau mot de passe',
+        'password_current_wrong' => 'Ce n’est pas votre mot de passe actuel.',
+        'password_mismatch' => 'Le nouveau mot de passe et sa confirmation ne correspondent pas.',
+        'password_too_short' => 'Le nouveau mot de passe doit comporter au moins 8 caractères.',
+        'password_changed' => 'Votre mot de passe a été changé.',
+    ],
     // Contrôles d'état opérationnel, app/Modules/Operations/Health/Checks/*.
     // Ces chaînes apparaissent sur le tableau de bord authentifié ET (le
     // libellé et le détail seulement, jamais le remède) sur le point de
@@ -2964,6 +2981,22 @@ return [
         'fiscal_provisional_title' => 'L’identité fiscale est encore un spécimen',
         'fiscal_provisional_body' => 'Tant que le NIU n’est pas confirmé, chaque facture, reçu et attestation s’imprime avec le filigrane SPECIMEN.',
         'fiscal_provisional_action' => 'Confirmer l’identité fiscale',
+    ],
+
+    'settings_hub' => [
+        'heading' => 'Écrans de paramétrage',
+        'school_identity_title' => 'Identité de l’établissement',
+        'school_identity_body' => 'L’en-tête que porte chaque document imprimé — adresse, contacts, en-tête ministériel, armoiries et signatures.',
+        'branding_title' => 'Identité visuelle',
+        'branding_body' => 'La couleur de marque avec laquelle cet établissement utilise la plateforme.',
+        'tax_title' => 'Configuration fiscale',
+        'tax_body' => 'Régime fiscal, prorata et calendrier des déclarations.',
+        'fiscal_identity_title' => 'Identité fiscale',
+        'fiscal_identity_body' => 'NIU, RCCM et centre des impôts — leur confirmation débloque les documents financiers.',
+        'academics_title' => 'Paramètres académiques',
+        'academics_body' => 'Années, trimestres, sections et calendrier académique.',
+        'licence_title' => 'Licence',
+        'licence_body' => 'La licence sous laquelle cette installation fonctionne.',
     ],
 
     'accounting' => [
