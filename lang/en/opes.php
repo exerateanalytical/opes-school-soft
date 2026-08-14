@@ -98,6 +98,7 @@ return [
         'academics' => 'Academic settings',
         'classes' => 'Classes',
         'subjects' => 'Subjects',
+        'curriculum' => 'Curriculum',
         'timetable' => 'Timetable',
         'attendance' => 'Attendance',
         'examinations' => 'Examinations',
@@ -524,6 +525,8 @@ return [
         'visitor.manage' => 'Manage the visitor log',
         'insurance.view' => 'View insurance',
         'insurance.manage' => 'Manage insurance',
+        'curriculum.view' => 'View curricula',
+        'curriculum.manage' => 'Manage curricula',
         'staff.view' => 'View staff records',
         'staff.manage' => 'Manage staff records',
         'leave.approve' => 'Approve leave requests',
@@ -548,6 +551,11 @@ return [
         'D' => 'MINEDUB Francophone primary',
         'E' => 'MINEDUB Anglophone primary',
         'F' => 'MINEDUB nursery',
+    ],
+    // Curriculum framework (module gap #2): version lifecycle labels.
+    'curriculum' => [
+        'status_draft' => 'Draft',
+        'status_published' => 'Published',
     ],
     // Assessment component kinds, 01-assessment 5.3.
     'component_kind' => [

@@ -107,6 +107,9 @@ enum Role: string
                 Permission::ProcurementView, Permission::ProcurementRequisitionApprove,
                 Permission::ProcurementOrderApprove, Permission::ProcurementPaymentApprove,
                 Permission::TaxView,
+                // Curriculum framework (gap #2): the Proviseur oversees the
+                // programme of study and can publish/revise it.
+                Permission::CurriculumView, Permission::CurriculumManage,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -128,6 +131,10 @@ enum Role: string
                 Permission::AttendanceView, Permission::AttendanceTake,
                 Permission::AttendanceAmend, Permission::AttendanceJustify,
                 Permission::DisciplineView, Permission::DisciplineManage,
+                // Curriculum framework (gap #2): shaping the programme of
+                // study is the Censeur's job, exactly like the academic
+                // structure it hangs off.
+                Permission::CurriculumView, Permission::CurriculumManage,
             ],
 
             // The bursar reads the student roll to collect against it, but
@@ -200,6 +207,9 @@ enum Role: string
                 // Phase 8: the registrar reads the timetable (scheduling
                 // context for enrolment) but never edits it.
                 Permission::TimetableView,
+                // Curriculum framework (gap #2): read-only, same posture as
+                // the timetable above.
+                Permission::CurriculumView,
             ],
 
             // 00-core 9.1: these three read the academic structure (year,
@@ -220,6 +230,10 @@ enum Role: string
                 // decides which registers this teacher may actually open.
                 Permission::TimetableView,
                 Permission::AttendanceView, Permission::AttendanceTake,
+                // Curriculum framework (gap #2): a teacher plans lessons
+                // against the published programme, so reads it - and only
+                // reads it.
+                Permission::CurriculumView,
             ],
 
             // The Professeur Principal enters marks for his own subject and
@@ -227,6 +241,7 @@ enum Role: string
             self::ClassMaster => [
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter, Permission::MarksValidate,
+                Permission::CurriculumView,
             ],
 
             // The exams office runs the assessment cycle end to end: it
@@ -236,6 +251,7 @@ enum Role: string
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter, Permission::MarksValidate,
                 Permission::AssessmentConfigure, Permission::ReportsPublish, Permission::ReportsView,
+                Permission::CurriculumView,
             ],
 
             // Phase 8: the Surveillant Général polices attendance and owns
