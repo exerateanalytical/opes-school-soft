@@ -20,6 +20,27 @@ anything.
 | Plan progress | **43 of 45 tasks** in `docs/superpowers/plans/2026-08-15-document-identity-and-assets.md` |
 | Commits this session | 44 |
 
+### Every branch is merged — but three worktrees hold uncommitted scraps
+
+`git branch --no-merged main` is empty, and every local and remote branch reports
+**0 commits not in main**. Nothing is stranded on a branch.
+
+However, three git worktrees on disk carry uncommitted tracked edits, all based on
+`0b02aac`/`c030eda` — commits from well before the current `main`. They were left
+by earlier agent sessions and were deliberately NOT merged at session end, because
+they sit on a stale base and have never been run against current `main`:
+
+| Worktree | Uncommitted |
+|---|---|
+| `.claude/worktrees/agent-a22b256b841ecf39d` | +198 lines of tests — `NotificationTest.php`, `WebhookTest.php` |
+| `.claude/worktrees/agent-a746d99bcdcd921e2` | +137/-16 — `Guardians/Index.php`, its blade, `GuardianTest.php` |
+| `.claude/worktrees/defect-fix-pass` | 1 line in `package-lock.json` (noise) |
+
+The first two are real test/feature work and may be worth recovering; the third is
+noise. **Recover by diffing against current `main` first, not by merging** — the
+files they touch have moved since. If they turn out to be superseded, delete the
+worktrees with `git worktree remove`. Nothing else on disk is uncommitted.
+
 ---
 
 ## 2. What is NOT done — start here
