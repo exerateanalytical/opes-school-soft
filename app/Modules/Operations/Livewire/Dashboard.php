@@ -4,26 +4,36 @@ declare(strict_types=1);
 
 namespace App\Modules\Operations\Livewire;
 
-use App\Modules\Identity\Actions\CountActiveUsers;
-use App\Modules\Identity\Actions\CountConfiguredRoles;
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Operations\Actions\CollectHealth;
+use App\Modules\Operations\Actions\ReadDashboardPanels;
 use App\Modules\Operations\Domain\HealthCheckResult;
 use App\Modules\Operations\Domain\HealthStatus;
+use App\Modules\Operations\Domain\RoleDashboard;
 use App\Modules\Operations\Models\Backup;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * The landing screen, docs/specs/09-ui.md section 3.
+ * The landing screen, docs/specs/09-ui.md section 3 — composed PER ROLE.
  *
- * Only tiles whose data actually exists are shown. The rest of section 3
- * describes enrolment, attendance and fee tiles that have no source yet, and a
- * tile reading 0 because its module is unbuilt is a lie the operator cannot
- * detect (09-ui 3.3). They arrive with their modules.
+ * It used to be ONE screen for twenty roles, with five admin-centric tiles
+ * (active users, roles configured, system health, last backup, attendance)
+ * each gated on an identity or operations permission. Gating them away from
+ * the other eighteen roles was correct; having nothing to put in their place
+ * was not, and the audit found the two defects that follows from it: an
+ * Accountant landed on a page with ZERO KPI cards, and a Teacher landed on
+ * one card reading "—" beside a raw authorization exception.
+ *
+ * WHAT each role sees is RoleDashboard (pure metadata, Domain);
+ * the FIGURES come from ReadDashboardPanels (cross-module DB::table reads).
+ * This component only composes them, and applies the same two gates to
+ * everything it offers: the PERMISSION, because a card that 403s on click
+ * teaches the operator that the screen lies, and Route::has, because a role
+ * profile can outrun the module that provides its action.
  */
 #[Layout('layouts.app')]
 final class Dashboard extends Component
@@ -114,89 +124,6 @@ final class Dashboard extends Component
     }
 
     /**
-     * "Today's Attendance", 09-ui §3.3: present ÷ expected from TODAY's
-     * submitted/amended registers only — draft registers do not count, the
-     * same rule the Attendance Management screen itself uses
-     * (Attendance\Livewire\Index::render()). Read cross-module via
-     * DB::table (00-core 6.2: never another module's Model), formatted here
-     * rather than handed back as a bare float so the view never has to
-     * decide between "—" and "0%" itself.
-     *
-     * NULL — not "0%" — when the school has taken no register yet today
-     * (07-students §9, C5): zero registers is "not yet taken", not "nobody
-     * came".
-     */
-    private function todaysAttendanceRate(): ?string
-    {
-        $today = now()->toDateString();
-
-        $registerIds = DB::table('attendance_registers')
-            ->whereDate('date', $today)
-            ->whereIn('status', ['submitted', 'amended'])
-            ->pluck('id');
-
-        if ($registerIds->isEmpty()) {
-            return null;
-        }
-
-        $totals = DB::table('attendance_registers')
-            ->whereIn('id', $registerIds)
-            ->selectRaw('SUM(expected_count) as expected, SUM(present_count) as present, SUM(late_count) as late')
-            ->first();
-
-        // §9.6's formula, the same one Attendance\Livewire\Index and
-        // GetAttendanceRateForEnrollments use: (present + late) over
-        // (expected − suspended-rows), never plain expected.
-        $suspended = DB::table('attendance_records')
-            ->whereIn('attendance_register_id', $registerIds)
-            ->where('status', 'suspended')
-            ->count();
-
-        // MySQL SUM() returns strings — cast.
-        $expected = (int) ($totals->expected ?? 0);
-        $denominator = $expected - $suspended;
-
-        if ($denominator <= 0) {
-            return null;
-        }
-
-        $present = (int) ($totals->present ?? 0);
-        $late = (int) ($totals->late ?? 0);
-
-        return number_format((($present + $late) / $denominator) * 100, 1).'%';
-    }
-
-    /**
-     * @return list<array{key: string, label: string, route: string|null}>
-     */
-    private function quickActions(): array
-    {
-        $actions = [
-            ['key' => 'add_user', 'permission' => Permission::UserManage, 'route' => '/users'],
-            ['key' => 'take_backup', 'permission' => Permission::BackupRun, 'route' => null],
-            ['key' => 'check_health', 'permission' => null, 'route' => '/up'],
-        ];
-
-        $visible = [];
-
-        foreach ($actions as $action) {
-            $permission = $action['permission'];
-
-            if ($permission instanceof Permission && ! Gate::allows($permission->value)) {
-                continue;
-            }
-
-            $visible[] = [
-                'key' => $action['key'],
-                'label' => (string) __('opes.dashboard.action_'.$action['key']),
-                'route' => $action['route'],
-            ];
-        }
-
-        return $visible;
-    }
-
-    /**
      * "Signed in as {name} · {role}".
      *
      * Purely informational, but it is what makes a role demonstration
@@ -229,57 +156,148 @@ final class Dashboard extends Component
         ];
     }
 
-    public function render(
-        CollectHealth $health,
-        CountActiveUsers $countUsers,
-        CountConfiguredRoles $countRoles,
-    ): mixed {
-        $canViewAttendance = Gate::allows(Permission::AttendanceView->value);
-        // The identity tiles (active users, roles configured) are identity
-        // data, so they ride the same permission as the /users screen they
-        // summarise. A Teacher or an Accountant has no business reading the
-        // size and shape of the staff account list.
-        $canViewUsers = Gate::allows(Permission::UserView->value);
-        // System health and the backup clock are operator facts. Gated on the
-        // permissions that let someone ACT on them - a red light nobody in
-        // the room can act on is noise, the same reasoning the alert filter
-        // above already uses.
-        $canViewHealth = Gate::allows(Permission::SettingView->value);
-        $canViewBackup = Gate::allows(Permission::BackupRun->value);
 
-        $tileCount = ($canViewUsers ? 2 : 0)
-            + ($canViewHealth ? 1 : 0)
-            + ($canViewBackup ? 1 : 0)
-            + ($canViewAttendance ? 1 : 0);
+    /**
+     * The signed-in user's roles, for dashboard composition.
+     *
+     * A user holding several roles gets the UNION of their panels, capped at
+     * six and de-duplicated in panel order: a vice-principal who also teaches
+     * needs both halves, and picking one role arbitrarily would hide half
+     * their job from them.
+     *
+     * @return list<Role>
+     */
+    private function dashboardRoles(): array
+    {
+        $user = auth()->user();
 
+        if ($user === null) {
+            return [];
+        }
+
+        $roles = [];
+
+        foreach ($user->getRoleNames() as $name) {
+            $role = Role::tryFrom((string) $name);
+
+            if ($role !== null) {
+                $roles[] = $role;
+            }
+        }
+
+        return $roles;
+    }
+
+    /**
+     * The panels this user actually sees: their roles' union, permission
+     * filtered by ReadDashboardPanels (which returns null for a panel the
+     * caller may not read), capped at six.
+     *
+     * @return list<array{key: string, value: int|string|null, sub: string|null, tone: string, icon: string, route: string|null}>
+     */
+    private function rolePanels(ReadDashboardPanels $reader): array
+    {
+        $keys = [];
+
+        foreach ($this->dashboardRoles() as $role) {
+            foreach (RoleDashboard::for($role)['panels'] as $panel) {
+                if (! in_array($panel, $keys, true)) {
+                    $keys[] = $panel;
+                }
+            }
+        }
+
+        $panels = [];
+
+        foreach ($keys as $key) {
+            $panel = $reader->read($key);
+
+            if ($panel === null) {
+                continue;
+            }
+
+            // The backup clock is a duration, not a count, and it is this
+            // component that owns the Backup model - so the reader leaves the
+            // value null and it is filled in here rather than duplicating the
+            // query across a module boundary.
+            if ($key === 'last_backup') {
+                $panel['value'] = $this->lastBackupAge();
+            }
+
+            $panels[] = $panel;
+
+            // Six is the point past which the eye stops reading a KPI strip
+            // and starts scanning it.
+            if (count($panels) === 6) {
+                break;
+            }
+        }
+
+        return $panels;
+    }
+
+    /**
+     * The quick actions this user can actually perform, from their roles'
+     * union.
+     *
+     * Both gates matter and are both applied: the PERMISSION, because a card
+     * that 403s on click teaches the operator that the screen lies; and
+     * Route::has, because a route that does not exist yet would 404 - and an
+     * action offered by a role profile can outrun the module that provides
+     * it.
+     *
+     * @return list<array{key: string, label: string, description: string, icon: string, url: string}>
+     */
+    private function quickActions(): array
+    {
+        $keys = [];
+
+        foreach ($this->dashboardRoles() as $role) {
+            foreach (RoleDashboard::for($role)['quick_actions'] as $action) {
+                if (! in_array($action, $keys, true)) {
+                    $keys[] = $action;
+                }
+            }
+        }
+
+        $visible = [];
+
+        foreach ($keys as $key) {
+            $action = RoleDashboard::quickAction($key);
+
+            if ($action === null) {
+                continue;
+            }
+
+            [$routeName, $permission] = $action;
+
+            if (! Gate::allows($permission) || ! Route::has($routeName)) {
+                continue;
+            }
+
+            $visible[] = [
+                'key' => $key,
+                'label' => (string) __('opes.dashboard.action_'.$key),
+                'description' => (string) __('opes.dashboard.action_'.$key.'_description'),
+                // NOT a lang key: an icon is not a translation.
+                'icon' => RoleDashboard::quickActionIcon($key),
+                'url' => route($routeName, absolute: false),
+            ];
+        }
+
+        return $visible;
+    }
+
+    public function render(CollectHealth $health, ReadDashboardPanels $panelReader): mixed
+    {
         return view('livewire.dashboard', [
-            // Only computed for someone who may actually see it - never
-            // query a figure the view is about to hide anyway.
-            'activeUsers' => $canViewUsers ? $countUsers->handle() : null,
-            'roleCount' => $canViewUsers ? $countRoles->handle() : null,
-            'healthSummary' => $canViewHealth ? $health->summary() : null,
-            'lastBackupAge' => $canViewBackup ? $this->lastBackupAge() : null,
+            'panels' => $this->rolePanels($panelReader),
             'alerts' => $this->alerts($health),
             'quickActions' => $this->quickActions(),
-            'canViewUsers' => $canViewUsers,
-            'canViewHealth' => $canViewHealth,
-            'canViewBackup' => $canViewBackup,
-            'canViewAttendance' => $canViewAttendance,
-            // Only queried for someone who may actually see it - never
-            // compute a figure the view is about to hide anyway.
-            'todaysAttendanceRate' => $canViewAttendance ? $this->todaysAttendanceRate() : null,
-            // Raw, not clamped: zero tiles means the whole strip is hidden
-            // rather than rendering an empty grid with a stray gap.
-            'tileCount' => $tileCount,
             'signedInAs' => $this->signedInAs(),
-            // Built by another module and possibly not routed yet, so the
-            // link only appears once the route genuinely exists AND the
-            // viewer holds a finance read permission - never offer a
-            // shortcut that lands on a 403.
-            'financeDashboardUrl' => \Illuminate\Support\Facades\Route::has('finance.dashboard')
-                && (Gate::allows(Permission::LedgerView->value) || Gate::allows(Permission::FeeView->value))
-                    ? route('finance.dashboard', absolute: false)
-                    : null,
+            // Kept: this feeds the health panel's display slot, which carries
+            // a status pill rather than a numeral.
+            'healthSummary' => Gate::allows(Permission::SettingView->value) ? $health->summary() : null,
         ]);
     }
 }
