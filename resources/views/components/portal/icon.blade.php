@@ -49,6 +49,10 @@
         // submit button and the card's gold tab. `shield` was standing in for
         // it, which read as a different mark at those three sizes.
         'lock' => 'M5 11h14a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8a1 1 0 011-1zM8 11V7a4 4 0 118 0v4M12 15v2',
+        // The bar glyph the reference bottom nav uses for "More".
+        'menu' => 'M4 7h16M4 12h16M4 17h16',
+        // The disclosure chevron beside the parent's name in the header.
+        'chevron-down' => 'M6 9l6 6 6-6',
         'dot' => 'M12 13a1 1 0 100-2 1 1 0 000 2z',
     ];
 

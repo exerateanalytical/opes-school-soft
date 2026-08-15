@@ -28,7 +28,7 @@ for f in /c/laragon/www/opeschool-cloud/public/__compare/*.html; do
         "http://localhost:8391/__compare/${slug}.html" >/dev/null 2>&1
 
     if [ -f "$SCRATCH/shots/${slug}.png" ]; then
-        "$PHP" /c/laragon/www/opeschool-cloud/compare_sheet.php "$slug" >/dev/null 2>&1 && n=$((n+1))
+        "$PHP" /c/laragon/www/opeschool-cloud/tools/design-parity/sheet.php "$slug" >/dev/null 2>&1 && n=$((n+1))
     fi
 done
 

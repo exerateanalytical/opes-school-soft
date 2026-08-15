@@ -2339,6 +2339,11 @@ return [
         // Phase 12-P3: the screens that close the gap with the mobile app.
         // Every one is a thin adapter over the SAME readers the API uses.
         'nav_label' => 'Portal sections',
+        // The bottom bar, in the reference designs' own order and wording.
+        'nav_dashboard' => 'Dashboard',
+        'nav_academics' => 'Academics',
+        'nav_more' => 'More',
+        'greeting' => 'Hello,',
         'nav_children' => 'Children',
         'nav_payments' => 'Payments',
         'nav_messages' => 'Messages',

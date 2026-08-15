@@ -267,6 +267,44 @@ html {
     font-size: 17px;
 }
 
+/* THE GUARDIAN PORTAL RUNS AT 16px, not the platform's 17.
+
+   The 17px root above is a deliberate BACK-OFFICE decision - it lifts ~5 000
+   un-migrated text-xs/text-sm utilities into a 16-18px range on screens that
+   are read for hours. It is wrong for the portal, which is drawn to a 426px
+   phone: every rem there starts 6% too large, and compounded with the
+   enlarged --text-* scale above it produced a dashboard 2 278px tall against
+   the reference design's 922.
+
+   Scoped to the ROOT ELEMENT, not to body: `rem` always resolves against
+   :root, so a class on <body> would change nothing at all. The portal renders
+   its own <html> tag in layouts/portal.blade.php and carries this class
+   there, which is why no staff screen moves. */
+html.portal-root {
+    font-size: 16px;
+
+    /* The type SCALE has to come back too, not just the root.
+
+       The --text-* tokens above are enlarged for the back office (text-sm at
+       ~15.9px, text-base at 17px). Dropping the root to 16px alone barely
+       moved the portal, because every utility still resolves through those
+       inflated tokens - the dashboard stayed roughly twice the design's
+       height. These are Tailwind's stock values, which is the scale the phone
+       designs are drawn to: measured against the reference, body copy lands at
+       ~14px and captions at ~12px.
+
+       Redefining them HERE works because html.portal-root IS :root on a portal
+       page, so the same custom properties are simply shadowed - and the class
+       exists on no staff screen, so no back-office text moves. */
+    --text-xs: 0.75rem;      /* 12px - captions, chips, nav labels */
+    --text-sm: 0.875rem;     /* 14px - body */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px - card titles */
+    --text-xl: 1.25rem;      /* 20px - section titles */
+    --text-2xl: 1.5rem;      /* 24px - page titles */
+    --text-3xl: 1.875rem;    /* 30px - hero metrics */
+}
+
 /* Alpine hides these until it has booted. Without it the user menu and the
    mobile drawer flash open on every page load over a slow 3G link. */
 [x-cloak] {

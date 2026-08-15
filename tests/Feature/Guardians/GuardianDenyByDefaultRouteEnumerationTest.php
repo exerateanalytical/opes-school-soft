@@ -108,7 +108,21 @@ it('denies a guardian portal principal on every non-portal web route, walked fro
         || str_starts_with($name, 'placeholder.')
         || $name === 'communication.messages'
         || $name === 'forms.unfinished_work'
-        || $name === 'push.vapid_public_key';
+        || $name === 'push.vapid_public_key'
+        //   account.index          the staff own-account screen. routes/web.php
+        //                          states the rule in its own comment: NO `can:`
+        //                          by design, because every authenticated user
+        //                          may read their own record and set their own
+        //                          password, and gating it would reproduce the
+        //                          gap it exists to close - a teacher unable to
+        //                          change their own password. Verified before
+        //                          listing: the component reads auth()->user()
+        //                          and nothing else, so a guardian sees their
+        //                          own name, email and roles and no one else's.
+        //                          It does render the STAFF shell to a parent,
+        //                          which is a wart worth fixing, but it is a
+        //                          presentation wart and not a data leak.
+        || $name === 'account.index';
 
     // Out of THIS suite's scope, not unguarded: `login` is `guest`-gated
     // (unreachable by an authenticated principal at all), `health` is

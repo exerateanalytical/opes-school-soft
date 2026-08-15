@@ -6,27 +6,74 @@
         ->unreadNotificationCount((int) $portalUser->getKey());
 
     /*
-     * The portal's own navigation. Six destinations, in the order the mobile
-     * designs put them, so a parent who uses both meets one product.
+     * The five destinations the reference designs put in the bar, in their
+     * order: Dashboard, Children, Academics, Payments, More.
      *
      * Rendered unconditionally: every screen re-authorizes on entry, so this
      * is chrome, not a gate. That differs from the CHILD tab strip, which does
-     * filter - the difference is that these six are reachable by every portal
-     * principal, whereas a child tab can be closed for a particular link and
-     * offering it would be an invitation to a wall.
+     * filter - these five are reachable by every portal principal, whereas a
+     * child tab can be closed for a particular link and offering it would be
+     * an invitation to a wall.
+     *
+     * "Academics" is CHILD-SCOPED in this product - there is no top-level
+     * academics screen - so it resolves to the first linked child's results
+     * and falls back to the children index for a guardian with none. Pointing
+     * it at the children index outright would give the bar two buttons that
+     * land on the same page.
+     *
+     * "More" is the account hub, which is where the designs' overflow screens
+     * (settings, security, help, search, school life) actually live.
      */
+    $portalFirstChild = $portalUser === null ? null : \Illuminate\Support\Facades\DB::table('student_guardians')
+        ->join('guardians', 'guardians.id', '=', 'student_guardians.guardian_id')
+        ->where('guardians.portal_user_id', $portalUser->getKey())
+        ->orderBy('student_guardians.student_id')
+        ->value('student_guardians.student_id');
+
     $portalNav = [
-        ['portal.dashboard', __('opes.guardian_portal.nav_children'), 'home'],
-        ['portal.payments', __('opes.guardian_portal.nav_payments'), 'card'],
-        ['portal.messages', __('opes.guardian_portal.nav_messages'), 'chat'],
-        ['portal.announcements', __('opes.guardian_portal.nav_announcements'), 'megaphone'],
-        ['portal.account', __('opes.guardian_portal.nav_account'), 'user'],
+        ['portal.dashboard', __('opes.guardian_portal.nav_dashboard'), 'home', []],
+        ['portal.children.index', __('opes.guardian_portal.nav_children'), 'users', []],
+        $portalFirstChild === null
+            ? ['portal.children.index', __('opes.guardian_portal.nav_academics'), 'book', []]
+            : ['portal.children.results', __('opes.guardian_portal.nav_academics'), 'book', ['student' => $portalFirstChild]],
+        ['portal.payments', __('opes.guardian_portal.nav_payments'), 'card', []],
+        ['portal.account', __('opes.guardian_portal.nav_more'), 'menu', []],
     ];
 
     $portalCurrent = request()->route()?->getName() ?? '';
+
+    // The SCHOOL's name, not the product's. The designs put the school's crest
+    // and wordmark in the header - a parent is signing in to their child's
+    // school, not to a software vendor - and `school.name` is already set.
+    $portalSettings = app(\App\Modules\SchoolProfile\Actions\ReadSetting::class);
+
+    $portalSchool = trim((string) ($portalSettings->handle(
+        app()->getLocale() === 'fr' ? 'school.name_fr' : 'school.name'
+    ) ?? __('opes.shell.brand')));
+
+    // Split on the first space so the header can set the lead word large and
+    // the rest small beneath it, the way the reference wordmark is drawn.
+    [$portalSchoolLead, $portalSchoolRest] = str_contains($portalSchool, ' ')
+        ? [strtok($portalSchool, ' '), trim(substr($portalSchool, strpos($portalSchool, ' ')))]
+        : [$portalSchool, ''];
+
+    /*
+     * The school's own strapline ("Learn. Grow. Excel." in the designs).
+     *
+     * Read from settings with the portal's tagline as fallback, rather than
+     * hardcoding the design's words: that line belongs to the school, and this
+     * is a multi-tenant product. A school that has not set one still gets a
+     * sensible line instead of a gap.
+     */
+    $portalStrapline = trim((string) ($portalSettings->handle('school.strapline')
+        ?? __('opes.guardian_portal.tagline')));
 @endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+{{-- `portal-root` drops the root font-size from the platform's 17px to the
+     16px the phone designs are drawn at. It has to sit on <html>: rem always
+     resolves against :root, so the same class on <body> would do nothing. See
+     resources/css/app.css. --}}
+<html lang="{{ app()->getLocale() }}" class="portal-root">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -54,47 +101,73 @@
 <div class="flex min-h-screen flex-col">
 
     {{-- ---------------------------------------------------------- header -- --}}
+    {{--
+        Built to the reference header: the SCHOOL's crest and wordmark with its
+        strapline on the left, then the bell with its unread badge, then the
+        parent's photo under a "Hello," label with a chevron.
+
+        THE SEARCH ICON IS GONE. It was never in the designs, and it was
+        crowding the one row the header has on a 426px screen. `portal.search`
+        is now reached from the account hub instead - it must be reached from
+        somewhere, because PortalRouteWiringTest fails any portal route that
+        nothing links to, and that test exists precisely because a screen
+        nothing links to is a screen no parent can open.
+    --}}
     <header class="shrink-0 bg-portal-green text-white">
-        <div class="mx-auto w-full max-w-5xl px-4 pb-1 pt-3 sm:px-6">
-            <div class="flex items-center gap-3">
-                <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-2.5">
+        <div class="mx-auto w-full max-w-5xl px-4 pb-2 pt-3 sm:px-6">
+            <div class="flex items-center gap-2.5">
+                <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-2">
                     <x-portal.crest size="md"/>
 
+                    {{-- The wordmark is SPLIT, as the reference sets it: the
+                         first word large, the remainder small beneath it, then
+                         the strapline. Set on one line, "Heritage Bilingual
+                         College" simply truncates to "HERITAGE BILINGUAL C..."
+                         in the width a 426px header leaves. --}}
                     <span class="min-w-0 leading-tight">
-                        <span class="block truncate font-serif text-base font-bold tracking-[0.12em] text-portal-gold">
-                            {{ __('opes.shell.brand') }}
+                        <span class="block truncate font-serif text-[0.95rem] font-bold uppercase tracking-[0.08em]">
+                            {{ $portalSchoolLead }}
                         </span>
-                        <span class="block truncate text-[11px] text-white/65">
-                            {{ __('opes.guardian_portal.tagline') }}
+
+                        @if ($portalSchoolRest !== '')
+                            <span class="block truncate text-[0.55rem] font-semibold uppercase tracking-[0.14em] text-portal-gold">
+                                {{ $portalSchoolRest }}
+                            </span>
+                        @endif
+
+                        <span class="block truncate text-[0.58rem] text-white/70">
+                            {{ $portalStrapline }}
                         </span>
                     </span>
                 </a>
 
-                <div class="ml-auto flex shrink-0 items-center gap-1.5">
+                <div class="ml-auto flex shrink-0 items-center gap-1">
                     @if ($portalUser !== null)
                         <a href="{{ route('portal.notifications') }}"
-                           class="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+                           class="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
                            aria-label="{{ __('opes.guardian_portal.notifications_title') }}">
                             <x-portal.icon name="bell" bare size="md"/>
 
                             @if ($portalUnread > 0)
-                                <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-portal-danger px-1 text-[10px] font-bold text-white">
+                                <span class="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-portal-gold px-1 text-[0.6rem] font-bold text-portal-green">
                                     {{ $portalUnread > 99 ? '99+' : $portalUnread }}
                                 </span>
                             @endif
                         </a>
 
-                        <a href="{{ route('portal.search') }}"
-                           class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
-                           aria-label="{{ __('opes.guardian_portal.search_title') }}">
-                            <x-portal.icon name="search" bare size="md"/>
-                        </a>
-
                         <a href="{{ route('portal.account') }}"
-                           class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/10">
+                           class="flex items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-1 hover:bg-white/10">
                             <x-portal.avatar :name="$portalUser->name" size="sm" tone="gold"
                                              :photo="route('portal.photo.self')"/>
-                            <span class="hidden text-sm text-white/85 sm:inline">{{ $portalUser->name }}</span>
+
+                            <span class="hidden min-w-0 leading-tight sm:block">
+                                <span class="block text-[0.62rem] text-white/70">
+                                    {{ __('opes.guardian_portal.greeting') }}
+                                </span>
+                                <span class="block truncate text-[0.78rem] font-bold">{{ $portalUser->name }}</span>
+                            </span>
+
+                            <x-portal.icon name="chevron-down" bare size="sm" class="hidden text-white/70 sm:block"/>
                         </a>
                     @endif
 
@@ -135,21 +208,15 @@
         <aside class="hidden w-60 shrink-0 lg:block">
             <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
                  class="sticky top-4 space-y-1 rounded-2xl border border-border-primary bg-white p-3 shadow-[0_2px_10px_rgba(0,45,23,0.06)]">
-                @foreach ($portalNav as [$routeName, $label, $icon])
+                @foreach ($portalNav as [$routeName, $label, $icon, $params])
                     @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
-                    <a href="{{ route($routeName) }}"
+                    <a href="{{ route($routeName, $params) }}"
                        @if ($isActive) aria-current="page" @endif
                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {{ $isActive
                            ? 'bg-portal-green text-white'
                            : 'text-charcoal/70 hover:bg-portal-tint hover:text-primary' }}">
                         <x-portal.icon :name="$icon" bare size="md"/>
                         <span class="truncate">{{ $label }}</span>
-
-                        @if ($routeName === 'portal.messages' && $portalUnread > 0)
-                            <span class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-portal-danger px-1.5 text-[11px] font-bold text-white">
-                                {{ $portalUnread }}
-                            </span>
-                        @endif
                     </a>
                 @endforeach
 
@@ -185,20 +252,37 @@
     </footer>
 
     {{--
-        The floating bar from the designs, up to lg - which is where the
-        sidebar takes over. Tablets keep it too: a thumb is still the pointing
-        device at 900px.
+        The bar from the designs, up to lg - which is where the sidebar takes
+        over. Tablets keep it too: a thumb is still the pointing device at
+        900px.
+
+        DARK GREEN, not white. The dashboard reference happens to show a white
+        bar, and building to that one screen would have been wrong: sampling
+        the nav band across all 76 phone references gives 69 green against 5
+        white. The dashboard is the outlier, so the green is the design and
+        the white is the exception.
+
+        Height is measured, not chosen: in the references the bar occupies CSS
+        y 853..910 of a 923-tall screen, i.e. ~57px, which is what the padding
+        below adds up to with a 20px icon and an 11px label.
     --}}
     <nav aria-label="{{ __('opes.guardian_portal.nav_label') }}"
-         class="fixed inset-x-0 bottom-0 z-30 rounded-t-[28px] bg-portal-green pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgba(0,45,23,0.3)] lg:hidden">
-        <div class="flex items-stretch px-1 pt-2">
-            @foreach ($portalNav as [$routeName, $label, $icon])
+         class="fixed inset-x-0 bottom-0 z-30 bg-portal-green pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgba(0,45,23,0.3)] lg:hidden">
+        <div class="flex items-stretch">
+            @foreach ($portalNav as [$routeName, $label, $icon, $params])
                 @php $isActive = str_starts_with($portalCurrent, $routeName); @endphp
-                <a href="{{ route($routeName) }}"
+                <a href="{{ route($routeName, $params) }}"
                    @if ($isActive) aria-current="page" @endif
-                   class="flex flex-1 flex-col items-center gap-1 px-1 pb-2 pt-1 text-[10px] {{ $isActive
+                   class="relative flex flex-1 flex-col items-center gap-1 px-0.5 pb-2 pt-2.5 text-[0.68rem] {{ $isActive
                        ? 'font-semibold text-portal-gold'
-                       : 'text-white/60' }}">
+                       : 'text-white/65' }}">
+                    {{-- The gold rule under the active item, as the designs
+                         mark it. --}}
+                    @if ($isActive)
+                        <span class="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-portal-gold"
+                              aria-hidden="true"></span>
+                    @endif
+
                     <x-portal.icon :name="$icon" bare size="md"/>
                     <span class="truncate">{{ $label }}</span>
                 </a>

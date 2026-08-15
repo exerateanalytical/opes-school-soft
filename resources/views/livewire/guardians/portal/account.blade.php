@@ -150,6 +150,15 @@
             $actions[] = ['shield', __('opes.guardian_portal.security_title'), route('portal.account.security')];
             $actions[] = ['gear', __('opes.guardian_portal.account_settings_title'), route('portal.account.settings')];
             $actions[] = ['help', __('opes.guardian_portal.help_title'), route('portal.help')];
+            /*
+             * Search lives here now. The reference header has no search icon,
+             * so it came out of the portal header - and this account hub is
+             * the "More" destination in the bottom bar, which is exactly where
+             * a phone design puts overflow. It must be linked from SOMEWHERE:
+             * PortalRouteWiringTest fails any portal route nothing links to,
+             * because a screen nothing links to is a screen no parent opens.
+             */
+            $actions[] = ['search', __('opes.guardian_portal.search_title'), route('portal.search')];
         @endphp
 
         <div class="grid grid-cols-3 gap-3 sm:grid-cols-5">

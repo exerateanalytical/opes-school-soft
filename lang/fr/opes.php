@@ -2313,6 +2313,11 @@ return [
         // Phase 12-P3 : les écrans qui comblent l'écart avec l'application
         // mobile. Chacun est un adaptateur mince sur les MÊMES lecteurs.
         'nav_label' => 'Sections du portail',
+        // La barre inférieure, dans l'ordre et les termes des maquettes.
+        'nav_dashboard' => 'Accueil',
+        'nav_academics' => 'Scolarité',
+        'nav_more' => 'Plus',
+        'greeting' => 'Bonjour,',
         'nav_children' => 'Enfants',
         'nav_payments' => 'Paiements',
         'nav_messages' => 'Messages',
