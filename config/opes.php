@@ -136,6 +136,89 @@ return [
                 'email' => 'demo.staffportal@opeschool.test',
                 'name' => 'Demo Staff',
             ],
+
+            /*
+             * The remaining twelve of the twenty roles in
+             * Identity\Domain\Role. Eight were offered here and the other
+             * twelve were not, which made the demo unable to show the thing
+             * this product is most opinionated about: a Librarian who sees
+             * the catalogue and nothing else, a Nurse who reaches the
+             * medical record but not the roll, a Bursar who takes money but
+             * cannot post to the ledger. RBAC that cannot be demonstrated
+             * reads as RBAC that does not exist.
+             *
+             * demoLogin() provisions each account on first use and assigns
+             * exactly the one role, so no seeder has to run first.
+             */
+            [
+                'role' => 'vice_principal',
+                'email' => 'demo.viceprincipal@opeschool.test',
+                'name' => 'Demo Vice Principal',
+            ],
+            [
+                'role' => 'exams_officer',
+                'email' => 'demo.examsofficer@opeschool.test',
+                'name' => 'Demo Exams Officer',
+            ],
+            [
+                'role' => 'class_master',
+                'email' => 'demo.classmaster@opeschool.test',
+                'name' => 'Demo Class Master',
+            ],
+            [
+                'role' => 'discipline_master',
+                'email' => 'demo.disciplinemaster@opeschool.test',
+                'name' => 'Demo Discipline Master',
+            ],
+            [
+                'role' => 'hr_officer',
+                'email' => 'demo.hrofficer@opeschool.test',
+                'name' => 'Demo HR Officer',
+            ],
+            [
+                'role' => 'payroll_officer',
+                'email' => 'demo.payrollofficer@opeschool.test',
+                'name' => 'Demo Payroll Officer',
+            ],
+            [
+                'role' => 'librarian',
+                'email' => 'demo.librarian2@opeschool.test',
+                'name' => 'Demo Librarian',
+            ],
+            [
+                'role' => 'store_keeper',
+                'email' => 'demo.storekeeper@opeschool.test',
+                'name' => 'Demo Store Keeper',
+            ],
+            [
+                'role' => 'nurse',
+                'email' => 'demo.nurse@opeschool.test',
+                'name' => 'Demo Nurse',
+            ],
+            [
+                'role' => 'welfare_officer',
+                'email' => 'demo.welfareofficer@opeschool.test',
+                'name' => 'Demo Welfare Officer',
+            ],
+            [
+                'role' => 'front_desk',
+                'email' => 'demo.frontdesk@opeschool.test',
+                'name' => 'Demo Front Desk',
+            ],
+
+            /*
+             * SuperAdmin is Permission::cases() - literally every right,
+             * including the ones Administrator is deliberately refused, such
+             * as backup.restore. It is here so the role set is complete and
+             * the break-glass account can be demonstrated, but it is the one
+             * identity worth removing before a demo URL is handed to people
+             * you do not know: deleting this block is the whole change.
+             */
+            [
+                'role' => 'super_admin',
+                'email' => 'demo.superadmin@opeschool.test',
+                'name' => 'Demo Super Admin',
+            ],
         ],
     ],
 
