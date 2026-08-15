@@ -52,7 +52,7 @@
     {{-- ── Control exceptions, first, because they block approval ─────── --}}
     <div class="space-y-2 print:hidden">
         @if ($invoice->withholding_unresolved)
-            <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger">{{ __('opes.supplier_invoice_screen.withholding_unresolved') }}</div>
+            <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger-text">{{ __('opes.supplier_invoice_screen.withholding_unresolved') }}</div>
         @endif
         @if ($invoice->match_override_reason)
             <div class="rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-sm text-text-primary">
@@ -72,7 +72,7 @@
             </div>
         @endif
         @if ($invoice->cancellation_reason)
-            <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger">
+            <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger-text">
                 <span class="font-semibold">{{ __('opes.procurement_detail.cancelled') }}:</span> {{ $invoice->cancellation_reason }}
                 <span class="opacity-70">— {{ $cancelledByName ?? '—' }} ({{ $invoice->cancelled_at }})</span>
             </div>
@@ -408,7 +408,7 @@
                             <td class="py-2 pr-2 text-xs">
                                 {{ str_replace('_', ' ', (string) $line->match_status) }}
                                 @if ($line->match_exception_reason)
-                                    <span class="block text-danger">{{ str_replace('_', ' ', (string) $line->match_exception_reason) }}</span>
+                                    <span class="block text-danger-text">{{ str_replace('_', ' ', (string) $line->match_exception_reason) }}</span>
                                 @endif
                                 @if ((int) $line->price_variance !== 0)
                                     <span class="block text-text-muted">{{ __('opes.supplier_invoice_screen.price_variance') }} {{ Money::of((int) $line->price_variance)->format(false) }}</span>

@@ -538,7 +538,7 @@
                     {{ __('opes.ui.clear') }}
                 </button>
                 @error('selectedAssetIds')
-                    <span class="text-xs font-medium text-danger">{{ $message }}</span>
+                    <span class="text-xs font-medium text-danger-text">{{ $message }}</span>
                 @enderror
             </span>
         @endif

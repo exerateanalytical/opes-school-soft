@@ -16,6 +16,6 @@
         <span class="mt-1 block text-xs text-text-secondary">{{ $hint }}</span>
     @endif
     @if ($error !== null && $error !== '')
-        <span class="mt-1 block text-xs font-medium text-danger">{{ $error }}</span>
+        <span class="mt-1 block text-xs font-medium text-danger-text">{{ $error }}</span>
     @endif
 </label>

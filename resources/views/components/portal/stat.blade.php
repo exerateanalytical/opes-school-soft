@@ -19,7 +19,7 @@
 @php
     $valueTone = match ($tone) {
         'danger' => 'text-portal-danger',
-        'warning' => 'text-warning',
+        'warning' => 'text-warning-text',
         'success' => 'text-portal-success',
         default => $onDark ? 'text-white' : 'text-charcoal',
     };

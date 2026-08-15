@@ -57,7 +57,7 @@
         'gold' => 'bg-gold-100 text-gold-700',
         'danger' => 'bg-portal-danger-soft text-portal-danger',
         'success' => 'bg-portal-chip text-portal-success',
-        'warning' => 'bg-warning-bg text-warning',
+        'warning' => 'bg-warning-bg text-warning-text',
         'info' => 'bg-info-bg text-info',
         'onChrome' => 'bg-white/10 text-portal-gold',
     ];

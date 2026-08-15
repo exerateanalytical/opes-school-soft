@@ -23,7 +23,7 @@
     $pill = [
         'success' => 'bg-portal-chip text-portal-success',
         'danger' => 'bg-portal-danger-soft text-portal-danger',
-        'warning' => 'bg-warning-bg text-warning',
+        'warning' => 'bg-warning-bg text-warning-text',
         'gold' => 'bg-gold-100 text-gold-700',
         'primary' => 'bg-portal-tint text-primary',
         'neutral' => 'bg-surface-secondary text-charcoal/70',

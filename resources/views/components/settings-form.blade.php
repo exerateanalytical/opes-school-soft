@@ -51,7 +51,7 @@
     {{-- The toast. `role="status"` so a screen reader announces the save;
          a flash message that only appears visually is not a confirmation. --}}
     <div x-show="toast" x-cloak role="status"
-         class="fixed right-4 top-20 z-50 rounded-lg border border-success/30 bg-success-bg px-4 py-3 text-sm font-medium text-success shadow-lg">
+         class="fixed right-4 top-20 z-50 rounded-lg border border-success/30 bg-success-bg px-4 py-3 text-sm font-medium text-success-text shadow-lg">
         {{ __('opes.ui.saved') }}
     </div>
 
@@ -73,7 +73,7 @@
                     </button>
                 @endif
 
-                <span x-show="dirty" x-cloak class="text-xs font-medium text-warning">
+                <span x-show="dirty" x-cloak class="text-xs font-medium text-warning-text">
                     {{ __('opes.ui.unsaved_changes') }}
                 </span>
             </div>

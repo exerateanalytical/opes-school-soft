@@ -154,7 +154,7 @@
 
                             @if ($$pathModel !== '')
                                 <button type="button" wire:click="{{ $removeMethod }}"
-                                        class="mt-1 text-xs font-medium text-danger hover:underline">
+                                        class="mt-1 text-xs font-medium text-danger-text hover:underline">
                                     {{ __('opes.school_identity.remove_image') }}
                                 </button>
                             @endif

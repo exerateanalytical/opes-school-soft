@@ -373,7 +373,7 @@
                     <span wire:loading wire:target="printLabel">{{ __('opes.ui.saving') }}</span>
                 </button>
                 @error('printLabel')
-                    <span class="text-xs font-medium text-danger">{{ $message }}</span>
+                    <span class="text-xs font-medium text-danger-text">{{ $message }}</span>
                 @enderror
             </div>
         </div>

@@ -69,7 +69,7 @@
                                 </div>
 
                                 @if ($record->severity)
-                                    <span class="shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-semibold text-warning">
+                                    <span class="shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-semibold text-warning-text">
                                         {{ $record->severity }}
                                     </span>
                                 @endif

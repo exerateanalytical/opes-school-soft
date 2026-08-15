@@ -19,8 +19,8 @@
                 @if ($card['summary'] !== '')
                     <span @class([
                         'mt-3 inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium',
-                        'bg-success-bg text-success' => $card['tone'] === 'good',
-                        'bg-warning-bg text-warning' => $card['tone'] === 'warn',
+                        'bg-success-bg text-success-text' => $card['tone'] === 'good',
+                        'bg-warning-bg text-warning-text' => $card['tone'] === 'warn',
                         'bg-sand text-text-secondary' => $card['tone'] === 'neutral',
                     ])>{{ $card['summary'] }}</span>
                 @endif

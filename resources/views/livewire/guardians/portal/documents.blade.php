@@ -68,7 +68,7 @@
                                 'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold',
                                 'bg-portal-chip text-portal-success' => $document->verification_status === 'verified',
                                 'bg-portal-danger-soft text-portal-danger' => $document->verification_status === 'rejected',
-                                'bg-warning-bg text-warning' => ! in_array($document->verification_status, ['verified', 'rejected'], true),
+                                'bg-warning-bg text-warning-text' => ! in_array($document->verification_status, ['verified', 'rejected'], true),
                             ])>{{ $document->verification_status }}</span>
 
                             {{-- Row 23 has real bytes. Row 22 above has none. --}}

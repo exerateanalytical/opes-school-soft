@@ -42,7 +42,7 @@
     </header>
 
     @if ($void !== null)
-        <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger print:hidden">
+        <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger-text print:hidden">
             <span class="font-semibold">{{ __('opes.procurement_detail.payment_voided') }}:</span> {{ $void->reason }}
             <span class="opacity-70">— {{ $void->voided_by_name ?? '—' }} ({{ $void->voided_at }})@if($void->reversal_piece_no) · {{ __('opes.procurement_detail.reversal_entry') }} {{ $void->reversal_piece_no }}@endif</span>
         </div>

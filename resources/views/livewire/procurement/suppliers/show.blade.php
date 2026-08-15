@@ -58,7 +58,7 @@
     </header>
 
     @if ($supplier->blocked_reason)
-        <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger">
+        <div class="rounded-lg border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger-text">
             <span class="font-semibold">{{ __('opes.procurement_detail.blocked') }}:</span> {{ $supplier->blocked_reason }}
         </div>
     @endif

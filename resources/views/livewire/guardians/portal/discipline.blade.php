@@ -42,7 +42,7 @@
                             <span @class([
                                 'rounded-full px-2.5 py-0.5 text-xs font-semibold',
                                 'bg-portal-chip text-portal-success' => $case->is_positive,
-                                'bg-warning-bg text-warning' => ! $case->is_positive,
+                                'bg-warning-bg text-warning-text' => ! $case->is_positive,
                             ])>{{ $case->status }}</span>
                         </div>
 
@@ -97,7 +97,7 @@
                                             {{ __('opes.guardian_portal.ack_button') }}
                                         </button>
                                     @else
-                                        <span class="shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-semibold text-warning">
+                                        <span class="shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-semibold text-warning-text">
                                             {{ __('opes.guardian_portal.discipline_pending_ack') }}
                                         </span>
                                     @endif

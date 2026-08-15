@@ -7,7 +7,7 @@
     </div>
 
     @if (session('status'))
-        <div class="rounded-xl border border-success/30 bg-success-bg px-4 py-3 text-sm font-medium text-success">
+        <div class="rounded-xl border border-success/30 bg-success-bg px-4 py-3 text-sm font-medium text-success-text">
             {{ session('status') }}
         </div>
     @endif
@@ -47,19 +47,19 @@
                     <span class="mb-1 block font-medium text-charcoal">{{ __('opes.account.current_password') }}</span>
                     <input type="password" wire:model="currentPassword" autocomplete="current-password"
                            class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                    @error('currentPassword') <span class="mt-1 block text-xs font-medium text-danger">{{ $message }}</span> @enderror
+                    @error('currentPassword') <span class="mt-1 block text-xs font-medium text-danger-text">{{ $message }}</span> @enderror
                 </label>
                 <label class="block text-sm">
                     <span class="mb-1 block font-medium text-charcoal">{{ __('opes.account.new_password') }}</span>
                     <input type="password" wire:model="newPassword" autocomplete="new-password"
                            class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                    @error('newPassword') <span class="mt-1 block text-xs font-medium text-danger">{{ $message }}</span> @enderror
+                    @error('newPassword') <span class="mt-1 block text-xs font-medium text-danger-text">{{ $message }}</span> @enderror
                 </label>
                 <label class="block text-sm">
                     <span class="mb-1 block font-medium text-charcoal">{{ __('opes.account.confirm_new_password') }}</span>
                     <input type="password" wire:model="newPasswordConfirmation" autocomplete="new-password"
                            class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                    @error('newPasswordConfirmation') <span class="mt-1 block text-xs font-medium text-danger">{{ $message }}</span> @enderror
+                    @error('newPasswordConfirmation') <span class="mt-1 block text-xs font-medium text-danger-text">{{ $message }}</span> @enderror
                 </label>
                 <button type="submit" class="rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90">
                     {{ __('opes.account.change_password') }}
