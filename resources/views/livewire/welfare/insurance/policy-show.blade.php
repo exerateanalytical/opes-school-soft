@@ -32,7 +32,7 @@
         <ol class="flex flex-wrap items-center gap-1 text-xs text-charcoal/60">
             <li>{{ __('opes.welfare_detail.breadcrumb_dashboard') }}</li>
             <li aria-hidden="true">/</li>
-            <li><a href="{{ url('/welfare/insurance') }}" class="hover:text-primary">{{ __('opes.welfare_detail.breadcrumb_insurance') }}</a></li>
+            <li><a href="{{ route('welfare.insurance.index') }}" class="hover:text-primary">{{ __('opes.welfare_detail.breadcrumb_insurance') }}</a></li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" class="font-medium text-charcoal/80">{{ $policy->policy_no }}</li>
         </ol>
@@ -46,7 +46,7 @@
                 {{ __('opes.welfare_detail.cover_type.'.$policy->cover_type) }}
             </span>
         </div>
-        <a href="{{ url('/welfare/insurance') }}"
+        <a href="{{ route('welfare.insurance.index') }}"
            class="rounded-xl border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
             {{ __('opes.welfare_detail.back_to_insurance') }}
         </a>
