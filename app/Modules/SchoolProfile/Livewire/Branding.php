@@ -310,33 +310,62 @@ final class Branding extends Component
     /**
      * The pairs the shell ACTUALLY renders, checked against WCAG AA.
      *
-     * White-on-primary is the button and the table header; charcoal-on-accent
-     * is a gold status pill. Both are real combinations in this codebase, not
-     * hypotheticals - which is why the warning is worth showing.
+     * The check used to measure every semantic colour against WHITE, which
+     * was the wrong pair twice over. Amber is never body text at its vivid
+     * value - it is a FILL - so flagging it on white warned a school about a
+     * colour it had not picked and could not fix. Meanwhile the pair that IS
+     * rendered, amber on its own #FFF5D9 tint at 2.25:1, went unmeasured.
+     *
+     * So each role is now checked against the background it renders on:
+     *   - SURFACE roles carry white text (the primary button, the table
+     *     header, the sidebar active row, a solid success/danger pill), so
+     *     they are measured against white;
+     *   - the accent is a gold pill with charcoal on it;
+     *   - the derived TEXT roles are measured against BOTH white and their
+     *     own tint, which is where inline errors, status pills and KPI
+     *     captions actually sit.
+     *
+     * `warning` has no surface entry on purpose: nothing in this codebase
+     * puts white text on a solid amber fill.
      *
      * @return list<array{token: string, against: string, ratio: float}>
      */
     public function contrastWarnings(): array
     {
+        /** @var list<array{token: string, against: string, text: bool}> $pairs */
         $pairs = [
-            ['token' => 'primary', 'against' => '#FFFFFF'],
-            ['token' => 'secondary', 'against' => '#FFFFFF'],
-            ['token' => 'success', 'against' => '#FFFFFF'],
-            ['token' => 'warning', 'against' => '#FFFFFF'],
-            ['token' => 'danger', 'against' => '#FFFFFF'],
-            ['token' => 'accent', 'against' => '#14201A'],
+            ['token' => 'primary', 'against' => '#FFFFFF', 'text' => false],
+            ['token' => 'secondary', 'against' => '#FFFFFF', 'text' => false],
+            ['token' => 'success', 'against' => '#FFFFFF', 'text' => false],
+            ['token' => 'danger', 'against' => '#FFFFFF', 'text' => false],
+            ['token' => 'accent', 'against' => '#14201A', 'text' => false],
         ];
 
+        foreach (array_keys(BrandTokens::TINTS) as $semantic) {
+            $pairs[] = ['token' => $semantic, 'against' => '#FFFFFF', 'text' => true];
+            $pairs[] = ['token' => $semantic, 'against' => BrandTokens::TINTS[$semantic], 'text' => true];
+        }
+
+        try {
+            $tokens = BrandTokens::fromArray($this->currentColors());
+        } catch (Throwable) {
+            // A half-typed hex mid-keystroke: no warning, no crash. save()
+            // is what reports a genuinely malformed value, and it puts the
+            // message under the picker that owns it.
+            return [];
+        }
+
         $warnings = [];
-        $colors = $this->currentColors();
 
         foreach ($pairs as $pair) {
-            try {
-                $ratio = ColorContrast::ratio($colors[$pair['token']], $pair['against']);
-            } catch (Throwable) {
-                // A half-typed hex mid-keystroke: no warning, no crash.
-                continue;
-            }
+            // Text roles are derived from the picked colour, so this measures
+            // the shade that will really be painted rather than the vivid one
+            // it came from.
+            $color = $pair['text']
+                ? $tokens->textRole($pair['token'])
+                : $tokens->get($pair['token']);
+
+            $ratio = ColorContrast::ratio($color, $pair['against']);
 
             if ($ratio < ColorContrast::AA_NORMAL) {
                 $warnings[] = [

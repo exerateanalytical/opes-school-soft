@@ -49,6 +49,80 @@ it('clears AA for white text on every solid fill in every shipped preset', funct
     }
 });
 
+/**
+ * The semantic colours are used in TWO roles, and only one of them was ever
+ * checked. As a solid FILL (a red "Overdue" pill) the vivid value is correct
+ * and white on it passes. As TEXT on its own tint - `bg-warning-bg
+ * text-warning`, which portal/row, portal/icon, the status pills and the KPI
+ * cards genuinely render - the vivid value failed: amber measured 2.25:1 on
+ * #FFF5D9, success 4.08:1 on its tint, danger 4.27:1 on its.
+ *
+ * So each semantic colour now has a separate TEXT role, darkened until it
+ * clears AA on BOTH white and its own tint. These are the pairs that role
+ * actually renders on.
+ *
+ * @var list<array{0: string, 1: string, 2: string}>
+ */
+$semanticText = [
+    ['success', '#EAF6EF', 'the "Paid" row label and the saved-settings toast'],
+    ['warning', '#FFF5D9', 'the "Pending" pill and the unsaved-changes hint'],
+    ['danger', '#FDECEC', 'the field validation error and the exception banner'],
+];
+
+it('clears AA for every semantic text role on white and on its own tint', function () use ($semanticText): void {
+    $tokens = BrandTokens::defaults();
+
+    foreach ($semanticText as [$token, $tint, $where]) {
+        $text = $tokens->textRole($token);
+
+        expect(ColorContrast::ratio($text, '#FFFFFF'))
+            ->toBeGreaterThanOrEqual(ColorContrast::AA_NORMAL, "{$where} fails AA on white")
+            ->and(ColorContrast::ratio($text, $tint))
+            ->toBeGreaterThanOrEqual(ColorContrast::AA_NORMAL, "{$where} fails AA on {$tint}");
+    }
+});
+
+it('clears AA for every semantic text role in every shipped preset', function () use ($semanticText): void {
+    foreach (BrandPreset::all() as $preset) {
+        $tokens = BrandTokens::fromArray($preset['colors']);
+
+        foreach ($semanticText as [$token, $tint, $where]) {
+            $text = $tokens->textRole($token);
+
+            expect(ColorContrast::ratio($text, '#FFFFFF'))
+                ->toBeGreaterThanOrEqual(
+                    ColorContrast::AA_NORMAL,
+                    "preset [{$preset['key']}]: {$where} fails AA on white",
+                )
+                ->and(ColorContrast::ratio($text, $tint))
+                ->toBeGreaterThanOrEqual(
+                    ColorContrast::AA_NORMAL,
+                    "preset [{$preset['key']}]: {$where} fails AA on {$tint}",
+                );
+        }
+    }
+});
+
+it('derives a readable text role for ANY colour a school might pick', function () use ($semanticText): void {
+    // The whole point of deriving rather than hard-coding three more hexes:
+    // a school that picks a pale amber must not get unreadable body text.
+    foreach (['#FFD700', '#5FB884', '#EF404A', '#000000'] as $picked) {
+        foreach ($semanticText as [$token, $tint, $where]) {
+            $text = BrandTokens::fromArray([$token => $picked])->textRole($token);
+
+            expect(ColorContrast::ratio($text, '#FFFFFF'))
+                ->toBeGreaterThanOrEqual(ColorContrast::AA_NORMAL, "{$picked} as {$token}: fails AA on white")
+                ->and(ColorContrast::ratio($text, $tint))
+                ->toBeGreaterThanOrEqual(ColorContrast::AA_NORMAL, "{$picked} as {$token}: fails AA on {$tint}");
+        }
+    }
+});
+
+it('emits every semantic text role as a CSS custom property', function (): void {
+    expect(BrandTokens::defaults()->toCssVariables())
+        ->toHaveKeys(['--color-success-text', '--color-warning-text', '--color-danger-text']);
+});
+
 it('clears AA for charcoal body text on the KPI card washes', function (): void {
     // The KPI tints are ~4% saturation washes precisely so text contrast is
     // untouched; this is the assertion that keeps them that way.

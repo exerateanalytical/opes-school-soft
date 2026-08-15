@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Identity\Domain\Role;
+use App\Modules\SchoolProfile\Domain\BrandPreset;
 use App\Modules\SchoolProfile\Livewire\Branding;
 use App\Support\Branding\BrandTokens;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,25 +72,33 @@ it('reports a contrast failure for the chosen primary on white', function (): vo
     expect($component->instance()->contrastWarnings())->not->toBeEmpty();
 });
 
-it('clears the Heritage default on the two colours the shell chrome is built from', function (): void {
+it('raises no contrast warning at all on a fresh unconfigured install', function (): void {
     p13coreUserAs(Role::Administrator);
 
-    // The plan expected NO warnings at all for the built-in palette. Measured
-    // against WCAG 2.1, that is arithmetically false: Heritage's shipped amber
-    // (#D99A20) is 2.44:1 on white and its red (#D64545) is 4.38:1, both under
-    // the 4.5 AA floor. Those are real - `bg-warning-bg text-warning` is a
-    // pattern this codebase actually renders - so the check stays honest and
-    // this test asserts the truth instead.
+    // This test used to DOCUMENT a failure: the shipped amber measured 2.44:1
+    // on white and the check flagged it, so a school that had changed nothing
+    // was greeted by a warning about a colour it never picked and could not
+    // fix. Both halves of that were wrong.
     //
-    // What must hold is that the colours a school PICKS and the shell paints
-    // its chrome, buttons and table headers from are clean.
-    $flagged = array_column(
-        Livewire::test(Branding::class)->instance()->contrastWarnings(),
-        'token'
-    );
+    // The check was measuring the wrong pair - amber is never body text at
+    // its vivid value, it is a FILL - and the real failure was one nobody was
+    // measuring: `bg-warning-bg text-warning`, amber on its own tint, at
+    // 2.25:1. That is now a separate, derived TEXT role that clears AA by
+    // construction, so the built-in palette is genuinely clean and the
+    // warning means something again.
+    expect(Livewire::test(Branding::class)->instance()->contrastWarnings())->toBe([]);
+});
 
-    expect($flagged)->not->toContain('primary')
-        ->and($flagged)->not->toContain('secondary')
-        ->and($flagged)->not->toContain('success')
-        ->and($flagged)->not->toContain('accent');
+it('raises no contrast warning for any preset the platform itself offers', function (): void {
+    p13coreUserAs(Role::Administrator);
+
+    // A preset the platform endorses must never be one its own warning flags.
+    foreach (BrandPreset::all() as $preset) {
+        expect(
+            Livewire::test(Branding::class)
+                ->call('applyPreset', $preset['key'])
+                ->instance()
+                ->contrastWarnings()
+        )->toBe([], "preset [{$preset['key']}] raises a contrast warning");
+    }
 });
