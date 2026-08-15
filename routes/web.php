@@ -521,8 +521,16 @@ Route::middleware('auth')->group(function (): void {
      * its own dedicated screen, not squeezed in here). Gated on setting.view,
      * matching Navigation::items()'s `settings` entry.
      */
-    Route::get('/settings', \App\Modules\SchoolProfile\Livewire\Index::class)
+    /*
+     * /settings is the categorised HUB (SettingsHub); the raw key/value
+     * browser it used to serve moved to /settings/advanced, where it is one
+     * card among eight rather than the only thing a principal finds.
+     */
+    Route::get('/settings', \App\Modules\SchoolProfile\Livewire\SettingsHub::class)
         ->middleware('can:setting.view')->name('settings.index');
+
+    Route::get('/settings/advanced', \App\Modules\SchoolProfile\Livewire\Index::class)
+        ->middleware('can:setting.view')->name('settings.advanced');
 
     // The school's one brand-colour picker.
     Route::get('/settings/branding', \App\Modules\SchoolProfile\Livewire\Branding::class)

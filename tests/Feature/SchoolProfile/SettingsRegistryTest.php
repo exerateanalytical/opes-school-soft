@@ -120,5 +120,8 @@ it('treats keys as case sensitive', function () {
     // NOT collide with the row above.
     defineSetting('UI.Theme', SettingType::String, SettingClass::Cosmetic, 'blue');
 
-    expect(Setting::query()->count())->toBe(2);
+    // Scoped to the two keys this test defines: `settings` is seeded by
+    // migrations (branding.primary_color, branding.palette, ...), so a global
+    // count asserts on every future seed rather than on collation.
+    expect(Setting::query()->whereIn('key', ['ui.theme', 'UI.Theme'])->count())->toBe(2);
 });

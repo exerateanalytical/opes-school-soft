@@ -3,37 +3,67 @@
 declare(strict_types=1);
 
 use App\Modules\Identity\Domain\Role;
+use App\Modules\Identity\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-
-require_once __DIR__.'/../Reporting/P13MoneyHelpers.php';
 
 uses(RefreshDatabase::class);
 
-it('links every settings screen an administrator is allowed to open', function (): void {
-    p13moneyUserAs(Role::Administrator);
+function settingsHubUserAs(Role ...$roles): User
+{
+    (new RolePermissionSeeder)->run();
+    $user = User::factory()->create();
 
-    $response = get('/settings');
-
-    $response->assertOk();
-
-    foreach ([
-        '/settings/school-identity',
-        '/settings/branding',
-        '/settings/tax',
-        '/settings/fiscal-identity',
-        '/academics/settings',
-    ] as $href) {
-        $response->assertSee('href="'.$href.'"', escape: false);
+    foreach ($roles as $role) {
+        $user->assignRole($role->value);
     }
+
+    $user = $user->fresh() ?? $user;
+    actingAs($user);
+
+    return $user;
+}
+
+it('shows every settings card an administrator may open', function (): void {
+    // Administrator, not Principal: the Proviseur holds setting.VIEW but not
+    // setting.EDIT (Role::permissions()), so School Identity and Branding -
+    // both setting.edit routes - are correctly absent for him. The card list
+    // is only fully populated for a role that can open every screen.
+    settingsHubUserAs(Role::Administrator);
+
+    get('/settings')
+        ->assertOk()
+        ->assertSee('School Identity')
+        ->assertSee('Branding');
 });
 
-it('hides a settings card the role may not open', function (): void {
-    // Administrator deliberately lacks licence.manage - /settings/licence
-    // returns 403 by design, so a card pointing at it would be a link the
-    // nav-and-route-agree contract forbids.
-    p13moneyUserAs(Role::Administrator);
+it('never renders a card the role cannot open', function (): void {
+    // A Principal holds setting.view (so the hub itself opens) but not
+    // academics.manage: the Academic Year card must be ABSENT, not disabled -
+    // offering a link the route would refuse is the one thing the nav
+    // contract forbids.
+    settingsHubUserAs(Role::Principal);
 
-    get('/settings')->assertDontSee('href="/settings/licence"', escape: false);
+    get('/settings')
+        ->assertOk()
+        ->assertDontSee('Academic Year & Terms');
+});
+
+it('summarises how many document images are set', function (): void {
+    settingsHubUserAs(Role::Administrator);
+
+    DB::table('school_document_profiles')->updateOrInsert(['id' => 1], [
+        'crest_path' => 'branding/crest-abc.png',
+        'logo_path' => 'branding/logo-abc.png',
+        'state_header_enabled' => false,
+        'bilingual_documents' => false,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    get('/settings')->assertOk()->assertSee('2 of 5 images set');
 });

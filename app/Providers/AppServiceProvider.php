@@ -88,6 +88,7 @@ use App\Modules\Operations\Livewire\Setup\Index as OperationsSetupIndex;
 use App\Modules\Reporting\Livewire\BulkPrints\Index as BulkPrintsIndex;
 use App\Modules\Reporting\Livewire\Reports\Hub as ReportsHub;
 use App\Modules\SchoolProfile\Livewire\Index as SettingsIndex;
+use App\Modules\SchoolProfile\Livewire\SettingsHub;
 use App\Modules\Students\Livewire\Promotion\Wizard as PromotionWizard;
 use App\Modules\Students\Livewire\Reports\Index as StudentsReportsIndex;
 use App\Modules\Welfare\Livewire\Reports\Index as WelfareReportsIndex;
@@ -404,6 +405,7 @@ class AppServiceProvider extends ServiceProvider
         // that path, which is how this shipped looking verified.
         Livewire::component('tax.declarations.index', TaxDeclarationsIndex::class);
         Livewire::component('schoolprofile.index', SettingsIndex::class);
+        Livewire::component('settings.hub', SettingsHub::class);
         Livewire::component('students.promotion', PromotionWizard::class);
     }
 }
