@@ -127,12 +127,19 @@
                                  to whoever runs the server, so it is tucked
                                  behind a disclosure rather than printed as
                                  the instruction. --}}
-                            @can('backup.run')
+                            {{-- ...but only where a backup is the actual fix.
+                                 queue.heartbeat shares this branch to keep its
+                                 artisan remedy behind the disclosure, not
+                                 because taking a backup restarts a dead task
+                                 runner; it was offering that button, and a
+                                 control that cannot fix the thing it sits
+                                 under is worse than no control. --}}
+                            @can('backup.run') @if (str_starts_with($alert->key, 'backup.'))
                                 <a href="{{ route('operations.backups') }}"
                                    class="mt-2 inline-block rounded-lg border border-primary bg-primary px-3.5 py-2 text-sm font-medium text-white transition hover:bg-primary/90">
                                     {{ __('opes.dashboard.run_a_backup') }}
                                 </a>
-                            @endcan
+                            @endif @endcan
                             <details class="mt-2 text-xs text-charcoal/55">
                                 <summary class="cursor-pointer">{{ __('opes.dashboard.for_your_it_provider') }}</summary>
                                 <p class="mt-1">{{ __('opes.dashboard.it_provider_backup_note') }}</p>

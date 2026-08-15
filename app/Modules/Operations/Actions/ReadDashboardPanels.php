@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Operations\Actions;
 
 use App\Modules\Operations\Domain\RoleDashboard;
+use Carbon\CarbonImmutable;
 use App\Modules\Operations\Domain\SetupCheckStatus;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -82,7 +83,7 @@ final class ReadDashboardPanels
             // These two carry a status pill rather than a numeral, so the
             // blade gives them its display slot and the value stays null.
             'system_health' => $this->panel($panel, null, 'green', 'operations', null),
-            'last_backup' => $this->panel($panel, null, 'amber', 'backups', 'operations.backups'),
+            'last_backup' => $this->lastBackup(),
             'go_live_blockers' => $this->blockers(),
 
             // ── Students and admissions ────────────────────────────────────
@@ -217,12 +218,39 @@ final class ReadDashboardPanels
     /**
      * @return array{key: string, value: int|string|null, sub: string|null, tone: string, icon: string, route: string|null}
      */
+    private function lastBackup(): array
+    {
+        // This card used to be hard-coded to null on the theory that the blade
+        // would fill it from a display slot; nothing ever did, so it printed a
+        // permanent "—". Read the real thing, and when there is nothing to
+        // read say so in the sub-line rather than leaving a bare dash.
+        $completedAt = DB::table('backups')
+            ->where('status', 'completed')
+            ->whereNotNull('completed_at')
+            ->max('completed_at');
+
+        if ($completedAt === null) {
+            return $this->panel('last_backup', null, 'amber', 'backups', 'operations.backups', __('opes.dashboard.sub_never_backed_up'));
+        }
+
+        return $this->panel(
+            'last_backup',
+            CarbonImmutable::parse($completedAt)->diffForHumans(),
+            'green',
+            'backups',
+            'operations.backups',
+        );
+    }
+
+    /**
+     * @return array{key: string, value: int|string|null, sub: string|null, tone: string, icon: string, route: string|null}
+     */
     private function myClasses(): array
     {
         $staffId = $this->currentStaffId();
 
         if ($staffId === null) {
-            return $this->panel('my_classes', null, 'blue', 'classes', 'timetable.index');
+            return $this->panel('my_classes', null, 'blue', 'classes', 'timetable.index', __('opes.dashboard.sub_no_staff_record'));
         }
 
         $count = DB::table('timetable_slots')
@@ -241,7 +269,7 @@ final class ReadDashboardPanels
         $staffId = $this->currentStaffId();
 
         if ($staffId === null) {
-            return $this->panel('my_timetable_today', null, 'blue', 'timetable', 'timetable.index');
+            return $this->panel('my_timetable_today', null, 'blue', 'timetable', 'timetable.index', __('opes.dashboard.sub_no_staff_record'));
         }
 
         $count = DB::table('timetable_slots')
@@ -260,7 +288,7 @@ final class ReadDashboardPanels
         $staffId = $this->currentStaffId();
 
         if ($staffId === null) {
-            return $this->panel('registers_not_taken', null, 'amber', 'attendance', 'attendance.index');
+            return $this->panel('registers_not_taken', null, 'amber', 'attendance', 'attendance.index', __('opes.dashboard.sub_no_staff_record'));
         }
 
         $expected = DB::table('timetable_slots')
@@ -271,7 +299,7 @@ final class ReadDashboardPanels
 
         if ($expected->isEmpty()) {
             // No lessons today: "nothing to take" is not "you are behind".
-            return $this->panel('registers_not_taken', null, 'green', 'attendance', 'attendance.index');
+            return $this->panel('registers_not_taken', null, 'green', 'attendance', 'attendance.index', __('opes.dashboard.sub_no_lessons_today'));
         }
 
         $taken = DB::table('attendance_registers')
