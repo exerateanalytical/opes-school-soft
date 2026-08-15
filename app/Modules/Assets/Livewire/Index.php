@@ -11,6 +11,7 @@ use App\Modules\Assets\Actions\CreateAssetCategory;
 use App\Modules\Assets\Actions\CreateMaintenanceRequest;
 use App\Modules\Assets\Actions\DisposeAsset;
 use App\Modules\Assets\Actions\PostDepreciationRun;
+use App\Modules\Assets\Actions\PrintAssetLabel;
 use App\Modules\Assets\Actions\RegisterAsset;
 use App\Modules\Assets\Actions\RunDepreciation;
 use App\Modules\Assets\Domain\AcquisitionType;
@@ -33,6 +34,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Asset register at /assets, gated `asset.view`: a read-only Index modeled
@@ -158,9 +160,50 @@ final class Index extends Component
 
     public string $categoryFormDisposalProceedsAccountId = '';
 
+    /**
+     * The assets ticked for a bulk label sheet. Kept as a plain list on the
+     * component rather than a "select all matching filter" flag: a stock-take
+     * operator needs to see exactly which stickers they are about to print,
+     * and "all 4 200 assets" is not a print job anyone meant to start.
+     *
+     * NOT a list: Livewire's checkbox binding removes entries in place, so an
+     * operator who ticks three boxes and unticks the middle one hands this
+     * property back with a hole at index 1. printLabelSheet re-indexes before
+     * it hands the ids on.
+     *
+     * @var array<int, int>
+     */
+    public array $selectedAssetIds = [];
+
     public function mount(): void
     {
         Gate::authorize(AssetPermission::VIEW);
+    }
+
+    /**
+     * Stream the A4 stock-take label sheet for the ticked assets. Goes
+     * through PrintAssetLabel -> RenderDocument, so the sheet is print-logged
+     * like every other PDF.
+     */
+    public function printLabelSheet(PrintAssetLabel $printAssetLabel): Response
+    {
+        Gate::authorize(AssetPermission::VIEW);
+
+        try {
+            $document = $printAssetLabel->sheet(array_values(array_map('intval', $this->selectedAssetIds)));
+        } catch (DomainException $e) {
+            $this->addError('selectedAssetIds', $e->getMessage());
+
+            return response('', 204);
+        }
+
+        return response()->streamDownload(
+            static function () use ($document): void {
+                echo $document->bytes;
+            },
+            'asset-labels-'.now()->format('Ymd-His').'.pdf',
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 
     public function selectTab(string $tab): void

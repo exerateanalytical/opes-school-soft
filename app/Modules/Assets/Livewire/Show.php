@@ -7,11 +7,13 @@ namespace App\Modules\Assets\Livewire;
 use App\Modules\Assets\Actions\CloseMaintenanceRequest;
 use App\Modules\Assets\Actions\CommissionAsset;
 use App\Modules\Assets\Actions\DisposeAsset;
+use App\Modules\Assets\Actions\PrintAssetLabel;
 use App\Modules\Assets\Domain\AssetPermission;
 use App\Modules\Assets\Domain\DisposalSettlement;
 use App\Modules\Assets\Domain\DisposalType;
 use App\Modules\Assets\Domain\MaintenanceResolution;
 use App\Modules\Assets\Models\Asset;
+use App\Modules\Reporting\Domain\DocumentFileName;
 use App\Modules\Reporting\Support\PdfExport;
 use DomainException;
 use Illuminate\Support\Carbon;
@@ -209,6 +211,36 @@ final class Show extends Component
             ['Field', 'Value'],
             $this->assetCardRows(),
             'asset-card-'.$this->asset->tag_number.'.pdf',
+        );
+    }
+
+    /**
+     * Stream the CR80 asset label. Reuses PrintAssetLabel, which goes through
+     * RenderDocument - the ONLY path to a PDF in this platform - so the label
+     * is print-logged like everything else.
+     */
+    public function printLabel(PrintAssetLabel $printAssetLabel): Response
+    {
+        Gate::authorize(AssetPermission::VIEW);
+
+        try {
+            $document = $printAssetLabel->handle((int) $this->asset->getKey());
+        } catch (DomainException $e) {
+            $this->addError('printLabel', $e->getMessage());
+
+            return response('', 204);
+        }
+
+        // The tag number carries '/' by design, and Symfony's HeaderUtils
+        // refuses to build a Content-Disposition header containing one.
+        $filename = 'asset-label-'.DocumentFileName::sanitize((string) $this->asset->tag_number).'.pdf';
+
+        return response()->streamDownload(
+            static function () use ($document): void {
+                echo $document->bytes;
+            },
+            $filename,
+            ['Content-Type' => 'application/pdf'],
         );
     }
 

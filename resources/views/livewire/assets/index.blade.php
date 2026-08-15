@@ -520,6 +520,28 @@
                 {{ $showRunDepreciationForm ? 'Hide form' : 'Run depreciation' }}
             </button>
         @endif
+
+        {{-- The stock-take control. Only appears once something is ticked:
+             a print button that would render nothing is a button that only
+             ever produces an error message. --}}
+        @if ($selectedAssetIds !== [])
+            <span class="flex flex-wrap items-center gap-2 rounded border border-primary/30 bg-kpi-green px-3 py-1.5 text-sm">
+                <span class="font-medium text-charcoal">
+                    {{ __('opes.assets.selected_count', ['count' => count($selectedAssetIds)]) }}
+                </span>
+                <button type="button" wire:click="printLabelSheet"
+                        class="rounded border border-primary bg-primary px-3 py-1 text-sm font-medium text-white transition hover:bg-primary/90">
+                    {{ __('opes.assets.print_label_sheet') }}
+                </button>
+                <button type="button" wire:click="$set('selectedAssetIds', [])"
+                        class="text-xs font-medium text-charcoal/60 hover:underline">
+                    {{ __('opes.ui.clear') }}
+                </button>
+                @error('selectedAssetIds')
+                    <span class="text-xs font-medium text-danger">{{ $message }}</span>
+                @enderror
+            </span>
+        @endif
     </x-slot:actions>
 
     {{-- Four KPI cards: total assets, net book value, under maintenance,
@@ -598,6 +620,7 @@
     <x-slot:head>
         <tr class="bg-chrome text-white">
             @if ($tab === 'assets')
+                <th scope="col" class="w-8 px-3 py-2.5"><span class="sr-only">{{ __('opes.assets.select_for_label') }}</span></th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Tag</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Name</th>
                 <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Category</th>
@@ -628,6 +651,10 @@
     @foreach ($rows as $row)
         <tr wire:key="assets-{{ $tab }}-{{ $row->id }}" class="hover:bg-sand/30">
             @if ($tab === 'assets')
+                <td class="px-3 py-2.5">
+                    <input type="checkbox" value="{{ $row->id }}" wire:model.live="selectedAssetIds"
+                           aria-label="{{ __('opes.assets.select_for_label') }}">
+                </td>
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ $row->tag_number }}</td>
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->name }}</td>
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->category_name }}</td>

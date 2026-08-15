@@ -367,6 +367,14 @@
                         class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90">
                     Export PDF
                 </button>
+                <button type="button" wire:click="printLabel"
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal transition hover:border-primary/50 hover:text-primary">
+                    <span wire:loading.remove wire:target="printLabel">{{ __('opes.assets.print_label') }}</span>
+                    <span wire:loading wire:target="printLabel">{{ __('opes.ui.saving') }}</span>
+                </button>
+                @error('printLabel')
+                    <span class="text-xs font-medium text-danger">{{ $message }}</span>
+                @enderror
             </div>
         </div>
 
