@@ -84,6 +84,7 @@ return [
         'dashboard' => 'Dashboard',
         'unfinished_work' => 'My unfinished work',
         'messages' => 'Messages',
+        'marks' => 'Marks entry',
         'homework' => 'Homework',
         'admissions' => 'Admissions',
         'students' => 'Students',
@@ -123,6 +124,8 @@ return [
         'medical' => 'Medical',
         'visitors' => 'Visitors',
         'insurance' => 'Insurance',
+        'discipline' => 'Discipline',
+        'documents_verify' => 'Verify a document',
         'reports' => 'Reports',
         'operations' => 'Year rollover',
         'users' => 'Users',
@@ -179,6 +182,9 @@ return [
         'alerts' => 'Needs attention',
         'no_alerts' => 'Nothing needs your attention right now.',
         'remedy' => 'What to do',
+        'run_a_backup' => 'Run a backup',
+        'for_your_it_provider' => 'For your IT provider',
+        'it_provider_backup_note' => 'The automatic backup service (the opes backup command on the server\'s nightly schedule) did not do its job — ask whoever runs the server to check it.',
         'quick_actions' => 'Quick actions',
         'action_add_user' => 'Add user',
         'action_take_backup' => 'Take a backup',
@@ -208,6 +214,7 @@ return [
         'marks_closed' => 'No assessment period is open for marks entry',
     ],
     'ui' => [
+        'section_navigation' => 'Section navigation',
         'no_data' => 'Not yet recorded',
         'select_placeholder' => 'Select…',
         'status_ok' => 'OK',
@@ -2516,6 +2523,7 @@ return [
         'ready' => 'No blocking gate is open. The product is configured well enough to go live.',
         'not_ready' => ':count check(s) block go-live. Each one names what already refuses to run.',
         'owner' => 'Answered by',
+        'fix_this' => 'Fix this',
     ],
 
     /*
@@ -3013,6 +3021,29 @@ return [
         'fiscal_provisional_title' => 'The fiscal identity is still a specimen',
         'fiscal_provisional_body' => 'Until the NIU is confirmed, every invoice, receipt and attestation prints with a SPECIMEN watermark.',
         'fiscal_provisional_action' => 'Confirm the fiscal identity',
+    ],
+
+    'procurement' => [
+        'nav_suppliers' => 'Suppliers',
+        'nav_requisitions' => 'Requisitions',
+        'nav_orders' => 'Purchase orders',
+        'nav_receipts' => 'Goods receipts',
+        'nav_invoices' => 'Supplier invoices',
+        'nav_payments' => 'Payments',
+        'nav_payables' => 'Payables',
+    ],
+
+    'ledger' => [
+        'nav_chart' => 'Chart of accounts',
+        'nav_journals' => 'Journal entries',
+        'nav_trial_balance' => 'Trial balance',
+        'nav_year_end' => 'Year-end',
+    ],
+
+    'tax' => [
+        'declarations' => 'Declarations register',
+        'attestations_heading' => 'Withholding attestations for this period',
+        'print_attestation' => 'Print attestation',
     ],
 
     'settings_hub' => [

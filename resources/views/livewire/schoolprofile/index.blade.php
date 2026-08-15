@@ -45,10 +45,34 @@
     };
 @endphp
 
+{{-- One root element: Livewire 4 refuses a multi-root component, and the hub
+     section below made this view's flash + list-screen pair multi-root. --}}
+<div class="min-w-0">
 @if (session('status'))
     <p class="mb-4 rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary" role="status">
         {{ session('status') }}
     </p>
+@endif
+
+{{-- The hub: /settings used to render a raw key/value table with zero links
+     while six real settings screens sat unreachable beside it. The cards are
+     permission-filtered in hubCards() so no role is offered a link its
+     permissions refuse (the nav-and-route-agree contract). --}}
+@if ($hubCards !== [])
+    <section class="mb-6">
+        <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/55">
+            {{ __('opes.settings_hub.heading') }}
+        </h2>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach ($hubCards as $card)
+                <a href="{{ $card['href'] }}"
+                   class="block rounded-xl border border-kpi-green-solid/15 bg-kpi-green p-4 transition hover:-translate-y-px hover:shadow-md">
+                    <p class="text-sm font-semibold text-charcoal">{{ $card['title'] }}</p>
+                    <p class="mt-1 text-xs text-charcoal/60">{{ $card['body'] }}</p>
+                </a>
+            @endforeach
+        </div>
+    </section>
 @endif
 
 <x-list-screen
@@ -244,3 +268,4 @@
         </div>
     </x-slot:rail>
 </x-list-screen>
+</div>

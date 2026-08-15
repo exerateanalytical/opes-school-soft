@@ -270,6 +270,47 @@ final class Index extends Component
         }
     }
 
+    /**
+     * The settings HUB. /settings was a raw key/value browser over a 3-row
+     * table that rendered no links at all, while six real settings screens
+     * sat unreachable beside it - three of them with zero inbound links from
+     * anywhere in the product.
+     *
+     * Gate-filtered, not Route::has()-filtered: the sidebar's contract is
+     * that a link is only ever offered to a role whose permissions allow it,
+     * and /settings/licence (403 for Administrator by design) is exactly the
+     * case Route::has() would get wrong.
+     *
+     * @return list<array{href: string, title: string, body: string}>
+     */
+    public function hubCards(): array
+    {
+        $candidates = [
+            ['href' => '/settings/school-identity', 'permission' => 'setting.edit', 'key' => 'school_identity'],
+            ['href' => '/settings/branding', 'permission' => 'setting.edit', 'key' => 'branding'],
+            ['href' => '/settings/tax', 'permission' => 'ledger.configure', 'key' => 'tax'],
+            ['href' => '/settings/fiscal-identity', 'permission' => 'ledger.configure', 'key' => 'fiscal_identity'],
+            ['href' => '/academics/settings', 'permission' => 'academics.manage', 'key' => 'academics'],
+            ['href' => '/settings/licence', 'permission' => 'licence.manage', 'key' => 'licence'],
+        ];
+
+        $cards = [];
+
+        foreach ($candidates as $candidate) {
+            if (! Gate::allows($candidate['permission'])) {
+                continue;
+            }
+
+            $cards[] = [
+                'href' => $candidate['href'],
+                'title' => (string) __('opes.settings_hub.'.$candidate['key'].'_title'),
+                'body' => (string) __('opes.settings_hub.'.$candidate['key'].'_body'),
+            ];
+        }
+
+        return $cards;
+    }
+
     public function render(): mixed
     {
         $classCounts = [];
@@ -280,6 +321,7 @@ final class Index extends Component
         }
 
         return view('livewire.schoolprofile.index', [
+            'hubCards' => $this->hubCards(),
             'rows' => $this->rows(),
             'kpis' => $this->kpis(),
             'classOptions' => $this->classOptions(),

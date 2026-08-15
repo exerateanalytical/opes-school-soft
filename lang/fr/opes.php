@@ -74,6 +74,7 @@ return [
         'dashboard' => 'Tableau de bord',
         'unfinished_work' => 'Mon travail en attente',
         'messages' => 'Messages',
+        'marks' => 'Saisie des notes',
         'homework' => 'Devoirs',
         'admissions' => 'Admissions',
         'students' => 'Élèves',
@@ -113,6 +114,8 @@ return [
         'medical' => 'Infirmerie',
         'visitors' => 'Visiteurs',
         'insurance' => 'Assurance',
+        'discipline' => 'Discipline',
+        'documents_verify' => 'Vérifier un document',
         'reports' => 'Rapports',
         'operations' => 'Bascule d\'année',
         'users' => 'Utilisateurs',
@@ -169,6 +172,9 @@ return [
         'alerts' => 'À traiter',
         'no_alerts' => 'Rien ne requiert votre attention pour le moment.',
         'remedy' => 'Que faire',
+        'run_a_backup' => 'Lancer une sauvegarde',
+        'for_your_it_provider' => 'Pour votre prestataire informatique',
+        'it_provider_backup_note' => 'Le service de sauvegarde automatique (la commande de sauvegarde opes planifiée chaque nuit sur le serveur) n’a pas fait son travail — demandez au responsable du serveur de le vérifier.',
         'quick_actions' => 'Actions rapides',
         'action_add_user' => 'Ajouter un utilisateur',
         'action_take_backup' => 'Lancer une sauvegarde',
@@ -198,6 +204,7 @@ return [
         'marks_closed' => 'Aucune période d\'évaluation n\'est ouverte à la saisie des notes',
     ],
     'ui' => [
+        'section_navigation' => 'Navigation de section',
         'no_data' => 'Non encore renseigné',
         'select_placeholder' => 'Sélectionner…',
         'status_ok' => 'OK',
@@ -2492,6 +2499,7 @@ return [
         'ready' => "Aucun point bloquant. Le produit est suffisamment configuré pour la mise en service.",
         'not_ready' => ':count point(s) bloquent la mise en service. Chacun indique ce qui refuse déjà de fonctionner.',
         'owner' => 'À traiter par',
+        'fix_this' => 'Corriger',
     ],
 
     /*
@@ -2981,6 +2989,29 @@ return [
         'fiscal_provisional_title' => 'L’identité fiscale est encore un spécimen',
         'fiscal_provisional_body' => 'Tant que le NIU n’est pas confirmé, chaque facture, reçu et attestation s’imprime avec le filigrane SPECIMEN.',
         'fiscal_provisional_action' => 'Confirmer l’identité fiscale',
+    ],
+
+    'procurement' => [
+        'nav_suppliers' => 'Fournisseurs',
+        'nav_requisitions' => 'Demandes d’achat',
+        'nav_orders' => 'Bons de commande',
+        'nav_receipts' => 'Réceptions',
+        'nav_invoices' => 'Factures fournisseurs',
+        'nav_payments' => 'Règlements',
+        'nav_payables' => 'Dettes fournisseurs',
+    ],
+
+    'ledger' => [
+        'nav_chart' => 'Plan comptable',
+        'nav_journals' => 'Écritures',
+        'nav_trial_balance' => 'Balance',
+        'nav_year_end' => 'Clôture d’exercice',
+    ],
+
+    'tax' => [
+        'declarations' => 'Registre des déclarations',
+        'attestations_heading' => 'Attestations de retenue pour cette période',
+        'print_attestation' => 'Imprimer l’attestation',
     ],
 
     'settings_hub' => [
