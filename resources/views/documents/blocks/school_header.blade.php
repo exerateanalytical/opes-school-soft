@@ -5,8 +5,20 @@
      Actions (phase-12-13 D3); this block prints whatever identity it is
      given and prints nothing it is not. --}}
 <div class="doc-block doc-center">
-    @if (!empty($school['branding']['crest_path']))
-        <img src="{{ $school['branding']['crest_path'] }}" alt="" style="height: 52pt;"><br>
+    {{-- Crest centred above the name, logo floated right beside it. Both
+         arrive as base64 data URIs (EmbeddedImage), because dompdf has
+         remote assets disabled and would render NOTHING for a /storage URL
+         or a bare relative path - which is exactly what this block used to
+         emit. An unset image prints no <img> at all: a letterhead with a
+         hole in it reads as a broken install, not as a school without a
+         crest. --}}
+    @if (!empty($school['branding']['logo_uri']))
+        <img src="{{ $school['branding']['logo_uri'] }}" alt=""
+             style="float: right; height: 40pt; margin-left: 8pt;">
+    @endif
+
+    @if (!empty($school['branding']['crest_uri']))
+        <img src="{{ $school['branding']['crest_uri'] }}" alt="" style="height: 52pt;"><br>
     @endif
 
     @if (!empty($school['name']) || !empty($school['name_fr']))

@@ -46,6 +46,15 @@
         }
         .doc-signature-line { border-top: 0.7pt solid #333; margin-top: 26pt; padding-top: 2pt; }
 
+        /* A scanned signature sits ON the rule below it, so its own bottom
+           margin is negative: the rule's 26pt top margin would otherwise
+           push the two apart into what reads as two unrelated marks. Height
+           is fixed and width auto - a scanned signature is any aspect ratio
+           at all, and a fixed box squashes half of them. */
+        .doc-signature-image { height: 34pt; width: auto; max-width: 150pt; display: block; margin: 0 auto -26pt auto; }
+        .doc-stamp-cell { vertical-align: middle; width: 90pt; }
+        .doc-stamp-image { height: 70pt; width: auto; max-width: 90pt; opacity: 0.9; }
+
         /* ── Screen preview ────────────────────────────────────────────────
            The PDF engine paginates against @page above and ignores all of
            this. A BROWSER does not: without it the same markup renders as

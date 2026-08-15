@@ -9,6 +9,7 @@ use App\Modules\Reporting\Domain\DocumentFileName;
 use App\Modules\Reporting\Domain\DocumentLanguage;
 use App\Modules\Reporting\Domain\DocumentReproducibilityViolation;
 use App\Modules\Reporting\Domain\DompdfRenderer;
+use App\Modules\Reporting\Domain\EmbeddedImage;
 use App\Modules\Reporting\Domain\PdfRenderer;
 use App\Modules\Reporting\Domain\PdfStamp;
 use App\Modules\Reporting\Domain\RenderedDocument;
@@ -881,6 +882,25 @@ final class RenderDocument
         array $renderState,
     ): string {
         $generatedAt = $renderState['generated_at'] ?? null;
+
+        // The branding block carries relative PATHS - that is what was frozen
+        // into the chrome at issue, and it must stay frozen. The `*_uri` keys
+        // added here are derived at RENDER time and never stored, because
+        // DompdfRenderer sets setIsRemoteEnabled(false) and would render
+        // nothing at all for a /storage URL.
+        //
+        // This is deterministic: the same path resolves to the same bytes
+        // forever, because StoredImage writes every image under a
+        // CONTENT-HASHED filename - replacing an image produces a NEW path,
+        // so a frozen path can never silently change what it points at.
+        //
+        // $chrome is a by-value parameter, so this touches only the copy that
+        // goes to the view; the frozen envelope is untouched.
+        if (is_array($chrome['branding'] ?? null)) {
+            /** @var array<string, mixed> $branding */
+            $branding = $chrome['branding'];
+            $chrome['branding'] = EmbeddedImage::resolveBranding($branding);
+        }
 
         return view($template->blade_view, [
             'document' => [
