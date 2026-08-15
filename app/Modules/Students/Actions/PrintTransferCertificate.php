@@ -39,6 +39,7 @@ final class PrintTransferCertificate
         ?string $reason = null,
         ?string $overrideReason = null,
         ?string $language = null,
+        bool $preview = false,
     ): RenderedDocument {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -76,7 +77,8 @@ final class PrintTransferCertificate
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'TRANSFER-CERT',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,

@@ -29,7 +29,7 @@ final class PrintTestimonial
         private readonly StudentDocumentReads $reads,
     ) {}
 
-    public function handle(int $studentId, string $body, ?string $language = null): RenderedDocument
+    public function handle(int $studentId, string $body, ?string $language = null, bool $preview = false): RenderedDocument
     {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -86,7 +86,8 @@ final class PrintTestimonial
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'TESTIMONIAL',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,

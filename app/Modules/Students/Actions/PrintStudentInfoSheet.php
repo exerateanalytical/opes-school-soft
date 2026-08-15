@@ -40,7 +40,7 @@ final class PrintStudentInfoSheet
         private readonly StudentDocumentReads $reads,
     ) {}
 
-    public function handle(int $studentId, ?string $language = null): RenderedDocument
+    public function handle(int $studentId, ?string $language = null, bool $preview = false): RenderedDocument
     {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -130,7 +130,8 @@ final class PrintStudentInfoSheet
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'STU-INFO',
             subjectType: 'Student',
             subjectId: $studentId,

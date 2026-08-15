@@ -32,6 +32,7 @@ final class PrintLeavingCertificate
         int $studentId,
         ?string $overrideReason = null,
         ?string $language = null,
+        bool $preview = false,
     ): RenderedDocument {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -79,7 +80,8 @@ final class PrintLeavingCertificate
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'LEAVING-CERT',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,

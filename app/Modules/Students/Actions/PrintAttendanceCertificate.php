@@ -34,7 +34,7 @@ final class PrintAttendanceCertificate
         private readonly StudentDocumentReads $reads,
     ) {}
 
-    public function handle(int $studentId, string $from, string $to, ?string $language = null): RenderedDocument
+    public function handle(int $studentId, string $from, string $to, ?string $language = null, bool $preview = false): RenderedDocument
     {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -85,7 +85,8 @@ final class PrintAttendanceCertificate
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'ATTEND-CERT',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,

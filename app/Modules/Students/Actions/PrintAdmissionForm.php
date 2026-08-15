@@ -34,7 +34,7 @@ final class PrintAdmissionForm
         private readonly StudentDocumentReads $reads,
     ) {}
 
-    public function handle(?int $applicationId = null, ?int $studentId = null, ?string $language = null): RenderedDocument
+    public function handle(?int $applicationId = null, ?int $studentId = null, ?string $language = null, bool $preview = false): RenderedDocument
     {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -47,7 +47,8 @@ final class PrintAdmissionForm
             [$form, $subjectType, $subjectId, $label] = [$this->blank(), 'AdmissionForm', 0, 'Blank admission form'];
         }
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'ADM-FORM',
             subjectType: $subjectType,
             subjectId: $subjectId,

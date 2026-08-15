@@ -48,6 +48,7 @@ final class PrintCharacterCertificate
         int $studentId,
         ?string $overrideReason = null,
         ?string $language = null,
+        bool $preview = false,
     ): RenderedDocument {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -97,7 +98,8 @@ final class PrintCharacterCertificate
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'CHAR-CERT',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,

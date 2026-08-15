@@ -30,7 +30,7 @@ final class PrintBonafideCertificate
         private readonly StudentDocumentReads $reads,
     ) {}
 
-    public function handle(int $studentId, ?string $language = null): RenderedDocument
+    public function handle(int $studentId, ?string $language = null, bool $preview = false): RenderedDocument
     {
         Gate::authorize(Permission::StudentsView->value);
 
@@ -64,7 +64,8 @@ final class PrintBonafideCertificate
             ],
         ];
 
-        return $this->render->handle(
+        return $this->render->issueOrPreview(
+            $preview,
             templateCode: 'BONAFIDE',
             subjectType: 'Enrollment',
             subjectId: $enrollment->id,
