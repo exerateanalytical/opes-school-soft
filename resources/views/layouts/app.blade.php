@@ -3,26 +3,55 @@
     use App\Modules\Identity\Support\Navigation;
     use App\Modules\SchoolProfile\Actions\ReadSetting;
     use App\Modules\SchoolProfile\Livewire\Branding;
-    use App\Support\Branding\BrandPalette;
+    use App\Support\Branding\BrandTokens;
 
     /** @var \App\Modules\Identity\Models\User|null $shellUser */
     $shellUser = auth()->user();
 
-    // The school's one brand-colour choice (/settings/branding), applied as
-    // an inline override AFTER the compiled stylesheet so it wins on
-    // specificity without a rebuild. ReadSetting is cached
-    // (rememberForever, invalidated on write), so this costs nothing beyond
-    // the first read per deploy. Wrapped defensively: a hand-edited or
-    // stale setting value must never crash every page in the app over a
-    // cosmetic preference - it just falls back to the built-in Heritage
-    // green for that render.
-    $brandOverride = null;
+    // The school's brand palette (/settings/branding), emitted as an
+    // UNLAYERED :root override after the compiled stylesheet.
+    //
+    // Unlayered is load-bearing: Tailwind 4 compiles utilities into
+    // @layer utilities, and unlayered CSS outranks every layered rule
+    // regardless of specificity. A @layer components version of this block
+    // measures correctly in devtools and repaints nothing.
+    //
+    // ReadSetting is cached (rememberForever, invalidated on write), so
+    // this costs nothing beyond the first read per deploy. Wrapped
+    // defensively: a hand-edited or stale palette must never take every
+    // page in the app down over a cosmetic preference.
+    $brandVariables = [];
+    $appLogoPath = '';
+    $faviconPath = '';
+
     try {
-        $brandPrimaryColor = (string) app(ReadSetting::class)->handle(Branding::SETTING_KEY, '#0B5A32');
-        $brandOverride = BrandPalette::fromPrimary($brandPrimaryColor);
+        $reader = app(ReadSetting::class);
+
+        /** @var mixed $storedPalette */
+        $storedPalette = $reader->handle(Branding::PALETTE_KEY, BrandTokens::DEFAULTS);
+
+        $brandVariables = BrandTokens::fromArray(
+            is_array($storedPalette) ? $storedPalette : BrandTokens::DEFAULTS
+        )->toCssVariables();
+
+        $appLogoPath = (string) $reader->handle('branding.app_logo_path', '');
+        $faviconPath = (string) $reader->handle('branding.favicon_path', '');
     } catch (\Throwable) {
-        $brandOverride = null;
+        $brandVariables = BrandTokens::defaults()->toCssVariables();
+        $appLogoPath = '';
+        $faviconPath = '';
     }
+
+    // Only ever a relative path under branding/ on the `public` disk (the
+    // uploader's own contract, mirrored by the settings validation_rule) -
+    // so nothing hand-typed can become an arbitrary <img src> or icon href.
+    $appLogoUrl = ($appLogoPath !== '' && str_starts_with($appLogoPath, 'branding/'))
+        ? \Illuminate\Support\Facades\Storage::disk('public')->url($appLogoPath)
+        : null;
+
+    $faviconUrl = ($faviconPath !== '' && str_starts_with($faviconPath, 'branding/'))
+        ? \Illuminate\Support\Facades\Storage::disk('public')->url($faviconPath)
+        : null;
 
     // Permission first, then enabled/disabled. An item the user may not see is
     // absent; an item nobody can use yet is present but inert. Conflating the
@@ -52,20 +81,21 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
-    @if ($brandOverride !== null)
-        {{-- The one place the school's picked colour actually applies:
-             overrides the compiled defaults for the three tokens the shell
-             chrome is built from. Every other token (gold, semantic
-             success/warning/danger/info, surfaces) is untouched - a school
-             changes its ONE brand colour, not the whole design system. --}}
-        <style>
-            :root {
-                --color-chrome: {{ $brandOverride['chrome'] }};
-                --color-chrome-light: {{ $brandOverride['chromeLight'] }};
-                --color-primary: {{ $brandOverride['primary'] }};
-            }
-        </style>
+    @if ($faviconUrl !== null)
+        <link rel="icon" href="{{ $faviconUrl }}">
     @endif
+
+    {{-- UNLAYERED on purpose - see the PHP block at the top of this file.
+         Blade compiles directives BEFORE it strips comments, so a directive
+         name written inside a comment is still compiled: never spell one out
+         here. --}}
+    <style>
+        :root {
+            @foreach ($brandVariables as $brandVariableName => $brandVariableValue)
+            {{ $brandVariableName }}: {{ $brandVariableValue }};
+            @endforeach
+        }
+    </style>
 </head>
 {{-- `opes-app` is the scope hook for the shared form-control treatment in
      app.css. It is deliberately ONLY on this layout: the auth screens and the
@@ -107,6 +137,14 @@
              chrome sidebar, built from the same two tokens as the rest of the
              shell chrome (00-core section 8) - no new colours introduced. --}}
         <a href="/dashboard" class="flex flex-col items-center gap-1 px-4 pt-6 pb-4 text-center">
+            @if ($appLogoUrl !== null)
+                {{-- The school's own logo replaces the built-in OPES mark
+                     once one is uploaded. Height-constrained, width auto:
+                     a school logo is any aspect ratio at all, and a fixed
+                     square box would squash half of them. --}}
+                <img src="{{ $appLogoUrl }}" alt="{{ __('opes.branding.app_logo_alt') }}"
+                     class="h-16 w-auto max-w-[200px] object-contain">
+            @else
             <svg class="h-16 w-16" viewBox="0 0 64 64" fill="none" stroke="var(--color-heritage-yellow)"
                  stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
                 {{-- laurel wreath, left and right --}}
@@ -122,6 +160,7 @@
                 <text x="32" y="40" text-anchor="middle" font-size="17" font-weight="700"
                       fill="var(--color-heritage-yellow)" stroke="none" font-family="serif">O</text>
             </svg>
+            @endif
             <span class="font-serif text-sm font-bold leading-tight tracking-wide text-heritage-yellow">{{ __('opes.shell.brand') }} {{ __('opes.shell.brand_suffix') }}</span>
             <span class="text-[11px] italic leading-tight text-heritage-yellow/85">{{ __('opes.shell.tagline') }}</span>
         </a>
