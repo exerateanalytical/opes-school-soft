@@ -249,6 +249,12 @@ enum Permission: string
     case InsuranceView = 'insurance.view';
     case InsuranceManage = 'insurance.manage';
 
+    // Curriculum framework (2026-08-12 module gap analysis, gap #2).
+    // Mirrors Curriculum\Domain\CurriculumPermission's string constants,
+    // same pattern as the Welfare block above.
+    case CurriculumView = 'curriculum.view';
+    case CurriculumManage = 'curriculum.manage';
+
     // Phase 11 (HR/Payroll). Mirrors HR\Domain\HrPermission and
     // Payroll\Domain\PayrollPermission string constants.
     case StaffView = 'staff.view';

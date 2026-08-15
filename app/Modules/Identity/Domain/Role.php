@@ -111,6 +111,9 @@ enum Role: string
                 // and signs off excursions, so he holds both the read and
                 // the write side - including recording guardian consent.
                 Permission::ActivityView, Permission::ActivityManage,
+                // Curriculum framework (gap #2): the Proviseur oversees the
+                // programme of study and can publish/revise it.
+                Permission::CurriculumView, Permission::CurriculumManage,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -132,6 +135,10 @@ enum Role: string
                 Permission::AttendanceView, Permission::AttendanceTake,
                 Permission::AttendanceAmend, Permission::AttendanceJustify,
                 Permission::DisciplineView, Permission::DisciplineManage,
+                // Curriculum framework (gap #2): shaping the programme of
+                // study is the Censeur's job, exactly like the academic
+                // structure it hangs off.
+                Permission::CurriculumView, Permission::CurriculumManage,
             ],
 
             // The bursar reads the student roll to collect against it, but
@@ -214,6 +221,9 @@ enum Role: string
                 // excursion - and recording the guardian's consent for the
                 // trip - is roll-keeping, which is the registrar's office.
                 Permission::ActivityView, Permission::ActivityManage,
+                // Curriculum framework (gap #2): read-only, same posture as
+                // the timetable above.
+                Permission::CurriculumView,
             ],
 
             // 00-core 9.1: these three read the academic structure (year,
@@ -238,6 +248,10 @@ enum Role: string
                 // roster and registers; enrolment and consent stay with the
                 // office roles (activity.manage).
                 Permission::ActivityView,
+                // Curriculum framework (gap #2): a teacher plans lessons
+                // against the published programme, so reads it - and only
+                // reads it.
+                Permission::CurriculumView,
             ],
 
             // The Professeur Principal enters marks for his own subject and
@@ -245,6 +259,7 @@ enum Role: string
             self::ClassMaster => [
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter, Permission::MarksValidate,
+                Permission::CurriculumView,
             ],
 
             // The exams office runs the assessment cycle end to end: it
@@ -254,6 +269,7 @@ enum Role: string
                 Permission::AcademicsView, Permission::StudentsView,
                 Permission::MarksEnter, Permission::MarksValidate,
                 Permission::AssessmentConfigure, Permission::ReportsPublish, Permission::ReportsView,
+                Permission::CurriculumView,
             ],
 
             // Phase 8: the Surveillant Général polices attendance and owns

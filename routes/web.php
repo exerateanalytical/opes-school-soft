@@ -637,6 +637,17 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/activities/{activity}', \App\Modules\Activities\Livewire\Show::class)
         ->middleware('can:activity.view')->whereNumber('activity')->name('activities.show');
     // ── End Activities module ──────────────────────────────────────────
+    // ── Curriculum module ──
+    // Gap #2 of the 2026-08-12 module gap analysis: the versioned programme
+    // of study (curricula, units/topics, competencies). Gated on the
+    // module's `.view` permission, matching Navigation::items(), per this
+    // file's nav-and-route-agree-by-construction contract.
+    Route::get('/curriculum', \App\Modules\Curriculum\Livewire\Index::class)
+        ->middleware('can:curriculum.view')->name('curriculum.index');
+
+    Route::get('/curriculum/{curriculum}', \App\Modules\Curriculum\Livewire\Show::class)
+        ->middleware('can:curriculum.view')->whereNumber('curriculum')->name('curriculum.show');
+    // ── /Curriculum module ──
 
     /*
      * Phase 9 (Assets/Inventory/Library) and Phase 11 (HR/Payroll): screens

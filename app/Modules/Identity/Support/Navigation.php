@@ -79,6 +79,11 @@ final class Navigation
             ['key' => 'academics', 'route' => '/academics/settings', 'permission' => Permission::AcademicsManage, 'enabled' => true, 'built' => true],
             ['key' => 'classes', 'route' => '/classes', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
             ['key' => 'subjects', 'route' => '/subjects', 'permission' => Permission::AcademicsView, 'enabled' => true, 'built' => true],
+            // Curriculum framework (gap #2 of the 2026-08-12 module gap
+            // analysis): the versioned programme of study behind each
+            // subject. Gated on curriculum.view, matching its route, per
+            // this file's nav-and-route-agree-by-construction contract.
+            ['key' => 'curriculum', 'route' => '/curriculum', 'permission' => Permission::CurriculumView, 'enabled' => true, 'built' => true],
             // Phase 8 F1/F5: real screens now live behind these URLs, so the
             // nav flips to built => true with the permission that gates the
             // route below - nav and route agree by construction, per this

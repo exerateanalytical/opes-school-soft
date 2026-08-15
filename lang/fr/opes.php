@@ -88,6 +88,7 @@ return [
         'academics' => 'Paramètres académiques',
         'classes' => 'Classes',
         'subjects' => 'Matières',
+        'curriculum' => 'Programmes d\'études',
         'timetable' => 'Emploi du temps',
         'attendance' => 'Présences',
         'examinations' => 'Examens',
@@ -549,6 +550,8 @@ return [
         'visitor.manage' => 'Gérer le registre des visiteurs',
         'insurance.view' => 'Consulter l\'assurance',
         'insurance.manage' => 'Gérer l\'assurance',
+        'curriculum.view' => 'Consulter les programmes d\'études',
+        'curriculum.manage' => 'Gérer les programmes d\'études',
         'staff.view' => 'Consulter les dossiers du personnel',
         'staff.manage' => 'Gérer les dossiers du personnel',
         'leave.approve' => 'Approuver les demandes de congé',
@@ -575,6 +578,11 @@ return [
         'D' => 'Primaire francophone MINEDUB',
         'E' => 'Primaire anglophone MINEDUB',
         'F' => 'Maternelle MINEDUB',
+    ],
+    // Programmes d'études (lacune n°2) : libellés du cycle de version.
+    'curriculum' => [
+        'status_draft' => 'Brouillon',
+        'status_published' => 'Publié',
     ],
     // Natures des épreuves, 01-assessment 5.3.
     'component_kind' => [
