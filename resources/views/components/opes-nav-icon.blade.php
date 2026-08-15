@@ -51,6 +51,8 @@
         'import' => '<path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
         // Promotion: a step upward - a class moving to the next year.
         'promotion' => '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/><path d="M4 21h16"/>',
+        // Alumni: a mortarboard - the graduate the school stays in touch with.
+        'alumni' => '<path d="M12 4L2 9l10 5 10-5-10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v5"/>',
         // Statutory books: a bound ledger.
         'books' => '<path d="M4 5a2 2 0 012-2h13v18H6a2 2 0 01-2-2z"/><path d="M9 3v18"/>',
         // Reconciliation: two arrows tying back to each other.

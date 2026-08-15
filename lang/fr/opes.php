@@ -80,6 +80,7 @@ return [
         'students' => 'Élèves',
         'import' => 'Import de données',
         'promotion' => 'Passage de classe',
+        'alumni' => 'Anciens élèves',
         'guardians' => 'Parents / Tuteurs',
         'guardian_meetings' => 'Rencontres avec les parents',
         'pta' => 'Association des parents (APEE)',
@@ -569,6 +570,8 @@ return [
         'expense.approve' => 'Approuver les bons de dépense soumis',
         'activity.view' => 'Consulter les activités',
         'activity.manage' => 'Gérer les activités',
+        'alumni.view' => 'Consulter le registre des anciens élèves',
+        'alumni.manage' => 'Convertir les diplômés et gérer les dossiers des anciens élèves',
     ],
     // Familles de systèmes d'évaluation, 01-assessment 3.2.
     'framework_family' => [

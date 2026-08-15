@@ -90,6 +90,7 @@ return [
         'students' => 'Students',
         'import' => 'Data import',
         'promotion' => 'Promotion',
+        'alumni' => 'Alumni',
         'guardians' => 'Guardians',
         'guardian_meetings' => 'Guardian meetings',
         'pta' => 'Parent-Teacher Association',
@@ -569,6 +570,8 @@ return [
         'expense.approve' => 'Approve submitted expense vouchers',
         'activity.view' => 'View activities',
         'activity.manage' => 'Manage activities',
+        'alumni.view' => 'View the alumni register',
+        'alumni.manage' => 'Convert graduates and manage alumni records',
     ],
     // Assessment framework families, 01-assessment 3.2.
     'framework_family' => [

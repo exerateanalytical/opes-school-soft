@@ -15,6 +15,8 @@ use App\Modules\Accounting\Livewire\Reports\Index as AccountingReportsIndex;
 use App\Modules\Accounting\Livewire\Statements\Index as AccountingStatementsIndex;
 use App\Modules\Accounting\Livewire\Reports\TrialBalance as TrialBalanceReport;
 use App\Modules\Admissions\Livewire\Index as AdmissionsIndex;
+use App\Modules\Alumni\Livewire\Index as AlumniIndex;
+use App\Modules\Alumni\Livewire\Show as AlumniShow;
 use App\Modules\Admissions\Livewire\Wizard as AdmissionsWizard;
 use App\Modules\Identity\Livewire\AuditLog\Index as AuditLogIndex;
 use App\Modules\Assets\Livewire\Index as AssetsIndex;
@@ -288,6 +290,8 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('assets.index', AssetsIndex::class);
         Livewire::component('inventory.index', InventoryIndex::class);
         Livewire::component('library.index', LibraryIndex::class);
+        Livewire::component('alumni.index', AlumniIndex::class);
+        Livewire::component('alumni.show', AlumniShow::class);
         Livewire::component('hr.index', HrIndex::class);
         Livewire::component('payroll.index', PayrollIndex::class);
         Livewire::component('procurement.suppliers.index', SuppliersIndex::class);
