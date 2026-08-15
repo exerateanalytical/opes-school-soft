@@ -61,10 +61,13 @@ it('rejects a colour that is not a 6-digit hex triplet', function (): void {
 });
 
 it('lets a user with setting.edit save a new brand colour', function (): void {
+    // The screen grew from one `primaryColor` property to a six-token
+    // palette; `branding.primary_color` is still written as the mirror this
+    // test has always asserted on.
     p13coreUserAs(Role::Administrator);
 
     Livewire::test(Branding::class)
-        ->set('primaryColor', '#7C3AED')
+        ->set('primary', '#7C3AED')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -76,22 +79,22 @@ it('rejects a save with an invalid hex value, through the real validation_rule',
     p13coreUserAs(Role::Administrator);
 
     Livewire::test(Branding::class)
-        ->set('primaryColor', 'javascript:alert(1)')
+        ->set('primary', 'javascript:alert(1)')
         ->call('save')
-        ->assertHasErrors('primaryColor');
+        ->assertHasErrors('primary');
 
     // The bad value never reached the store - still the seeded default.
     expect(DB::table('settings')->where('key', 'branding.primary_color')->value('value'))
         ->toBe(json_encode('#0B5A32'));
 });
 
-it('resets the picker to the built-in Heritage green', function (): void {
+it('restores the persisted palette when the operator cancels', function (): void {
     p13coreUserAs(Role::Administrator);
 
     Livewire::test(Branding::class)
-        ->set('primaryColor', '#7C3AED')
-        ->call('resetToHeritageGreen')
-        ->assertSet('primaryColor', '#0B5A32');
+        ->set('primary', '#7C3AED')
+        ->call('cancel')
+        ->assertSet('primary', '#0B5A32');
 });
 
 it('refuses the screen to a user without setting.edit', function (): void {
@@ -103,9 +106,13 @@ it('refuses the screen to a user without setting.edit', function (): void {
 it('applies the saved colour as an inline shell override on the next page load', function (): void {
     $user = p13coreUserAs(Role::Administrator);
 
+    // The shell paints from `branding.palette` now; primary_color survives
+    // as the mirror, but the layout's read moved.
     DB::table('settings')
-        ->where('key', 'branding.primary_color')
-        ->update(['value' => json_encode('#7C3AED')]);
+        ->where('key', 'branding.palette')
+        ->update(['value' => json_encode(
+            ['primary' => '#7C3AED'] + \App\Support\Branding\BrandTokens::DEFAULTS
+        )]);
 
     // Cache::rememberForever means the write path (Cache::forget in
     // WriteSetting) is what keeps this correct - a raw DB update here
@@ -113,7 +120,7 @@ it('applies the saved colour as an inline shell override on the next page load',
     // the shell reads the CURRENT row rather than trusting a stale cache
     // an earlier test left behind.
     \Illuminate\Support\Facades\Cache::forget(
-        \App\Modules\SchoolProfile\Actions\ReadSetting::cacheKey('branding.primary_color', 'global', null)
+        \App\Modules\SchoolProfile\Actions\ReadSetting::cacheKey('branding.palette', 'global', null)
     );
 
     actingAs($user);
@@ -126,9 +133,9 @@ it('applies the saved colour as an inline shell override on the next page load',
 it('falls back to the Heritage default when no override is set, so an unconfigured install is unaffected', function (): void {
     $user = p13coreUserAs(Role::Administrator);
 
-    DB::table('settings')->where('key', 'branding.primary_color')->delete();
+    DB::table('settings')->where('key', 'branding.palette')->delete();
     \Illuminate\Support\Facades\Cache::forget(
-        \App\Modules\SchoolProfile\Actions\ReadSetting::cacheKey('branding.primary_color', 'global', null)
+        \App\Modules\SchoolProfile\Actions\ReadSetting::cacheKey('branding.palette', 'global', null)
     );
 
     actingAs($user);
