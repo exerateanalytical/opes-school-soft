@@ -33,6 +33,24 @@
             transform: rotate(-24deg);
             z-index: 0;
         }
+        /* The school's own mark. Deliberately OFFSET from .doc-watermark's
+           38% and rotated the other way: when both draw, two marks at the
+           same angle in the same place read as a printing fault, while two
+           at different angles read as two marks. z-index below the status
+           watermark, which is the more urgent thing to say. */
+        .doc-school-watermark {
+            position: fixed;
+            top: 55%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 40pt;
+            font-weight: bold;
+            letter-spacing: 4pt;
+            transform: rotate(-12deg);
+            z-index: 0;
+        }
+        .doc-school-watermark img { max-width: 55%; max-height: 260pt; }
         .doc-footer {
             position: fixed;
             bottom: -34pt;
@@ -84,6 +102,7 @@
                 box-shadow: 0 2px 8px rgba(1, 60, 31, .10), 0 16px 40px rgba(1, 60, 31, .10);
             }
             .doc-watermark { position: absolute; }
+            .doc-school-watermark { position: absolute; }
             .doc-footer {
                 position: absolute;
                 bottom: 14pt;
@@ -121,6 +140,7 @@
      drawn on; in print and in the PDF engine it collapses to nothing (see
      the @media print block) so pagination is unchanged. --}}
 <div class="doc-sheet">
+    @include('documents.blocks.school_watermark')
     @include('documents.blocks.watermark')
     @include('documents.blocks.document_footer')
 

@@ -316,14 +316,21 @@ final class RenderDocument
             ? 'void'
             : ($isDuplicate ? 'duplicata' : $this->provisionalWatermark());
 
+        // The school's own mark is a SECOND layer: it draws whether or not a
+        // status watermark does, which is the whole point - with one slot the
+        // first reprint of any document silently replaced the school's mark
+        // with DUPLICATA.
+        $schoolWatermark = $this->hasSchoolWatermark($chrome);
+
         $outputHtml = $this->renderHtml($template, $issued->template_version, $issued->serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
             'watermark' => $watermark,
+            'school_watermark' => $schoolWatermark,
             'issued_at' => $issued->issued_at,
             'copy_no' => $copyNo,
             'printed_on' => Carbon::now()->format('d/m/Y'),
             'printed_by_name' => $actor->name,
         ]);
-        $outputBytes = $watermark === null
+        $outputBytes = $watermark === null && ! $schoolWatermark
             ? $cleanBytes
             : $this->pdf->render($outputHtml, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
 
@@ -421,15 +428,23 @@ final class RenderDocument
         // it was printed under. Folding the watermark into the hash would
         // make confirming the NIU retroactively fail every prior document's
         // reproducibility check (§4.5).
+        //
+        // The SCHOOL's watermark is the second layer and rides the same
+        // mechanism for the same reason: it is decoration on the OUTPUT, and
+        // folding it into the hash would mean a school that switches it on
+        // can never reprint anything it issued before.
         $outputBytes = $bytes;
+        $provisional = $this->provisionalWatermark();
+        $schoolWatermark = $this->hasSchoolWatermark($chrome);
 
-        if ($this->provisionalWatermark() !== null) {
-            $specimenHtml = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
-                'watermark' => 'specimen',
+        if ($provisional !== null || $schoolWatermark) {
+            $overlayHtml = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
+                'watermark' => $provisional,
+                'school_watermark' => $schoolWatermark,
                 'issued_at' => $issuedAt,
                 'copy_no' => 1,
             ]);
-            $outputBytes = $this->pdf->render($specimenHtml, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
+            $outputBytes = $this->pdf->render($overlayHtml, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
         }
 
         // 8. IssuedDocument + DocumentPrintLog.
@@ -525,6 +540,7 @@ final class RenderDocument
         // one and only render.
         $html = $this->renderHtml($template, $template->version, null, $lang, $chrome, $data, $subjectLabel, [
             'watermark' => $this->provisionalWatermark(),
+            'school_watermark' => $this->hasSchoolWatermark($chrome),
             'issued_at' => null,
             'generated_at' => $generatedAt,
             'generated_by' => $actor->name,
@@ -729,6 +745,23 @@ final class RenderDocument
                 'principal_signature_path' => $profile->principal_signature_path,
                 'registrar_signature_path' => $profile->registrar_signature_path,
                 'school_stamp_path' => $profile->school_stamp_path,
+                'watermark_image_path' => $profile->watermark_image_path,
+            ],
+            // The SCHOOL's own watermark, frozen into the chrome like
+            // everything else here - so a school that switches its watermark
+            // on does not retroactively change what an already-issued
+            // document says it was printed with. It is still applied as an
+            // OUTPUT overlay and never drawn into the hashed render, exactly
+            // like the status watermark (see renderHtml's school_watermark
+            // flag).
+            'watermark' => $profile === null || ! (bool) ($profile->watermark_enabled ?? false) ? null : [
+                'text' => $profile->watermark_text,
+                'image_path' => $profile->watermark_image_path,
+                // 1-30 percent. Clamped HERE, not in the blade: a value that
+                // reached the database around the settings screen (an import,
+                // a hand-run UPDATE) must not be able to print an opaque
+                // black slab across a certificate.
+                'opacity' => max(1, min(30, (int) ($profile->watermark_opacity ?? 8))),
             ],
             // Letterhead contacts (10-documents §4.7). Ordinary school-supplied
             // details, not registry-issued identifiers like the NIU below, so
@@ -858,6 +891,29 @@ final class RenderDocument
             || in_array($template->code, self::FINANCIAL_TEMPLATE_CODES, true);
     }
 
+    /**
+     * Does the frozen chrome carry a school watermark that has something to
+     * DRAW? "Enabled" alone is not enough - a school that ticks the box and
+     * supplies neither text nor image must get no overlay render at all,
+     * rather than a second PDF pass that produces an empty block.
+     *
+     * @param  array<string, mixed>  $chrome
+     */
+    private function hasSchoolWatermark(array $chrome): bool
+    {
+        $watermark = $chrome['watermark'] ?? null;
+
+        if (! is_array($watermark)) {
+            return false;
+        }
+
+        $text = $watermark['text'] ?? null;
+        $imagePath = $watermark['image_path'] ?? null;
+
+        return (is_string($text) && trim($text) !== '')
+            || (is_string($imagePath) && $imagePath !== '');
+    }
+
     private function schoolShortCode(): string
     {
         /** @var mixed $code */
@@ -869,7 +925,7 @@ final class RenderDocument
     /**
      * @param  array<string, mixed>  $chrome
      * @param  array<string, mixed>  $payload
-     * @param  array{watermark: string|null, issued_at: Carbon|null, copy_no: int, generated_at?: Carbon, generated_by?: string, printed_on?: string, printed_by_name?: string}  $renderState
+     * @param  array{watermark: string|null, issued_at: Carbon|null, copy_no: int, school_watermark?: bool, generated_at?: Carbon, generated_by?: string, printed_on?: string, printed_by_name?: string}  $renderState
      */
     private function renderHtml(
         DocumentTemplate $template,
@@ -909,6 +965,12 @@ final class RenderDocument
                 'serial' => $serial,
                 'language' => $lang->value,
                 'watermark' => $renderState['watermark'],
+                // The SECOND watermark layer, drawn independently of the
+                // status one above so a DUPLICATA reprint still carries the
+                // school's own mark. False on every CLEAN render for the same
+                // reason SPECIMEN is: the hashed artefact must not move when a
+                // school changes its letterhead decoration.
+                'school_watermark' => $renderState['school_watermark'] ?? false,
                 'is_duplicate' => ($renderState['watermark'] ?? null) === 'duplicata',
                 'copy_no' => $renderState['copy_no'],
                 'issued_at' => $renderState['issued_at']?->format('d/m/Y'),
