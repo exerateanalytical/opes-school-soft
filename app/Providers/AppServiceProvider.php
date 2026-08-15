@@ -34,6 +34,7 @@ use App\Modules\Academics\Livewire\Subjects\Index as SubjectsIndex;
 use App\Modules\Attendance\Livewire\CoverageReport as AttendanceCoverageReport;
 use App\Modules\Attendance\Livewire\Index as AttendanceIndex;
 use App\Modules\Attendance\Livewire\TakeRegister as AttendanceTakeRegister;
+use App\Modules\Identity\Domain\Role;
 use App\Modules\Fees\Livewire\CashDesk\Show as FeesCashDeskShow;
 use App\Modules\Fees\Livewire\Cashier as FeesCashier;
 use App\Modules\Fees\Livewire\Invoices\Index as FeesInvoicesIndex;
@@ -114,6 +115,7 @@ use App\Modules\Procurement\Support\ProcurementLedgerSource;
 use App\Support\Ledger\LedgerSourceRegistry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -147,6 +149,35 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        /*
+         * SuperAdmin answers every ability, unconditionally.
+         *
+         * The role already carried Permission::cases(), but that is only
+         * every permission that exists at seed time: a permission added
+         * later, or an ability checked by name without a matching enum case,
+         * would refuse the one account that is supposed to be able to do
+         * anything - and it would refuse it silently, until someone hit the
+         * screen. This closes that by answering before permission
+         * resolution runs at all.
+         *
+         * `null` for everyone else is deliberate: it means "no opinion", so
+         * normal resolution continues untouched for the other nineteen
+         * roles. Returning false here would deny them everything.
+         *
+         * This bypasses GATES. It does not bypass the rules that live inside
+         * the Actions - the maker-checker separations (a cashier cannot void
+         * their own payment, an author cannot approve their own invoice) are
+         * enforced on the data, not on a permission, and they still hold for
+         * SuperAdmin. That is the correct split: "may this person reach this
+         * screen" is authorization, "may the same person do both halves of a
+         * two-person control" is an accounting invariant.
+         */
+        Gate::before(static function (object $user, string $ability): ?bool {
+            return method_exists($user, 'hasRole') && $user->hasRole(Role::SuperAdmin->value)
+                ? true
+                : null;
+        });
+
         // Phase 12 (docs/plans/phase-12-13.md 12.4): named rate limiters.
         //
         // `api` backs the throttle in the stock `api` middleware group that
