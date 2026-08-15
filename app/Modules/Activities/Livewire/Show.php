@@ -251,7 +251,7 @@ final class Show extends Component
         $marks = [];
 
         foreach ($this->attendanceMarks as $membershipId => $status) {
-            if (is_string($status) && $status !== '') {
+            if ($status !== '') {
                 $marks[(int) $membershipId] = $status;
             }
         }
