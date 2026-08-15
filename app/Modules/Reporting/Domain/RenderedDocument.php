@@ -28,7 +28,12 @@ final readonly class RenderedDocument
         public int $copyNo,
         public ?string $serial,
         public ?int $issuedDocumentId,
-        public int $printLogId,
-        public string $storagePath,
+        // Nullable since the preview path (10-documents §4.8, preview
+        // extension): a preview allocates no serial, writes no
+        // IssuedDocument, logs no print and stores no file, so there is
+        // genuinely nothing to report here. A zero would read as "print log
+        // number zero" and a caller would follow it.
+        public ?int $printLogId = null,
+        public ?string $storagePath = null,
     ) {}
 }

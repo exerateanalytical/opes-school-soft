@@ -151,6 +151,159 @@ final class RenderDocument
     }
 
     /**
+     * Render a document WITHOUT issuing it: no series number allocated, no
+     * IssuedDocument row, no print log, no stored file - and SPECIMEN on the
+     * face of it, unconditionally.
+     *
+     * Why this lives here rather than in a separate previewer: the ONE thing
+     * a preview must never do is diverge from what issuing would produce. A
+     * separate assembly path drifts - a payload key is added to one and not
+     * the other, a chrome capture is subtly different - and a preview that
+     * lies is worse than no preview, because the operator stops checking.
+     *
+     * So every step below is the SAME call the issue path makes: the same
+     * template lookup, the same language resolution, the same snapshot load,
+     * the same schoolChrome(), the same firstRenderState(), the same
+     * renderHtml(). The differences are all SUBTRACTIONS, and they are the
+     * whole method.
+     *
+     * DocumentPreviewDivergenceTest asserts that a preview and the subsequent
+     * issue of the same subject produce identical document bodies once the
+     * watermark layers and the identity footer are accounted for.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function preview(
+        string $templateCode,
+        string $subjectType,
+        int $subjectId,
+        string $subjectLabel,
+        ?int $snapshotId = null,
+        ?string $language = null,
+        ?int $schoolSectionId = null,
+        array $data = [],
+    ): RenderedDocument {
+        // Same gate as issuing: previewing a payslip is reading a payslip.
+        Gate::authorize(Permission::DocumentsPrint->value);
+
+        /** @var DocumentTemplate $template */
+        $template = DocumentTemplate::query()->where('code', $templateCode)->firstOrFail();
+
+        if (! $template->is_active) {
+            throw new DomainException(
+                "Document template [{$templateCode}] is not active; an inactive template renders nothing."
+            );
+        }
+
+        $lang = $this->resolveLanguage($language, $schoolSectionId);
+
+        if ($template->is_snapshot_backed && $snapshotId === null) {
+            throw ValidationException::withMessages([
+                'snapshot_id' => "Template [{$templateCode}] is snapshot-backed; a preview without a snapshot "
+                    .'would be a live query wearing a certificate (10-documents 4.2).',
+            ]);
+        }
+
+        $snapshot = $template->is_snapshot_backed
+            ? $this->loadSnapshot($template, (int) $snapshotId, $data, null)
+            : ['payload' => $data, 'version' => null];
+
+        $chrome = $this->schoolChrome($template, $schoolSectionId, $snapshot['payload']);
+
+        $actor = $this->currentActor();
+        $generatedAt = Carbon::now()->startOfSecond();
+
+        // SPECIMEN unconditionally, not only while the fiscal identity is
+        // provisional: an unissued document IS a specimen, and this is the
+        // one signal separating a preview printed to paper from the real
+        // thing. The school's own mark rides along as it does on any other
+        // OUTPUT, so what the operator sees is what the printer gives them.
+        //
+        // issued_at is forced back to null and replaced by generated_at:
+        // a preview has no issue date, and printing today's date under
+        // "Issued on" would be the single most damaging thing this method
+        // could say.
+        $renderState = array_merge($this->firstRenderState($template, $generatedAt, $actor), [
+            'watermark' => 'specimen',
+            'school_watermark' => $this->hasSchoolWatermark($chrome),
+            'issued_at' => null,
+            'generated_at' => $generatedAt,
+            'generated_by' => $actor->name,
+        ]);
+
+        $html = $this->renderHtml(
+            $template, $template->version, null, $lang, $chrome,
+            $snapshot['payload'], $subjectLabel, $renderState,
+        );
+
+        $bytes = $this->pdf->render(
+            $html,
+            $template->paperSize(),
+            $template->orientation(),
+            new PdfStamp(
+                $generatedAt->format('YmdHis'),
+                $this->stampSeed($template, $subjectType, $subjectId, $snapshotId, null).'|preview',
+            ),
+            $this->pageFooter($lang),
+        );
+
+        return new RenderedDocument(
+            bytes: $bytes,
+            html: $html,
+            contentHash: hash('sha256', $bytes),
+            language: $lang,
+            isDuplicate: false,
+            copyNo: 1,
+            serial: null,
+            issuedDocumentId: null,
+            printLogId: null,
+            storagePath: null,
+        );
+    }
+
+    /**
+     * Issue, or preview, from ONE argument list.
+     *
+     * Every module Action that offers both ("Print" and "Preview" side by side
+     * on the same screen) calls this rather than branching itself, because a
+     * branch at the call site is where the two drift apart: a payload key gets
+     * added to the issue arm and forgotten in the preview arm, and the
+     * operator is then previewing a document that is not the one they are
+     * about to issue. Here there is a single `$args` list and no way to give
+     * the two paths different inputs.
+     *
+     * The issue-only parameters (idempotency key, bulk print job, series
+     * scope, supersession) are deliberately absent: none of them mean anything
+     * for a render that allocates nothing and records nothing.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function issueOrPreview(
+        bool $preview,
+        string $templateCode,
+        string $subjectType,
+        int $subjectId,
+        string $subjectLabel,
+        ?int $snapshotId = null,
+        ?string $language = null,
+        ?int $schoolSectionId = null,
+        array $data = [],
+    ): RenderedDocument {
+        $args = [
+            'templateCode' => $templateCode,
+            'subjectType' => $subjectType,
+            'subjectId' => $subjectId,
+            'subjectLabel' => $subjectLabel,
+            'snapshotId' => $snapshotId,
+            'language' => $language,
+            'schoolSectionId' => $schoolSectionId,
+            'data' => $data,
+        ];
+
+        return $preview ? $this->preview(...$args) : $this->handle(...$args);
+    }
+
+    /**
      * 00-core 6.2.5 batch signature - the bulk printer calls THIS, never the
      * single form in a loop it wrote itself. Each subject is its own
      * transaction (10-documents 18.2): one failure marks that subject failed
@@ -412,11 +565,11 @@ final class RenderDocument
         );
 
         // 6-7. Render and hash. The clean render IS the original artefact.
-        $html = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
-            'watermark' => null,
-            'issued_at' => $issuedAt,
-            'copy_no' => 1,
-        ]);
+        // The render state comes from firstRenderState(), which preview() also
+        // uses - see its docblock for why that sharing is not optional.
+        $cleanState = $this->firstRenderState($template, $issuedAt, $actor);
+
+        $html = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, $cleanState);
         $bytes = $this->pdf->render($html, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
         $hash = hash('sha256', $bytes);
 
@@ -438,12 +591,10 @@ final class RenderDocument
         $schoolWatermark = $this->hasSchoolWatermark($chrome);
 
         if ($provisional !== null || $schoolWatermark) {
-            $overlayHtml = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, [
+            $overlayHtml = $this->renderHtml($template, $template->version, $serial, $lang, $chrome, $snapshot['payload'], $subjectLabel, array_merge($cleanState, [
                 'watermark' => $provisional,
                 'school_watermark' => $schoolWatermark,
-                'issued_at' => $issuedAt,
-                'copy_no' => 1,
-            ]);
+            ]));
             $outputBytes = $this->pdf->render($overlayHtml, $template->paperSize(), $template->orientation(), $stamp, $this->pageFooter($lang));
         }
 
@@ -538,14 +689,13 @@ final class RenderDocument
         // no byte-identity - and a footer that SAYS so (4.2). There is no
         // hash to protect here, so the specimen overlay simply goes on the
         // one and only render.
-        $html = $this->renderHtml($template, $template->version, null, $lang, $chrome, $data, $subjectLabel, [
-            'watermark' => $this->provisionalWatermark(),
-            'school_watermark' => $this->hasSchoolWatermark($chrome),
-            'issued_at' => null,
-            'generated_at' => $generatedAt,
-            'generated_by' => $actor->name,
-            'copy_no' => 1,
-        ]);
+        $html = $this->renderHtml($template, $template->version, null, $lang, $chrome, $data, $subjectLabel, array_merge(
+            $this->firstRenderState($template, $generatedAt, $actor),
+            [
+                'watermark' => $this->provisionalWatermark(),
+                'school_watermark' => $this->hasSchoolWatermark($chrome),
+            ],
+        ));
 
         $stamp = new PdfStamp(
             $generatedAt->format('YmdHis'),
@@ -578,6 +728,39 @@ final class RenderDocument
     // -----------------------------------------------------------------------
     // Pipeline pieces
     // -----------------------------------------------------------------------
+
+    /**
+     * The render state of a document being produced for the FIRST time -
+     * shared, deliberately, by issueOriginal(), renderLive() and preview().
+     *
+     * This exists to make preview/issue divergence a compile-time
+     * impossibility rather than a discipline. Every one of those three used to
+     * hand-build this array; adding a field to the footer or the shell meant
+     * remembering to add it in three places, and the one that got forgotten
+     * would be the preview - the path nobody reprints and compares.
+     *
+     * The two shapes below are not a style choice: a snapshot-backed document
+     * is ISSUED (it has an issue date and the footer says so), a live document
+     * is GENERATED (4.2's "Generated on ... by ..." line is what stops a
+     * working view being mistaken for evidence). Callers override on top of
+     * this; they must not replace it.
+     *
+     * @return array{watermark: string|null, issued_at: Carbon|null, copy_no: int, generated_at?: Carbon, generated_by?: string}
+     */
+    private function firstRenderState(DocumentTemplate $template, Carbon $at, Actor $actor): array
+    {
+        if ($template->is_snapshot_backed) {
+            return ['watermark' => null, 'issued_at' => $at, 'copy_no' => 1];
+        }
+
+        return [
+            'watermark' => null,
+            'issued_at' => null,
+            'generated_at' => $at,
+            'generated_by' => $actor->name,
+            'copy_no' => 1,
+        ];
+    }
 
     private function resolveLanguage(?string $language, ?int $schoolSectionId): DocumentLanguage
     {
