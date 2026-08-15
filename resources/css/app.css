@@ -23,7 +23,7 @@
          gold accent                    #E3A94B   (staff token is #D9A829)
          gold deep (crest strokes)      #B77A12
          success / "Paid"               #318538   (staff token is #198754)
-         danger / "Balance Due"         #EF404A   (staff token is #D64545)
+         danger / "Balance Due"         #EF404A   (staff token is #CC3D3D)
          danger tint                    #FEF3F4
          page background                #FEFEFE   - near-WHITE. The designs do
                                         NOT use a warm canvas; only the
@@ -57,7 +57,7 @@
     --color-chrome: #002D17;         /* was Cameroon green -> Heritage Dark Green (sidebar) */
     --color-chrome-light: #064A2B;   /* -> Heritage Forest Green (cards, active states) */
     --color-primary: #0B5A32;        /* -> Heritage Green (buttons, links) */
-    --color-heritage-red: #D64545;   /* -> Danger (was Cameroon flag red) */
+    --color-heritage-red: #CC3D3D;   /* -> Danger (was Cameroon flag red) */
     --color-heritage-yellow: #D9A829;/* -> Heritage Gold (was Cameroon flag yellow) */
     --color-ivory: #FDFEFE;          /* -> Warm White (main background) */
     --color-sand: #F5F7F6;           /* -> Soft Surface (secondary background) */
@@ -113,7 +113,13 @@
     --color-success-bg: #EAF6EF;
     --color-warning: #D99A20;
     --color-warning-bg: #FFF5D9;
-    --color-danger: #D64545;
+    /* Darkened from #D64545 on 2026-08-15. The old red measured 4.38:1 against
+       white and the product genuinely renders white on it - `bg-heritage-red
+       text-white` on the destructive buttons, and status-pill's solid red -
+       so it was a real AA failure, not a hypothetical one. #CC3D3D holds the
+       same hue at 4.88:1. tests/Feature/Ui/PaletteAccessibilityTest.php is
+       what keeps it there. */
+    --color-danger: #CC3D3D;
     --color-danger-bg: #FDECEC;
     --color-info: #2878C8;
     --color-info-bg: #EDF5FC;

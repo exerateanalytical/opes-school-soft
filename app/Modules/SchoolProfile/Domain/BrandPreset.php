@@ -31,7 +31,7 @@ final class BrandPreset
                 'label' => 'Heritage Green',
                 'colors' => [
                     'primary' => '#0B5A32', 'secondary' => '#064A2B', 'accent' => '#D9A829',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -39,7 +39,7 @@ final class BrandPreset
                 'label' => 'Indigo',
                 'colors' => [
                     'primary' => '#31408C', 'secondary' => '#232F66', 'accent' => '#E0A32E',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -47,7 +47,7 @@ final class BrandPreset
                 'label' => 'Burgundy',
                 'colors' => [
                     'primary' => '#8A1F3D', 'secondary' => '#6B152E', 'accent' => '#C9A227',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -55,7 +55,7 @@ final class BrandPreset
                 'label' => 'Deep Teal',
                 'colors' => [
                     'primary' => '#0F5C63', 'secondary' => '#0A464C', 'accent' => '#D9A829',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -63,7 +63,7 @@ final class BrandPreset
                 'label' => 'Navy & Gold',
                 'colors' => [
                     'primary' => '#1B3A6B', 'secondary' => '#132B50', 'accent' => '#D9A829',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -71,7 +71,7 @@ final class BrandPreset
                 'label' => 'Graphite',
                 'colors' => [
                     'primary' => '#3A4750', 'secondary' => '#2A343B', 'accent' => '#C98A2E',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
             [
@@ -79,7 +79,7 @@ final class BrandPreset
                 'label' => 'Plum',
                 'colors' => [
                     'primary' => '#5B2A6B', 'secondary' => '#451F52', 'accent' => '#D9A829',
-                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#D64545',
+                    'success' => '#198754', 'warning' => '#D99A20', 'danger' => '#CC3D3D',
                 ],
             ],
         ];

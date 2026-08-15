@@ -38,7 +38,7 @@ final readonly class BrandTokens
         'accent' => '#D9A829',     // Heritage Gold - accents only
         'success' => '#198754',
         'warning' => '#D99A20',
-        'danger' => '#D64545',
+        'danger' => '#CC3D3D',
     ];
 
     /**
