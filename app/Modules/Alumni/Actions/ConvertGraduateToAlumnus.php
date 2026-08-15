@@ -123,6 +123,13 @@ final class ConvertGraduateToAlumnus
                 'academic_year_name' => $enrollment->academic_year_name,
                 'contact_email' => $contact?->email,
                 'contact_phone' => $contact?->phone,
+                // Stated rather than left to the column default. create()
+                // returns the in-memory instance, which never learns a
+                // default applied by the database, so every caller reading
+                // this straight off the returned record saw null where the
+                // stored row says false - and "we have no idea whether this
+                // person is alive" is a different claim from "they are".
+                'is_deceased' => false,
                 'created_by' => $actor->id,
             ]);
 

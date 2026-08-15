@@ -147,7 +147,7 @@ it('records an engagement from the rail form', function () {
 
     Livewire::test(AlumniShow::class, ['alumnus' => (int) $record->getKey()])
         ->set('engagementType', 'mentorship')
-        ->set('engagedOn', '2031-02-01')
+        ->set('engagedOn', '2026-02-01')
         ->set('engagementNote', 'Mentoring two Form 5 science students.')
         ->call('recordEngagement')
         ->assertHasNoErrors();

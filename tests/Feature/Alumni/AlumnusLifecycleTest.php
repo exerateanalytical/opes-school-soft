@@ -57,12 +57,12 @@ it('appends an engagement to the log', function () {
 
     $engagement = app(RecordEngagement::class)->handle((int) $record->getKey(), [
         'type' => 'donation',
-        'engaged_on' => '2031-03-01',
+        'engaged_on' => '2026-03-01',
         'note' => 'Donated 50 chairs for the assembly hall.',
     ], alumActor($user));
 
     expect($engagement->type)->toBe(EngagementType::Donation)
-        ->and($engagement->engaged_on->toDateString())->toBe('2031-03-01')
+        ->and($engagement->engaged_on->toDateString())->toBe('2026-03-01')
         ->and($engagement->alumnus_record_id)->toBe((int) $record->getKey());
 
     expect(AlumniEngagement::query()->count())->toBe(1);
@@ -74,7 +74,7 @@ it('refuses an engagement with a blank note or a future date', function () {
 
     expect(fn () => app(RecordEngagement::class)->handle((int) $record->getKey(), [
         'type' => 'visit',
-        'engaged_on' => '2031-03-01',
+        'engaged_on' => '2026-03-01',
         'note' => '   ',
     ], alumActor($user)))->toThrow(DomainException::class, 'note');
 
@@ -113,7 +113,7 @@ it('refuses every write door to a view-only user', function () {
     expect(fn () => app(UpdateAlumnusContact::class)->handle($id, ['notes' => 'x'], alumActor($viewer)))
         ->toThrow(AuthorizationException::class);
     expect(fn () => app(RecordEngagement::class)->handle($id, [
-        'type' => 'visit', 'engaged_on' => '2031-01-01', 'note' => 'x',
+        'type' => 'visit', 'engaged_on' => '2026-01-01', 'note' => 'x',
     ], alumActor($viewer)))->toThrow(AuthorizationException::class);
     expect(fn () => app(MarkDeceased::class)->handle($id, alumActor($viewer)))
         ->toThrow(AuthorizationException::class);
