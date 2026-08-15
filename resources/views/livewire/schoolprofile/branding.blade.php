@@ -120,5 +120,48 @@
                 </div>
             </div>
         </x-settings-fieldset>
+
+        <x-settings-fieldset :heading="__('opes.branding.marks')"
+                             :hint="__('opes.branding.marks_hint')">
+            @foreach ([
+                ['app_logo', 'appLogoUpload', 'appLogoPath', 'removeAppLogo'],
+                ['favicon', 'faviconUpload', 'faviconPath', 'removeFavicon'],
+            ] as [$key, $uploadModel, $pathModel, $removeMethod])
+                <x-settings-field :label="__('opes.branding.'.$key)"
+                                  :hint="__('opes.branding.hint_'.$key)"
+                                  :error="$errors->first($uploadModel)">
+                    <div class="flex items-start gap-3">
+                        <span wire:key="brand-preview-{{ $key }}-{{ $$pathModel }}"
+                              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-primary bg-sand">
+                            @if ($$uploadModel !== null)
+                                <img src="{{ $$uploadModel->temporaryUrl() }}" alt="" class="max-h-full max-w-full object-contain">
+                            @elseif ($$pathModel !== '')
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($$pathModel) }}"
+                                     alt="" class="max-h-full max-w-full object-contain">
+                            @else
+                                <span class="text-xs text-charcoal/40">{{ __('opes.school_identity.no_image') }}</span>
+                            @endif
+                        </span>
+
+                        <div class="min-w-0 flex-1">
+                            <input type="file" wire:model="{{ $uploadModel }}"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-sm text-charcoal file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90">
+
+                            <div wire:loading wire:target="{{ $uploadModel }}" class="mt-1 text-xs text-text-secondary">
+                                {{ __('opes.school_identity.uploading') }}
+                            </div>
+
+                            @if ($$pathModel !== '')
+                                <button type="button" wire:click="{{ $removeMethod }}"
+                                        class="mt-1 text-xs font-medium text-danger hover:underline">
+                                    {{ __('opes.school_identity.remove_image') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </x-settings-field>
+            @endforeach
+        </x-settings-fieldset>
     </x-settings-form>
 </div>
