@@ -245,6 +245,15 @@ return [
         'save' => 'Save',
         'actions' => 'Actions',
         'new' => 'New',
+        'clear' => 'Clear',
+    ],
+
+    // Asset register label printing (Phase 3 of the document identity plan).
+    'assets' => [
+        'print_label' => 'Print label',
+        'print_label_sheet' => 'Print label sheet',
+        'select_for_label' => 'Select for label printing',
+        'selected_count' => ':count selected',
     ],
     // User Management, docs/specs/09-ui.md section 8.10.
     'users' => [
@@ -3085,6 +3094,16 @@ return [
         'hint_principal_signature_path' => 'Printed above the Principal signature line on certificates.',
         'hint_registrar_signature_path' => 'Printed above the Registrar signature line on certificates.',
         'hint_school_stamp_path' => 'Printed beside the signatures on certificates.',
+        'watermark' => 'School watermark',
+        'watermark_hint' => 'A faint mark printed behind every document. It appears IN ADDITION to DUPLICATA, ANNULÉ and SPECIMEN, never instead of them.',
+        'watermark_enabled' => 'Enabled',
+        'watermark_enabled_hint' => 'Print the school watermark behind every document.',
+        'watermark_text' => 'Watermark text',
+        'watermark_text_hint' => 'Usually the school name. Ignored when an image is uploaded.',
+        'watermark_opacity' => 'Opacity',
+        'watermark_opacity_hint' => 'Below 5% it barely prints; above 15% it competes with the text.',
+        'watermark_image' => 'Watermark image',
+        'watermark_image_hint' => 'A crest or mark, printed instead of the text when supplied.',
         'hint_default_document_language' => 'Used when neither the caller nor the section specifies one.',
         'hint_bilingual_documents' => 'Print the English and French school names together.',
         'title' => 'School identity',

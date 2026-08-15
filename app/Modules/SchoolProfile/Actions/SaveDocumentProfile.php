@@ -43,7 +43,7 @@ final class SaveDocumentProfile
     {
         Gate::authorize(Permission::SettingEdit->value);
 
-        $data = Validator::make($input, [
+        $validator = Validator::make($input, [
             'address_line1' => ['nullable', 'string', 'max:160'],
             'address_line2' => ['nullable', 'string', 'max:160'],
             'city' => ['nullable', 'string', 'max:80'],
@@ -71,7 +71,36 @@ final class SaveDocumentProfile
             'principal_signature_path' => ['nullable', 'string', 'max:255'],
             'registrar_signature_path' => ['nullable', 'string', 'max:255'],
             'school_stamp_path' => ['nullable', 'string', 'max:255'],
-        ])->validate();
+            'watermark_enabled' => ['nullable', 'boolean'],
+            'watermark_text' => ['nullable', 'string', 'max:60'],
+            'watermark_image_path' => ['nullable', 'string', 'max:255'],
+            // 1-30 percent. Below 1 it does not print; above 30 it competes
+            // with the text it sits behind and the document stops being
+            // readable. A plain `required_if` cannot express "text OR image",
+            // so the either-or rule is an after() hook below.
+            'watermark_opacity' => ['nullable', 'integer', 'min:1', 'max:30'],
+        ]);
+
+        $validator->after(function (\Illuminate\Validation\Validator $v) use ($input): void {
+            $enabled = filter_var($input['watermark_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $text = $input['watermark_text'] ?? null;
+            $imagePath = $input['watermark_image_path'] ?? null;
+
+            $hasText = is_string($text) && trim($text) !== '';
+            $hasImage = is_string($imagePath) && $imagePath !== '';
+
+            // An enabled watermark with nothing to draw prints an empty,
+            // unexplainable block on every document the school issues.
+            if ($enabled && ! $hasText && ! $hasImage) {
+                $v->errors()->add(
+                    'watermark_text',
+                    'Give the watermark either text or an image before switching it on.',
+                );
+            }
+        });
+
+        /** @var array<string, mixed> $data */
+        $data = $validator->validate();
 
         DB::transaction(function () use ($data, $actor): void {
             $existing = DB::table('school_document_profiles')->where('id', 1)->first();

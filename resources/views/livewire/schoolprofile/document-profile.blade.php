@@ -114,6 +114,69 @@
             @endforeach
         </x-settings-fieldset>
 
+        <x-settings-fieldset :heading="__('opes.school_identity.watermark')"
+                             :hint="__('opes.school_identity.watermark_hint')">
+            <x-settings-field :label="__('opes.school_identity.watermark_enabled')"
+                              :hint="__('opes.school_identity.watermark_enabled_hint')" :span="2">
+                <label class="flex items-center gap-2 text-sm font-normal">
+                    <input type="checkbox" wire:model.live="watermarkEnabled">
+                    <span>{{ __('opes.school_identity.watermark_enabled_hint') }}</span>
+                </label>
+            </x-settings-field>
+
+            @if ($watermarkEnabled)
+                <x-settings-field :label="__('opes.school_identity.watermark_text')"
+                                  :hint="__('opes.school_identity.watermark_text_hint')"
+                                  :error="$errors->first('watermark_text')">
+                    <input type="text" wire:model="watermarkText" maxlength="60"
+                           class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                </x-settings-field>
+
+                <x-settings-field :label="__('opes.school_identity.watermark_opacity')"
+                                  :hint="__('opes.school_identity.watermark_opacity_hint')"
+                                  :error="$errors->first('watermark_opacity')">
+                    <span class="flex items-center gap-3">
+                        <input type="range" min="1" max="30" wire:model.live="watermarkOpacity" class="w-full">
+                        <span class="w-10 shrink-0 text-right font-mono text-sm">{{ $watermarkOpacity }}%</span>
+                    </span>
+                </x-settings-field>
+
+                <x-settings-field :label="__('opes.school_identity.watermark_image')"
+                                  :hint="__('opes.school_identity.watermark_image_hint')"
+                                  :error="$errors->first('watermarkUpload')" :span="2">
+                    <div class="flex items-start gap-3">
+                        <span wire:key="preview-watermark-{{ $watermarkImagePath }}"
+                              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-primary bg-sand">
+                            @if ($watermarkUpload !== null)
+                                <img src="{{ $watermarkUpload->temporaryUrl() }}" alt="" class="max-h-full max-w-full object-contain">
+                            @elseif ($watermarkImagePath !== '')
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($watermarkImagePath) }}"
+                                     alt="" class="max-h-full max-w-full object-contain">
+                            @else
+                                <span class="text-xs text-charcoal/40">{{ __('opes.school_identity.no_image') }}</span>
+                            @endif
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <input type="file" wire:model="watermarkUpload"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-sm text-charcoal file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90">
+
+                            <div wire:loading wire:target="watermarkUpload" class="mt-1 text-xs text-text-secondary">
+                                {{ __('opes.school_identity.uploading') }}
+                            </div>
+
+                            @if ($watermarkImagePath !== '')
+                                <button type="button" wire:click="removeImage('watermark')"
+                                        class="mt-1 text-xs font-medium text-danger hover:underline">
+                                    {{ __('opes.school_identity.remove_image') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </x-settings-field>
+            @endif
+        </x-settings-fieldset>
+
         <x-settings-fieldset :heading="__('opes.school_identity.language')"
                              :hint="__('opes.school_identity.language_hint')">
             <x-settings-field :label="__('opes.school_identity.default_document_language')"

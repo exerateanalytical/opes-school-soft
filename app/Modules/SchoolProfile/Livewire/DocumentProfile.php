@@ -98,6 +98,23 @@ final class DocumentProfile extends Component
     public ?TemporaryUploadedFile $schoolStampUpload = null;
 
     /**
+     * The SCHOOL's own watermark - a SECOND layer behind every document, drawn
+     * in ADDITION to DUPLICATA / ANNULE / SPECIMEN rather than instead of them.
+     * Off by default: a live school must print exactly what it printed
+     * yesterday until someone deliberately changes it.
+     */
+    public bool $watermarkEnabled = false;
+
+    public string $watermarkText = '';
+
+    public string $watermarkImagePath = '';
+
+    /** Percent, 1-30. Below 1 it does not print; above 30 it competes with the text. */
+    public int $watermarkOpacity = 8;
+
+    public ?TemporaryUploadedFile $watermarkUpload = null;
+
+    /**
      * slot => [upload property, path property, database column].
      *
      * One list rather than five near-identical blocks: the validation, the
@@ -112,6 +129,10 @@ final class DocumentProfile extends Component
         'principal_signature' => ['principalSignatureUpload', 'principalSignaturePath', 'principal_signature_path'],
         'registrar_signature' => ['registrarSignatureUpload', 'registrarSignaturePath', 'registrar_signature_path'],
         'school_stamp' => ['schoolStampUpload', 'schoolStampPath', 'school_stamp_path'],
+        // The watermark image rides the same list, which is the point of the
+        // list: it gets content-hashed storage, the preview, the remove
+        // control and delete-on-replace with no extra code.
+        'watermark' => ['watermarkUpload', 'watermarkImagePath', 'watermark_image_path'],
     ];
 
     /**
@@ -315,6 +336,10 @@ final class DocumentProfile extends Component
         $this->principalSignaturePath = (string) ($row->principal_signature_path ?? '');
         $this->registrarSignaturePath = (string) ($row->registrar_signature_path ?? '');
         $this->schoolStampPath = (string) ($row->school_stamp_path ?? '');
+        $this->watermarkEnabled = (bool) ($row->watermark_enabled ?? false);
+        $this->watermarkText = (string) ($row->watermark_text ?? '');
+        $this->watermarkImagePath = (string) ($row->watermark_image_path ?? '');
+        $this->watermarkOpacity = (int) ($row->watermark_opacity ?? 8);
     }
 
     public function save(SaveDocumentProfile $save): void
@@ -362,6 +387,10 @@ final class DocumentProfile extends Component
                 'principal_signature_path' => $this->principalSignaturePath ?: null,
                 'registrar_signature_path' => $this->registrarSignaturePath ?: null,
                 'school_stamp_path' => $this->schoolStampPath ?: null,
+                'watermark_enabled' => $this->watermarkEnabled,
+                'watermark_text' => $this->watermarkText ?: null,
+                'watermark_image_path' => $this->watermarkImagePath ?: null,
+                'watermark_opacity' => $this->watermarkOpacity,
             ], $user->toAuditActor());
         } catch (ValidationException $e) {
             foreach ($e->validator->errors()->messages() as $field => $messages) {

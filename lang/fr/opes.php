@@ -235,6 +235,15 @@ return [
         'save' => 'Enregistrer',
         'actions' => 'Actions',
         'new' => 'Nouveau',
+        'clear' => 'Effacer',
+    ],
+
+    // Impression des étiquettes du registre des immobilisations.
+    'assets' => [
+        'print_label' => "Imprimer l'étiquette",
+        'print_label_sheet' => "Imprimer la planche d'étiquettes",
+        'select_for_label' => "Sélectionner pour impression d'étiquette",
+        'selected_count' => ':count sélectionné(s)',
     ],
     // Gestion des utilisateurs, docs/specs/09-ui.md section 8.10.
     'users' => [
@@ -3053,6 +3062,16 @@ return [
         'hint_principal_signature_path' => 'Imprimée au-dessus de la ligne de signature du Proviseur.',
         'hint_registrar_signature_path' => "Imprimée au-dessus de la ligne de signature du Censeur.",
         'hint_school_stamp_path' => 'Imprimé à côté des signatures sur les certificats.',
+        'watermark' => "Filigrane de l'établissement",
+        'watermark_hint' => "Une marque discrète imprimée derrière chaque document. Elle s'ajoute à DUPLICATA, ANNULÉ et SPÉCIMEN, sans jamais les remplacer.",
+        'watermark_enabled' => 'Activé',
+        'watermark_enabled_hint' => 'Imprimer le filigrane derrière chaque document.',
+        'watermark_text' => 'Texte du filigrane',
+        'watermark_text_hint' => "En général le nom de l'établissement. Ignoré si une image est fournie.",
+        'watermark_opacity' => 'Opacité',
+        'watermark_opacity_hint' => "En dessous de 5 % il s'imprime à peine ; au-delà de 15 % il gêne la lecture.",
+        'watermark_image' => 'Image du filigrane',
+        'watermark_image_hint' => 'Des armoiries ou une marque, imprimées à la place du texte.',
         'hint_default_document_language' => "Utilisée si ni l'appelant ni la section n'en précise une.",
         'hint_bilingual_documents' => "Imprimer ensemble les noms anglais et français.",
         'title' => 'Identité de l’établissement',
