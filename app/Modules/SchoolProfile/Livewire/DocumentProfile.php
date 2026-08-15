@@ -80,6 +80,26 @@ final class DocumentProfile extends Component
     {
         Gate::authorize(Permission::SettingEdit->value);
 
+        $this->hydrateFromDatabase();
+    }
+
+    /**
+     * Discard in-progress edits and re-read the persisted row. The shared
+     * <x-settings-form> Cancel control calls this, and clears its own dirty
+     * flag on the same click - so Cancel means "put it back", not "leave the
+     * screen", which is the one thing a settings Cancel must never be
+     * ambiguous about.
+     */
+    public function cancel(): void
+    {
+        Gate::authorize(Permission::SettingEdit->value);
+
+        $this->resetErrorBag();
+        $this->hydrateFromDatabase();
+    }
+
+    private function hydrateFromDatabase(): void
+    {
         $row = DB::table('school_document_profiles')->where('id', 1)->first();
 
         if ($row === null) {
@@ -154,7 +174,11 @@ final class DocumentProfile extends Component
             return;
         }
 
-        session()->flash('status', __('opes.school_identity.saved'));
+        // A browser event rather than a session flash: the shared
+        // <x-settings-form> listens for it to clear its dirty flag and raise
+        // the toast, and a Livewire round trip does not reload the page a
+        // session flash would need.
+        $this->dispatch('settings-saved');
     }
 
     /**
