@@ -93,6 +93,8 @@ use App\Modules\Students\Livewire\Students\Index as StudentsIndex;
 use App\Modules\Students\Livewire\Students\Show as StudentsShow;
 use App\Modules\Welfare\Livewire\Discipline\CaseShow as DisciplineCaseShow;
 use App\Modules\Welfare\Livewire\Discipline\Index as DisciplineIndex;
+use App\Modules\Activities\Livewire\Index as ActivitiesIndex;
+use App\Modules\Activities\Livewire\Show as ActivitiesShow;
 use App\Modules\Welfare\Livewire\Hostel\Index as HostelIndex;
 use App\Modules\Welfare\Livewire\Hostel\RoomShow as HostelRoomShow;
 use App\Modules\Welfare\Livewire\Insurance\Index as InsuranceIndex;
@@ -281,6 +283,8 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('welfare.medical.index', MedicalIndex::class);
         Livewire::component('welfare.visitors.index', VisitorsIndex::class);
         Livewire::component('welfare.insurance.index', InsuranceIndex::class);
+        Livewire::component('activities.index', ActivitiesIndex::class);
+        Livewire::component('activities.show', ActivitiesShow::class);
         Livewire::component('assets.index', AssetsIndex::class);
         Livewire::component('inventory.index', InventoryIndex::class);
         Livewire::component('library.index', LibraryIndex::class);
