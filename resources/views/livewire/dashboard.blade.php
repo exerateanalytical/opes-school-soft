@@ -129,7 +129,25 @@
                             <span class="text-sm font-semibold text-charcoal">{{ $alert->label }}</span>
                         </div>
                         <p class="mt-1 text-sm text-charcoal/80">{{ $alert->detail }}</p>
-                        @if ($alert->remedy !== '')
+                        @if (str_starts_with($alert->key, 'backup.') || $alert->key === 'queue.heartbeat')
+                            {{-- A school administrator gets a BUTTON, not a
+                                 shell command: /operations/backups exists, is
+                                 in the sidebar, and has a run control. The
+                                 artisan command in the remedy string belongs
+                                 to whoever runs the server, so it is tucked
+                                 behind a disclosure rather than printed as
+                                 the instruction. --}}
+                            @can('backup.run')
+                                <a href="{{ route('operations.backups') }}"
+                                   class="mt-2 inline-block rounded-lg border border-primary bg-primary px-3.5 py-2 text-sm font-medium text-white transition hover:bg-primary/90">
+                                    {{ __('opes.dashboard.run_a_backup') }}
+                                </a>
+                            @endcan
+                            <details class="mt-2 text-xs text-charcoal/55">
+                                <summary class="cursor-pointer">{{ __('opes.dashboard.for_your_it_provider') }}</summary>
+                                <p class="mt-1">{{ __('opes.dashboard.it_provider_backup_note') }}</p>
+                            </details>
+                        @elseif ($alert->remedy !== '')
                             {{-- The remedy is the whole point. A red light with
                                  no instruction is anxiety, not information
                                  (08-operations 7). --}}

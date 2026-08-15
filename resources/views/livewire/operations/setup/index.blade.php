@@ -44,6 +44,12 @@
                     <p class="mt-1 text-xs text-slate-500">
                         {{ __('opes.setup_screen.owner') }}: <strong>{{ $check['owner'] }}</strong>
                     </p>
+                    @if ($check['fix_href'] !== null)
+                        <a href="{{ $check['fix_href'] }}"
+                           class="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+                            {{ __('opes.setup_screen.fix_this') }}
+                        </a>
+                    @endif
                 @endif
             </article>
         @endforeach
