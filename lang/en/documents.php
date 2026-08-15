@@ -384,6 +384,13 @@ return [
         'stamp' => 'School stamp',
     ],
 
+    'assessment' => [
+        'broadsheet_title' => 'Class Broadsheet',
+        'broadsheet_student' => 'Student',
+        'broadsheet_average' => 'Average',
+        'broadsheet_rank' => 'Rank',
+    ],
+
     'assets' => [
         'no_barcode' => 'No scannable tag',
         'label_sheet_title' => 'Asset labels',

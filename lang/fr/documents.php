@@ -378,6 +378,13 @@ return [
         'stamp' => "Cachet de l'établissement",
     ],
 
+    'assessment' => [
+        'broadsheet_title' => 'Tableau de notes de la classe',
+        'broadsheet_student' => 'Élève',
+        'broadsheet_average' => 'Moyenne',
+        'broadsheet_rank' => 'Rang',
+    ],
+
     'assets' => [
         'no_barcode' => 'Étiquette non scannable',
         'label_sheet_title' => "Étiquettes d'immobilisations",
