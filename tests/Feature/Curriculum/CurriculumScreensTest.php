@@ -126,7 +126,6 @@ it('revises from the banner and redirects to the new draft', function () {
     $curriculum = currPublishable($manager);
     app(PublishCurriculum::class)->handle((int) $curriculum->getKey(), currActor($manager));
 
-    /** @var Curriculum $draft */
     Livewire::test(CurriculumShow::class, ['curriculum' => (int) $curriculum->getKey()])
         ->call('revise')
         ->assertRedirect();

@@ -119,7 +119,7 @@ if (! function_exists('currTopic')) {
         /** @var array{title: string} $data */
         $data = [
             'title' => 'Topic '.fake()->unique()->numberBetween(1, 999_999),
-            'learning_outcome' => 'Learners can '.fake()->words(3, true).'.',
+            'learning_outcome' => 'Learners can apply concept '.fake()->unique()->numberBetween(1, 999_999).'.',
             ...$overrides,
         ];
 
@@ -136,7 +136,7 @@ if (! function_exists('currCompetency')) {
         /** @var array{code: string, descriptor: string} $data */
         $data = [
             'code' => 'COMP-'.fake()->unique()->numberBetween(1, 999_999),
-            'descriptor' => 'Masters '.fake()->words(3, true).'.',
+            'descriptor' => 'Masters skill '.fake()->unique()->numberBetween(1, 999_999).'.',
             ...$overrides,
         ];
 

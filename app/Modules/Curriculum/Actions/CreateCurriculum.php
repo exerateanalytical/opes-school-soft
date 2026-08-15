@@ -58,7 +58,7 @@ final class CreateCurriculum
             'class_level_id' => 'class_levels',
             'academic_year_id' => 'academic_years',
         ] as $field => $table) {
-            if (! DB::table($table)->whereKey($data[$field])->exists()) {
+            if (! DB::table($table)->where('id', $data[$field])->exists()) {
                 throw ValidationException::withMessages([
                     $field => 'The referenced record does not exist.',
                 ]);
