@@ -309,6 +309,15 @@ enum Role: string
                 Permission::InventoryView, Permission::InventoryManage,
                 Permission::InventoryPost,
                 Permission::AssetView, Permission::AssetManage,
+                // Asset labels are the store keeper's own paperwork - the
+                // sticker on the projector and the stock-take sheet - and
+                // every PDF in this platform goes through RenderDocument,
+                // which gates on documents.print. Without this the ONLY role
+                // holding asset.view could not print an asset label at all,
+                // and no other role holds both halves. Print only: never
+                // reprint, never the financial reprint, never the override
+                // gate - a label carries no series number to reprint.
+                Permission::DocumentsPrint,
             ],
 
             self::Nurse => [
