@@ -45,6 +45,19 @@ final class BrandPalette
     }
 
     /**
+     * Darken toward black by $fraction (0..1). Public because BrandTokens
+     * derives the sidebar chrome from the school's secondary colour and must
+     * use the SAME relationship the built-in Heritage palette has, rather
+     * than a second, subtly different shading rule of its own.
+     */
+    public static function darken(string $hex, float $fraction): string
+    {
+        self::assertHex($hex);
+
+        return self::shade($hex, -abs($fraction));
+    }
+
+    /**
      * A negative $amount darkens toward black; this never lightens, because
      * the two derived shades only ever need to sit BELOW the picked colour.
      */
