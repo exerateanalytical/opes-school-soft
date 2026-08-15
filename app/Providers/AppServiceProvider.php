@@ -97,6 +97,8 @@ use App\Modules\Welfare\Livewire\Discipline\CaseShow as DisciplineCaseShow;
 use App\Modules\Welfare\Livewire\Discipline\Index as DisciplineIndex;
 use App\Modules\Activities\Livewire\Index as ActivitiesIndex;
 use App\Modules\Activities\Livewire\Show as ActivitiesShow;
+use App\Modules\Curriculum\Livewire\Index as CurriculumIndex;
+use App\Modules\Curriculum\Livewire\Show as CurriculumShow;
 use App\Modules\Welfare\Livewire\Hostel\Index as HostelIndex;
 use App\Modules\Welfare\Livewire\Hostel\RoomShow as HostelRoomShow;
 use App\Modules\Welfare\Livewire\Insurance\Index as InsuranceIndex;
@@ -287,6 +289,18 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('welfare.insurance.index', InsuranceIndex::class);
         Livewire::component('activities.index', ActivitiesIndex::class);
         Livewire::component('activities.show', ActivitiesShow::class);
+
+        // Curriculum and Alumni need the same explicit names Activities got:
+        // Livewire's convention-based lookup derives a component name from the
+        // class's path under app/Livewire, and a module class living at
+        // app/Modules/<Module>/Livewire resolves to the nonsense name
+        // `app.modules.<module>.livewire`, which nothing has registered - so
+        // routing straight to the class 500s with ComponentNotFoundException
+        // the moment the page is opened. Every module screen above is here for
+        // this reason; these two were merged from branches whose screen suites
+        // never got a confirming run, so the gap reached the demo.
+        Livewire::component('curriculum.index', CurriculumIndex::class);
+        Livewire::component('curriculum.show', CurriculumShow::class);
         Livewire::component('assets.index', AssetsIndex::class);
         Livewire::component('inventory.index', InventoryIndex::class);
         Livewire::component('library.index', LibraryIndex::class);
