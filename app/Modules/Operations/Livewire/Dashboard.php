@@ -84,6 +84,17 @@ final class Dashboard extends Component
         'queue.heartbeat' => Permission::SettingEdit,
         'queue.failed_jobs' => Permission::SettingEdit,
         'audit.chain' => Permission::AuditView,
+        // CollectHealth's own fallback, and the reason a Teacher used to see
+        // the words "LedgerIntegrityCheck" and "This action is unauthorized"
+        // on their landing screen: LedgerIntegrityCheck runs
+        // VerifyLedgerIntegrity, which Gate::authorize's ledger.view, so for
+        // any signed-in user without it the check THROWS and is wrapped as
+        // `check.error` carrying the class name and the exception message.
+        // A check that could not run is an operator fact - the same
+        // reasoning as every other row in this map - so it goes to whoever
+        // can act on it, and stops being a raw stack-trace fragment rendered
+        // at a teacher.
+        'check.error' => Permission::SettingView,
     ];
 
     /**

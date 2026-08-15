@@ -1,129 +1,119 @@
-<div class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.dashboard.title') }}</h1>
+{{-- The landing screen, composed PER ROLE (09-ui §3).
 
-        {{-- Which identity is producing this (filtered) screen. Makes a role
-             demonstration legible, and is a useful orientation cue for a real
-             user who holds more than one account. --}}
-        @if ($signedInAs !== null)
-            <p class="text-xs text-charcoal/70">
-                {{ __('opes.dashboard.signed_in_as') }}:
-                <span class="font-semibold text-charcoal">{{ $signedInAs['name'] }}</span>
-                @if ($signedInAs['role'] !== null)
-                    <span aria-hidden="true">·</span>
-                    <span class="font-semibold text-charcoal">{{ $signedInAs['role'] }}</span>
-                @endif
+     This was one screen for twenty roles, and it produced two defects an
+     audit caught: an Accountant landed on a page with zero KPI cards, and a
+     Teacher landed on one card reading "—" beside a raw authorization
+     exception. Gating the admin tiles away from other roles was correct;
+     having nothing to put in their place was not.
+
+     Spacing follows the 8pt token grid (--space-*). Do NOT reason about
+     pixel sizes from the Tailwind utility names on this page: the root
+     font-size is 17px, so gap-4 is 16px but w-72 is 306px. --}}
+<div class="min-w-0 space-y-8">
+
+    {{-- ── Greeting ─────────────────────────────────────────────────────── --}}
+    <div>
+        <h1 class="text-2xl font-bold text-charcoal">
+            {{ __('opes.dashboard.greeting', ['name' => $signedInAs['name'] ?? '']) }}
+        </h1>
+        @if (($signedInAs['role'] ?? null) !== null)
+            {{-- Which identity is producing this (filtered) screen. Makes a
+                 role demonstration legible, and orients a real user who holds
+                 more than one account. --}}
+            <p class="mt-1 text-sm text-text-secondary">
+                {{ __('opes.dashboard.greeting_role', ['role' => $signedInAs['role']]) }}
             </p>
         @endif
     </div>
 
-    @if ($financeDashboardUrl !== null)
-        <p>
-            <a href="{{ $financeDashboardUrl }}" wire:navigate
-               class="inline-flex items-center gap-2 rounded border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">
-                {{ __('opes.dashboard.go_to_finance') }}
-            </a>
-        </p>
+    {{-- ── KPI strip ────────────────────────────────────────────────────── --}}
+    @if ($panels !== [])
+        <section aria-labelledby="opes-dashboard-overview">
+            <h2 id="opes-dashboard-overview" class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+                {{ __('opes.dashboard.overview') }}
+            </h2>
+
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                @foreach ($panels as $panel)
+                    <x-kpi-card wire:key="panel-{{ $panel['key'] }}"
+                                :label="__('opes.dashboard.panel_'.$panel['key'])"
+                                :value="$panel['value']"
+                                :sub="$panel['sub'] ?? __('opes.dashboard.panel_'.$panel['key'].'_sub')"
+                                :tone="$panel['tone']"
+                                :href="$panel['route'] === null ? null : route($panel['route'], absolute: false)">
+                        <x-slot:icon>
+                            <x-opes-nav-icon :nav-key="$panel['icon']" class="h-5 w-5"/>
+                        </x-slot:icon>
+
+                        {{-- System health is the one panel whose headline is
+                             not a numeral: it carries a status pill through
+                             x-kpi-card's display slot, so it picks up the same
+                             surface, radius and badge as its neighbours rather
+                             than rendering as the one plain white rectangle in
+                             a tinted row. --}}
+                        @if ($panel['key'] === 'system_health' && $healthSummary !== null)
+                            <x-slot:display>
+                                <x-status-pill :status="$healthSummary->value"/>
+                            </x-slot:display>
+                        @endif
+                    </x-kpi-card>
+                @endforeach
+            </div>
+        </section>
+    @else
+        {{-- The empty-state rule: a role with nothing to show still lands on
+             something that says what it is and offers what it can do. Never a
+             blank grid. --}}
+        <section class="rounded-xl border border-border-primary bg-white p-6 text-center shadow-sm">
+            <p class="text-base font-medium text-charcoal">{{ __('opes.dashboard.empty_title') }}</p>
+            <p class="mx-auto mt-1 max-w-prose text-sm text-text-secondary">{{ __('opes.dashboard.empty_body') }}</p>
+        </section>
     @endif
 
-    {{-- ── Tiles. Only the four whose data actually exists (09-ui 3). Each
-         gets the mockup's coloured icon-circle; deltas stay OFF here because
-         no "vs last term" comparison exists for any of these four figures
-         yet - inventing one would violate the no-fabricated-data rule. ───── --}}
-    @if ($tileCount > 0)
-    {{-- The same capped auto-fit track as list-screen's KPI strip, so the two
-         cannot disagree. The old per-count column arms had no ceiling either:
-         a teacher's single-tile dashboard stretched one card - carrying one em
-         dash - across the full page width, which reads as a layout accident
-         rather than a stat. --}}
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] xl:[&>*]:max-w-[22rem]">
-        {{-- Identity tiles: gated on user.view, the same permission the
-             /users screen behind them is gated on. The tile links there only
-             for someone allowed to open it. A link that guarantees a 403 is
-             not a shortcut, it is a trap. --}}
-        @if ($canViewUsers)
-        <x-kpi-card :label="__('opes.dashboard.tile_users')"
-                    :value="$activeUsers"
-                    :href="$canViewUsers ? '/users' : null"
-                    tone="green">
-            <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
-            </x-slot:icon>
-        </x-kpi-card>
+    {{-- ── Quick actions ────────────────────────────────────────────────── --}}
+    @if ($quickActions !== [])
+        <section aria-labelledby="opes-dashboard-actions">
+            <h2 id="opes-dashboard-actions" class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+                {{ __('opes.dashboard.quick_actions') }}
+            </h2>
 
-        <x-kpi-card :label="__('opes.dashboard.tile_roles')" :value="$roleCount" tone="blue">
-            <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
-            </x-slot:icon>
-        </x-kpi-card>
-        @endif
-
-        {{-- Health carries a status pill rather than a number, which is why it
-             used to be hand-rolled - and why it rendered as the one plain white
-             rectangle in a row of tinted cards. x-kpi-card's `display` slot
-             covers the non-numeric case now, so this tile is a real KPI card
-             and picks up the same surface, radius and badge as its neighbours.
-             `iconBg` keeps the teal circle it has always had. --}}
-        @if ($canViewHealth)
-        <x-kpi-card :label="__('opes.dashboard.tile_health')" icon-bg="bg-badge-teal">
-            <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-            </x-slot:icon>
-            <x-slot:display>
-                <x-status-pill :status="$healthSummary->value"/>
-            </x-slot:display>
-        </x-kpi-card>
-        @endif
-
-        {{-- Null, not zero: see Dashboard::lastBackupAge(). Gated on
-             backup.run - the operator right that makes the figure
-             actionable. --}}
-        @if ($canViewBackup)
-        <x-kpi-card :label="__('opes.dashboard.tile_backup')" :value="$lastBackupAge" tone="amber">
-            <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3.5 2"/></svg>
-            </x-slot:icon>
-        </x-kpi-card>
-        @endif
-
-        {{-- Phase 8 F5: shown only to a role that holds attendance.view - the
-             same permission the /attendance route itself is gated on, so the
-             tile never links anywhere its viewer would get a 403. Null, not
-             zero, when no register has been taken yet today: see
-             Dashboard::todaysAttendanceRate(). --}}
-        @if ($canViewAttendance)
-            <x-kpi-card :label="__('opes.dashboard.tile_attendance')"
-                        :value="$todaysAttendanceRate"
-                        href="/attendance"
-                        tone="purple">
-                <x-slot:icon>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
-                </x-slot:icon>
-            </x-kpi-card>
-        @endif
-    </div>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($quickActions as $action)
+                    {{-- min-h-[88px] so a one-word card and a two-line card
+                         are the same height; the badge is 40x40 inside a 44px
+                         tap target row. --}}
+                    <a href="{{ $action['url'] }}" wire:key="action-{{ $action['key'] }}" wire:navigate
+                       class="group flex min-h-[88px] items-start gap-3 rounded-xl border border-border-primary bg-white p-4 shadow-sm transition hover:border-primary hover:shadow-md">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-kpi-green text-kpi-green-solid">
+                            <x-opes-nav-icon :nav-key="$action['icon']" class="h-5 w-5"/>
+                        </span>
+                        <span class="min-w-0">
+                            <span class="block font-semibold text-charcoal group-hover:text-primary">{{ $action['label'] }}</span>
+                            <span class="mt-0.5 block text-sm text-text-secondary">{{ $action['description'] }}</span>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </section>
     @endif
 
     {{-- ── "What's open right now" (08-operations §6.4). The panel decides
-         its own visibility (fee.view or ledger.view - the Bursar, Accountant,
-         Principal, Administrator set the spec names) and renders nothing for
+         its own visibility (fee.view or ledger.view) and renders nothing for
          anyone else. --}}
     @livewire(\App\Modules\Operations\Livewire\WhatsOpenPanel::class)
 
     {{-- ── Alerts ───────────────────────────────────────────────────────── --}}
     <section aria-labelledby="opes-alerts">
-        <h2 id="opes-alerts" class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+        <h2 id="opes-alerts" class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
             {{ __('opes.dashboard.alerts') }}
         </h2>
 
         @if ($alerts === [])
-            <div class="mt-2">
-                <x-empty-state :message="__('opes.dashboard.no_alerts')"/>
-            </div>
+            <x-empty-state :message="__('opes.dashboard.no_alerts')"/>
         @else
-            <ul class="mt-2 space-y-2">
+            <ul class="space-y-2">
                 @foreach ($alerts as $alert)
-                    <li class="rounded border border-border-primary bg-white px-4 py-3">
+                    <li class="rounded-xl border border-border-primary bg-white px-4 py-3 shadow-sm">
                         <div class="flex flex-wrap items-center gap-2">
                             <x-status-pill :status="$alert->status->value"/>
                             <span class="text-sm font-semibold text-charcoal">{{ $alert->label }}</span>
@@ -161,36 +151,4 @@
             </ul>
         @endif
     </section>
-
-    {{-- Quick actions render as the gold-bordered sidebar box the mockups
-         show (see layouts/app.blade.php's @stack('sidebar-quick-actions')),
-         not inline in the page body - this keeps the same treatment on
-         every screen that pushes its own action list. --}}
-    @push('sidebar-quick-actions')
-        <div class="mx-3 mt-auto rounded-lg border border-heritage-yellow/70 p-3">
-            <h2 class="text-xs font-bold uppercase tracking-wide text-heritage-yellow">
-                {{ __('opes.dashboard.quick_actions') }}
-            </h2>
-            <ul class="mt-2 space-y-1">
-                @foreach ($quickActions as $action)
-                    <li>
-                        @if (is_string($action['route']))
-                            <a href="{{ $action['route'] }}"
-                               class="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-white/90 hover:bg-chrome-light">
-                                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-heritage-yellow" aria-hidden="true"></span>
-                                {{ $action['label'] }}
-                            </a>
-                        @else
-                            <span aria-disabled="true"
-                                  title="{{ __('opes.nav.nav_disabled_title') }}"
-                                  class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
-                                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/30" aria-hidden="true"></span>
-                                {{ $action['label'] }}
-                            </span>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-    @endpush
 </div>

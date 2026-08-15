@@ -37,12 +37,17 @@ it('shows the number of active users', function () {
     Livewire::test(Dashboard::class)->assertSee('5');
 });
 
-it('surfaces a red health check with the command that fixes it', function () {
+it('surfaces a red health check with the control that fixes it', function () {
     // A fresh install has no backup, so backup.recency is red. That must reach
-    // the operator rather than sitting in a CLI command nobody runs (09-ui 3.4).
+    // the operator rather than sitting in a CLI command nobody runs (09-ui 3.4)
+    // - and since commit 80da7eb it reaches them as a BUTTON to
+    // /operations/backups, not as an artisan invocation. This assertion still
+    // read `opes:backup:run` and had been failing since that change.
     actingAs(dashUser());
 
-    Livewire::test(Dashboard::class)->assertSee('opes:backup:run');
+    Livewire::test(Dashboard::class)
+        ->assertSee(__('opes.dashboard.run_a_backup'))
+        ->assertDontSee('opes:backup:run');
 });
 
 it('renders a dash rather than zero for a metric with no data', function () {
