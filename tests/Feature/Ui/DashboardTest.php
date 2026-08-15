@@ -69,3 +69,22 @@ it('renders through the real route, not just the component', function () {
     // would leave every other test in this file green.
     actingAs(dashUser())->get('/dashboard')->assertOk()->assertSee('OPES');
 });
+
+it('does not offer a backup button on an alert a backup cannot fix', function () {
+    // Task 44 caught this by looking: "Background tasks — the background task
+    // runner has never reported in" carried a "Run a backup" button. Running a
+    // backup does not restart a dead scheduler. It shares the disclosure with
+    // the backup alerts only so its artisan remedy stays out of an
+    // administrator's face; it must not share the button.
+    actingAs(dashUser());
+
+    $html = Livewire::test(Dashboard::class)->html();
+    $heartbeat = strpos($html, (string) __('opes.health.queue_heartbeat.never_detail'));
+
+    expect($heartbeat)->not->toBeFalse();
+
+    // The next alert control after the heartbeat detail must not be the button.
+    $after = substr($html, $heartbeat, 600);
+
+    expect($after)->not->toContain(__('opes.dashboard.run_a_backup'));
+});

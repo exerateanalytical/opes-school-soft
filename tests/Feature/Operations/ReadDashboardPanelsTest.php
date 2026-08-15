@@ -6,6 +6,7 @@ use App\Modules\Identity\Domain\Role;
 use App\Modules\Operations\Actions\ReadDashboardPanels;
 use App\Modules\Operations\Domain\RoleDashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 require_once __DIR__.'/../Reporting/P13CoreHelpers.php';
 
@@ -67,4 +68,45 @@ it('gives every panel a tone from the semantic set', function (): void {
             expect(['green', 'blue', 'amber', 'pink', 'purple'])->toContain($read['tone']);
         }
     }
+});
+
+it('explains WHY a panel is blank rather than leaving the generic sub-line under a dash', function (): void {
+    // Task 44 caught this by looking: a Teacher with no staff record saw three
+    // cards reading "—" under sub-lines that described the metric and said
+    // nothing about the reason. A dash with no explanation reads as a broken
+    // page, which is precisely the "made by an amateur" complaint.
+    p13coreUserAs(Role::Teacher);
+
+    foreach (['my_classes', 'my_timetable_today', 'registers_not_taken'] as $panel) {
+        $read = app(ReadDashboardPanels::class)->read($panel);
+
+        expect($read['value'])->toBeNull()
+            ->and($read['sub'])->not->toBeNull();
+    }
+});
+
+it('reads the last healthy backup instead of always printing a dash', function (): void {
+    p13coreUserAs(Role::SuperAdmin);
+
+    DB::table('backups')->insert([
+        'kind' => 'full',
+        'status' => 'completed',
+        'path' => 'backups/one.sql.gz',
+        'started_at' => now()->subHour(),
+        'completed_at' => now()->subMinutes(30),
+        'verified_at' => now()->subMinutes(20),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect(app(ReadDashboardPanels::class)->read('last_backup')['value'])->not->toBeNull();
+});
+
+it('says no backup has ever completed rather than showing a bare dash', function (): void {
+    p13coreUserAs(Role::SuperAdmin);
+
+    $read = app(ReadDashboardPanels::class)->read('last_backup');
+
+    expect($read['value'])->toBeNull()
+        ->and($read['sub'])->not->toBeNull();
 });
