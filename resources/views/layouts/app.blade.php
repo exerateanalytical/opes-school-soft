@@ -293,6 +293,13 @@
                                 </form>
                             @endforeach
                         </div>
+                        {{-- The staff shell had no own-account screen at all,
+                             so this menu offered a name, a language toggle and
+                             a way out. --}}
+                        <a href="/account"
+                           class="block border-t border-border-primary px-3 py-2 text-sm text-charcoal hover:bg-sand">
+                            {{ __('opes.account.title') }}
+                        </a>
                         <form method="POST" action="/logout">
                             @csrf
                             <button type="submit"
@@ -303,16 +310,21 @@
                     </div>
                 </div>
 
-                {{-- Settings has no route yet (Navigation marks it disabled),
-                     so the gear is an inert control that says so - same
-                     convention as a disabled sidebar item, never a dead link. --}}
-                <span title="{{ __('opes.nav.nav_disabled_title') }}" aria-disabled="true"
-                      class="hidden cursor-not-allowed rounded-full p-2 text-charcoal/40 lg:inline-flex">
+                {{-- /settings has existed since the wiring pass and is in the
+                     sidebar; the comment that used to sit here claiming
+                     otherwise outlived the route by several phases. Behind
+                     setting.view because the route is - a link the holder's
+                     permissions refuse is the one thing the nav contract
+                     forbids offering. --}}
+                @can('setting.view')
+                <a href="{{ route('settings.index') }}" title="{{ __('opes.nav.settings') }}"
+                   class="hidden rounded-full p-2 text-charcoal/60 transition hover:bg-sand hover:text-primary lg:inline-flex">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <circle cx="12" cy="12" r="3"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>
                     </svg>
-                </span>
+                </a>
+                @endcan
             </div>
         </header>
 
