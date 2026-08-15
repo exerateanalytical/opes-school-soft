@@ -49,8 +49,13 @@ final class PrintTestimonial
 
         $conduct = $this->reads->disciplineSummary($studentId);
 
+        // The facts window: the enrollment period. The upper bound for a
+        // still-enrolled student is the ACADEMIC YEAR end, not "today" -
+        // registers cannot exist beyond the year, so the wider bound is
+        // harmless, while "today" would clip an enrollment whose year runs
+        // ahead of the calendar and conjure an empty denominator.
         $rangeFrom = (string) $enrollment->enrolled_on;
-        $rangeTo = (string) ($enrollment->left_on ?? Carbon::now()->toDateString());
+        $rangeTo = (string) ($enrollment->left_on ?? max($enrollment->year_ends_on, Carbon::now()->toDateString()));
         $attendance = $this->reads->attendanceInRange($enrollment->id, $rangeFrom, $rangeTo);
 
         $fullName = $this->reads->fullName($student);
@@ -65,7 +70,10 @@ final class PrintTestimonial
                 ),
                 'body' => trim($body),
                 'attended_from' => Carbon::parse($student->first_admission_date ?? $enrollment->enrolled_on)->format('d/m/Y'),
-                'attended_to' => Carbon::parse($rangeTo)->format('d/m/Y'),
+                // Displayed 'to' stays honest: departure date, or today
+                // for a still-enrolled student - never the computation's
+                // year-end upper bound.
+                'attended_to' => Carbon::parse((string) ($enrollment->left_on ?? Carbon::now()->toDateString()))->format('d/m/Y'),
                 'level' => $enrollment->level_name,
                 'enrollment_status' => $enrollment->status,
                 // Facts print only where the underlying registers exist -

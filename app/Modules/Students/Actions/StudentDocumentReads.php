@@ -67,8 +67,8 @@ final class StudentDocumentReads
      * @return object{id: int, student_id: int, academic_year_id: int, status: string,
      *     enrolled_on: string, left_on: string|null, financial_clearance: int|bool,
      *     previous_school_name: string|null, school_section_id: int,
-     *     year_name: string, level_name: string, section_name: string,
-     *     section_name_fr: string}
+     *     year_name: string, year_ends_on: string, level_name: string,
+     *     section_name: string, section_name_fr: string}
      */
     public function latestEnrollment(int $studentId, bool $requireLive = false): object
     {
@@ -82,7 +82,7 @@ final class StudentDocumentReads
             $query->whereIn('enr.status', ['pending', 'active', 'suspended']);
         }
 
-        /** @var object{id: int, student_id: int, academic_year_id: int, status: string, enrolled_on: string, left_on: string|null, financial_clearance: int|bool, previous_school_name: string|null, school_section_id: int, year_name: string, level_name: string, section_name: string, section_name_fr: string}|null $enrollment */
+        /** @var object{id: int, student_id: int, academic_year_id: int, status: string, enrolled_on: string, left_on: string|null, financial_clearance: int|bool, previous_school_name: string|null, school_section_id: int, year_name: string, year_ends_on: string, level_name: string, section_name: string, section_name_fr: string}|null $enrollment */
         $enrollment = $query
             ->orderByDesc('enr.enrolled_on')
             ->orderByDesc('enr.id')
@@ -90,7 +90,7 @@ final class StudentDocumentReads
                 'enr.id', 'enr.student_id', 'enr.academic_year_id', 'enr.status',
                 'enr.enrolled_on', 'enr.left_on', 'enr.financial_clearance',
                 'enr.previous_school_name', 'enr.school_section_id',
-                'ay.name as year_name', 'cl.name as level_name',
+                'ay.name as year_name', 'ay.ends_on as year_ends_on', 'cl.name as level_name',
                 'ss.name as section_name', 'ss.name_fr as section_name_fr',
             ]);
 

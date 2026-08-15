@@ -240,6 +240,37 @@ it('computes the attendance rate from registers actually taken and keys the snap
     expect($other->html)->toContain('100%');
 });
 
+// ------------------------------------------------------------ reachability
+
+it('serves the bonafide PDF inline over the profile route', function (): void {
+    sdocUserAs(Role::Registrar);
+    $fixture = sdocEnrollment();
+
+    $response = Pest\Laravel\get('/students/'.$fixture['enrollment']->student_id.'/documents/bonafide/print');
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/pdf');
+    expect($response->headers->get('Content-Disposition'))->toContain('inline');
+});
+
+it('returns the refusal as a 422 plain-text message over the route', function (): void {
+    sdocUserAs(Role::Registrar);
+    $fixture = sdocEnrollment(['status' => 'withdrawn', 'left_on' => '2027-01-15']);
+
+    $response = Pest\Laravel\get('/students/'.$fixture['enrollment']->student_id.'/documents/transfer-certificate/print');
+
+    $response->assertStatus(422);
+    expect($response->getContent())->toContain('Financial clearance');
+});
+
+it('denies the document routes to a holder of students.view without documents.print', function (): void {
+    sdocUserAs(Role::Teacher);
+    $fixture = sdocEnrollment();
+
+    Pest\Laravel\get('/students/'.$fixture['enrollment']->student_id.'/documents/bonafide/print')
+        ->assertForbidden();
+});
+
 // ------------------------------------------------- §2.3 forbidden strings
 
 it('sweeps every rendered document for the §2.2 forbidden strings', function (): void {
