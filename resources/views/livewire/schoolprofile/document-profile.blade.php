@@ -68,16 +68,48 @@
         <x-settings-fieldset :heading="__('opes.school_identity.marks')"
                              :hint="__('opes.school_identity.marks_hint')">
             @foreach ([
-                'logoPath' => 'logo_path', 'crestPath' => 'crest_path',
-                'principalSignaturePath' => 'principal_signature_path',
-                'registrarSignaturePath' => 'registrar_signature_path',
-                'schoolStampPath' => 'school_stamp_path',
-            ] as $model => $key)
+                ['crest', 'crestUpload', 'crestPath', 'crest_path'],
+                ['logo', 'logoUpload', 'logoPath', 'logo_path'],
+                ['principal_signature', 'principalSignatureUpload', 'principalSignaturePath', 'principal_signature_path'],
+                ['registrar_signature', 'registrarSignatureUpload', 'registrarSignaturePath', 'registrar_signature_path'],
+                ['school_stamp', 'schoolStampUpload', 'schoolStampPath', 'school_stamp_path'],
+            ] as [$slot, $uploadModel, $pathModel, $key])
                 <x-settings-field :label="__('opes.school_identity.'.$key)"
                                   :hint="__('opes.school_identity.hint_'.$key)"
-                                  :error="$errors->first($key)">
-                    <input type="text" wire:model="{{ $model }}"
-                           class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                  :error="$errors->first($uploadModel) ?: $errors->first($key)">
+                    <div class="flex items-start gap-3">
+                        {{-- The preview. wire:key on the wrapper so Livewire
+                             replaces the thumbnail when the path changes
+                             instead of reusing a stale img. --}}
+                        <span wire:key="preview-{{ $slot }}-{{ $$pathModel }}"
+                              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-primary bg-sand">
+                            @if ($$uploadModel !== null)
+                                <img src="{{ $$uploadModel->temporaryUrl() }}" alt="" class="max-h-full max-w-full object-contain">
+                            @elseif ($$pathModel !== '')
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($$pathModel) }}"
+                                     alt="" class="max-h-full max-w-full object-contain">
+                            @else
+                                <span class="text-xs text-charcoal/40">{{ __('opes.school_identity.no_image') }}</span>
+                            @endif
+                        </span>
+
+                        <div class="min-w-0 flex-1">
+                            <input type="file" wire:model="{{ $uploadModel }}"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-sm text-charcoal file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90">
+
+                            <div wire:loading wire:target="{{ $uploadModel }}" class="mt-1 text-xs text-text-secondary">
+                                {{ __('opes.school_identity.uploading') }}
+                            </div>
+
+                            @if ($$pathModel !== '')
+                                <button type="button" wire:click="removeImage('{{ $slot }}')"
+                                        class="mt-1 text-xs font-medium text-danger hover:underline">
+                                    {{ __('opes.school_identity.remove_image') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
                 </x-settings-field>
             @endforeach
         </x-settings-fieldset>
