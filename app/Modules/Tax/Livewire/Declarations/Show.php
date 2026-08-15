@@ -177,11 +177,29 @@ final class Show extends Component
         $unmappedForm = $declaration->declaration_type !== DeclarationTypeCode::DsfAnnual->value
             && ($formBoxes === null || $formBoxes === []);
 
+        $isWithholding = $declaration->declaration_type === DeclarationTypeCode::WithholdingMonthly->value;
+
+        // The attestations issued for this declaration's period. The print
+        // route existed and worked but nothing anywhere linked it, so an
+        // issued attestation could only be reached by typing its URL.
+        // Period-matched, not FK-matched: tax_declaration_id is only set
+        // when the declaration is generated FROM the attestations, and an
+        // attestation issued afterwards would silently vanish from the list.
+        $attestations = $isWithholding
+            ? \Illuminate\Support\Facades\DB::table('withholding_attestations as wa')
+                ->join('suppliers as s', 's.id', '=', 'wa.supplier_id')
+                ->where('wa.period_month', $declaration->period_month)
+                ->where('wa.period_year', $declaration->period_year)
+                ->orderBy('wa.id')
+                ->get(['wa.id', 'wa.attestation_no', 'wa.status', 'wa.withheld_amount', 's.name as supplier_name'])
+            : collect();
+
         return view('livewire.tax.declarations.show', [
             'declaration' => $declaration,
             'unmappedForm' => $unmappedForm,
             'isDsf' => $declaration->declaration_type === DeclarationTypeCode::DsfAnnual->value,
-            'isWithholding' => $declaration->declaration_type === DeclarationTypeCode::WithholdingMonthly->value,
+            'isWithholding' => $isWithholding,
+            'attestations' => $attestations,
         ]);
     }
 }

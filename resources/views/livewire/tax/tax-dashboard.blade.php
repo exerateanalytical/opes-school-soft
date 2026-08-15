@@ -6,12 +6,23 @@
     automated filing.
 --}}
 <div class="mx-auto max-w-6xl space-y-6 p-4">
-    <div>
-        <h1 class="text-xl font-semibold text-charcoal">Tax &amp; declarations</h1>
-        <p class="text-sm text-charcoal/70">
-            This system generates figures and exports; it never files anything.
-            Declarations are filed by the bursar on impots.cm and recorded here with their acknowledgement.
-        </p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold text-charcoal">Tax &amp; declarations</h1>
+            <p class="text-sm text-charcoal/70">
+                This system generates figures and exports; it never files anything.
+                Declarations are filed by the bursar on impots.cm and recorded here with their acknowledgement.
+            </p>
+        </div>
+        {{-- The declarations REGISTER had zero inbound links: this dashboard
+             is the sidebar's Tax target, so the door belongs here. Behind
+             tax.declare, matching the route. --}}
+        @can('tax.declare')
+            <a href="{{ route('tax.declarations.index') }}"
+               class="rounded-lg border border-border-primary px-3.5 py-2 text-sm font-medium text-charcoal transition hover:border-primary/50 hover:bg-sand hover:text-primary">
+                {{ __('opes.tax.declarations') }}
+            </a>
+        @endcan
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">

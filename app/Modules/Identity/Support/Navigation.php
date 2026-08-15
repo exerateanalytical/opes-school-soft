@@ -37,6 +37,13 @@ final class Navigation
             // In-platform messaging: open to any authenticated user,
             // membership-gated rather than RBAC-gated (00-core §6.2).
             ['key' => 'messages', 'route' => '/messages', 'permission' => null, 'enabled' => true, 'built' => true],
+            // The route's own comment calls /marks "the single highest-
+            // traffic academic screen", and a 244-page crawl found zero links
+            // to it anywhere in the product - a teacher could reach their
+            // primary daily task only by typing the URL. Gated on
+            // marks.enter, matching the route, per this file's nav-and-route-
+            // agree-by-construction contract.
+            ['key' => 'marks', 'route' => '/marks', 'permission' => Permission::MarksEnter, 'enabled' => true, 'built' => true],
             // Homework/assignments - not in the spec set, which is
             // compliance-first; gated on the same marks.enter a teacher
             // already holds.
@@ -165,6 +172,16 @@ final class Navigation
             ['key' => 'visitors', 'route' => '/visitors', 'permission' => Permission::VisitorManage, 'enabled' => true, 'built' => true],
             // Phase 10 W5/W5: insurance (policies, enrolment, claims).
             ['key' => 'insurance', 'route' => '/insurance', 'permission' => Permission::InsuranceView, 'enabled' => true, 'built' => true],
+            // The route comment says discipline is "reached from within (the
+            // student profile's Discipline tab and the Welfare area)" - but
+            // that tab is disabled and there is no Welfare area, so the
+            // screen had zero inbound links. Gated on discipline.view,
+            // matching the route.
+            ['key' => 'discipline', 'route' => '/welfare/discipline', 'permission' => Permission::DisciplineView, 'enabled' => true, 'built' => true],
+            // The front-desk certificate check (10-documents §17.2) had no
+            // entry point anywhere. Auth-only, exactly like its route: the
+            // page holds no student data by construction.
+            ['key' => 'documents_verify', 'route' => '/documents/verify', 'permission' => null, 'enabled' => true, 'built' => true],
             // Reports hub (2026-08 build): a categorised catalogue of every
             // report screen (financial, academic, HR, procurement, welfare,
             // assets, library, tax, students) with Excel/PDF/print export.

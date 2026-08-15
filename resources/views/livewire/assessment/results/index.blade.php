@@ -106,6 +106,18 @@
     empty-message="No results match these filters yet. Period results, class statistics and publications appear here once the pipeline has run."
     rail-title="Results Overview"
 >
+    <x-slot:actions>
+        {{-- The in-context door to marks ENTRY: /results is where a teacher
+             already looks at a class's marks, and /marks had zero inbound
+             links anywhere. Behind marks.enter, matching its route. --}}
+        @can('marks.enter')
+            <a href="{{ route('marks.entry') }}"
+               class="rounded-lg border border-primary bg-primary px-3.5 py-2 text-sm font-medium text-white transition hover:bg-primary/90">
+                {{ __('opes.nav.marks') }}
+            </a>
+        @endcan
+    </x-slot:actions>
+
     <x-slot:kpis>
         <x-kpi-card label="Students with Results" :value="$kpis['students_with_results']" icon-bg="bg-primary">
             <x-slot:icon>

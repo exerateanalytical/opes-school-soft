@@ -116,6 +116,31 @@
         </form>
     @endif
 
+    {{-- The attestations already issued for this period, each with its print
+         link - the print route existed and worked but had zero inbound links
+         anywhere in the product. --}}
+    @if ($isWithholding && $attestations->isNotEmpty())
+        <section class="rounded border border-border-primary bg-white p-4">
+            <h2 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.tax.attestations_heading') }}</h2>
+            <ul class="divide-y divide-border-primary text-sm">
+                @foreach ($attestations as $attestation)
+                    <li class="flex flex-wrap items-center justify-between gap-2 py-2">
+                        <span class="min-w-0">
+                            <span class="font-medium text-charcoal">{{ $attestation->attestation_no }}</span>
+                            <span class="text-charcoal/60">— {{ $attestation->supplier_name }}</span>
+                            <span class="text-charcoal/60">· {{ number_format($attestation->withheld_amount, 0, ',', ' ') }} FCFA</span>
+                            <span class="text-charcoal/60">· {{ $attestation->status }}</span>
+                        </span>
+                        <a href="{{ route('tax.withholding-attestations.print', ['attestation' => $attestation->id]) }}"
+                           class="text-sm font-medium text-primary hover:underline">
+                            {{ __('opes.tax.print_attestation') }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     @if ($unmappedForm)
         <p class="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             Not yet mapped to the official form: the DGI form box codes are unverified, so the lines below
