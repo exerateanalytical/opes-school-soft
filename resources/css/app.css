@@ -109,10 +109,24 @@
     --color-border-primary: #DCE5DF;
     --color-border-secondary: #E7ECE9;
 
+    /* Each semantic colour has TWO roles, and conflating them was a real AA
+       failure. `--color-x` is the SURFACE role - solid pills, icon circles,
+       chart fills, borders - and stays vivid because that is the product's
+       visual character and white on it already passes. `--color-x-text` is
+       the TEXT role, the same hue darkened only as far as AA requires on
+       white AND on its own tint, because `bg-warning-bg text-warning` is a
+       pattern this codebase genuinely renders and amber-on-its-tint measured
+       2.25:1. These literals are the values BrandTokens::textRole() derives
+       for the Heritage defaults; the shell re-emits them per school as
+       unlayered custom properties, so a rebranded install gets its OWN hue
+       darkened, not these. tests/Feature/Ui/PaletteAccessibilityTest.php is
+       what keeps every one of them above 4.5. */
     --color-success: #198754;
     --color-success-bg: #EAF6EF;
+    --color-success-text: #177C4D;   /* 5.22 on white, 4.70 on #EAF6EF */
     --color-warning: #D99A20;
     --color-warning-bg: #FFF5D9;
+    --color-warning-text: #8F6615;   /* 5.15 on white, 4.74 on #FFF5D9 */
     /* Darkened from #D64545 on 2026-08-15. The old red measured 4.38:1 against
        white and the product genuinely renders white on it - `bg-heritage-red
        text-white` on the destructive buttons, and status-pill's solid red -
@@ -121,6 +135,7 @@
        what keeps it there. */
     --color-danger: #CC3D3D;
     --color-danger-bg: #FDECEC;
+    --color-danger-text: #C03939;    /* 5.41 on white, 4.73 on #FDECEC */
     --color-info: #2878C8;
     --color-info-bg: #EDF5FC;
 

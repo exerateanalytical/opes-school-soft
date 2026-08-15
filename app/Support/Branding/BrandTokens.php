@@ -42,6 +42,35 @@ final readonly class BrandTokens
     ];
 
     /**
+     * The static tint each semantic colour is rendered ON when it is used as
+     * TEXT rather than as a fill - `bg-warning-bg text-warning-text`, which
+     * portal/row, portal/icon, the status pills, the KPI cards and every
+     * inline validation error render.
+     *
+     * These mirror `--color-*-bg` in resources/css/app.css and are
+     * deliberately NOT brandable: they are ~4% saturation washes chosen so
+     * charcoal body text stays readable on them, and letting a school repaint
+     * them would break that (asserted in PaletteAccessibilityTest).
+     *
+     * @var array<string, string>
+     */
+    public const TINTS = [
+        'success' => '#EAF6EF',
+        'warning' => '#FFF5D9',
+        'danger' => '#FDECEC',
+    ];
+
+    /**
+     * The contrast a derived TEXT role must reach on white AND on its tint.
+     *
+     * Above the 4.5 AA floor on purpose. Landing a shipped token exactly ON
+     * 4.50 makes AA compliance a property of float rounding; the extra 0.15
+     * costs a barely perceptible darkening and buys a margin that survives a
+     * tint being nudged later.
+     */
+    private const TEXT_ROLE_TARGET = 4.65;
+
+    /**
      * @param  array<string, string>  $colors  keyed exactly like DEFAULTS
      */
     private function __construct(private array $colors)
@@ -90,6 +119,56 @@ final readonly class BrandTokens
     }
 
     /**
+     * The readable TEXT shade of a semantic colour.
+     *
+     * A semantic colour is used in two roles and only one of them was ever
+     * checked. As a solid FILL - a red "Overdue" pill, an amber chart mark,
+     * an icon circle - the vivid value is right and white on it passes. As
+     * TEXT it failed, badly and in the places people actually read: Heritage
+     * amber measures 2.25:1 on its own tint, success 4.08:1 on its, danger
+     * 4.27:1 on its.
+     *
+     * The fix is NOT to darken the surface colour. That would repaint the
+     * product's character - vivid amber to dark brown - on every badge, icon
+     * and chart fill where the colour carries no text and is perfectly
+     * legible. Material, Radix and Tailwind all separate these two roles, and
+     * so does this now.
+     *
+     * DERIVED rather than three more picked hexes, because the palette is
+     * user-editable: a school that types a pale amber into the warning picker
+     * must not thereby get unreadable body text, and a hard-coded text role
+     * would silently keep pointing at the OLD colour's shade. Darkening
+     * toward black scales all three channels by the same factor, so the hue
+     * the school chose survives; only the lightness moves, and only as far as
+     * AA requires.
+     */
+    public function textRole(string $token): string
+    {
+        if (! array_key_exists($token, self::TINTS)) {
+            throw new InvalidArgumentException(
+                "Brand token [{$token}] has no text role; only ".implode(', ', array_keys(self::TINTS)).' do.'
+            );
+        }
+
+        $tint = self::TINTS[$token];
+        $base = $this->get($token);
+
+        // 1% steps toward black. Bounded and always satisfied: at step 100 the
+        // candidate is black, which clears the target on white and on every
+        // tint, so the loop cannot walk off the end in practice.
+        for ($step = 0; $step <= 100; $step++) {
+            $candidate = $step === 0 ? $base : BrandPalette::darken($base, $step / 100);
+
+            if (ColorContrast::ratio($candidate, '#FFFFFF') >= self::TEXT_ROLE_TARGET
+                && ColorContrast::ratio($candidate, $tint) >= self::TEXT_ROLE_TARGET) {
+                return $candidate;
+            }
+        }
+
+        return '#000000';
+    }
+
+    /**
      * The CSS custom properties the shell layout emits into an UNLAYERED
      * <style> block in <head>.
      *
@@ -112,10 +191,17 @@ final readonly class BrandTokens
             '--color-chrome-light' => $secondary,
             '--color-primary' => $this->get('primary'),
             '--color-heritage-yellow' => $this->get('accent'),
+            // The SURFACE role: solid pills, icon circles, chart fills,
+            // borders. Stays exactly as vivid as the school picked it.
             '--color-success' => $this->get('success'),
             '--color-warning' => $this->get('warning'),
             '--color-danger' => $this->get('danger'),
             '--color-heritage-red' => $this->get('danger'),
+            // The TEXT role: the same hue, darkened only as far as AA needs
+            // on white and on its own tint. See textRole().
+            '--color-success-text' => $this->textRole('success'),
+            '--color-warning-text' => $this->textRole('warning'),
+            '--color-danger-text' => $this->textRole('danger'),
         ];
     }
 }
