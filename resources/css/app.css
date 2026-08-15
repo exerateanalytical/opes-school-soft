@@ -165,6 +165,77 @@
     --color-badge-purple: #7C3AED; /* "Super Admin" role pill; "Teachers" / "Total Payments" icon circle */
     --color-badge-orange: #F97316; /* "Administrators" KPI icon circle; "Librarian" role pill */
     --color-badge-teal: #0D9488;   /* "Students" / "Collection Rate" KPI icon circle; "Accountant" role pill */
+
+    /* --------------------------------------------------------------------
+       DESIGN TOKENS (2026-08-15). The scales every screen is composed from,
+       so a card's padding, a panel's shadow and a toast's layer are chosen
+       ONCE here rather than re-picked per screen.
+
+       SPACING IS DECLARED IN PIXELS ON PURPOSE. The root font-size of this
+       app is 17px (see the `html` rule further down), not the 16px every
+       published 8pt-grid table assumes. An 8pt grid expressed in rem against
+       a 17px root is an 8.5pt grid - silently 6% off, compounding at the
+       larger steps. Tailwind's spacing NAMES lie at this root too: `w-72`
+       renders 306px, `w-56` renders 238px. Never reason about a pixel size
+       from a utility name.
+
+       NO TYPE TOKENS ARE ISSUED HERE. The --text-* scale above was already
+       tuned against the 17px root and is on every screen in the product; a
+       second declaration inside this same @theme block would silently resize
+       the whole application. DesignTokenTest asserts each --text-* is
+       declared exactly once.
+       -------------------------------------------------------------------- */
+
+    /* 8pt grid. -1 and -3 are the half-steps the grid allows for dense
+       controls (chip padding, icon gaps); everything structural uses
+       8/16/24/32. */
+    --space-0: 0px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Radii, named by the SURFACE they belong to so a card and a chip cannot
+       drift apart across screens. These sit alongside the existing
+       --radius-sm..3xl scale (which is named by t-shirt size and consumed by
+       Tailwind's rounded-* utilities); the two do not collide because no name
+       is shared. */
+    --radius-chip: 999px;
+    --radius-control: 8px;
+    --radius-card: 12px;
+    --radius-panel: 16px;
+
+    /* Elevation. Three levels, deliberately: e1 is a resting card, e2 a
+       hovered/raised one, e3 a floating surface (modal, toast, sticky save
+       bar). A fourth level is how a UI stops reading as layered. Layered
+       shadows - a tight contact shadow plus a wide ambient one. */
+    --shadow-e1: 0 1px 2px rgba(1, 60, 31, 0.06), 0 1px 3px rgba(1, 60, 31, 0.08);
+    --shadow-e2: 0 2px 4px rgba(1, 60, 31, 0.06), 0 4px 12px rgba(1, 60, 31, 0.1);
+    --shadow-e3: 0 4px 8px rgba(1, 60, 31, 0.08), 0 16px 40px rgba(1, 60, 31, 0.14);
+
+    /* Layering, named, so nobody reaches for z-50 and wonders why the toast
+       is behind the modal. */
+    --z-base: 0;
+    --z-sticky: 20;
+    --z-drawer: 30;
+    --z-modal: 40;
+    --z-toast: 50;
+
+    /* Motion. Fast for a state change the finger caused, base for anything
+       entering or leaving. Standard easing decelerates: things arrive
+       quickly and settle. */
+    --motion-fast: 120ms;
+    --motion-base: 200ms;
+    --motion-slow: 320ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Minimum hit area for anything tappable (WCAG 2.5.5). Applied to
+       icon-only controls, which are the ones that fail it. */
+    --tap-target: 44px;
 }
 
 /* Heritage baseline: 16-18px body text platform-wide, not the 12-14px a raw

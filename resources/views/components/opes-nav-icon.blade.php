@@ -3,12 +3,32 @@
 ])
 
 {{--
-    Small icon-per-nav-item set for the sidebar (frontend images mockups show
-    an icon beside every label). These are simple inline outline glyphs built
-    from the same stroke conventions as the rest of the shell chrome - not an
-    icon-font or SVG-sprite dependency, so no new build step is introduced.
-    A key with no entry below falls back to a plain dot rather than nothing,
-    so a future nav item never renders with a missing/broken icon.
+    THE platform icon set. Inline outline glyphs on a shared 24x24 viewBox,
+    fill="none", stroke="currentColor", stroke-width 1.6-2, round caps and
+    joins - the conventions the shell chrome, x-kpi-card and x-empty-state
+    already draw with. A key with no entry below falls back to a plain dot, so
+    a future nav item never renders as a missing image.
+
+    WHY NOT LUCIDE. The obvious answer to "we want a consistent icon
+    language" is to adopt an icon library, and lucide is the right one to
+    want. It is not the right one to ADOPT here: this set already carries
+    ~45 glyphs on one consistent grid with no build step and no npm
+    dependency, and switching means touching every call site. A PARTIAL
+    migration - lucide on the new screens, these on the old - is precisely
+    the mixed-icon inconsistency the change was meant to remove, and that is
+    the realistic outcome of starting one.
+
+    So: this set stays, and it is the ONLY icon source for staff screens. New
+    glyphs are TRACED FROM THE LUCIDE GLYPH OF THE SAME NAME (lucide is also
+    a 24x24, currentColor, round-cap outline set, so the tracing is
+    faithful), which keeps the family consistent with the icon language the
+    product is aiming at without taking the dependency.
+
+    Rules for adding one:
+      1. 24x24 viewBox, no fill, stroke inherits.
+      2. Optical weight matched to its neighbours - trace, do not invent.
+      3. Named for the DOMAIN CONCEPT ('fiscal_identity'), never the picture
+         ('shield'), so a redraw is not a rename across every call site.
 --}}
 @php
     $paths = [
