@@ -8,6 +8,8 @@
 
     <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.payables_dashboard.title') }}</h1>
 
+    @include('livewire.procurement._subnav')
+
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <x-kpi-card :label="__('opes.payables_dashboard.kpi_outstanding')" :value="number_format($agedTotals['total'], 0, ',', ' ')" icon-bg="bg-primary">
             <x-slot:icon>

@@ -21,6 +21,7 @@
     :paginator="$entries"
     :empty-message="__('opes.ledger_screen.je_empty')"
 >
+    <x-slot:subnav>@include("livewire.accounting._ledger-subnav")</x-slot:subnav>
     <x-slot:actions>
         @can('ledger.post')
             <a href="{{ route('ledger.journal-entries.create') }}"

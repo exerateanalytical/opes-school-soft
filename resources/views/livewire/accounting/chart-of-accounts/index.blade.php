@@ -203,6 +203,7 @@
     :paginator="$accounts"
     :empty-message="__('opes.ledger_screen.coa_empty')"
 >
+    <x-slot:subnav>@include("livewire.accounting._ledger-subnav")</x-slot:subnav>
     @if ($canManageAccounts || $canManageFiscalYears)
         <x-slot:actions>
             @if ($canManageAccounts)

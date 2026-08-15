@@ -16,6 +16,7 @@
     :paginator="$invoices"
     :empty-message="__('opes.supplier_invoice_screen.empty')"
 >
+    <x-slot:subnav>@include("livewire.procurement._subnav")</x-slot:subnav>
     <x-slot:kpis>
         <x-kpi-card :label="__('opes.supplier_invoice_screen.kpi_pending_approval')" :value="$kpis['pending_approval']" icon-bg="bg-primary">
             <x-slot:icon>

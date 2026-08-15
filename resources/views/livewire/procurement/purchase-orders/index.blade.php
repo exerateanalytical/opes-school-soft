@@ -21,11 +21,18 @@
     :paginator="$orders"
     :empty-message="__('opes.procurement_screen.orders_empty')"
 >
+    <x-slot:subnav>@include("livewire.procurement._subnav")</x-slot:subnav>
     <x-slot:actions>
-        <a href="{{ url('/procurement/orders/new') }}"
-           class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
-            {{ __('opes.procurement_screen.new_order') }}
-        </a>
+        {{-- route(), not url('/procurement/orders/new'): that path 404s -
+             the capture screen lives at /procurement/orders/capture and the
+             {order} route is whereNumber-constrained so `new` cannot fall
+             through. Behind order_manage because the route is. --}}
+        @can('procurement.order_manage')
+            <a href="{{ route('procurement.orders.capture') }}"
+               class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                {{ __('opes.procurement_screen.new_order') }}
+            </a>
+        @endcan
     </x-slot:actions>
 
     <x-slot:kpis>

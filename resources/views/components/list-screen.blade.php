@@ -122,6 +122,13 @@
         @endisset
     </div>
 
+    {{-- ── Module sub-nav (optional). A module whose sidebar entry lands on
+         one of its screens mounts x-module-subnav here so its siblings are
+         reachable without going back to the sidebar. --}}
+    @isset($subnav)
+        {{ $subnav }}
+    @endisset
+
     {{-- ── KPI strip. 2-up and scrollable below md, 3-up at md, then as many
          as fit at lg.
 

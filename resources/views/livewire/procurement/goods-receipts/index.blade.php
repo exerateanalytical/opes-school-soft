@@ -15,6 +15,7 @@
     :paginator="$receipts"
     :empty-message="__('opes.procurement_screen.receipts_empty')"
 >
+    <x-slot:subnav>@include("livewire.procurement._subnav")</x-slot:subnav>
     @if ($canManage)
         <x-slot:actions>
             <button type="button" wire:click="toggleForm"

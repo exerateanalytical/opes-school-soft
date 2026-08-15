@@ -19,6 +19,8 @@
         </h1>
     </div>
 
+    @include('livewire.accounting._ledger-subnav')
+
     @if ($statusMessage !== '')
         <div class="rounded border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary" role="status">
             {{ $statusMessage }}

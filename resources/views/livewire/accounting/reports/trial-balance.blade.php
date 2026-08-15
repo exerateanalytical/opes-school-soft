@@ -17,6 +17,8 @@
         <h1 class="min-w-0 text-xl font-semibold text-charcoal">{{ __('opes.ledger_screen.tb_title') }}</h1>
     </div>
 
+    @include('livewire.accounting._ledger-subnav')
+
     <section aria-label="{{ __('opes.ui.filters') }}" class="rounded border border-border-primary bg-white p-3">
         <label for="tb-fiscal-year" class="flex min-w-[12rem] flex-col gap-1">
             <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.tb_fiscal_year_label') }}</span>

@@ -9,6 +9,7 @@
     :paginator="$payments"
     :empty-message="__('opes.supplier_payment_screen.empty')"
 >
+    <x-slot:subnav>@include("livewire.procurement._subnav")</x-slot:subnav>
     <x-slot:kpis>
         <x-kpi-card :label="__('opes.supplier_payment_screen.kpi_draft')" :value="$kpis['draft']" icon-bg="bg-primary">
             <x-slot:icon>

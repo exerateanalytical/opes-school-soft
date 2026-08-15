@@ -44,6 +44,10 @@
         </div>
     </div>
 
+    <div class="no-print">
+        @include('livewire.accounting._ledger-subnav')
+    </div>
+
     @if ($statusMessage !== '')
         <p class="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{{ $statusMessage }}</p>
     @endif

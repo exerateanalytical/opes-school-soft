@@ -108,6 +108,7 @@
     :paginator="$requisitions"
     :empty-message="__('opes.procurement_screen.requisitions_empty')"
 >
+    <x-slot:subnav>@include("livewire.procurement._subnav")</x-slot:subnav>
     <x-slot:actions>
         <button type="button" wire:click="toggleForm"
                 class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
