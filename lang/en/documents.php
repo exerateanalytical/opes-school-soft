@@ -383,4 +383,11 @@ return [
     'certificate' => [
         'stamp' => 'School stamp',
     ],
+
+    'assets' => [
+        'no_barcode' => 'No scannable tag',
+        'label_sheet_title' => 'Asset labels',
+        'label_sheet_count' => ':count labels',
+        'serial' => 'S/N',
+    ],
 ];

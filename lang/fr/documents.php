@@ -377,4 +377,11 @@ return [
     'certificate' => [
         'stamp' => "Cachet de l'établissement",
     ],
+
+    'assets' => [
+        'no_barcode' => 'Étiquette non scannable',
+        'label_sheet_title' => "Étiquettes d'immobilisations",
+        'label_sheet_count' => ':count étiquettes',
+        'serial' => 'N° série',
+    ],
 ];
