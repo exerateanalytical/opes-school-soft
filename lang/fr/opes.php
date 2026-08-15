@@ -109,6 +109,7 @@ return [
         'library' => 'Bibliothèque',
         'inventory' => 'Stocks',
         'assets' => 'Immobilisations',
+        'activities' => 'Activités',
         'transport' => 'Transport',
         'hostel' => 'Internat',
         'medical' => 'Infirmerie',
@@ -563,6 +564,8 @@ return [
         'declaration.file' => 'Enregistrer le dépôt des déclarations sociales',
         'expense.record' => 'Saisir et soumettre les bons de dépense',
         'expense.approve' => 'Approuver les bons de dépense soumis',
+        'activity.view' => 'Consulter les activités',
+        'activity.manage' => 'Gérer les activités',
     ],
     // Familles de systèmes d'évaluation, 01-assessment 3.2.
     'framework_family' => [

@@ -107,6 +107,10 @@ enum Role: string
                 Permission::ProcurementView, Permission::ProcurementRequisitionApprove,
                 Permission::ProcurementOrderApprove, Permission::ProcurementPaymentApprove,
                 Permission::TaxView,
+                // Activities (gap #1): the Proviseur oversees the programme
+                // and signs off excursions, so he holds both the read and
+                // the write side - including recording guardian consent.
+                Permission::ActivityView, Permission::ActivityManage,
             ],
 
             // The Censeur shapes the academic structure, so he also shapes the
@@ -206,6 +210,10 @@ enum Role: string
                 // Phase 8: the registrar reads the timetable (scheduling
                 // context for enrolment) but never edits it.
                 Permission::TimetableView,
+                // Activities (gap #1): enrolling a student in a club or an
+                // excursion - and recording the guardian's consent for the
+                // trip - is roll-keeping, which is the registrar's office.
+                Permission::ActivityView, Permission::ActivityManage,
             ],
 
             // 00-core 9.1: these three read the academic structure (year,
@@ -226,6 +234,10 @@ enum Role: string
                 // decides which registers this teacher may actually open.
                 Permission::TimetableView,
                 Permission::AttendanceView, Permission::AttendanceTake,
+                // Activities (gap #1): a teacher running a club reads its
+                // roster and registers; enrolment and consent stay with the
+                // office roles (activity.manage).
+                Permission::ActivityView,
             ],
 
             // The Professeur Principal enters marks for his own subject and
