@@ -27,6 +27,32 @@
         'moderate' => 'amber',
         'high' => 'red',
     ];
+
+    // x-status-pill accepts ok|amber|red ONLY - a domain status passed straight
+    // through renders as a green "OK" on every row. Each map below is the
+    // domain enum from the owning module's table, checked against
+    // information_schema, with the human label supplied separately.
+    $attendanceTone = [
+        'present' => 'ok',
+        'late' => 'amber',
+        'excused' => 'amber',
+        'sick' => 'amber',
+        'suspended' => 'amber',
+        'absent' => 'red',
+    ];
+
+    $invoiceTone = [
+        'issued' => 'amber',
+        'draft' => 'amber',
+        'cancelled' => 'red',
+    ];
+
+    $disciplineTone = [
+        'resolved' => 'ok',
+        'dismissed' => 'ok',
+        'open' => 'red',
+        'under_investigation' => 'amber',
+    ];
 @endphp
 
 {{-- 11.2's five quick actions. None of the five has a screen in Phase 2 -
@@ -376,11 +402,15 @@
     </section>
 
     {{-- ── Tabs ────────────────────────────────────────────────────────────
-         Four live, seven inert. A disabled tab is PRESENT (so the operator can
-         see the shape of the finished product and knows the data is not simply
-         missing) but carries aria-disabled and the shell-wide "arrives later"
-         title, and can never be selected. It is never filled with a plausible
-         empty grid, which would read as "this child has no marks". --}}
+         All ten are live. `examinations` was removed rather than implemented -
+         no examination-result table exists, and a tab promising results while
+         showing a seat number is worse than no tab (see the audit at
+         docs/superpowers/audits/2026-08-15-inert-controls.md and the
+         component's own header).
+
+         The DISABLED_TABS loop is gone with the constant now empty: leaving
+         dead markup here is how the next reader concludes the tabs are still
+         inert. --}}
     <div class="-mx-4 overflow-x-auto border-b border-border-primary px-4 sm:mx-0 sm:px-0">
         <div role="tablist" aria-label="{{ __('opes.students_screen.breadcrumb_profile') }}" class="flex min-w-max items-center gap-1">
             @foreach (StudentShow::LIVE_TABS as $liveTab)
@@ -393,15 +423,180 @@
                 </button>
             @endforeach
 
-            @foreach (StudentShow::DISABLED_TABS as $disabledTab)
-                <span role="tab" aria-disabled="true" aria-selected="false"
-                      title="{{ __('opes.nav.nav_disabled_title') }}"
-                      class="cursor-not-allowed whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm text-charcoal/30">
-                    {{ __('opes.students_screen.tab_'.$disabledTab) }}
-                </span>
-            @endforeach
         </div>
     </div>
+
+    {{-- ── Overview ────────────────────────────────────────────────────────
+         Every card's value is NULL where the figure has not been recorded, and
+         x-kpi-card draws an em dash for null rather than a 0 (09-ui 3.3). A
+         child with no register taken has not been absent. --}}
+    @if ($tab === 'overview')
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <x-kpi-card :label="__('opes.students_screen.overview_attendance')"
+                        :value="$overviewSummary['attendance_rate']"
+                        :sub="$overviewSummary['attendance_rate'] === null ? __('opes.students_screen.overview_no_attendance') : null"
+                        tone="green"/>
+
+            <x-kpi-card :label="__('opes.students_screen.overview_marks')"
+                        :value="$overviewSummary['marks_count']"
+                        :sub="$overviewSummary['marks_count'] === null ? __('opes.students_screen.overview_no_marks') : null"
+                        tone="blue"/>
+
+            <x-kpi-card :label="__('opes.students_screen.overview_balance')"
+                        :value="$overviewSummary['outstanding_balance'] === null ? null : number_format($overviewSummary['outstanding_balance'], 0, '.', ' ').' FCFA'"
+                        :sub="$overviewSummary['outstanding_balance'] === null ? __('opes.students_screen.overview_no_fees') : null"
+                        tone="amber"/>
+
+            @if ($canViewDiscipline)
+                <x-kpi-card :label="__('opes.students_screen.overview_discipline')"
+                            :value="$overviewSummary['discipline_cases']"
+                            :sub="$overviewSummary['discipline_cases'] === null ? __('opes.students_screen.overview_no_discipline') : null"
+                            tone="pink"/>
+            @endif
+
+            <x-kpi-card :label="__('opes.students_screen.overview_documents')"
+                        :value="$overviewSummary['documents']"
+                        :sub="$overviewSummary['documents'] === null ? __('opes.students_screen.overview_no_documents') : null"
+                        tone="purple"/>
+        </div>
+    @endif
+
+    {{-- ── Academic records ────────────────────────────────────────────── --}}
+    @if ($tab === 'academic_records')
+        @if ($academicRows->isEmpty())
+            <x-empty-state :message="__('opes.students_screen.academic_empty')"/>
+        @else
+            <div class="space-y-2">
+                @foreach ($academicRows as $row)
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-border-primary bg-white px-4 py-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-charcoal">{{ $row->period_name ?? __('opes.students_screen.not_recorded') }}</p>
+                            <p class="text-xs text-charcoal/55">
+                                {{ __('opes.students_screen.academic_published', ['date' => $row->issued_at]) }}
+                            </p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    @endif
+
+    {{-- ── Attendance ──────────────────────────────────────────────────── --}}
+    @if ($tab === 'attendance')
+        @if ($attendanceRows->isEmpty())
+            <x-empty-state :message="__('opes.students_screen.attendance_empty')"/>
+        @else
+            <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
+                <table class="w-full min-w-[40rem] border-collapse text-sm">
+                    <thead class="border-b border-border-primary text-left">
+                        <tr class="bg-chrome text-white">
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.attendance_date') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.attendance_class') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.attendance_status') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.attendance_remark') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-primary">
+                        @foreach ($attendanceRows as $row)
+                            <tr wire:key="attendance-{{ $row->id }}">
+                                <td class="px-4 py-2.5">{{ $row->date }}</td>
+                                <td class="px-4 py-2.5 text-charcoal/70">{{ $row->class_name ?? '—' }}</td>
+                                <td class="px-4 py-2.5">
+                                    {{-- x-status-pill takes ok|amber|red ONLY; the domain
+                                         status goes through as the LABEL, or every row
+                                         renders a green "OK". --}}
+                                    <x-status-pill :status="$attendanceTone[$row->status] ?? 'amber'"
+                                                   :label="__('opes.students_screen.attendance_state_'.$row->status)"/>
+                                </td>
+                                <td class="px-4 py-2.5 text-charcoal/70">{{ $row->remark ?: '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($attendanceTotal > $listLimit)
+                <p class="text-xs text-charcoal/55">{{ __('opes.ui.showing', ['first' => 1, 'last' => $listLimit, 'total' => $attendanceTotal]) }}</p>
+            @endif
+        @endif
+    @endif
+
+    {{-- ── Fees ────────────────────────────────────────────────────────── --}}
+    @if ($tab === 'fees')
+        @if ($feeRows->isEmpty())
+            <x-empty-state :message="__('opes.students_screen.fees_empty')"/>
+        @else
+            <div class="min-w-0 overflow-x-auto rounded border border-border-primary bg-white">
+                <table class="w-full min-w-[44rem] border-collapse text-sm">
+                    <thead class="border-b border-border-primary text-left">
+                        <tr class="bg-chrome text-white">
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.fees_invoice') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.fees_issued') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.fees_status') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.fees_total') }}</th>
+                            <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.fees_balance') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-primary">
+                        @foreach ($feeRows as $row)
+                            <tr wire:key="invoice-{{ $row->id }}">
+                                <td class="px-4 py-2.5 font-mono text-xs">{{ $row->invoice_no }}</td>
+                                <td class="px-4 py-2.5 text-charcoal/70">{{ $row->issue_date }}</td>
+                                <td class="px-4 py-2.5">
+                                    <x-status-pill :status="$invoiceTone[$row->status] ?? 'amber'"
+                                                   :label="__('opes.students_screen.fees_state_'.$row->status)"/>
+                                </td>
+                                <td class="px-4 py-2.5 text-right tabular-nums">{{ number_format((int) $row->total_amount, 0, '.', ' ') }}</td>
+                                <td class="px-4 py-2.5 text-right font-medium tabular-nums">
+                                    {{ number_format(max(0, (int) $row->total_amount - (int) $row->paid_amount), 0, '.', ' ') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($feeTotal > $listLimit)
+                <p class="text-xs text-charcoal/55">{{ __('opes.ui.showing', ['first' => 1, 'last' => $listLimit, 'total' => $feeTotal]) }}</p>
+            @endif
+        @endif
+    @endif
+
+    {{-- ── Discipline ──────────────────────────────────────────────────── --}}
+    @if ($tab === 'discipline')
+        @if (! $canViewDiscipline)
+            {{-- Said, not hidden: an operator who cannot see conduct records
+                 should know they exist rather than conclude this child has a
+                 clean record. --}}
+            <x-empty-state :message="__('opes.students_screen.discipline_forbidden')"/>
+        @elseif ($disciplineRows->isEmpty())
+            <x-empty-state :message="__('opes.students_screen.discipline_empty')"/>
+        @else
+            <div class="space-y-3">
+                @foreach ($disciplineRows as $row)
+                    <div wire:key="discipline-{{ $row->id }}" class="rounded border border-border-primary bg-white p-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <x-status-pill :status="$disciplineTone[$row->status] ?? 'amber'"
+                                           :label="__('opes.students_screen.discipline_state_'.$row->status)"/>
+                            <span class="text-xs text-charcoal/55">{{ $row->occurred_on }}</span>
+                            @if ((bool) $row->is_positive)
+                                <span class="text-xs font-medium text-primary">{{ __('opes.students_screen.discipline_positive') }}</span>
+                            @endif
+                        </div>
+                        <p class="mt-2 text-sm font-medium text-charcoal">
+                            {{ $row->category_name ?? __('opes.students_screen.not_recorded') }}
+                            @if ($row->category_severity !== null)
+                                <span class="text-xs font-normal text-charcoal/55">
+                                    · {{ __('opes.students_screen.discipline_severity', ['level' => $row->category_severity]) }}
+                                </span>
+                            @endif
+                        </p>
+                        <p class="mt-1 text-sm text-charcoal/70">{{ $row->description }}</p>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    @endif
 
     {{-- ── General ─────────────────────────────────────────────────────── --}}
     @if ($tab === 'general')
@@ -491,6 +686,29 @@
                     {{ __('opes.students_screen.print_documents_heading') }}
                 </h2>
 
+                {{-- Said out loud, not implied by a watermark the operator may
+                     not scroll to: a preview is not a certificate. Every
+                     Preview control below hits the SAME route with ?preview=1,
+                     so it renders the same payload the Print button would
+                     issue - it just never allocates a number or records
+                     anything. --}}
+                <p class="text-xs text-charcoal/55">{{ __('opes.students_screen.preview_not_issued') }}</p>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('students.documents.print', [$student->id, 'info-sheet', 'preview' => 1]) }}" target="_blank"
+                       class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_info_sheet') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </a>
+                    <a href="{{ route('students.documents.print', [$student->id, 'bonafide', 'preview' => 1]) }}" target="_blank"
+                       class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_bonafide') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </a>
+                    <a href="{{ route('students.documents.print', [$student->id, 'admission-form', 'preview' => 1]) }}" target="_blank"
+                       class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_admission_form') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </a>
+                </div>
+
                 <div class="flex flex-wrap items-center gap-2">
                     <a href="{{ route('students.documents.print', [$student->id, 'info-sheet']) }}" target="_blank"
                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
@@ -524,6 +742,10 @@
                         <input id="doc_att_to" name="to" type="date" required
                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
                     </div>
+                    <button type="submit" name="preview" value="1"
+                            class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_attendance_cert') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </button>
                     <button type="submit"
                             class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.students_screen.print_attendance_cert') }}
@@ -539,6 +761,10 @@
                         <textarea id="doc_testimonial_body" name="body" rows="2" required
                                   class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"></textarea>
                     </div>
+                    <button type="submit" name="preview" value="1"
+                            class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_testimonial') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </button>
                     <button type="submit"
                             class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.students_screen.print_testimonial') }}
@@ -561,6 +787,10 @@
                         <input id="doc_transfer_override" name="override_reason" type="text"
                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
                     </div>
+                    <button type="submit" name="preview" value="1"
+                            class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_transfer_cert') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </button>
                     <button type="submit"
                             class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.students_screen.print_transfer_cert') }}
@@ -575,6 +805,10 @@
                         <input id="doc_leaving_override" name="override_reason" type="text"
                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
                     </div>
+                    <button type="submit" name="preview" value="1"
+                            class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_leaving_cert') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </button>
                     <button type="submit"
                             class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.students_screen.print_leaving_cert') }}
@@ -589,6 +823,10 @@
                         <input id="doc_char_override" name="override_reason" type="text"
                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
                     </div>
+                    <button type="submit" name="preview" value="1"
+                            class="rounded border border-dashed border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.students_screen.print_char_cert') }} <span class="text-xs">{{ __('opes.students_screen.preview_suffix') }}</span>
+                    </button>
                     <button type="submit"
                             class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
                         {{ __('opes.students_screen.print_char_cert') }}
@@ -602,18 +840,31 @@
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
                     {{ __('opes.students_screen.documents_heading') }}
                 </h2>
-                {{-- 8.1 puts every document on a PRIVATE disk, served through a
-                     policy-checked controller, with a SHA-256 hash unique per
-                     student and a quarantine-then-delete lifecycle. None of
-                     that transport exists yet, so the upload control is inert
-                     rather than a file input that would write somewhere
-                     unspecified - and, for the same reason, the file name is
-                     not a download link. --}}
-                <span aria-disabled="true" title="{{ __('opes.students_screen.upload_disabled') }}"
-                      class="cursor-not-allowed rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/40">
-                    {{ __('opes.students_screen.upload_document') }}
-                </span>
             </div>
+
+            {{-- The control was inert with a comment saying a file input
+                 "would write somewhere unspecified". Phase 1's upload work
+                 specified it: PDFs and images only, 5 MB, content hashed on
+                 the way in. The file name is still not a download link - the
+                 policy-checked serving controller of 8.1 is a separate
+                 piece. --}}
+            @can('students.manage')
+                <div class="flex flex-wrap items-end gap-2 rounded border border-border-primary bg-white p-3">
+                    <label class="block text-sm">
+                        <span class="mb-1 block text-xs text-charcoal/55">{{ __('opes.students_screen.document_title') }}</span>
+                        <input type="text" wire:model="documentTitle"
+                               class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    </label>
+                    <input type="file" wire:model="documentUpload" accept=".pdf,image/png,image/jpeg,image/webp"
+                           class="block text-sm text-charcoal file:mr-3 file:rounded file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90"/>
+                    <button type="button" wire:click="saveDocument"
+                            class="rounded border border-primary bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90">
+                        {{ __('opes.students_screen.upload_document') }}
+                    </button>
+                </div>
+                @error('documentUpload') <p class="text-xs font-medium text-heritage-red">{{ $message }}</p> @enderror
+                @error('documentTitle') <p class="text-xs font-medium text-heritage-red">{{ $message }}</p> @enderror
+            @endcan
 
             @if ($documents->isEmpty())
                 <x-empty-state :message="__('opes.students_screen.documents_empty')"/>
@@ -706,5 +957,36 @@
                 @endif
             @endif
         </section>
+    @endif
+
+    {{-- ── Activity log ────────────────────────────────────────────────────
+         A closed event taxonomy (Students\Domain\StudentActivityEvent), one
+         label per case. An unknown event would otherwise print its raw enum
+         value at a guardian, so the label falls back to the summary line the
+         writing Action supplied. --}}
+    @if ($tab === 'activity_log')
+        @if ($activityRows->isEmpty())
+            <x-empty-state :message="__('opes.students_screen.activity_empty')"/>
+        @else
+            <ol class="space-y-2">
+                @foreach ($activityRows as $entry)
+                    <li wire:key="activity-{{ $entry->id }}" class="flex gap-3 rounded border border-border-primary bg-white px-4 py-3">
+                        <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-charcoal">
+                                {{ __('opes.students_screen.activity_'.$entry->event->value) }}
+                            </p>
+                            <p class="text-sm text-charcoal/70">{{ $entry->summary }}</p>
+                            <p class="mt-0.5 text-xs text-charcoal/55">
+                                {{ $entry->occurred_at?->translatedFormat('d M Y H:i') }}
+                                @if ($entry->actor_name_at_time !== null)
+                                    · {{ $entry->actor_name_at_time }}
+                                @endif
+                            </p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+        @endif
     @endif
 </div>

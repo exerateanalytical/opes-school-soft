@@ -6,6 +6,7 @@ use App\Modules\Guardians\Domain\GuardianRelationship;
 use App\Modules\Guardians\Models\Guardian;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Identity\Domain\Role;
+use App\Modules\Identity\Models\User;
 use App\Modules\Students\Domain\DocumentVerificationStatus;
 use App\Modules\Students\Domain\MedicalConditionType;
 use App\Modules\Students\Domain\MedicalSeverity;
@@ -14,6 +15,7 @@ use App\Modules\Students\Models\Student;
 use App\Modules\Students\Models\StudentDocument;
 use App\Modules\Students\Models\StudentMedicalRecord;
 use App\Support\Clock\BusinessDate;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -25,10 +27,10 @@ uses(RefreshDatabase::class);
 
 /* studentsUiUserAs() is declared in StudentsScreenTest.php, guarded. */
 if (! function_exists('studentsUiUserAs')) {
-    function studentsUiUserAs(Role $role): \App\Modules\Identity\Models\User
+    function studentsUiUserAs(Role $role): User
     {
-        (new \Database\Seeders\RolePermissionSeeder())->run();
-        $user = \App\Modules\Identity\Models\User::factory()->create();
+        (new RolePermissionSeeder)->run();
+        $user = User::factory()->create();
         $user->assignRole($role->value);
 
         return $user->fresh() ?? $user;
@@ -96,22 +98,26 @@ it('never prints the encrypted special-category columns', function () {
         ->assertDontSee('0654876210');
 });
 
-it('renders the seven unbuilt tabs as present but inert', function () {
+it('renders every tab as live and offers no inert one', function () {
+    // This test previously pinned SEVEN inert tabs. Assessment, Attendance,
+    // Fees, Welfare/Discipline and the activity log have all shipped since, so
+    // the tabs are real; `examinations` was REMOVED rather than implemented
+    // because no examination-result table exists (see
+    // docs/superpowers/audits/2026-08-15-inert-controls.md).
     actingAs(studentsUiUserAs(Role::Registrar));
 
     $student = Student::factory()->create();
 
     $rendered = Livewire::test(Show::class, ['student' => $student]);
 
-    foreach (Show::DISABLED_TABS as $disabled) {
-        $rendered->assertSee(__('opes.students_screen.tab_'.$disabled));
+    foreach (Show::LIVE_TABS as $tab) {
+        $rendered->assertSee(__('opes.students_screen.tab_'.$tab));
     }
 
-    // Present, aria-disabled, and unreachable: asking for one falls back to
-    // General rather than rendering an empty grid that reads as "no marks".
-    $rendered->assertSeeHtml('aria-disabled="true"');
+    expect(Show::DISABLED_TABS)->toBe([])
+        ->and(Show::LIVE_TABS)->not->toContain('examinations');
 
-    $rendered->call('selectTab', 'fees')->assertSet('tab', 'general');
+    $rendered->call('selectTab', 'fees')->assertSet('tab', 'fees');
 });
 
 it('shows the linked guardians with relationship, validity and granted scopes', function () {
@@ -169,7 +175,7 @@ it('says so instead of showing an empty guardian table', function () {
         ->assertSee(__('opes.students_screen.guardians_empty'));
 });
 
-it('lists documents and offers no upload control', function () {
+it('lists documents and offers a real upload control', function () {
     actingAs(studentsUiUserAs(Role::Registrar));
 
     $student = Student::factory()->create();
@@ -178,7 +184,7 @@ it('lists documents and offers no upload control', function () {
     // workstream), and `verification_status` is deliberately out of $fillable
     // - moving a document out of `unverified` is an audited staff decision -
     // so the row is built explicitly rather than through a fill().
-    $document = new StudentDocument();
+    $document = new StudentDocument;
     $document->forceFill([
         'student_id' => $student->id,
         'title' => 'Birth Certificate',
@@ -195,9 +201,10 @@ it('lists documents and offers no upload control', function () {
         ->call('selectTab', 'documents')
         ->assertSee('Birth Certificate')
         ->assertSee(__('opes.students_screen.verification_verified'))
-        // 8.1 puts the file on a private disk behind a policy-checked
-        // controller that does not exist yet, so the control is inert.
-        ->assertSee(__('opes.students_screen.upload_disabled'));
+        // The upload is a real file input now (Task 38); the file NAME is
+        // still not a download link, because 8.1's policy-checked serving
+        // controller is a separate piece.
+        ->assertSeeHtml('wire:model="documentUpload"');
 });
 
 it('shows the medical summary but never the encrypted detail', function () {
