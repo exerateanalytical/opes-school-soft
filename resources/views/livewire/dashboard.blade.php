@@ -33,7 +33,17 @@
                 {{ __('opes.dashboard.overview') }}
             </h2>
 
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {{-- `grid-cols-1` is LOAD-BEARING, not decoration. Without it there
+                 is no grid-template-columns below sm, so the cards land in an
+                 implicit `auto` track floored by their own min-content - and
+                 `truncate` on the sub-line sets `white-space: nowrap`, so that
+                 floor is the width of the LONGEST sub-line on the page. "No
+                 backup has ever completed successfully" sized the track to
+                 359px inside a 341px column and every card was clipped by
+                 main's `overflow-x-hidden`, silently, with no scrollbar to
+                 show for it. `grid-cols-1` is repeat(1, minmax(0, 1fr)), whose
+                 zero minimum lets the track shrink to its container. --}}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 @foreach ($panels as $panel)
                     <x-kpi-card wire:key="panel-{{ $panel['key'] }}"
                                 :label="__('opes.dashboard.panel_'.$panel['key'])"
@@ -77,7 +87,9 @@
                 {{ __('opes.dashboard.quick_actions') }}
             </h2>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {{-- Same reason as the KPI strip above: an explicit single column
+                 below sm, so the track cannot be widened by a long line. --}}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($quickActions as $action)
                     {{-- min-h-[88px] so a one-word card and a two-line card
                          are the same height; the badge is 40x40 inside a 44px
