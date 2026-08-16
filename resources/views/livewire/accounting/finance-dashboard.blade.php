@@ -68,25 +68,6 @@
         }
     }
 
-    // Trend line: 12 monthly points mapped into a 640x180 plot box.
-    $trendPath = '';
-    $trendArea = '';
-    $trendPoints = [];
-    if ($chartTab === 'monthly-trend' && count($chartSeries) > 1) {
-        $plotWidth = 600.0;
-        $plotHeight = 150.0;
-        $step = $plotWidth / (count($chartSeries) - 1);
-        $scale = $seriesMax > 0 ? $seriesMax : 1;
-        $i = 0;
-        foreach ($chartSeries as $point) {
-            $x = 30 + ($i * $step);
-            $y = 20 + ($plotHeight - (((int) $point['amount'] / $scale) * $plotHeight));
-            $trendPoints[] = ['x' => $x, 'y' => $y, 'label' => $point['label'], 'amount' => (int) $point['amount']];
-            $trendPath .= ($i === 0 ? 'M' : ' L').' '.round($x, 2).' '.round($y, 2);
-            $i++;
-        }
-        $trendArea = 'M 30 170 L'.substr($trendPath, 1).' L '.round(30 + (($i - 1) * $step), 2).' 170 Z';
-    }
 @endphp
 
 <div class="min-w-0 space-y-4 print:space-y-2">
@@ -277,28 +258,10 @@
                 @elseif ($chartTab === 'monthly-trend')
                     {{-- Line/area chart: twelve monthly collection totals. --}}
                     <figure class="overflow-x-auto">
-                        <svg viewBox="0 0 660 220" role="img" class="h-auto w-full min-w-[560px]"
-                             aria-labelledby="fd-trend-title fd-trend-desc">
-                            <title id="fd-trend-title">Monthly collection trend</title>
-                            <desc id="fd-trend-desc">Cleared receipts per month over the twelve months ending {{ \Illuminate\Support\Carbon::parse($window['end'])->format('F Y') }}.</desc>
-
-                            <line x1="30" y1="170" x2="630" y2="170" stroke="var(--color-border-primary)" stroke-width="1"/>
-                            <line x1="30" y1="20" x2="30" y2="170" stroke="var(--color-border-primary)" stroke-width="1"/>
-
-                            <path d="{{ $trendArea }}" fill="var(--color-primary)" fill-opacity="0.10"/>
-                            <path d="{{ $trendPath }}" fill="none" stroke="var(--color-primary)" stroke-width="2.5"
-                                  stroke-linejoin="round" stroke-linecap="round"/>
-
-                            @foreach ($trendPoints as $index => $point)
-                                <circle cx="{{ round($point['x'], 2) }}" cy="{{ round($point['y'], 2) }}" r="3" fill="var(--color-primary)">
-                                    <title>{{ $point['label'] }}: {{ Money::of($point['amount'])->format() }}</title>
-                                </circle>
-                                <text x="{{ round($point['x'], 2) }}" y="188" text-anchor="middle"
-                                      font-size="9" fill="var(--color-text-muted)">{{ $point['label'] }}</text>
-                            @endforeach
-
-                            <text x="30" y="14" font-size="9" fill="var(--color-text-muted)">{{ Money::of($seriesMax)->format(false) }}</text>
-                        </svg>
+                        <x-accounting.trend-chart
+                            :series="$chartSeries"
+                            :geometry="app(\App\Modules\Accounting\Actions\MonthlyCollectionTrend::class)->chartGeometry($chartSeries)"
+                            :end-label="\Illuminate\Support\Carbon::parse($window['end'])->format('F Y')"/>
                         <figcaption class="sr-only">
                             @foreach ($chartSeries as $point)
                                 {{ $point['label'] }}: {{ Money::of($point['amount'])->format() }}.

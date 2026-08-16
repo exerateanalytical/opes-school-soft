@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Accounting\Livewire;
 
+use App\Modules\Accounting\Actions\MonthlyCollectionTrend;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Reporting\Support\PdfExport;
@@ -738,48 +739,6 @@ final class FinanceDashboard extends Component
     }
 
     /**
-     * Cleared, non-voided receipts per calendar month across the twelve
-     * months ending with the window's end month. Months with no receipts are
-     * present with 0 - here a zero IS the fact (no money came in that month),
-     * unlike an unbuilt module's zero.
-     *
-     * @return list<array{label: string, amount: int}>
-     */
-    private function monthlyCollectionTrend(string $to): array
-    {
-        $end = Carbon::parse($to)->endOfMonth();
-        $start = $end->copy()->startOfMonth()->subMonths(11);
-
-        $rows = DB::table('payments as p')
-            ->whereBetween('p.value_date', [$start->toDateString(), $end->toDateString()])
-            ->where('p.clearing_state', '<>', 'bounced')
-            ->whereNotExists(function (QueryBuilder $query): void {
-                $query->selectRaw('1')->from('payment_voids as v')
-                    ->whereColumn('v.payment_id', 'p.id')
-                    ->where('v.status', 'confirmed');
-            })
-            ->groupBy('bucket')
-            ->selectRaw("DATE_FORMAT(p.value_date, '%Y-%m') as bucket, CAST(COALESCE(SUM(p.amount), 0) AS SIGNED) as amount")
-            ->pluck('amount', 'bucket');
-
-        $out = [];
-        $cursor = $start->copy();
-
-        for ($i = 0; $i < 12; $i++) {
-            $key = $cursor->format('Y-m');
-
-            $out[] = [
-                'label' => $cursor->format('M y'),
-                'amount' => (int) ($rows[$key] ?? 0),
-            ];
-
-            $cursor = $cursor->addMonthNoOverflow();
-        }
-
-        return $out;
-    }
-
-    /**
      * Fee Collection Summary donut. One pass over issued invoices raised on
      * or before the window's end, split three ways by the SAME balance
      * formula: what has been settled, what is still owed and not yet due,
@@ -1057,7 +1016,7 @@ final class FinanceDashboard extends Component
 
         $chartSeries = match ($this->chartTab) {
             'expense-category' => $this->expenseByCategory($window['start'], $window['end']),
-            'monthly-trend' => $this->monthlyCollectionTrend($window['end']),
+            'monthly-trend' => app(MonthlyCollectionTrend::class)->handle($window['end']),
             default => $this->incomeByCategory($window['start'], $window['end']),
         };
 
