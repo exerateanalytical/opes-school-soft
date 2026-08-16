@@ -2535,6 +2535,8 @@ return [
         'dashboard_view_messages' => 'View messages',
         'dashboard_recent_messages' => 'Recent messages',
         'dashboard_upcoming' => 'Upcoming activities',
+        // The footer row that closes the Upcoming Activities panel.
+        'dashboard_add_to_calendar' => 'Add to Calendar',
         'dashboard_quick_actions' => 'Quick actions',
         'dashboard_safety_title' => "Your child's safety is our priority.",
         'dashboard_safety_body' => 'Keep your contact details up to date so you receive every important alert.',

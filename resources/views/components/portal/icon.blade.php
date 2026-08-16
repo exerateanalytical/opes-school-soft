@@ -53,6 +53,8 @@
         'menu' => 'M4 7h16M4 12h16M4 17h16',
         // The disclosure chevron beside the parent's name in the header.
         'chevron-down' => 'M6 9l6 6 6-6',
+        // Row and button affordances throughout the dashboard.
+        'chevron-right' => 'M9 6l6 6-6 6',
         'dot' => 'M12 13a1 1 0 100-2 1 1 0 000 2z',
     ];
 

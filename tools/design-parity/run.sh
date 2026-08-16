@@ -2,9 +2,14 @@
 # Screenshot every captured portal screen at the reference designs' exact
 # device size (426x922 CSS at 2x = 852x1844) and build a side-by-side sheet.
 #
-# The device size is not a guess: the reference PNGs are 852x1846, and this
-# viewport reproduces 852x1844, so the two panels are directly comparable
-# pixel for pixel rather than "about the same shape".
+# The reference PNGs are 852x1846 = a 426x922 CSS viewport at 2x.
+#
+# Captured at 1x and upscaled when compositing, NOT with
+# --force-device-scale-factor=2. That flag does not give a 426px CSS viewport:
+# it lays the page out at roughly 392px and scales the raster up, so content
+# that fits perfectly in the live browser appears clipped at the right edge in
+# the shot. Measuring the live DOM said 426 while the screenshot said ~392,
+# and the screenshot was the liar.
 set -u
 
 CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
@@ -22,7 +27,7 @@ for f in /c/laragon/www/opeschool-cloud/public/__compare/*.html; do
     [ -f "/c/laragon/www/opeschool-cloud/mobile/${slug}.png" ] || continue
 
     "$CHROME" --headless=new --disable-gpu --hide-scrollbars \
-        --force-device-scale-factor=2 --window-size=426,922 \
+        --window-size=426,922 \
         --user-data-dir="${SCRATCH_WIN}\chrome-profile" \
         --screenshot="${SCRATCH_WIN}\shots\\${slug}.png" \
         "http://localhost:8391/__compare/${slug}.html" >/dev/null 2>&1

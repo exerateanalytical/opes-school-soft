@@ -2509,6 +2509,7 @@ return [
         'dashboard_view_messages' => 'Voir les messages',
         'dashboard_recent_messages' => 'Messages recents',
         'dashboard_upcoming' => 'Activites a venir',
+        'dashboard_add_to_calendar' => 'Ajouter au calendrier',
         'dashboard_quick_actions' => 'Actions rapides',
         'dashboard_safety_title' => "La securite de votre enfant est notre priorite.",
         'dashboard_safety_body' => 'Gardez vos coordonnees a jour pour recevoir toutes les alertes importantes.',

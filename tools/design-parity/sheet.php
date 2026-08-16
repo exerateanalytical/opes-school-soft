@@ -23,7 +23,23 @@ if (! is_file($refPath) || ! is_file($shotPath)) {
 }
 
 $ref = imagecreatefrompng($refPath);
-$shot = imagecreatefrompng($shotPath);
+
+/*
+ * The shot is captured at 1x (a true 426 CSS px viewport) and doubled here.
+ *
+ * NOT with --force-device-scale-factor=2: that flag does not give Chrome a
+ * 426px CSS viewport, it lays the page out at roughly 392px and scales the
+ * raster up. Content that fits perfectly in the live browser then reads as
+ * clipped at the right edge in the screenshot - the live DOM measured 426
+ * while the shot behaved like 392, and the shot was the liar. Doubling a
+ * correct layout is softer but geometrically true, and geometry is the whole
+ * point of this sheet.
+ */
+$raw = imagecreatefrompng($shotPath);
+$raww = imagesx($raw);
+$rawh = imagesy($raw);
+$shot = imagecreatetruecolor($raww * 2, $rawh * 2);
+imagecopyresampled($shot, $raw, 0, 0, 0, 0, $raww * 2, $rawh * 2, $raww, $rawh);
 
 $rw = imagesx($ref);
 $rh = imagesy($ref);
