@@ -131,7 +131,10 @@ final class ReadDashboardPanels
             // ── Welfare ────────────────────────────────────────────────────
             'open_discipline_cases' => $this->openDisciplineCases(),
             'todays_consultations' => $this->todaysConsultations(),
-            'open_referrals' => $this->queue('open_referrals', DB::table('medical_referrals')->whereNull('followed_up_at')->count(), 'medical', 'welfare.medical.index'),
+            // Its own glyph, not 'medical': this sits beside todays_consultations
+            // on the Nurse dashboard, and with both drawn as 'medical' the two
+            // tiles read as the same card twice.
+            'open_referrals' => $this->queue('open_referrals', DB::table('medical_referrals')->whereNull('followed_up_at')->count(), 'referrals', 'welfare.medical.index'),
             'hostel_occupancy' => $this->panel($panel, DB::table('hostel_allocations')->where('status', 'active')->count(), 'green', 'hostel', 'welfare.hostel.index'),
             'transport_allocations_active' => $this->panel($panel, DB::table('transport_allocations')->where('status', 'active')->count(), 'blue', 'transport', 'welfare.transport.index'),
             'insurance_policies_active' => $this->panel($panel, DB::table('insurance_policies')->where('status', 'active')->count(), 'purple', 'insurance', 'welfare.insurance.index'),

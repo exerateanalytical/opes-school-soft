@@ -87,6 +87,11 @@
         'hostel' => '<path d="M4 10.5L12 4l8 6.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/>',
         'medical' => '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/>',
         'visitors' => '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M2 8l2.5 2.5L9 6"/>',
+        // A patient referred OUT: the person, then an arrow leaving them.
+        // Distinct from 'medical' on purpose - the Nurse dashboard shows
+        // consultations and referrals side by side, and drawn with the same
+        // glyph the two tiles were indistinguishable at a glance.
+        'referrals' => '<circle cx="8" cy="8" r="3.5"/><path d="M2 20c0-3.3 2.7-6 6-6"/><path d="M13 16h8M18 13l3 3-3 3"/>',
         'insurance' => '<path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/>',
         'reports' => '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17V11M12 17V7M16 17v-5"/>',
         'operations' => '<path d="M21 12a9 9 0 01-15.4 6.4M3 12a9 9 0 0115.4-6.4"/><path d="M3 17v-4h4M21 7v4h-4"/>',
