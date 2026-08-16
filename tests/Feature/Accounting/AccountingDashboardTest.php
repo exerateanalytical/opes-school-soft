@@ -195,3 +195,34 @@ it('shows the collection trend chart with an accurate description date', functio
 
     $response->assertSee('Monthly collection trend', false);
 });
+
+it('always offers the four standing accounting actions', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+
+    foreach ([
+        route('ledger.journal-entries.create'),
+        route('ledger.trial-balance'),
+        route('tax.dashboard'),
+        route('reports.hub'),
+    ] as $href) {
+        $response->assertSee('href="'.$href.'"', escape: false);
+    }
+});
+
+it('offers to continue closing a fiscal year only when one is closing', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+    $response->assertDontSee('href="'.route('accounting.year-end').'"', escape: false);
+
+    \App\Modules\Accounting\Models\FiscalYear::query()->create([
+        'code' => 'FY2099', 'starts_on' => '2099-01-01', 'ends_on' => '2099-12-31', 'status' => 'closing', 'is_first_exercice' => false,
+    ]);
+
+    $response = get('/accounting/dashboard')->assertOk();
+    $response->assertSee('href="'.route('accounting.year-end').'"', escape: false);
+});

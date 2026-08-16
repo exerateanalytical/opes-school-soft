@@ -124,4 +124,30 @@
                 :end-label="now()->format('F Y')"/>
         </div>
     </section>
+
+    <section aria-labelledby="acct-dash-actions">
+        <h2 id="acct-dash-actions" class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+            {{ __('opes.dashboard.actions') }}
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a href="{{ route('ledger.journal-entries.create') }}" class="rounded-xl border border-border-primary bg-white p-4 shadow-sm hover:border-primary">
+                <span class="block font-semibold text-charcoal">{{ __('opes.accounting.dashboard.action_new_entry') }}</span>
+            </a>
+            <a href="{{ route('ledger.trial-balance') }}" class="rounded-xl border border-border-primary bg-white p-4 shadow-sm hover:border-primary">
+                <span class="block font-semibold text-charcoal">{{ __('opes.accounting.dashboard.action_trial_balance') }}</span>
+            </a>
+            <a href="{{ route('tax.dashboard') }}" class="rounded-xl border border-border-primary bg-white p-4 shadow-sm hover:border-primary">
+                <span class="block font-semibold text-charcoal">{{ __('opes.accounting.dashboard.action_tax') }}</span>
+            </a>
+            <a href="{{ route('reports.hub') }}" class="rounded-xl border border-border-primary bg-white p-4 shadow-sm hover:border-primary">
+                <span class="block font-semibold text-charcoal">{{ __('opes.accounting.dashboard.action_reports') }}</span>
+            </a>
+            @if ($closingYear !== null)
+                <a href="{{ route('accounting.year-end') }}" class="rounded-xl border border-primary bg-portal-tint p-4 shadow-sm">
+                    <span class="block font-semibold text-primary">{{ __('opes.accounting.dashboard.action_continue_closing', ['code' => $closingYear->code]) }}</span>
+                </a>
+            @endif
+        </div>
+    </section>
 </div>

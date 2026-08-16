@@ -3496,6 +3496,11 @@ return [
             'unknown_student' => 'Élève inconnu',
             'trend_heading' => 'Encaissements dans le temps',
             'trend_caveat' => 'D\'après l\'historique des paiements enregistrés dans le système.',
+            'action_new_entry' => 'Nouvelle écriture',
+            'action_trial_balance' => 'Balance générale',
+            'action_tax' => 'Fiscalité',
+            'action_reports' => 'Rapports',
+            'action_continue_closing' => 'Poursuivre la clôture de :code',
         ],
     ],
 ];

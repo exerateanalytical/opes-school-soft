@@ -3535,6 +3535,11 @@ return [
             'unknown_student' => 'Unknown student',
             'trend_heading' => 'Collections over time',
             'trend_caveat' => 'Based on payment history recorded in the system.',
+            'action_new_entry' => 'New journal entry',
+            'action_trial_balance' => 'Trial balance',
+            'action_tax' => 'Tax',
+            'action_reports' => 'Reports',
+            'action_continue_closing' => 'Continue closing :code',
         ],
     ],
 ];
