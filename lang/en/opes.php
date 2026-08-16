@@ -3510,6 +3510,14 @@ return [
         ],
         'dashboard' => [
             'heading' => 'Accounting dashboard',
+            'health_heading' => 'Book health',
+            'books_balanced' => 'Books balanced?',
+            'balanced' => 'Balanced',
+            'out_of_balance_count' => ':count out of balance',
+            'unposted_entries' => 'Unposted entries',
+            'all_caught_up' => 'All caught up',
+            'uncategorised' => 'Uncategorised balances',
+            'none' => 'None',
         ],
     ],
 ];

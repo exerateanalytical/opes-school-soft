@@ -3471,6 +3471,14 @@ return [
         ],
         'dashboard' => [
             'heading' => 'Tableau de bord comptable',
+            'health_heading' => 'Santé des comptes',
+            'books_balanced' => 'Comptes équilibrés ?',
+            'balanced' => 'Équilibrés',
+            'out_of_balance_count' => ':count en déséquilibre',
+            'unposted_entries' => 'Écritures non validées',
+            'all_caught_up' => 'Tout est à jour',
+            'uncategorised' => 'Soldes non catégorisés',
+            'none' => 'Aucun',
         ],
     ],
 ];
