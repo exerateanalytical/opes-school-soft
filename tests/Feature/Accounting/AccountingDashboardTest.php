@@ -186,3 +186,12 @@ it('shows the aged-receivables total and a top debtor by name', function (): voi
     $response->assertSeeText('100,000');
     $response->assertSeeText('Aged Debtor');
 });
+
+it('shows the collection trend chart with an accurate description date', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+
+    $response->assertSee('Monthly collection trend', false);
+});

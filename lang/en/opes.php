@@ -3533,6 +3533,8 @@ return [
             'top_debtors_heading' => 'Top debtors',
             'no_debtors' => 'No one owes money right now.',
             'unknown_student' => 'Unknown student',
+            'trend_heading' => 'Collections over time',
+            'trend_caveat' => 'Based on payment history recorded in the system.',
         ],
     ],
 ];

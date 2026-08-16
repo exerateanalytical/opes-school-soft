@@ -57,6 +57,10 @@ final class AccountingDashboard extends Component
             ->get(['id', 'first_name', 'last_name'])
             ->keyBy('id');
 
+        $trendAction = app(\App\Modules\Accounting\Actions\MonthlyCollectionTrend::class);
+        $trendSeries = $trendAction->handle(now()->toDateString());
+        $trendGeometry = $trendAction->chartGeometry($trendSeries);
+
         return view('livewire.accounting.accounting-dashboard', [
             'brokenCount' => $checks->filter(fn ($c): bool => $c->difference !== 0)->count(),
             'draftCount' => $draftCount,
@@ -66,6 +70,8 @@ final class AccountingDashboard extends Component
             'buckets' => $buckets,
             'topDebtors' => $topDebtors,
             'students' => $students,
+            'trendSeries' => $trendSeries,
+            'trendGeometry' => $trendGeometry,
         ]);
     }
 }

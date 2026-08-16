@@ -110,5 +110,18 @@
                 <p class="text-sm text-portal-success">{{ __('opes.accounting.dashboard.no_debtors') }}</p>
             @endforelse
         </div>
+
+        <div class="rounded-xl border border-border-primary bg-white p-4 shadow-sm">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/55">
+                {{ __('opes.accounting.dashboard.trend_heading') }}
+            </p>
+            <p class="mb-2 text-xs text-charcoal/50">
+                {{ __('opes.accounting.dashboard.trend_caveat') }}
+            </p>
+            <x-accounting.trend-chart
+                :series="$trendSeries"
+                :geometry="$trendGeometry"
+                :end-label="now()->format('F Y')"/>
+        </div>
     </section>
 </div>

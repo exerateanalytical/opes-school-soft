@@ -3494,6 +3494,8 @@ return [
             'top_debtors_heading' => 'Principaux débiteurs',
             'no_debtors' => 'Personne ne doit d\'argent actuellement.',
             'unknown_student' => 'Élève inconnu',
+            'trend_heading' => 'Encaissements dans le temps',
+            'trend_caveat' => 'D\'après l\'historique des paiements enregistrés dans le système.',
         ],
     ],
 ];
