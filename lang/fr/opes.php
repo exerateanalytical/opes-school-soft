@@ -3479,6 +3479,10 @@ return [
             'all_caught_up' => 'Tout est à jour',
             'uncategorised' => 'Soldes non catégorisés',
             'none' => 'Aucun',
+            'attention_heading' => 'À traiter aujourd\'hui',
+            'nothing_pending' => 'Rien ne nécessite votre attention pour le moment.',
+            'fiscal_year_closing' => 'L\'exercice :code est en cours de clôture',
+            'draft_entry' => 'Écriture brouillon : :label',
         ],
     ],
 ];

@@ -3518,6 +3518,10 @@ return [
             'all_caught_up' => 'All caught up',
             'uncategorised' => 'Uncategorised balances',
             'none' => 'None',
+            'attention_heading' => 'Needs your attention today',
+            'nothing_pending' => 'Nothing needs your attention right now.',
+            'fiscal_year_closing' => 'Fiscal year :code is being closed',
+            'draft_entry' => 'Draft entry: :label',
         ],
     ],
 ];

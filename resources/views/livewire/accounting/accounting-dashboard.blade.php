@@ -41,4 +41,35 @@
             @endif
         </a>
     </section>
+
+    {{-- Needs attention today: a real task list, not another count. --}}
+    <section aria-labelledby="acct-dash-attention">
+        <h2 id="acct-dash-attention" class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+            {{ __('opes.accounting.dashboard.attention_heading') }}
+        </h2>
+
+        @if ($closingYear === null && $draftEntries->isEmpty())
+            <p class="rounded-xl border border-border-primary bg-white px-4 py-3 text-sm text-charcoal/60">
+                {{ __('opes.accounting.dashboard.nothing_pending') }}
+            </p>
+        @else
+            <ul class="space-y-2">
+                @if ($closingYear !== null)
+                    <li class="rounded-xl border border-border-primary bg-white px-4 py-3 shadow-sm">
+                        <a href="{{ route('accounting.year-end') }}" class="text-sm font-semibold text-charcoal hover:text-primary">
+                            {{ __('opes.accounting.dashboard.fiscal_year_closing', ['code' => $closingYear->code]) }}
+                        </a>
+                    </li>
+                @endif
+
+                @foreach ($draftEntries as $entry)
+                    <li class="rounded-xl border border-border-primary bg-white px-4 py-3 shadow-sm">
+                        <a href="{{ route('ledger.journal-entries.index') }}" class="text-sm font-semibold text-charcoal hover:text-primary">
+                            {{ __('opes.accounting.dashboard.draft_entry', ['label' => $entry->label]) }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
 </div>

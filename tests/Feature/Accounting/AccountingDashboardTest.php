@@ -108,3 +108,30 @@ it('shows the books balanced tile in green on a reconciled ledger', function ():
 
     $response->assertSeeText(__('opes.accounting.dashboard.balanced'));
 });
+
+it('lists a fiscal year that is currently closing', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    \App\Modules\Accounting\Models\FiscalYear::query()->create([
+        'code' => 'FY2099',
+        'starts_on' => '2099-01-01',
+        'ends_on' => '2099-12-31',
+        'status' => 'closing',
+        'is_first_exercice' => false,
+    ]);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+
+    $response->assertSeeText('FY2099');
+    $response->assertSee('href="'.route('accounting.year-end').'"', escape: false);
+});
+
+it('shows nothing needing attention when there is no closing year and no drafts', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+
+    $response->assertSeeText(__('opes.accounting.dashboard.nothing_pending'));
+});
