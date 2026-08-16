@@ -1,4 +1,5 @@
 @php
+    use App\Modules\Accounting\Actions\MonthlyCollectionTrend;
     use App\Support\Money\Money;
 
     /**
@@ -260,7 +261,7 @@
                     <figure class="overflow-x-auto">
                         <x-accounting.trend-chart
                             :series="$chartSeries"
-                            :geometry="app(\App\Modules\Accounting\Actions\MonthlyCollectionTrend::class)->chartGeometry($chartSeries)"
+                            :geometry="app(MonthlyCollectionTrend::class)->chartGeometry($chartSeries)"
                             :end-label="\Illuminate\Support\Carbon::parse($window['end'])->format('F Y')"/>
                         <figcaption class="sr-only">
                             @foreach ($chartSeries as $point)

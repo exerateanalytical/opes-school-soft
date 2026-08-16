@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Accounting\Livewire;
 
+use App\Modules\Accounting\Actions\MonthlyCollectionTrend;
 use App\Modules\Accounting\Actions\Review\ControlAccountChecks;
 use App\Modules\Accounting\Actions\Review\JournalExceptions;
 use App\Modules\Accounting\Actions\Review\SuspenseBalances;
 use App\Modules\Accounting\Models\FiscalYear;
+// AgedBalances gates on fee.view, not ledger.view like every other source on
+// this page - fine today because Role::Accountant holds both, but a future
+// role with ledger.view and not fee.view would 403 the whole page here.
 use App\Modules\Fees\Actions\AgedBalances;
 use App\Modules\Identity\Domain\Permission;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +61,7 @@ final class AccountingDashboard extends Component
             ->get(['id', 'first_name', 'last_name'])
             ->keyBy('id');
 
-        $trendAction = app(\App\Modules\Accounting\Actions\MonthlyCollectionTrend::class);
+        $trendAction = app(MonthlyCollectionTrend::class);
         $trendSeries = $trendAction->handle(now()->toDateString());
         $trendGeometry = $trendAction->chartGeometry($trendSeries);
 
