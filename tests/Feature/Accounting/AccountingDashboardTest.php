@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Modules\Accounting\Models\ChartOfAccount;
+use App\Modules\Accounting\Models\FiscalYear;
 use App\Modules\Accounting\Models\Journal;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Accounting\Models\JournalEntryLine;
 use App\Modules\Identity\Domain\Role;
+use App\Modules\Students\Models\Enrollment;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\get;
 
@@ -134,4 +137,52 @@ it('shows nothing needing attention when there is no closing year and no drafts'
     $response = get('/accounting/dashboard')->assertOk();
 
     $response->assertSeeText(__('opes.accounting.dashboard.nothing_pending'));
+});
+
+it('shows the aged-receivables total and a top debtor by name', function (): void {
+    $user = ledgerUser(Role::Accountant);
+
+    $enrollment = Enrollment::factory()->create();
+
+    DB::table('students')->where('id', $enrollment->student_id)->update([
+        'first_name' => 'Aged',
+        'last_name' => 'Debtor',
+    ]);
+
+    $fiscalYearId = (int) FiscalYear::factory()->open()->create()->getKey();
+
+    $invoiceId = DB::table('invoices')->insertGetId([
+        'invoice_no' => 'INV/2026/AGEDTEST',
+        'enrollment_id' => $enrollment->id,
+        'student_id' => $enrollment->student_id,
+        'academic_year_id' => $enrollment->academic_year_id,
+        'fiscal_year_id' => $fiscalYearId,
+        'type' => 'standard',
+        'issue_date' => '2026-01-01',
+        'due_date' => '2026-01-15',
+        'status' => 'issued',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('invoice_lines')->insert([
+        'invoice_id' => $invoiceId,
+        'line_no' => 1,
+        'description' => 'Tuition Fee',
+        'collection_basis' => 'own_revenue',
+        'revenue_account_id' => ChartOfAccount::factory()->create()->id,
+        'recognition_method' => 'on_issue',
+        'quantity' => 1,
+        'unit_amount' => 100_000,
+        'amount' => 100_000,
+        'tax_amount' => 0,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs($user);
+    $response = get('/accounting/dashboard')->assertOk();
+
+    $response->assertSeeText('100,000');
+    $response->assertSeeText('Aged Debtor');
 });
