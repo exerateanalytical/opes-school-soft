@@ -124,6 +124,10 @@ final class Navigation
             // day, and the treasury panel there is the one place cash, bank,
             // MTN and Orange are shown as four separate balances.
             ['key' => 'finance_dashboard', 'route' => '/finance/dashboard', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
+            // The Accountant's own overview (2026-08-16 design doc),
+            // deliberately separate from finance_dashboard above - that one
+            // is the Bursar's collections view.
+            ['key' => 'accounting_dashboard', 'route' => '/accounting/dashboard', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             ['key' => 'ledger', 'route' => '/ledger/chart-of-accounts', 'permission' => Permission::LedgerView, 'enabled' => true, 'built' => true],
             // Expense capture (02-accounting §21.3): the petty cash-and-receipt
             // spend that never becomes a supplier invoice.

@@ -730,6 +730,16 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:ledger.view')->name('finance.dashboard');
 
     /*
+     * The Accountant's own overview (2026-08-16 design doc) - book health,
+     * today's task list, and receivables/collections. Deliberately separate
+     * from finance.dashboard above: that screen is the Bursar's collections
+     * view, this one answers "can I trust these books and what needs doing
+     * today," which is a different job even though both are ledger.view.
+     */
+    Route::get('/accounting/dashboard', \App\Modules\Accounting\Livewire\AccountingDashboard::class)
+        ->middleware('can:ledger.view')->name('accounting.dashboard');
+
+    /*
      * The OHADA/SYSCOHADA statements themselves (02-accounting §14.2/§17.7):
      * Bilan, Compte de resultat, Tableau des flux, plus prior-period
      * comparatives. Separate from /reports/financial, which carries the

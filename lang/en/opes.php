@@ -3508,5 +3508,8 @@ return [
             'suspense_explainer' => 'SYSCOHADA class 47. A suspense account should read zero outside a migration window; a balance here is money the books cannot yet explain.',
             'suspense_empty' => 'No suspense account carries a balance.',
         ],
+        'dashboard' => [
+            'heading' => 'Accounting dashboard',
+        ],
     ],
 ];

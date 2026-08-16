@@ -3469,5 +3469,8 @@ return [
             'suspense_explainer' => "Classe 47 SYSCOHADA. Un compte d'attente doit etre a zero hors periode de migration ; un solde ici est une somme que les livres n'expliquent pas encore.",
             'suspense_empty' => "Aucun compte d'attente ne presente de solde.",
         ],
+        'dashboard' => [
+            'heading' => 'Tableau de bord comptable',
+        ],
     ],
 ];

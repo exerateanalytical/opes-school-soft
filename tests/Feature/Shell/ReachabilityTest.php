@@ -115,3 +115,18 @@ it('links every ledger screen from the chart of accounts', function (): void {
         $response->assertSee('href="'.$href.'"', escape: false);
     }
 });
+
+it('offers the accounting dashboard in the navigation', function (): void {
+    $keys = array_column(Navigation::items(), 'key');
+
+    expect($keys)->toContain('accounting_dashboard');
+});
+
+it('shows an accountant the accounting dashboard link in their own sidebar', function (): void {
+    p13moneyUserAs(Role::Accountant);
+
+    $response = get('/dashboard');
+
+    $response->assertOk();
+    $response->assertSee('href="/accounting/dashboard"', escape: false);
+});
