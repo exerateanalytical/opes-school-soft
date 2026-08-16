@@ -27,6 +27,10 @@ use Illuminate\Validation\ValidationException;
  *   3. write AuditLog with the full BEFORE/AFTER flag set;
  *   4. revoke the guardian's active portal sessions for that child.
  *
+ * Step 4 is implemented via the `sessions` table (`SESSION_DRIVER=database`),
+ * keyed by `user_id`: deleting the guardian's portal user's row(s) is this
+ * driver's standard force-logout mechanism. See revokePortalSessions() below.
+ *
  * Why close-and-succeed rather than UPDATE: 7.2 forbids changing scope
  * retroactively. An in-place update would make last term's access look like it
  * had always been today's, and the audit row would be the only trace - which
@@ -47,13 +51,10 @@ use Illuminate\Validation\ValidationException;
  * `guardians.manage` today. The narrower right is a Phase-2-consolidation
  * follow-up, and until it exists Front Desk must not hold guardians.manage.
  *
- * STEP 4 IS NOT IMPLEMENTED HERE, and its absence is deliberate rather than
- * forgotten: there is no guardian portal, no portal session store and no
- * `guardian.custody.revoked` listener in Phase 2. Wiring a revocation call
- * into a session driver that does not yet exist would be untestable ceremony.
- * The successor-row design is what makes the later addition a one-liner: the
- * moment a session store exists, it is revoked here, at the point the flags
- * change.
+ * Step 4 revokes only on the close-and-succeed path, not on the future-dated
+ * amend-in-place path: an amendment whose valid_from is still ahead has not
+ * granted or removed anything yet, so there is nothing a live session could
+ * be wrong about.
  */
 final class SetGuardianAuthorization
 {
@@ -216,6 +217,8 @@ final class SetGuardianAuthorization
                 actor: $actor,
             );
 
+            $this->revokePortalSessions($current->guardian_id);
+
             return $successor;
         });
     }
@@ -237,5 +240,32 @@ final class SetGuardianAuthorization
     private function currentActor(): Actor
     {
         return auth()->user()?->toAuditActor() ?? Actor::system();
+    }
+
+    /**
+     * Step 4 of the class docblock's spec, now buildable: the guardian
+     * portal and its database-backed session store both exist. Deleting the
+     * row(s) from `sessions` is this driver's standard force-logout
+     * mechanism - the next request from that browser finds no matching
+     * session and is redirected to log in again, at which point the CURRENT
+     * (still valid until midnight per 7.3) flags apply, same as before. The
+     * point is not to change what they can see - it hasn't changed yet -
+     * it is to end whatever they were already looking at immediately rather
+     * than let a revocation-in-progress guardian keep browsing on a session
+     * opened before the operator acted.
+     *
+     * Only called from the close-and-succeed path. A future-dated amendment
+     * (valid_from still ahead) has not granted or removed anything yet, so
+     * there is nothing to force an immediate end to.
+     */
+    private function revokePortalSessions(int $guardianId): void
+    {
+        $portalUserId = DB::table('guardians')->where('id', $guardianId)->value('portal_user_id');
+
+        if ($portalUserId === null) {
+            return;
+        }
+
+        DB::table('sessions')->where('user_id', $portalUserId)->delete();
     }
 }

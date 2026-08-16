@@ -387,6 +387,72 @@ it('refuses an authorization change without the permission, and refuses a no-op'
     expect($link->refresh()->valid_to)->toBeNull();
 });
 
+// ---------------------------------------------------------------------------
+// Step 4 - revoke the guardian's active portal sessions when authorization
+// actually changes (close-and-succeed path only).
+// ---------------------------------------------------------------------------
+
+it("revokes the guardian's active portal sessions when authorization changes today", function () {
+    actingAs(guardiansUserAs());
+
+    $portalUser = User::factory()->create();
+    $guardian = Guardian::factory()->create(['portal_user_id' => $portalUser->id]);
+    $link = guardianLink(guardianFlagSet(['has_custody']), ['guardian_id' => $guardian->getKey()]);
+
+    DB::table('sessions')->insert([
+        'id' => 'test-session-id',
+        'user_id' => $portalUser->id,
+        'payload' => base64_encode('x'),
+        'last_activity' => time(),
+    ]);
+
+    app(SetGuardianAuthorization::class)->handle(
+        $link,
+        ['has_custody' => false],
+        'Court order received',
+    );
+
+    expect(DB::table('sessions')->where('user_id', $portalUser->id)->exists())->toBeFalse();
+});
+
+it('does not revoke sessions on a future-dated amendment that has not taken effect', function () {
+    actingAs(guardiansUserAs());
+
+    $portalUser = User::factory()->create();
+    $guardian = Guardian::factory()->create(['portal_user_id' => $portalUser->id]);
+    $link = guardianLink(guardianFlagSet(['has_custody']), [
+        'guardian_id' => $guardian->getKey(),
+        'valid_from' => Carbon::parse(BusinessDate::today())->addDay()->toDateString(),
+    ]);
+
+    DB::table('sessions')->insert([
+        'id' => 'test-session-id-2',
+        'user_id' => $portalUser->id,
+        'payload' => base64_encode('x'),
+        'last_activity' => time(),
+    ]);
+
+    app(SetGuardianAuthorization::class)->handle(
+        $link,
+        ['has_custody' => false],
+        'Planned change',
+    );
+
+    expect(DB::table('sessions')->where('user_id', $portalUser->id)->exists())->toBeTrue();
+});
+
+it('does nothing when the guardian has no portal account', function () {
+    actingAs(guardiansUserAs());
+
+    $link = guardianLink(guardianFlagSet(['has_custody']));
+
+    expect(fn () => app(SetGuardianAuthorization::class)->handle(
+        $link,
+        ['has_custody' => false],
+        'No portal account.',
+    ))->not->toThrow(Throwable::class);
+});
+
 it('takes effect on the successor row, and only from tomorrow', function () {
     actingAs(guardiansUserAs());
 
