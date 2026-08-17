@@ -537,6 +537,18 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:setting.edit')->name('settings.branding');
 
     /*
+     * The school's own Meta WhatsApp Business Cloud API credentials.
+     *
+     * `setting.edit`, not `setting.view`, and not a new permission: this
+     * screen exists ONLY to write credentials, so read-only access to it
+     * would show a masked token and nothing actionable. It matches
+     * /settings/branding beside it, and the component re-checks the same
+     * Permission::SettingEdit in mount() and in every write method.
+     */
+    Route::get('/settings/whatsapp', \App\Modules\Communication\Livewire\WhatsAppSettings::class)
+        ->middleware('can:setting.edit')->name('settings.whatsapp');
+
+    /*
      * The school's DOCUMENT identity - letterhead contacts, ministry state
      * header, crest/logo/signature paths. RenderDocument reads this row for
      * every printed document; before this screen existed the table had zero

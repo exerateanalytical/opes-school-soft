@@ -27,9 +27,17 @@ final class DriverManager
             $log = new LogDriver;
             $null = new NullDriver;
 
+            // The WhatsApp driver is the "one more entry here and nothing
+            // else" this class anticipated. Resolved from the container
+            // rather than `new`-ed because it has dependencies (the config
+            // reader and the sending Action); built lazily with the rest, so
+            // an instance running the `log` driver never constructs it.
+            $whatsapp = app(WhatsAppDriver::class);
+
             $this->drivers = [
                 $log->name() => $log,
                 $null->name() => $null,
+                $whatsapp->name() => $whatsapp,
             ];
         }
 
