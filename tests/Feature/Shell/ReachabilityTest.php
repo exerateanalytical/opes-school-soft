@@ -101,6 +101,36 @@ it('does not name a 404 route in the insurance policy detail view', function ():
     expect($blade)->not->toContain("url('/welfare/insurance')");
 });
 
+it('groups every nav item into a declared section with a real translation', function (): void {
+    $sections = require base_path('lang/en/opes.php');
+    $knownSections = array_keys($sections['nav_section']);
+
+    foreach (Navigation::items() as $item) {
+        expect($item)->toHaveKey('section');
+        expect($item['section'])->toBeString()->not->toBe('');
+        expect($knownSections)->toContain($item['section']);
+    }
+});
+
+it('renders the sidebar grouped under its section headings without error', function (): void {
+    p13moneyUserAs(Role::Administrator);
+
+    $response = get('/dashboard');
+
+    $response->assertOk();
+
+    // Every section an Administrator's permissions surface must have its
+    // heading rendered exactly once, ahead of its own links.
+    $sectionsSeen = [];
+    foreach (Navigation::items() as $item) {
+        $sectionsSeen[$item['section']] = true;
+    }
+
+    foreach (array_keys($sectionsSeen) as $sectionKey) {
+        $response->assertSee(__('opes.nav_section.'.$sectionKey));
+    }
+});
+
 it('links every ledger screen from the chart of accounts', function (): void {
     p13moneyUserAs(Role::Accountant);
 

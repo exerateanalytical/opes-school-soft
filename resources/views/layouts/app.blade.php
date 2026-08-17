@@ -62,6 +62,15 @@
             || ($shellUser !== null && $shellUser->can($item['permission']->value)),
     ));
 
+    // Group by 'section', preserving each section's first-appearance order
+    // (Navigation::items()'s own order) rather than sorting alphabetically -
+    // a school's mental model of "what comes first" is the build's, not the
+    // dictionary's.
+    $navSections = [];
+    foreach ($navItems as $item) {
+        $navSections[$item['section']][] = $item;
+    }
+
     $currentPath = '/'.ltrim(request()->path(), '/');
 
     $shellRoleName = $shellUser?->getRoleNames()->first();
@@ -167,55 +176,64 @@
 
         <x-toghu-band/>
 
-        <ul class="space-y-0.5 px-2 py-2">
-            @foreach ($navItems as $item)
-                @php
-                    $label = __('opes.nav.'.$item['key']);
-                    $isActive = $item['enabled'] && $item['route'] === $currentPath;
-                @endphp
-                <li>
-                    @if ($item['enabled'] && is_string($item['route']))
-                        <a href="{{ $item['route'] }}"
-                           @if ($isActive) aria-current="page" @endif
-                           @unless ($item['built'] ?? true) title="{{ __('opes.nav.nav_disabled_title') }}" @endunless
-                           class="relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
-                               ? 'bg-primary font-semibold text-white'
-                               : (($item['built'] ?? true)
-                                   ? 'text-white/85 hover:bg-chrome-light/60 hover:text-white'
-                                   : 'text-white/60 hover:bg-chrome-light/40 hover:text-white/90') }}">
-                            @if ($isActive)
-                                {{-- The design system's gold left indicator on
-                                     the active module. Absolutely positioned so
-                                     it cannot shift the label the way a border
-                                     would, and aria-hidden because
-                                     aria-current="page" already carries this
-                                     meaning to a screen reader. --}}
-                                <span class="absolute inset-y-1 left-0 w-[3px] rounded-full bg-heritage-yellow" aria-hidden="true"></span>
-                            @endif
-                            <x-opes-nav-icon :nav-key="$item['key']"
-                                             class="h-4.5 w-4.5 shrink-0 {{ $isActive ? 'text-heritage-yellow' : '' }}"/>
-                            <span class="min-w-0 truncate">{{ $label }}</span>
-                            @unless ($item['built'] ?? true)
-                                {{-- The module is scheduled, not missing: the
-                                     link works and lands on a page that says
-                                     so. The chip keeps built and coming
-                                     modules distinguishable at a glance. --}}
-                                <span class="ml-auto shrink-0 rounded-full bg-heritage-yellow/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-heritage-yellow">
-                                    {{ __('opes.placeholder.chip_short') }}
-                                </span>
-                            @endunless
-                        </a>
-                    @else
-                        <span aria-disabled="true"
-                              title="{{ __('opes.nav.nav_disabled_title') }}"
-                              class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/35">
-                            <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
-                            {{ $label }}
-                        </span>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
+        @foreach ($navSections as $sectionKey => $sectionItems)
+            {{-- Section header: small uppercase muted label, the same
+                 treatment the top bar already uses for the secondary date
+                 line (text-charcoal/50 there; text-white/50 here to sit on
+                 the dark chrome sidebar) - no new visual language. --}}
+            <p class="{{ $loop->first ? 'mt-1' : 'mt-3' }} px-4 pb-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">
+                {{ __('opes.nav_section.'.$sectionKey) }}
+            </p>
+            <ul class="space-y-0.5 px-2 pb-2">
+                @foreach ($sectionItems as $item)
+                    @php
+                        $label = __('opes.nav.'.$item['key']);
+                        $isActive = $item['enabled'] && $item['route'] === $currentPath;
+                    @endphp
+                    <li>
+                        @if ($item['enabled'] && is_string($item['route']))
+                            <a href="{{ $item['route'] }}"
+                               @if ($isActive) aria-current="page" @endif
+                               @unless ($item['built'] ?? true) title="{{ __('opes.nav.nav_disabled_title') }}" @endunless
+                               class="relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ $isActive
+                                   ? 'bg-primary font-semibold text-white'
+                                   : (($item['built'] ?? true)
+                                       ? 'text-white/85 hover:bg-chrome-light/60 hover:text-white'
+                                       : 'text-white/60 hover:bg-chrome-light/40 hover:text-white/90') }}">
+                                @if ($isActive)
+                                    {{-- The design system's gold left indicator on
+                                         the active module. Absolutely positioned so
+                                         it cannot shift the label the way a border
+                                         would, and aria-hidden because
+                                         aria-current="page" already carries this
+                                         meaning to a screen reader. --}}
+                                    <span class="absolute inset-y-1 left-0 w-[3px] rounded-full bg-heritage-yellow" aria-hidden="true"></span>
+                                @endif
+                                <x-opes-nav-icon :nav-key="$item['key']"
+                                                 class="h-4.5 w-4.5 shrink-0 {{ $isActive ? 'text-heritage-yellow' : '' }}"/>
+                                <span class="min-w-0 truncate">{{ $label }}</span>
+                                @unless ($item['built'] ?? true)
+                                    {{-- The module is scheduled, not missing: the
+                                         link works and lands on a page that says
+                                         so. The chip keeps built and coming
+                                         modules distinguishable at a glance. --}}
+                                    <span class="ml-auto shrink-0 rounded-full bg-heritage-yellow/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-heritage-yellow">
+                                        {{ __('opes.placeholder.chip_short') }}
+                                    </span>
+                                @endunless
+                            </a>
+                        @else
+                            <span aria-disabled="true"
+                                  title="{{ __('opes.nav.nav_disabled_title') }}"
+                                  class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/35">
+                                <x-opes-nav-icon :nav-key="$item['key']" class="h-4.5 w-4.5 shrink-0"/>
+                                {{ $label }}
+                            </span>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endforeach
 
         {{-- Per-screen QUICK ACTIONS box. Each screen @push()es its own list
              into this stack; a screen that pushes nothing simply renders no
