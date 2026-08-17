@@ -183,6 +183,80 @@
             @if ($canManage && $allocationsForSubjectId === $subject->id)
                 <tr wire:key="subject-allocations-{{ $subject->id }}">
                     <td colspan="6" class="bg-sand/30 px-4 py-3">
+                        {{-- Add-allocation control: AllocateSubject has always
+                             existed but nothing on this screen reached it, so
+                             an allocation could be edited and never created. --}}
+                        <div class="mb-3 flex items-center justify-end">
+                            <button type="button" wire:click="toggleNewAllocationForm"
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                {{ __('opes.subjects_screen.add_allocation') }}
+                            </button>
+                        </div>
+
+                        @if ($showNewAllocationForm)
+                            <form wire:submit="saveNewAllocation" class="mb-3 space-y-3 rounded border border-border-primary bg-white p-3">
+                                <h3 class="text-sm font-semibold text-charcoal">{{ __('opes.subjects_screen.add_allocation') }}</h3>
+
+                                <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
+                                    <label for="new-alloc-level" class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.class_level_field') }}</span>
+                                        <select id="new-alloc-level" wire:model="newAllocClassLevelId"
+                                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                            <option value="">{{ __('opes.subjects_screen.class_level_placeholder') }}</option>
+                                            @foreach ($levelOptions as $level)
+                                                <option value="{{ $level->id }}">{{ app()->getLocale() === 'fr' ? $level->name_fr : $level->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('newAllocClassLevelId')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                                    </label>
+
+                                    <label for="new-alloc-stream" class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.stream_field') }}</span>
+                                        <select id="new-alloc-stream" wire:model="newAllocStreamId"
+                                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                            <option value="">{{ __('opes.subjects_screen.stream_whole_level') }}</option>
+                                            @foreach ($streamOptions as $stream)
+                                                <option value="{{ $stream->id }}">{{ app()->getLocale() === 'fr' ? $stream->name_fr : $stream->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('newAllocStreamId')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                                    </label>
+
+                                    <label for="new-alloc-coefficient" class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.subjects_screen.coefficient_field') }}</span>
+                                        <input id="new-alloc-coefficient" type="number" step="0.01" min="0" max="99.99"
+                                               wire:model="newAllocCoefficient"
+                                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                                        @error('newAllocCoefficient')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                                    </label>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <label for="new-alloc-optional" class="flex items-center gap-2">
+                                        <input id="new-alloc-optional" type="checkbox" wire:model="newAllocIsOptional"
+                                               class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
+                                        <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.is_optional_field') }}</span>
+                                    </label>
+                                    <label for="new-alloc-counts" class="flex items-center gap-2">
+                                        <input id="new-alloc-counts" type="checkbox" wire:model="newAllocCountsTowardAverage"
+                                               class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
+                                        <span class="text-sm text-charcoal">{{ __('opes.subjects_screen.counts_toward_average_field') }}</span>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center gap-2 border-t border-border-primary pt-3">
+                                    <button type="submit"
+                                            class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                                        {{ __('opes.subjects_screen.save') }}
+                                    </button>
+                                    <button type="button" wire:click="toggleNewAllocationForm"
+                                            class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                        {{ __('opes.subjects_screen.cancel') }}
+                                    </button>
+                                </div>
+                            </form>
+                        @endif
+
                         @if ($expandedAllocations->isEmpty())
                             <p class="text-sm text-charcoal/60">{{ __('opes.subjects_screen.allocations_empty') }}</p>
                         @else

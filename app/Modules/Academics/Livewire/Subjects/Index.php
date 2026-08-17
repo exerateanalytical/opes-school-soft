@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Academics\Livewire\Subjects;
 
+use App\Modules\Academics\Actions\AllocateSubject;
 use App\Modules\Academics\Actions\CreateSubject;
 use App\Modules\Academics\Actions\UpdateAllocation;
 use App\Modules\Academics\Actions\UpdateSubject;
 use App\Modules\Academics\Models\AcademicYear;
+use App\Modules\Academics\Models\ClassLevel;
 use App\Modules\Academics\Models\Department;
+use App\Modules\Academics\Models\Stream;
 use App\Modules\Academics\Models\Subject;
 use App\Modules\Academics\Models\SubjectAllocation;
 use App\Modules\Identity\Domain\Permission;
@@ -72,6 +75,19 @@ final class Index extends Component
     public bool $allocCountsTowardAverage = true;
 
     public bool $allocIsActive = true;
+
+    // ── New-allocation form (AllocateSubject) ────────────────────────────
+    public bool $showNewAllocationForm = false;
+
+    public string $newAllocClassLevelId = '';
+
+    public string $newAllocStreamId = '';
+
+    public string $newAllocCoefficient = '1';
+
+    public bool $newAllocIsOptional = false;
+
+    public bool $newAllocCountsTowardAverage = true;
 
     public function mount(): void
     {
@@ -199,6 +215,87 @@ final class Index extends Component
 
         $this->allocationsForSubjectId = $this->allocationsForSubjectId === $subjectId ? null : $subjectId;
         $this->editingAllocationId = null;
+        $this->showNewAllocationForm = false;
+        $this->resetErrorBag();
+    }
+
+    public function toggleNewAllocationForm(): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        $this->showNewAllocationForm = ! $this->showNewAllocationForm;
+
+        if ($this->showNewAllocationForm) {
+            $this->editingAllocationId = null;
+            $this->reset([
+                'newAllocClassLevelId', 'newAllocStreamId',
+                'newAllocIsOptional', 'newAllocCountsTowardAverage',
+            ]);
+            $this->newAllocCoefficient = '1';
+        }
+
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Put the expanded subject on a class level for the CURRENT academic
+     * year. The screen only ever shows current-year allocations, so that is
+     * the only year it may write to.
+     *
+     * AllocateSubject also accepts required_components, subject_group_id,
+     * max_score_override and the effective-period window; Phase 1 has no
+     * screen for any of them, so they stay at the Action's own defaults
+     * rather than being half-collected here.
+     */
+    public function saveNewAllocation(AllocateSubject $allocateSubject): void
+    {
+        Gate::authorize(Permission::AcademicsManage->value);
+
+        if ($this->allocationsForSubjectId === null) {
+            return;
+        }
+
+        $year = AcademicYear::query()->where('is_current', true)->first();
+
+        if ($year === null) {
+            $this->addError('newAllocClassLevelId', __('opes.subjects_screen.allocation_needs_year'));
+
+            return;
+        }
+
+        $validated = $this->validate([
+            'newAllocClassLevelId' => ['required', 'integer', 'exists:class_levels,id'],
+            'newAllocStreamId' => $this->newAllocStreamId === ''
+                ? ['nullable']
+                : ['integer', 'exists:streams,id'],
+            'newAllocCoefficient' => ['required', 'numeric', 'min:0', 'max:99.99'],
+            'newAllocIsOptional' => ['boolean'],
+            'newAllocCountsTowardAverage' => ['boolean'],
+        ], [], [
+            'newAllocClassLevelId' => 'class level',
+            'newAllocStreamId' => 'stream',
+            'newAllocCoefficient' => 'coefficient',
+        ]);
+
+        try {
+            $allocateSubject->handle(
+                academicYearId: (int) $year->getKey(),
+                classLevelId: (int) $validated['newAllocClassLevelId'],
+                streamId: $this->newAllocStreamId === '' ? null : (int) $this->newAllocStreamId,
+                subjectId: $this->allocationsForSubjectId,
+                coefficient: (string) $validated['newAllocCoefficient'],
+                isOptional: $this->newAllocIsOptional,
+                countsTowardAverage: $this->newAllocCountsTowardAverage,
+            );
+        } catch (DomainException $exception) {
+            // Negative coefficient / already-allocated, phrased by the Action.
+            $this->addError('newAllocCoefficient', $exception->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', __('opes.subjects_screen.allocation_created'));
+        $this->showNewAllocationForm = false;
         $this->resetErrorBag();
     }
 
@@ -319,6 +416,8 @@ final class Index extends Component
             'totalSubjects' => Subject::query()->count(),
             'canManage' => Gate::allows(Permission::AcademicsManage->value),
             'expandedAllocations' => $this->allocationsForExpandedSubject(),
+            'levelOptions' => ClassLevel::query()->orderBy('order_index')->get(),
+            'streamOptions' => Stream::query()->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 }

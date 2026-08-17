@@ -931,6 +931,13 @@ return [
         'is_optional_field' => 'Optional',
         'counts_toward_average_field' => 'Counts toward average',
         'allocation_updated' => 'Subject allocation updated.',
+        'add_allocation' => 'Add allocation',
+        'class_level_field' => 'Class level',
+        'class_level_placeholder' => 'Choose a class level',
+        'stream_field' => 'Stream',
+        'stream_whole_level' => 'Whole level (no stream)',
+        'allocation_created' => 'Subject allocated.',
+        'allocation_needs_year' => 'No current academic year has been set, so there is no year to allocate this subject to. Set one under Academic Settings first.',
     ],
     // Classes screen, Phase 1.
     'classes_screen' => [
@@ -965,6 +972,33 @@ return [
         'cancel' => 'Cancel',
         'created' => 'Class created.',
         'updated' => 'Class updated.',
+        // Class levels and streams — the structures a class group is opened
+        // against. Managed from this screen because only `classes.index` is
+        // routed.
+        'structure_heading' => 'Levels & streams',
+        'add_level' => 'Add class level',
+        'edit_level' => 'Edit class level',
+        'form_level_title' => 'Add class level',
+        'form_level_edit_title' => 'Edit class level',
+        'level_section_field' => 'School section',
+        'level_section_placeholder' => 'Choose a section',
+        'level_code_field' => 'Level code',
+        'level_name_field' => 'Level name (English)',
+        'level_name_fr_field' => 'Level name (French)',
+        'level_order_field' => 'Order',
+        'level_exam_class_field' => 'Exam class',
+        'levels_empty' => 'No class levels have been defined yet.',
+        'level_created' => 'Class level created.',
+        'level_updated' => 'Class level updated.',
+        'add_stream' => 'Add stream',
+        'form_stream_title' => 'Add stream',
+        'stream_code_field' => 'Stream code',
+        'stream_name_field' => 'Stream name (English)',
+        'stream_name_fr_field' => 'Stream name (French)',
+        'stream_basket_field' => 'Subject basket (comma-separated codes)',
+        'stream_basket_help' => 'Optional. Subject codes separated by commas, e.g. MATH101, PHY101.',
+        'streams_empty' => 'No streams have been defined yet.',
+        'stream_created' => 'Stream created.',
     ],
     // Students screens, docs/specs/07-students.md 11.1 and 11.2. Phase 2.
     'students_screen' => [

@@ -410,15 +410,20 @@ final class Index extends Component
     }
 
     /**
-     * @return list<array{value: string, label: string, count: int}>
+     * The tab strip. Each entry carried a hardcoded `'count' => 0` that no
+     * view ever read — a literal zero one badge away from being rendered as
+     * "0 records" for a report that in fact has rows. Dropped rather than
+     * back-filled: the tabs are report selectors, not counters.
+     *
+     * @return list<array{value: string, label: string}>
      */
     private function reportTabs(): array
     {
         return [
-            ['value' => 'class_list', 'label' => 'Class List', 'count' => 0],
-            ['value' => 'subject_allocation', 'label' => 'Subject Allocation Register', 'count' => 0],
-            ['value' => 'timetable', 'label' => 'Timetable Register', 'count' => 0],
-            ['value' => 'promotion', 'label' => 'Promotion Register', 'count' => 0],
+            ['value' => 'class_list', 'label' => 'Class List'],
+            ['value' => 'subject_allocation', 'label' => 'Subject Allocation Register'],
+            ['value' => 'timetable', 'label' => 'Timetable Register'],
+            ['value' => 'promotion', 'label' => 'Promotion Register'],
         ];
     }
 
