@@ -7,12 +7,14 @@ namespace App\Modules\Admissions\Livewire;
 use App\Modules\Admissions\Actions\ConvertApplication;
 use App\Modules\Admissions\Actions\RejectApplication;
 use App\Modules\Admissions\Actions\SaveApplicationStep;
+use App\Modules\Admissions\Actions\SetApplicantPhoto;
 use App\Modules\Admissions\Actions\SubmitApplication;
 use App\Modules\Admissions\Domain\ApplicantRelationship;
 use App\Modules\Admissions\Domain\ApplicationStatus;
 use App\Modules\Admissions\Domain\WizardStep;
 use App\Modules\Admissions\Models\AdmissionApplication;
 use App\Modules\Identity\Domain\Permission;
+use App\Support\Storage\StoredImage;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +22,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * The 5-step admission wizard, docs/specs/07-students.md 6.2 and 11.4.
@@ -35,9 +39,11 @@ use Livewire\Component;
  *    renders it into the same error bag an inline `$this->validate()` would
  *    have used. That is why an API caller and an operator get identical rules,
  *    and why the rules cannot drift between the two.
- *  - **Nothing is fabricated.** The mockup's photo tile, document uploader and
- *    notification bell have no backing behaviour in this phase and are not
- *    drawn as decoration. What is on screen is what the row can hold.
+ *  - **Nothing is fabricated.** The mockup's document uploader and notification
+ *    bell have no backing behaviour in this phase and are not drawn as
+ *    decoration. What is on screen is what the row can hold. The photo tile
+ *    HAS backing behaviour now - `admission_applications.photo_path` is a real
+ *    column and SetApplicantPhoto fills it - so it is drawn, on step 5.
  *
  * Authorisation is checked in mount() AND in every write. A Livewire component
  * can be reached directly, not only through the route it is registered
@@ -47,6 +53,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 final class Wizard extends Component
 {
+    use WithFileUploads;
+
     /**
      * In the query string so a full page reload resumes the same draft.
      * Typed as a string rather than ?int on purpose: a query parameter arrives
@@ -132,6 +140,16 @@ final class Wizard extends Component
 
     public string $rejection_reason = '';
 
+    /**
+     * The pending applicant photograph. Not persisted on its own: the operator
+     * picks a file, sees the preview Livewire renders from the temporary
+     * upload, and the file only reaches `photo_path` on Save.
+     */
+    public ?TemporaryUploadedFile $photoUpload = null;
+
+    /** What the ROW holds - '' when the applicant has no photo. */
+    public string $photo_path = '';
+
     public string $statusMessage = '';
 
     public function mount(): void
@@ -195,6 +213,93 @@ final class Wizard extends Component
         if ($this->guardians === []) {
             $this->guardians = [self::blankGuardian()];
         }
+    }
+
+    /**
+     * Store the picked photograph against the application.
+     *
+     * `image` plus an explicit mimes list plus a dimension cap, all three, for
+     * the reasons DocumentProfile's rules() sets out: `image` alone admits SVG
+     * (a script-capable document served from this app's own origin), the mimes
+     * list alone admits a 12 000 px scan, and the dimension cap alone admits a
+     * renamed executable.
+     */
+    public function savePhoto(SetApplicantPhoto $setApplicantPhoto): void
+    {
+        Gate::authorize(Permission::AdmissionsManage->value);
+
+        $application = $this->application();
+
+        if ($application === null) {
+            // There is no row to hang a photo on until step 1 has been saved.
+            // Reported rather than silently dropped: the operator would
+            // otherwise watch a preview appear and a file vanish.
+            $this->addError('photoUpload', (string) __('opes.admissions_screen.errors.photo_needs_draft'));
+
+            return;
+        }
+
+        $this->validate([
+            'photoUpload' => [
+                'required',
+                'image',
+                'mimes:'.implode(',', StoredImage::ALLOWED_EXTENSIONS),
+                'max:'.StoredImage::MAX_KILOBYTES,
+                'dimensions:max_width='.StoredImage::MAX_DIMENSION.',max_height='.StoredImage::MAX_DIMENSION,
+            ],
+        ], [
+            'photoUpload.required' => (string) __('opes.admissions_screen.errors.photo_required'),
+            'photoUpload.image' => (string) __('opes.admissions_screen.errors.photo_not_an_image'),
+            'photoUpload.mimes' => (string) __('opes.admissions_screen.errors.photo_wrong_type', [
+                'types' => strtoupper(implode(', ', StoredImage::ALLOWED_EXTENSIONS)),
+            ]),
+            'photoUpload.max' => (string) __('opes.admissions_screen.errors.photo_too_large', [
+                'kb' => StoredImage::MAX_KILOBYTES,
+            ]),
+            'photoUpload.dimensions' => (string) __('opes.admissions_screen.errors.photo_too_big', [
+                'px' => StoredImage::MAX_DIMENSION,
+            ]),
+        ]);
+
+        $upload = $this->photoUpload;
+
+        if (! $upload instanceof TemporaryUploadedFile) {
+            return;
+        }
+
+        $saved = $setApplicantPhoto->handle($application, $upload);
+
+        // Released immediately: a TemporaryUploadedFile left on a public
+        // property is re-serialised into every subsequent request's payload.
+        $upload->delete();
+        $this->photoUpload = null;
+
+        $this->photo_path = (string) ($saved->photo_path ?? '');
+        $this->statusMessage = __('opes.admissions_screen.photo_saved');
+    }
+
+    public function removePhoto(SetApplicantPhoto $setApplicantPhoto): void
+    {
+        Gate::authorize(Permission::AdmissionsManage->value);
+
+        $this->photoUpload?->delete();
+        $this->photoUpload = null;
+
+        $application = $this->application();
+
+        // Nothing stored means Remove only discarded the pending pick, so the
+        // Action is not called at all - it would write an audit entry saying
+        // null became null.
+        if ($application === null || $application->photo_path === null) {
+            $this->photo_path = '';
+
+            return;
+        }
+
+        $setApplicantPhoto->handle($application, null);
+
+        $this->photo_path = '';
+        $this->statusMessage = __('opes.admissions_screen.photo_removed');
     }
 
     public function submit(SubmitApplication $submitApplication): void
@@ -329,6 +434,7 @@ final class Wizard extends Component
 
         $this->date_of_birth = $application->date_of_birth?->toDateString() ?? '';
         $this->admission_date = $application->admission_date?->toDateString() ?? '';
+        $this->photo_path = (string) ($application->photo_path ?? '');
 
         $this->guardians = array_map(
             static fn (\App\Modules\Admissions\Models\AdmissionApplicationGuardian $row): array => [
