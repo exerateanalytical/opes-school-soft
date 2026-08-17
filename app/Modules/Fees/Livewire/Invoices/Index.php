@@ -109,6 +109,16 @@ final class Index extends Component
 
     public string $categoryNameFr = '';
 
+    /**
+     * 04-fees §2.1 - `fee_categories.display_order`, the integer every
+     * category list in the app sorts by (categoryOptions() below orders on
+     * it). It was pinned at 0 by the call site, which made the ordering of a
+     * school's own categories unreachable from the screen that creates them.
+     * 0 stays the default, so a school that never touches it keeps
+     * creation-order lists.
+     */
+    public string $categoryDisplayOrder = '0';
+
     // ── Create fee structure (CreateFeeStructure) ───────────────────────
     // Simplified for the demo: a single line item per structure, and the
     // class level / stream / enrollment-status / boarding discriminators
@@ -411,14 +421,22 @@ final class Index extends Component
             'categoryCode' => ['required', 'string', 'max:30'],
             'categoryName' => ['required', 'string', 'max:160'],
             'categoryNameFr' => ['required', 'string', 'max:160'],
+            'categoryDisplayOrder' => ['required', 'integer', 'min:0'],
         ], [], [
             'categoryCode' => 'code',
             'categoryName' => 'name',
             'categoryNameFr' => 'French name',
+            'categoryDisplayOrder' => 'display order',
         ]);
 
         try {
-            $action->handle($this->categoryCode, $this->categoryName, $this->categoryNameFr, 0, $this->actor());
+            $action->handle(
+                $this->categoryCode,
+                $this->categoryName,
+                $this->categoryNameFr,
+                (int) $this->categoryDisplayOrder,
+                $this->actor(),
+            );
         } catch (ValidationException $e) {
             $this->addError('categoryCode', $e->getMessage());
 
@@ -429,7 +447,7 @@ final class Index extends Component
             return;
         }
 
-        $this->reset(['showCategoryForm', 'categoryCode', 'categoryName', 'categoryNameFr']);
+        $this->reset(['showCategoryForm', 'categoryCode', 'categoryName', 'categoryNameFr', 'categoryDisplayOrder']);
         session()->flash('status', 'Fee category created.');
     }
 

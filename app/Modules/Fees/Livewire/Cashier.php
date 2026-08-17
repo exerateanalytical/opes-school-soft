@@ -8,6 +8,7 @@ use App\Modules\Fees\Actions\CloseCashDeskSession;
 use App\Modules\Fees\Actions\OpenCashDeskSession;
 use App\Modules\Fees\Actions\RecordPayment;
 use App\Modules\Fees\Actions\VoidPayment;
+use App\Modules\Fees\Domain\FeeBearer;
 use App\Modules\Fees\Domain\PaymentMethod;
 use App\Modules\Fees\Domain\PaymentVoidReason;
 use App\Modules\Fees\Models\Payment;
@@ -59,6 +60,30 @@ final class Cashier extends Component
     public string $treasuryAccountId = '';
 
     public string $reference = '';
+
+    /**
+     * 04-fees §11 - WHO handed the money over. A receipt is issued to a
+     * person, and at a Cameroonian school counter that person is usually a
+     * guardian, an elder sibling or an employer, not the pupil: naming the
+     * student every time made every receipt a small lie and left the cashier
+     * nothing to match a disputed payment against. Defaulted to the selected
+     * student (the walk-up case is still the common one) and overwritable.
+     */
+    public string $payerName = '';
+
+    public string $payerPhone = '';
+
+    public string $notes = '';
+
+    /**
+     * §2.4 / §15.6 - the operator or bank commission on this transfer, as it
+     * was actually charged, and who absorbed it. Typed in, never computed:
+     * this screen owns no tariff table and inventing one would fabricate
+     * money. Blank/zero with bearer "none" is the cash desk's normal day.
+     */
+    public string $feeAmount = '';
+
+    public string $feeBearer = 'none';
 
     public string $receiptNo = '';
 
@@ -508,16 +533,22 @@ final class Cashier extends Component
     {
         // A new search implicitly abandons the previous selection.
         $this->studentId = null;
+        $this->payerName = '';
         $this->receiptNo = '';
         $this->errorMessage = '';
     }
 
     public function selectStudent(int $studentId): void
     {
-        $exists = DB::table('students')->where('id', $studentId)->exists();
+        /** @var object{first_name: string, last_name: string}|null $student */
+        $student = DB::table('students')->where('id', $studentId)->first(['first_name', 'last_name']);
 
-        if ($exists) {
+        if ($student !== null) {
             $this->studentId = $studentId;
+            // The walk-up default, not a hardcoded truth: the cashier reads
+            // it back to the person at the counter and corrects it whenever
+            // the payer is a guardian or a third party.
+            $this->payerName = trim($student->first_name.' '.$student->last_name);
             $this->receiptNo = '';
             $this->errorMessage = '';
         }
@@ -525,7 +556,10 @@ final class Cashier extends Component
 
     public function clearSelection(): void
     {
-        $this->reset(['studentId', 'search', 'amount', 'reference', 'receiptNo', 'lastPaymentId', 'errorMessage']);
+        $this->reset([
+            'studentId', 'search', 'amount', 'reference', 'payerName', 'payerPhone',
+            'notes', 'feeAmount', 'feeBearer', 'receiptNo', 'lastPaymentId', 'errorMessage',
+        ]);
     }
 
     public function collect(): void
@@ -550,12 +584,27 @@ final class Cashier extends Component
             // that the account is class 5 and postable.
             'treasuryAccountId' => ['required', 'integer'],
             'reference' => ['nullable', 'string', 'max:120'],
+            // §11: the receipt is issued to a PERSON. Required, because a
+            // blank payer would silently reintroduce the old lie.
+            'payerName' => ['required', 'string', 'max:160'],
+            'payerPhone' => ['nullable', 'string', 'max:40'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            // Typed as charged; the Action refuses a negative commission and
+            // decides (§15.6) whether it enters the books at all.
+            'feeAmount' => ['nullable', 'integer', 'min:0'],
+            'feeBearer' => ['required', 'in:'.implode(',', array_map(
+                static fn (FeeBearer $b): string => $b->value,
+                FeeBearer::cases(),
+            ))],
         ], [
             'amount.required' => __('opes.fees_screen.amount_invalid'),
             'amount.integer' => __('opes.fees_screen.amount_invalid'),
             'amount.min' => __('opes.fees_screen.amount_invalid'),
             'treasuryAccountId.required' => __('opes.fees_screen.treasury_account_required'),
             'treasuryAccountId.integer' => __('opes.fees_screen.treasury_account_required'),
+            'payerName.required' => __('opes.fees_screen.payer_name_required'),
+            'feeBearer.required' => __('opes.fees_screen.fee_bearer_required'),
+            'feeBearer.in' => __('opes.fees_screen.fee_bearer_required'),
         ]);
 
         $method = PaymentMethod::from($this->method);
@@ -598,10 +647,7 @@ final class Cashier extends Component
             return;
         }
 
-        /** @var object{first_name: string, last_name: string}|null $student */
-        $student = DB::table('students')->where('id', $studentId)->first(['first_name', 'last_name']);
-
-        if ($student === null) {
+        if (! DB::table('students')->where('id', $studentId)->exists()) {
             return;
         }
 
@@ -615,14 +661,18 @@ final class Cashier extends Component
                 fiscalYearId: (int) $fiscalYearId,
                 method: $method,
                 amount: Money::of((int) $this->amount),
-                // The walk-up payer at a cashier desk is recorded as the
-                // student's own name unless a dedicated payer field exists;
-                // the mockup's form carries no payer input.
-                payerName: $student->first_name.' '.$student->last_name,
+                // Whoever the cashier says handed the money over - defaulted
+                // to the student on selection, corrected at the counter when
+                // a guardian or a third party pays.
+                payerName: trim($this->payerName),
                 valueDate: BusinessDate::today(),
                 actor: $actor,
+                feeAmount: $this->feeAmount === '' ? null : Money::of((int) $this->feeAmount),
+                feeBearer: FeeBearer::from($this->feeBearer),
                 reference: $this->reference !== '' ? $this->reference : null,
+                payerPhone: trim($this->payerPhone) !== '' ? trim($this->payerPhone) : null,
                 enrollmentId: $this->latestEnrollmentId($studentId),
+                notes: trim($this->notes) !== '' ? trim($this->notes) : null,
                 treasuryAccountId: (int) $this->treasuryAccountId,
                 // §11.7: file the collection under the shift that took it -
                 // set above for cash only, and only once a session was found
@@ -632,7 +682,9 @@ final class Cashier extends Component
 
             $this->receiptNo = $payment->receipt_no;
             $this->lastPaymentId = (int) $payment->getKey();
-            $this->reset(['amount', 'reference']);
+            // The payer stays on screen (the same guardian often settles a
+            // second line straight after); the money fields do not.
+            $this->reset(['amount', 'reference', 'notes', 'feeAmount', 'feeBearer']);
         } catch (ValidationException $exception) {
             // The Action's own refusals (an archived or non-class-5 float,
             // a school with no treasury account at all) land on the field
@@ -642,6 +694,12 @@ final class Cashier extends Component
 
                 if ($field === 'treasury_account_id') {
                     $this->addError('treasuryAccountId', $message);
+
+                    continue;
+                }
+
+                if ($field === 'fee_amount') {
+                    $this->addError('feeAmount', $message);
 
                     continue;
                 }
@@ -842,6 +900,7 @@ final class Cashier extends Component
             'cashBoxOptions' => $this->cashBoxOptions(),
             'session' => $this->openSession(),
             'methodOptions' => array_map(static fn (PaymentMethod $m): string => $m->value, PaymentMethod::cases()),
+            'feeBearerOptions' => array_map(static fn (FeeBearer $b): string => $b->value, FeeBearer::cases()),
             'canCollect' => $this->canCollect(),
             'canVoid' => $this->canVoid(),
             'voidReasonOptions' => array_map(static fn (PaymentVoidReason $r): string => $r->value, PaymentVoidReason::cases()),
