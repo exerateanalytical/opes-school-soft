@@ -359,7 +359,9 @@ final class Entry extends Component
 
         $this->showRejectForm = false;
         $this->rejectReason = '';
-        $this->notice = 'Returned '.$result['returned'].' mark(s) to the teacher for correction.';
+        $this->notice = __('opes.assessment_screen.returned', [
+            'returned' => $result['returned'],
+        ]);
     }
 
     /**

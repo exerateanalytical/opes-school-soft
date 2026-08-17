@@ -39,19 +39,23 @@
 
 <div class="min-w-0 space-y-4">
 @if (session('status'))
-    <div class="mb-3 rounded border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">{{ session('status') }}</div>
+    {{-- `ok` is x-status-pill's semantic tone name, not a palette token: as a
+         Tailwind colour class it resolves to nothing, so this flash rendered
+         as unstyled text. The success flash uses the same primary tokens the
+         rest of the module's status banners do. --}}
+    <div class="mb-3 rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary" role="status">{{ session('status') }}</div>
 @endif
 
 @if (session('error'))
-    <div class="mb-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{ session('error') }}</div>
+    <div class="mb-3 rounded border border-heritage-red/40 bg-heritage-red/10 px-3 py-2 text-sm font-medium text-heritage-red">{{ session('error') }}</div>
 @endif
 
 @error('publish')
-    <div class="mb-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{ $message }}</div>
+    <div class="mb-3 rounded border border-heritage-red/40 bg-heritage-red/10 px-3 py-2 text-sm font-medium text-heritage-red">{{ $message }}</div>
 @enderror
 
 @error('period')
-    <div class="mb-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{ $message }}</div>
+    <div class="mb-3 rounded border border-heritage-red/40 bg-heritage-red/10 px-3 py-2 text-sm font-medium text-heritage-red">{{ $message }}</div>
 @enderror
 
 <div class="mb-4 rounded border border-border-primary bg-white">
@@ -93,7 +97,7 @@
             </button>
 
             @error('computePeriodId')
-                <p class="w-full text-sm text-red-700">{{ $message }}</p>
+                <p class="w-full text-sm font-medium text-heritage-red">{{ $message }}</p>
             @enderror
         </form>
     @endif

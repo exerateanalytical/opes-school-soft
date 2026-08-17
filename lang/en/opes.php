@@ -1593,6 +1593,7 @@ return [
         'keyboard_move' => 'move between students',
         'out_of_range' => 'out of range',
         'reason_placeholder' => 'Why? (required)',
+        'locked_hint' => 'This mark has been validated and can no longer be edited here; ask the head of department to return it first.',
 
         'footer_entered' => 'entered',
         'footer_pending' => 'pending',
@@ -1605,6 +1606,15 @@ return [
         'submit_confirm' => 'Submit these marks to the head of department? You will not be able to edit them again until they are returned.',
         'submitted' => ':submitted mark(s) submitted for validation; :pending still not entered.',
         'approved' => ':validated mark(s) validated.',
+        'approve' => 'Approve',
+        'approve_confirm' => 'Approve these marks? They move to the validated stage.',
+        'reject_open' => 'Return to teacher',
+        'reject_cancel' => 'Cancel return',
+        'reject_reason_label' => 'Reason for returning these marks',
+        'reject_submit' => 'Confirm return',
+        'reject_confirm' => 'Return this submission to the teacher for correction?',
+        'reject_dismiss' => 'Cancel',
+        'returned' => ':returned mark(s) returned to the teacher for correction.',
         'saved_count' => '{0} Nothing to save.|{1} One mark saved.|[2,*] :count marks saved.',
         'nothing_changed' => 'Nothing has changed since the last save.',
 
