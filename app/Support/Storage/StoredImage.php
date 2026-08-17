@@ -48,28 +48,35 @@ final class StoredImage
     /** The largest an uploaded branding image may be, in kilobytes. */
     public const MAX_KILOBYTES = 2048;
 
-    public static function put(string $slot, UploadedFile $file, string $directory = self::DIRECTORY): string
-    {
+    /**
+     * $directory and $disk default to the branding pair and every existing
+     * caller keeps its behaviour. They exist because a second family of
+     * images - guardian photographs - wants the SAME content-hashed naming and
+     * the same never-reuse-a-path guarantee, but must not land in branding/ on
+     * the public disk: a photograph of a person is served through a
+     * policy-checked controller off the private default disk. Sharing the
+     * mechanism and parameterising the destination is what keeps there from
+     * being a second, subtly different image store.
+     */
+    public static function put(
+        string $slot,
+        UploadedFile $file,
+        string $directory = self::DIRECTORY,
+        string $disk = self::DISK,
+    ): string {
         $extension = strtolower($file->getClientOriginalExtension());
 
         $contents = (string) file_get_contents((string) $file->getRealPath());
 
-        return self::putContents($slot, $contents, $extension, $directory);
+        return self::putContents($slot, $contents, $extension, $directory, $disk);
     }
 
-    /**
-     * `$directory` exists so a second KIND of image - an applicant photo, which
-     * is per-record rather than per-school - inherits the content hashing, the
-     * type allow-list and forget()'s delete guard without a second copy of any
-     * of them. It defaults to `branding`, so every pre-existing call site keeps
-     * its exact behaviour, and forget() takes the same argument so the guard
-     * still refuses to delete outside the directory it was handed.
-     */
     public static function putContents(
         string $slot,
         string $contents,
         string $extension,
         string $directory = self::DIRECTORY,
+        string $disk = self::DISK,
     ): string {
         $extension = strtolower($extension);
 
@@ -87,7 +94,7 @@ final class StoredImage
 
         $path = trim($directory, '/').'/'.Str::slug($slot).'-'.$digest.'.'.$extension;
 
-        Storage::disk(self::DISK)->put($path, $contents);
+        Storage::disk($disk)->put($path, $contents);
 
         return $path;
     }
@@ -114,12 +121,16 @@ final class StoredImage
      *   - never delete when the two paths are equal (re-uploading identical
      *     bytes yields the same path, and deleting it would erase the image
      *     that was just "saved");
-     *   - never delete anything outside $directory, so a hand-edited path
+     *   - never delete anything outside branding/, so a hand-edited path
      *     column can never turn a settings save into a delete of an issued
      *     PDF.
      */
-    public static function forget(?string $previous, ?string $keep, string $directory = self::DIRECTORY): void
-    {
+    public static function forget(
+        ?string $previous,
+        ?string $keep,
+        string $directory = self::DIRECTORY,
+        string $disk = self::DISK,
+    ): void {
         if ($previous === null || $previous === '' || $previous === $keep) {
             return;
         }
@@ -128,6 +139,6 @@ final class StoredImage
             return;
         }
 
-        Storage::disk(self::DISK)->delete($previous);
+        Storage::disk($disk)->delete($previous);
     }
 }

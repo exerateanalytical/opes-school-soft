@@ -1157,6 +1157,14 @@ return [
     ],
     // Fiche tuteur, docs/specs/07-students.md 11.3. Phase 2.
     'guardians_screen' => [
+        'photo_heading' => 'Photographie',
+        'photo_hint' => "Affichée au personnel lors de la remise de l'enfant.",
+        'photo_uploading' => 'Téléversement…',
+        'photo_save' => 'Enregistrer la photo',
+        'photo_remove' => 'Supprimer la photo',
+        'photo_required' => "Choisissez d'abord une image.",
+        'photo_saved' => 'Photographie enregistrée.',
+        'photo_removed' => 'Photographie supprimée.',
         'title' => 'Fiche tuteur',
         'breadcrumb_dashboard' => 'Tableau de bord',
         'breadcrumb_guardians' => 'Tuteurs',

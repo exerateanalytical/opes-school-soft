@@ -1170,6 +1170,14 @@ return [
     ],
     // Guardian profile, docs/specs/07-students.md 11.3. Phase 2.
     'guardians_screen' => [
+        'photo_heading' => 'Photograph',
+        'photo_hint' => 'Shown to staff releasing a child at pickup.',
+        'photo_uploading' => 'Uploading…',
+        'photo_save' => 'Save photo',
+        'photo_remove' => 'Remove photo',
+        'photo_required' => 'Choose an image first.',
+        'photo_saved' => 'Photograph saved.',
+        'photo_removed' => 'Photograph removed.',
         'title' => 'Guardian Profile',
         'breadcrumb_dashboard' => 'Dashboard',
         'breadcrumb_guardians' => 'Guardians',
