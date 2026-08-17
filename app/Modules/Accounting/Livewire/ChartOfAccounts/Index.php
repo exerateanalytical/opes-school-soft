@@ -91,6 +91,8 @@ final class Index extends Component
 
     public string $editNotes = '';
 
+    public string $editDsfLineCode = '';
+
     // ── Create fiscal year form (header toolbar - see class docblock and
     // final report: no other Accounting screen surfaces this). ───────────
     public bool $showFiscalYearForm = false;
@@ -219,11 +221,12 @@ final class Index extends Component
         $this->editNameFr = $account->name_fr;
         $this->editDisplayAlias = (string) $account->display_alias;
         $this->editNotes = (string) $account->notes;
+        $this->editDsfLineCode = (string) $account->dsf_line_code;
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['editAccountId', 'editName', 'editNameFr', 'editDisplayAlias', 'editNotes']);
+        $this->reset(['editAccountId', 'editName', 'editNameFr', 'editDisplayAlias', 'editNotes', 'editDsfLineCode']);
     }
 
     public function saveEditAccount(UpdateAccount $updateAccount): void
@@ -255,6 +258,7 @@ final class Index extends Component
                     'name_fr' => $validated['editNameFr'],
                     'display_alias' => $this->editDisplayAlias !== '' ? $this->editDisplayAlias : null,
                     'notes' => $this->editNotes !== '' ? $this->editNotes : null,
+                    'dsf_line_code' => $this->editDsfLineCode !== '' ? $this->editDsfLineCode : null,
                 ],
                 actor: $this->actor(),
             );
@@ -264,7 +268,7 @@ final class Index extends Component
             return;
         }
 
-        $this->reset(['editAccountId', 'editName', 'editNameFr', 'editDisplayAlias', 'editNotes']);
+        $this->reset(['editAccountId', 'editName', 'editNameFr', 'editDisplayAlias', 'editNotes', 'editDsfLineCode']);
         session()->flash('status', __('opes.ledger_screen.coa_account_updated'));
     }
 

@@ -135,6 +135,13 @@
                         <input id="coa-edit-notes" type="text" wire:model="editNotes"
                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
                     </label>
+
+                    <label for="coa-edit-dsf-line-code" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.ledger_screen.coa_edit_dsf_line_code_label') }}</span>
+                        <input id="coa-edit-dsf-line-code" type="text" wire:model="editDsfLineCode"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        <span class="text-xs text-charcoal/50">{{ __('opes.ledger_screen.coa_edit_dsf_line_code_caption') }}</span>
+                    </label>
                 </div>
 
                 <div class="flex items-center gap-3">

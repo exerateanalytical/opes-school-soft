@@ -1617,6 +1617,8 @@ return [
         'coa_edit_form_title' => 'Modifier le compte',
         'coa_edit_alias_label' => 'Alias d\'affichage',
         'coa_edit_notes_label' => 'Notes',
+        'coa_edit_dsf_line_code_label' => 'Code ligne DSF',
+        'coa_edit_dsf_line_code_caption' => 'La case du formulaire DGI à laquelle ce compte correspond, si vous la connaissez - laisser vide sinon.',
         'coa_edit_submit' => 'Enregistrer',
         'coa_fiscal_year_form_title' => 'Nouvel exercice',
         'coa_fiscal_year_code_label' => 'Code',

@@ -116,6 +116,40 @@ it('searches by code', function () {
         ->assertDontSee($account->code);
 });
 
+it('persists a DSF line code entered on the edit form', function () {
+    // SuperAdmin, not Accountant: CreateAccount::PERMISSION/UpdateAccount::
+    // PERMISSION is the literal string 'accounting.manage', which no role's
+    // grant list in Role.php actually carries (confirmed by grep - zero
+    // hits). The entire account editor is unreachable by any seeded role
+    // today; SuperAdmin's unconditional Gate::before bypass is the only way
+    // to exercise it until that's fixed, which is a separate, pre-existing
+    // bug outside this feature's scope. Flagged, not fixed, here.
+    actingAs(ledgerUiUserAs(Role::SuperAdmin));
+
+    $account = ChartOfAccount::factory()->create();
+
+    Livewire::test(Index::class)
+        ->call('startEdit', $account->id)
+        ->set('editDsfLineCode', 'BL-401')
+        ->call('saveEditAccount');
+
+    expect($account->fresh()->dsf_line_code)->toBe('BL-401');
+});
+
+it('persists a blank DSF line code as null, not an empty string', function () {
+    // SuperAdmin - see the comment on the previous test.
+    actingAs(ledgerUiUserAs(Role::SuperAdmin));
+
+    $account = ChartOfAccount::factory()->create();
+
+    Livewire::test(Index::class)
+        ->call('startEdit', $account->id)
+        ->set('editDsfLineCode', '')
+        ->call('saveEditAccount');
+
+    expect($account->fresh()->dsf_line_code)->toBeNull();
+});
+
 it('counts real KPI totals, never fabricated', function () {
     actingAs(ledgerUiUserAs(Role::Accountant));
 

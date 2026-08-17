@@ -1637,6 +1637,8 @@ return [
         'coa_edit_form_title' => 'Edit account',
         'coa_edit_alias_label' => 'Display alias',
         'coa_edit_notes_label' => 'Notes',
+        'coa_edit_dsf_line_code_label' => 'DSF line code',
+        'coa_edit_dsf_line_code_caption' => 'The DGI form box this account maps to, if you know it - leave blank otherwise.',
         'coa_edit_submit' => 'Save changes',
         'coa_fiscal_year_form_title' => 'New fiscal year',
         'coa_fiscal_year_code_label' => 'Code',
