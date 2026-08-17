@@ -8,6 +8,7 @@ use App\Modules\Procurement\Actions\CancelSupplierInvoice;
 use App\Modules\Procurement\Actions\IssueSupplierCreditNote;
 use App\Modules\Procurement\Domain\SupplierCreditNoteReasonType;
 use App\Modules\Procurement\Domain\SupplierInvoicePermission;
+use App\Modules\Procurement\Domain\SupplierInvoiceStatus;
 use DomainException;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
@@ -316,6 +317,10 @@ final class Index extends Component
             'taxCodes' => $taxCodes,
             'expenseAccounts' => $expenseAccounts,
             'creditNoteReasonTypes' => array_map(static fn (SupplierCreditNoteReasonType $r): string => $r->value, SupplierCreditNoteReasonType::cases()),
+            // The Blade used to list eight statuses by hand, so invoices sat
+            // in `pending_match` and `disputed` with no filter that could
+            // reach them.
+            'statusOptions' => array_map(static fn (SupplierInvoiceStatus $s): string => $s->value, SupplierInvoiceStatus::cases()),
         ]);
     }
 }

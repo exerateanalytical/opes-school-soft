@@ -6,6 +6,8 @@ namespace App\Modules\Procurement\Livewire\Reports;
 
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Procurement\Actions\AgedPayables;
+use App\Modules\Procurement\Domain\GoodsReceiptStatus;
+use App\Modules\Procurement\Domain\PurchaseOrderStatus;
 use App\Modules\Reporting\Support\ExcelExport;
 use App\Modules\Reporting\Support\PdfExport;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -381,19 +383,23 @@ final class Index extends Component
     private function statusOptions(): array
     {
         return match ($this->report) {
-            'purchase_order_register' => [
-                ['value' => 'draft', 'label' => 'Draft'],
-                ['value' => 'approved', 'label' => 'Approved'],
-                ['value' => 'sent', 'label' => 'Sent'],
-                ['value' => 'partially_received', 'label' => 'Partially received'],
-                ['value' => 'closed', 'label' => 'Closed'],
-                ['value' => 'cancelled', 'label' => 'Cancelled'],
-            ],
-            'goods_receipt_register' => [
-                ['value' => 'draft', 'label' => 'Draft'],
-                ['value' => 'confirmed', 'label' => 'Confirmed'],
-                ['value' => 'cancelled', 'label' => 'Cancelled'],
-            ],
+            // Both lists come from the enum. Typed out by hand, the PO list
+            // covered six of the ten states, so a `received` or `invoiced`
+            // order simply could not be filtered for in this report.
+            'purchase_order_register' => array_map(
+                static fn (PurchaseOrderStatus $s): array => [
+                    'value' => $s->value,
+                    'label' => ucfirst(str_replace('_', ' ', $s->value)),
+                ],
+                PurchaseOrderStatus::cases(),
+            ),
+            'goods_receipt_register' => array_map(
+                static fn (GoodsReceiptStatus $s): array => [
+                    'value' => $s->value,
+                    'label' => ucfirst(str_replace('_', ' ', $s->value)),
+                ],
+                GoodsReceiptStatus::cases(),
+            ),
             'supplier_register' => [
                 ['value' => 'active', 'label' => 'Active'],
                 ['value' => 'archived', 'label' => 'Archived'],
@@ -403,15 +409,18 @@ final class Index extends Component
     }
 
     /**
-     * @return list<array{value: string, label: string, count: int}>
+     * The `count` key these carried was a literal 0 on every tab and no
+     * view ever read it - a fabricated number waiting to be rendered.
+     *
+     * @return list<array{value: string, label: string}>
      */
     private function reportTabs(): array
     {
         return [
-            ['value' => 'supplier_register', 'label' => 'Supplier Register', 'count' => 0],
-            ['value' => 'purchase_order_register', 'label' => 'Purchase Order Register', 'count' => 0],
-            ['value' => 'payables_aging', 'label' => 'Payables Aging', 'count' => 0],
-            ['value' => 'goods_receipt_register', 'label' => 'Goods Receipt Register', 'count' => 0],
+            ['value' => 'supplier_register', 'label' => 'Supplier Register'],
+            ['value' => 'purchase_order_register', 'label' => 'Purchase Order Register'],
+            ['value' => 'payables_aging', 'label' => 'Payables Aging'],
+            ['value' => 'goods_receipt_register', 'label' => 'Goods Receipt Register'],
         ];
     }
 

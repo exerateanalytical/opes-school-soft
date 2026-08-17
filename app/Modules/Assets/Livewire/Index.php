@@ -720,7 +720,9 @@ final class Index extends Component
             ->orderByDesc('r.period_month')
             ->select([
                 'r.id', 'r.period_month', 'r.status', 'r.run_at', 'r.approved_at',
-                'r.assets_processed', 'r.total_charge', 'fy.name as fiscal_year_name',
+                // fiscal_years carries `code` (e.g. "2026"), never a `name`
+                // column - selecting fy.name made this whole tab a SQL error.
+                'r.assets_processed', 'r.total_charge', 'fy.code as fiscal_year_name',
             ])
             ->paginate($this->perPage, page: $this->page);
     }
