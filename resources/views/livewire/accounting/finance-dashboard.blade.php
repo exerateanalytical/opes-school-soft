@@ -53,7 +53,7 @@
         foreach ([
             ['key' => 'collected', 'label' => 'Collected', 'colour' => 'var(--color-primary)'],
             ['key' => 'outstanding', 'label' => 'Outstanding', 'colour' => 'var(--color-heritage-yellow)'],
-            ['key' => 'overdue', 'label' => 'Overdue', 'colour' => '#A4161A'],
+            ['key' => 'overdue', 'label' => 'Overdue', 'colour' => 'var(--color-heritage-red)'],
         ] as $slice) {
             $value = (int) $collection[$slice['key']];
             $fraction = $value / $donutTotal;

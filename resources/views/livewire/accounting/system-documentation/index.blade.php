@@ -2,12 +2,20 @@
     <header class="flex flex-wrap items-center justify-between gap-2">
         <div>
             <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.system_doc_screen.title') }}</h1>
-            <p class="mt-1 max-w-3xl text-sm text-slate-600">{{ __('opes.system_doc_screen.intro') }}</p>
+            <p class="mt-1 max-w-3xl text-sm text-charcoal/70">{{ __('opes.system_doc_screen.intro') }}</p>
         </div>
-        <button type="button" wire:click="generate" wire:loading.attr="disabled"
-                class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {{ __('opes.system_doc_screen.generate') }}
-        </button>
+        {{-- The only disable on this screen is transient, and it says why:
+             the tooltip is always present and a live message renders beside it. --}}
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-charcoal/70" wire:loading wire:target="generate" role="status">
+                {{ __('opes.system_doc_screen.generating') }}
+            </span>
+            <button type="button" wire:click="generate" wire:loading.attr="disabled" wire:target="generate"
+                    title="{{ __('opes.system_doc_screen.generating') }}"
+                    class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+                {{ __('opes.system_doc_screen.generate') }}
+            </button>
+        </div>
     </header>
 
     @if ($message !== '')
@@ -26,7 +34,7 @@
                 <th class="p-2 text-left font-semibold">{{ __('opes.system_doc_screen.software_version') }}</th>
                 <th class="p-2 text-left font-semibold">{{ __('opes.system_doc_screen.schema_version') }}</th>
                 <th class="p-2 text-left font-semibold">{{ __('opes.system_doc_screen.hash') }}</th>
-                <th class="p-2 text-left font-semibold">{{ __('opes.books_screen.supersedes') }}</th>
+                <th class="p-2 text-left font-semibold">{{ __('opes.system_doc_screen.supersedes') }}</th>
             </tr>
             </thead>
             <tbody>
@@ -35,13 +43,21 @@
                     <td class="p-2 whitespace-nowrap">{{ $snapshot->generated_at?->format('Y-m-d H:i') }}</td>
                     <td class="p-2">{{ $snapshot->software_version }}</td>
                     <td class="p-2 font-mono text-xs">{{ mb_substr($snapshot->schema_version, -30) }}</td>
-                    <td class="p-2 font-mono text-xs">{{ substr($snapshot->sha256, 0, 16) }}…</td>
+                    <td class="p-2 font-mono text-xs" title="{{ $snapshot->sha256 }}">{{ substr($snapshot->sha256, 0, $hashPrefix) }}…</td>
                     <td class="p-2">{{ $snapshot->supersedes_id ? '#'.$snapshot->supersedes_id : '—' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="p-4 text-center text-slate-500">{{ __('opes.system_doc_screen.empty') }}</td></tr>
+                <tr><td colspan="5" class="p-4 text-center text-charcoal/60">{{ __('opes.system_doc_screen.empty') }}</td></tr>
             @endforelse
             </tbody>
         </table>
     </section>
+
+    {{-- The list is capped. Say so, rather than letting the operator read a
+         truncated register as the whole register. --}}
+    @if ($snapshotTotal > $listLimit)
+        <p class="text-xs text-charcoal/60">
+            {{ __('opes.system_doc_screen.showing', ['shown' => $listLimit, 'total' => $snapshotTotal]) }}
+        </p>
+    @endif
 </div>

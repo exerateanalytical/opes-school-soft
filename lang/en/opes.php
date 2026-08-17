@@ -1765,6 +1765,7 @@ return [
         'je_continue_draft' => 'Continue',
         'kpi_entries_this_year' => 'Entries this fiscal year',
         'kpi_unposted_drafts' => 'Unposted drafts',
+        'kpi_no_open_year' => 'No fiscal year is open — this is not a count of zero.',
 
         // Journal Entry form
         'je_form_title_new' => 'New journal entry',
@@ -2767,6 +2768,9 @@ return [
         'title' => 'Bank and treasury reconciliation',
         'import_statement' => 'Import a statement',
         'cancel_import' => 'Cancel import',
+        'why_no_post' => 'You do not have the ledger.post permission, so this reconciliation is read-only for you.',
+        'why_no_statement' => 'No bank statement has been imported for this period yet, so there is nothing to match against.',
+        'why_no_selection' => 'Select at least one statement line and at least one ledger line before matching.',
         'statement_reference' => 'Statement reference',
         'accounting_period' => 'Accounting period',
         'period_start' => 'Period start',
@@ -2854,6 +2858,8 @@ return [
         'supersedes' => 'Supersedes',
         'empty' => 'No book has been generated for this fiscal year yet.',
         'select_year' => 'Select a fiscal year first.',
+        'generated_ok' => ':book — :lines lines, sha256 :hash',
+        'showing' => 'Showing the :shown most recent generations of :total. Older generations are retained and remain part of the legal register.',
     ],
 
     /*
@@ -3045,6 +3051,9 @@ return [
         'schema_version' => 'Schema version',
         'hash' => 'SHA-256',
         'empty' => 'Nothing generated yet.',
+        'supersedes' => 'Supersedes',
+        'generating' => 'Generating the snapshot — this reads live configuration and takes a moment.',
+        'showing' => 'Showing the :shown most recent snapshots of :total. Older snapshots are retained.',
     ],
 
     /*

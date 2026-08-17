@@ -12,7 +12,10 @@
                 class="rounded-full border px-3 py-1 {{ $filter === $key ? 'border-charcoal bg-charcoal text-white' : 'border-charcoal/20 text-charcoal/70 hover:border-charcoal/40' }}"
             >
                 {{ __('opes.accounting.review.journal_'.$key) }}
-                <span class="ml-1 tabular-nums">{{ $counts[$key] }}</span>
+                {{-- ?? 0 is safe here and only here: the tabs iterate FILTERS,
+                     and counts() aggregates over the SAME list, so a missing key
+                     is a genuinely empty category, not an unknown figure. --}}
+                <span class="ml-1 tabular-nums">{{ $counts[$key] ?? 0 }}</span>
             </button>
         @endforeach
     </nav>
@@ -34,7 +37,7 @@
                         <td class="py-2 pr-4 whitespace-nowrap">{{ $entry->date->toDateString() }}</td>
                         <td class="py-2 pr-4 font-mono text-xs">{{ $entry->piece_no ?? '—' }}</td>
                         <td class="py-2 pr-4">{{ $entry->label }}</td>
-                        <td class="py-2 pr-4 text-right tabular-nums">{{ number_format($entry->total_debit) }}</td>
+                        <td class="py-2 pr-4 text-right tabular-nums">{{ \App\Support\Money\Money::of((int) $entry->total_debit)->format(false) }}</td>
                         <td class="py-2">
                             <x-accounting.source-link :reference="$references[$entry->id]" />
                         </td>

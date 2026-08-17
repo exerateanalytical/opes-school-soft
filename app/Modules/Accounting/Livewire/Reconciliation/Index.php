@@ -115,6 +115,27 @@ final class Index extends Component
         $this->resetSelection();
     }
 
+    /**
+     * The period picker is a `wire:model.live` select, NOT a call to
+     * selectPeriod(), so the reset has to hang off the update hook as well.
+     *
+     * Without this, the line ids in $selectedStatementLines/$selectedLedgerLines
+     * survive a period change and the "Match N to M" button stays enabled while
+     * pointing at lines that are no longer on screen - which would hand
+     * MatchReconciliationLines a cross-period match. Same reasoning for the
+     * account picker, which does go through selectAccount() today but must not
+     * depend on that staying true.
+     */
+    public function updatedPeriodId(): void
+    {
+        $this->resetSelection();
+    }
+
+    public function updatedAccountId(): void
+    {
+        $this->resetSelection();
+    }
+
     public function resetSelection(): void
     {
         $this->selectedStatementLines = [];

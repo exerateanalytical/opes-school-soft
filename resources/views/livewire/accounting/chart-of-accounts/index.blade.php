@@ -265,6 +265,14 @@
                    class="rounded border-border-primary text-primary focus:ring-primary"/>
             <span class="text-sm text-charcoal">{{ __('opes.ledger_screen.coa_postable_only_label') }}</span>
         </label>
+        {{-- resetFilters() existed on the component with nothing bound to it;
+             this is that control, not new behaviour. --}}
+        <div class="flex flex-col justify-end">
+            <button type="button" wire:click="resetFilters"
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                {{ __('opes.ui.reset') }}
+            </button>
+        </div>
     </x-slot:filters>
 
     <x-slot:head>
