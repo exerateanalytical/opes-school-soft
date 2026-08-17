@@ -8,11 +8,13 @@ use App\Modules\HR\Actions\ApproveLeave;
 use App\Modules\HR\Actions\HireStaffMember;
 use App\Modules\HR\Actions\OpenStaffContract;
 use App\Modules\HR\Actions\RequestLeave;
+use App\Modules\HR\Actions\SetStaffPhoto;
 use App\Modules\HR\Actions\TerminateContract;
 use App\Modules\HR\Domain\ContractType;
 use App\Modules\HR\Domain\HrPermission;
 use App\Modules\HR\Domain\TerminationReason;
 use App\Modules\HR\Domain\WorkingTime;
+use App\Support\Storage\StoredImage;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * Admin-facing staff directory at /hr (route wired separately), gated
@@ -42,6 +46,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 final class Index extends Component
 {
+    use WithFileUploads;
+
     /** Which table is showing: staff | contracts | leave. */
     #[Url]
     public string $tab = 'staff';
@@ -150,6 +156,14 @@ final class Index extends Component
     public string $portalAccessEmail = '';
 
     public ?string $portalAccessTemporaryPassword = null;
+
+    // ── Staff photo (per-row, Staff tab) ────────────────────────────────
+    public ?int $photoStaffId = null;
+
+    public ?TemporaryUploadedFile $photoUpload = null;
+
+    /** The path the OPEN row currently holds, for the preview. */
+    public string $photoCurrentPath = '';
 
     public function mount(): void
     {
@@ -503,6 +517,90 @@ final class Index extends Component
         $this->resetPage();
     }
 
+    // ── Staff photo ──────────────────────────────────────────────────────
+
+    public function toggleStaffPhotoForm(int $staffMemberId): void
+    {
+        Gate::authorize(HrPermission::MANAGE);
+
+        $this->resetErrorBag('photoUpload');
+        $this->photoUpload = null;
+        $this->photoStaffId = $this->photoStaffId === $staffMemberId ? null : $staffMemberId;
+        $this->photoCurrentPath = $this->photoStaffId === null
+            ? ''
+            : (string) (DB::table('staff_members')->where('id', $this->photoStaffId)->value('photo_path') ?? '');
+    }
+
+    /**
+     * `image` plus an explicit mimes list plus a dimension cap, all three -
+     * the same reasoning DocumentProfile states for its slots: `image` alone
+     * admits SVG (script-capable, served from this app's own origin), the
+     * mimes list alone admits a 12 000 px scan, and the dimension cap alone
+     * admits a renamed executable.
+     */
+    public function saveStaffPhoto(SetStaffPhoto $setStaffPhoto): void
+    {
+        Gate::authorize(HrPermission::MANAGE);
+
+        if ($this->photoStaffId === null) {
+            return;
+        }
+
+        $this->validate([
+            'photoUpload' => [
+                'required',
+                'image',
+                'mimes:'.implode(',', StoredImage::ALLOWED_EXTENSIONS),
+                'max:'.StoredImage::MAX_KILOBYTES,
+                'dimensions:max_width='.StoredImage::MAX_DIMENSION.',max_height='.StoredImage::MAX_DIMENSION,
+            ],
+        ], [
+            'photoUpload.required' => (string) __('opes.staff_photo.required'),
+            'photoUpload.image' => (string) __('opes.staff_photo.not_an_image'),
+            'photoUpload.mimes' => (string) __('opes.staff_photo.wrong_type', [
+                'types' => strtoupper(implode(', ', StoredImage::ALLOWED_EXTENSIONS)),
+            ]),
+            'photoUpload.max' => (string) __('opes.staff_photo.too_large', ['kb' => StoredImage::MAX_KILOBYTES]),
+            'photoUpload.dimensions' => (string) __('opes.staff_photo.too_big', ['px' => StoredImage::MAX_DIMENSION]),
+        ]);
+
+        $upload = $this->photoUpload;
+
+        if (! $upload instanceof TemporaryUploadedFile) {
+            return;
+        }
+
+        $this->photoCurrentPath = $setStaffPhoto->set(
+            $this->photoStaffId,
+            (string) file_get_contents((string) $upload->getRealPath()),
+            strtolower($upload->getClientOriginalExtension()),
+            $this->actor(),
+        );
+
+        // A TemporaryUploadedFile left on a public property is re-serialised
+        // into every subsequent request's payload.
+        $upload->delete();
+        $this->photoUpload = null;
+
+        session()->flash('status', __('opes.staff_photo.saved'));
+    }
+
+    public function removeStaffPhoto(SetStaffPhoto $setStaffPhoto): void
+    {
+        Gate::authorize(HrPermission::MANAGE);
+
+        if ($this->photoStaffId === null) {
+            return;
+        }
+
+        $setStaffPhoto->remove($this->photoStaffId, $this->actor());
+
+        $this->photoUpload = null;
+        $this->photoCurrentPath = '';
+
+        session()->flash('status', __('opes.staff_photo.removed'));
+    }
+
     private function actor(): \App\Support\Audit\Actor
     {
         /** @var \App\Modules\Identity\Models\User $user */
@@ -553,7 +651,7 @@ final class Index extends Component
             ->orderBy('sm.first_name')
             ->select([
                 'sm.id', 'sm.staff_no', 'sm.first_name', 'sm.last_name', 'sm.phone',
-                'sm.email', 'sm.status', 'sm.portal_user_id',
+                'sm.email', 'sm.status', 'sm.portal_user_id', 'sm.photo_path',
             ])
             ->selectSub(
                 DB::table('staff_contracts as sc')
