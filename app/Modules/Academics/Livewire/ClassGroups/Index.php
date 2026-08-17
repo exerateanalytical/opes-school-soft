@@ -17,6 +17,7 @@ use App\Modules\Academics\Models\Stream;
 use App\Modules\Identity\Domain\Permission;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -289,6 +290,12 @@ final class Index extends Component
             $this->addError('levelCode', $exception->getMessage());
 
             return;
+        } catch (UniqueConstraintViolationException) {
+            // Now that the panel is actually reachable, a duplicate code is an
+            // operator typo — an inline error, not a 500.
+            $this->addError('levelCode', __('validation.unique', ['attribute' => 'code']));
+
+            return;
         }
 
         session()->flash('status', $this->editingLevelId === null
@@ -341,13 +348,19 @@ final class Index extends Component
 
         $section = SchoolSection::query()->findOrFail((int) $validated['streamSectionId']);
 
-        $createStream->handle(
-            section: $section,
-            code: $validated['streamCode'],
-            name: $validated['streamName'],
-            nameFr: $validated['streamNameFr'],
-            subjectBasket: $basket,
-        );
+        try {
+            $createStream->handle(
+                section: $section,
+                code: $validated['streamCode'],
+                name: $validated['streamName'],
+                nameFr: $validated['streamNameFr'],
+                subjectBasket: $basket,
+            );
+        } catch (UniqueConstraintViolationException) {
+            $this->addError('streamCode', __('validation.unique', ['attribute' => 'code']));
+
+            return;
+        }
 
         session()->flash('status', __('opes.classes_screen.stream_created'));
         $this->resetStreamForm();

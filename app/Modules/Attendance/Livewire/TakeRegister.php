@@ -89,7 +89,13 @@ final class TakeRegister extends Component
 
     public function markAllPresent(): void
     {
-        foreach (array_keys($this->marks) as $enrollmentId) {
+        foreach ($this->marks as $enrollmentId => $status) {
+            // §9.5: `suspended` is a roster fact, not a mark the bulk
+            // shortcuts may overwrite.
+            if ($status === AttendanceStatus::Suspended->value) {
+                continue;
+            }
+
             $this->marks[$enrollmentId] = AttendanceStatus::Present->value;
         }
         $this->minutesLate = [];
@@ -97,7 +103,11 @@ final class TakeRegister extends Component
 
     public function clearAll(): void
     {
-        foreach (array_keys($this->marks) as $enrollmentId) {
+        foreach ($this->marks as $enrollmentId => $status) {
+            if ($status === AttendanceStatus::Suspended->value) {
+                continue;
+            }
+
             $this->marks[$enrollmentId] = '';
         }
         $this->minutesLate = [];
@@ -280,8 +290,22 @@ final class TakeRegister extends Component
 
         // Seed the radio state: saved statuses when a register exists,
         // default-all-present otherwise (§9.9).
+        //
+        // A suspended enrollment is NOT a teacher's choice (§9.5): it stays in
+        // expected and is recorded as `suspended`. Its row renders a hidden
+        // input rather than radios, so whatever is seeded here is what the
+        // save posts — seeding it `present` (as this did) silently recorded
+        // suspended students as present and left the double-punishment rule
+        // with nothing to exclude.
         foreach ($roster as $row) {
             $enrollmentId = (int) $row->enrollment_id;
+            $isSuspended = (string) $row->enrollment_status === 'suspended';
+
+            if ($isSuspended) {
+                $this->marks[$enrollmentId] = AttendanceStatus::Suspended->value;
+
+                continue;
+            }
 
             if (! array_key_exists($enrollmentId, $this->marks)) {
                 $record = $existingRecords[$enrollmentId] ?? null;

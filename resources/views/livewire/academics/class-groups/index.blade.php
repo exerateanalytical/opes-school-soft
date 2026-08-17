@@ -245,4 +245,198 @@
             </x-slot:cards>
         </x-list-screen>
     @endif
+
+    {{-- ── Levels & streams ────────────────────────────────────────────────
+         Class levels and streams are year-independent, so this section sits
+         OUTSIDE the current-year branch: a school setting itself up has to be
+         able to define them before any year is current. The component has
+         always carried startCreateLevel/startEditLevel/saveLevel and
+         toggleStreamForm/saveStream — until now nothing rendered a control
+         that reached them, so CreateClassLevel/UpdateClassLevel/CreateStream
+         were unreachable from the UI. --}}
+    @if ($canManage)
+        <section aria-label="{{ __('opes.classes_screen.structure_heading') }}"
+                 class="rounded-lg border border-border-primary bg-white shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border-primary px-4 py-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-charcoal/70">
+                    {{ __('opes.classes_screen.structure_heading') }}
+                </h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" wire:click="startCreateLevel"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.classes_screen.add_level') }}
+                    </button>
+                    <button type="button" wire:click="toggleStreamForm"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                        {{ __('opes.classes_screen.add_stream') }}
+                    </button>
+                </div>
+            </div>
+
+            {{-- Class-level create/edit panel --}}
+            @if ($showLevelForm)
+                <form wire:submit="saveLevel" class="space-y-4 border-b border-border-primary p-4">
+                    <h3 class="text-sm font-semibold text-charcoal">
+                        {{ $editingLevelId === null ? __('opes.classes_screen.form_level_title') : __('opes.classes_screen.form_level_edit_title') }}
+                    </h3>
+
+                    <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <label for="level-section" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_section_field') }}</span>
+                            <select id="level-section" wire:model="levelSectionId"
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                <option value="">{{ __('opes.classes_screen.level_section_placeholder') }}</option>
+                                @foreach ($sectionOptions as $section)
+                                    <option value="{{ $section->id }}">{{ app()->getLocale() === 'fr' ? $section->name_fr : $section->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('levelSectionId')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="level-code" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_code_field') }}</span>
+                            <input id="level-code" type="text" wire:model="levelCode"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('levelCode')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="level-order" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_order_field') }}</span>
+                            <input id="level-order" type="number" min="0" wire:model="levelOrderIndex"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('levelOrderIndex')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="level-name" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_name_field') }}</span>
+                            <input id="level-name" type="text" wire:model="levelName"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('levelName')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="level-name-fr" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_name_fr_field') }}</span>
+                            <input id="level-name-fr" type="text" wire:model="levelNameFr"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('levelNameFr')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="level-exam-class" class="flex items-center gap-2 sm:pt-5">
+                            <input id="level-exam-class" type="checkbox" wire:model="levelIsExamClass"
+                                   class="h-4 w-4 rounded border-border-primary text-primary focus:ring-primary"/>
+                            <span class="text-sm text-charcoal">{{ __('opes.classes_screen.level_exam_class_field') }}</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2 border-t border-border-primary pt-4">
+                        <button type="submit"
+                                class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            {{ __('opes.classes_screen.save') }}
+                        </button>
+                        <button type="button" wire:click="cancelLevelForm"
+                                class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            {{ __('opes.classes_screen.cancel') }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+
+            {{-- Stream create panel --}}
+            @if ($showStreamForm)
+                <form wire:submit="saveStream" class="space-y-4 border-b border-border-primary p-4">
+                    <h3 class="text-sm font-semibold text-charcoal">{{ __('opes.classes_screen.form_stream_title') }}</h3>
+
+                    <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <label for="stream-section" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.level_section_field') }}</span>
+                            <select id="stream-section" wire:model="streamSectionId"
+                                    class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                                <option value="">{{ __('opes.classes_screen.level_section_placeholder') }}</option>
+                                @foreach ($sectionOptions as $section)
+                                    <option value="{{ $section->id }}">{{ app()->getLocale() === 'fr' ? $section->name_fr : $section->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('streamSectionId')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="stream-code" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.stream_code_field') }}</span>
+                            <input id="stream-code" type="text" wire:model="streamCode"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('streamCode')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="stream-name" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.stream_name_field') }}</span>
+                            <input id="stream-name" type="text" wire:model="streamName"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('streamName')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="stream-name-fr" class="flex flex-col gap-1">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.stream_name_fr_field') }}</span>
+                            <input id="stream-name-fr" type="text" wire:model="streamNameFr"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            @error('streamNameFr')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+
+                        <label for="stream-basket" class="flex flex-col gap-1 sm:col-span-2">
+                            <span class="text-xs font-medium text-charcoal/70">{{ __('opes.classes_screen.stream_basket_field') }}</span>
+                            <input id="stream-basket" type="text" wire:model="streamSubjectBasket"
+                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                            <span class="text-xs text-charcoal/50">{{ __('opes.classes_screen.stream_basket_help') }}</span>
+                            @error('streamSubjectBasket')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2 border-t border-border-primary pt-4">
+                        <button type="submit"
+                                class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                            {{ __('opes.classes_screen.save') }}
+                        </button>
+                        <button type="button" wire:click="toggleStreamForm"
+                                class="rounded border border-border-primary px-4 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                            {{ __('opes.classes_screen.cancel') }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+
+            <div class="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
+                <div class="min-w-0">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal/60">{{ __('opes.classes_screen.column_level') }}</h3>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        @forelse ($levelOptions as $level)
+                            <li wire:key="level-{{ $level->id }}" class="flex items-center justify-between gap-2 rounded border border-border-primary px-3 py-1.5">
+                                <span class="min-w-0 truncate text-charcoal">
+                                    <span class="font-mono text-xs text-charcoal/60">{{ $level->code }}</span>
+                                    {{ app()->getLocale() === 'fr' ? $level->name_fr : $level->name }}
+                                </span>
+                                <button type="button" wire:click="startEditLevel({{ $level->id }})"
+                                        class="shrink-0 text-sm font-medium text-primary hover:underline">
+                                    {{ __('opes.classes_screen.edit_level') }}
+                                </button>
+                            </li>
+                        @empty
+                            <li class="text-charcoal/50">{{ __('opes.classes_screen.levels_empty') }}</li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                <div class="min-w-0">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal/60">{{ __('opes.classes_screen.column_stream') }}</h3>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        @forelse ($streamOptions as $stream)
+                            <li wire:key="stream-{{ $stream->id }}" class="rounded border border-border-primary px-3 py-1.5">
+                                <span class="font-mono text-xs text-charcoal/60">{{ $stream->code }}</span>
+                                <span class="text-charcoal">{{ app()->getLocale() === 'fr' ? $stream->name_fr : $stream->name }}</span>
+                            </li>
+                        @empty
+                            <li class="text-charcoal/50">{{ __('opes.classes_screen.streams_empty') }}</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </section>
+    @endif
 </div>
