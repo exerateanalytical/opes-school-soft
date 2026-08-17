@@ -6,13 +6,16 @@ namespace App\Modules\Accounting\Actions\Reconciliation;
 
 use App\Modules\Accounting\Domain\ReconciliationSessionStatus;
 use App\Modules\Accounting\Models\ReconciliationSession;
+use App\Modules\Accounting\Models\ReconciliationStatement;
 use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Identity\Domain\Permission;
 use App\Support\Audit\Actor;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * docs/specs/02-accounting.md §13.2 BR-3 - "a session may only be completed
@@ -37,11 +40,16 @@ use Illuminate\Support\Facades\Gate;
  * `ck_reconciliation_sessions_completed_ties` says the same thing again, so
  * no other write path can produce a completed-but-untrue session.
  *
- * Not implemented here, and named so it is not mistaken for done: §13.3 also
- * asks for the état to be persisted as an immutable PDF with its own
- * document hash in `StatutoryBook`/`IssuedDocument` style (§14). The screen
- * exports a PDF on demand through the shared PdfExport; wiring it into the
- * hashed document register is left to the documents module and reported.
+ * §13.3 also asks for the état to be persisted as an immutable PDF with its
+ * own document hash, `StatutoryBook`-style (§14). That happens here, inside
+ * this same transaction: the frozen figures are rendered through the same
+ * `reports.pdf-shell` view the screen's on-demand `exportPdf()` uses, hashed,
+ * written to storage, and recorded as a `ReconciliationStatement` row - a
+ * NEW table rather than a row in `statutory_books`, because that table's own
+ * CHECK constraint enumerates AUDCIF's four named books and requires a
+ * `fiscal_year_id`, neither of which an état de rapprochement is. Doing this
+ * inside the transaction that marks the session completed means a completed
+ * session and its registered document appear together or not at all.
  */
 final class CloseReconciliationSession
 {
@@ -108,7 +116,64 @@ final class CloseReconciliationSession
                 actor: $actor,
             );
 
+            $this->registerStatement($session, $etat, $actor);
+
             return $session->refresh();
         });
+    }
+
+    /**
+     * @param  array{book_balance: int, statement_balance: int, deposits_in_transit: int, unpresented_payments: int, unrecorded_statement_items: int, computed_difference: int, ties: bool}  $etat
+     */
+    private function registerStatement(ReconciliationSession $session, array $etat, Actor $actor): void
+    {
+        $account = $session->treasuryAccount()->first();
+        $period = $session->accountingPeriod()->first();
+        $generatedAt = now();
+
+        $pdf = Pdf::loadView('reports.pdf-shell', [
+            'title' => sprintf(
+                'Etat de rapprochement %s - %s %s',
+                $session->session_no,
+                $account?->code ?? '',
+                $period === null ? '' : $period->ends_on->toDateString(),
+            ),
+            'headers' => ['Libelle', 'Montant (FCFA)'],
+            'rows' => [
+                ['Solde du releve au '.($period === null ? '' : $period->ends_on->toDateString()), $etat['statement_balance']],
+                ['+ Encaissements comptabilises non encore au releve', $etat['deposits_in_transit']],
+                ['- Decaissements comptabilises non encore au releve', -$etat['unpresented_payments']],
+                ['- Operations au releve non encore comptabilisees', -$etat['unrecorded_statement_items']],
+                ['= Solde comptable au '.($period === null ? '' : $period->ends_on->toDateString()), $etat['book_balance']],
+                ['Difference non expliquee', $etat['computed_difference']],
+            ],
+            'generatedAt' => $generatedAt->format('Y-m-d H:i'),
+        ])->setPaper('a4', 'portrait');
+
+        $binary = $pdf->output();
+        $sha256 = hash('sha256', $binary);
+
+        $path = sprintf(
+            'reconciliation-statements/%s-%s.pdf',
+            str_replace('/', '-', $session->session_no),
+            $generatedAt->format('YmdHis'),
+        );
+
+        Storage::disk('local')->put($path, $binary);
+
+        $previous = ReconciliationStatement::query()
+            ->where('reconciliation_session_id', $session->getKey())
+            ->orderByDesc('id')
+            ->lockForUpdate()
+            ->first();
+
+        ReconciliationStatement::query()->create([
+            'reconciliation_session_id' => $session->getKey(),
+            'generated_at' => $generatedAt,
+            'generated_by' => $actor->id,
+            'file_path' => $path,
+            'sha256' => $sha256,
+            'supersedes_id' => $previous?->getKey(),
+        ]);
     }
 }
