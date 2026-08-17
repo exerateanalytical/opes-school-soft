@@ -56,6 +56,195 @@
     </p>
 @endif
 
+{{-- Inline "Add/Edit Item" panel - the catalogue door. --}}
+@if ($showItemForm)
+    <section aria-label="{{ __('opes.inventory_item_form.section_label') }}" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
+        <h2 class="text-base font-semibold text-charcoal">
+            {{ $editingItemId === null ? __('opes.inventory_item_form.heading_create') : __('opes.inventory_item_form.heading_edit') }}
+        </h2>
+
+        <form wire:submit="saveItem" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <label for="item-form-code" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.item_code') }}</span>
+                    <input id="item-form-code" type="text" wire:model="itemCode" placeholder="ITM0001"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemCode')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-name" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.name') }}</span>
+                    <input id="item-form-name" type="text" wire:model="itemName" placeholder="A4 Copier Paper (Box)"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemName')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-category" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.category') }}</span>
+                    <select id="item-form-category" wire:model="itemCategoryId"
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="">{{ __('opes.inventory_item_form.select_category') }}</option>
+                        @foreach ($categoryOptions as $option)
+                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('itemCategoryId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-unit" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.unit_of_measure') }}</span>
+                    <select id="item-form-unit" wire:model="itemUnitOfMeasureId"
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="">{{ __('opes.inventory_item_form.select_unit') }}</option>
+                        @foreach ($unitOptions as $option)
+                            <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('itemUnitOfMeasureId')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-type" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.item_type') }}</span>
+                    <select id="item-form-type" wire:model="itemType"
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="consumable">{{ __('opes.inventory_item_form.type_consumable') }}</option>
+                        <option value="equipment">{{ __('opes.inventory_item_form.type_equipment') }}</option>
+                        <option value="merchandise">{{ __('opes.inventory_item_form.type_merchandise') }}</option>
+                    </select>
+                    @error('itemType')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-status" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.status') }}</span>
+                    <select id="item-form-status" wire:model="itemStatus"
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="active">{{ __('opes.inventory_item_form.status_active') }}</option>
+                        <option value="discontinued">{{ __('opes.inventory_item_form.status_discontinued') }}</option>
+                        <option value="archived">{{ __('opes.inventory_item_form.status_archived') }}</option>
+                    </select>
+                    @error('itemStatus')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-reorder-level" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.reorder_level') }}</span>
+                    <input id="item-form-reorder-level" type="text" wire:model="itemReorderLevel" placeholder="e.g. 10"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemReorderLevel')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-reorder-quantity" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.reorder_quantity') }}</span>
+                    <input id="item-form-reorder-quantity" type="text" wire:model="itemReorderQuantity" placeholder="e.g. 50"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemReorderQuantity')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-barcode" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.barcode') }}</span>
+                    <input id="item-form-barcode" type="text" wire:model="itemBarcode"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemBarcode')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-sale-price" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.sale_price') }}</span>
+                    <input id="item-form-sale-price" type="text" wire:model="itemSalePrice" placeholder="e.g. 2500"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemSalePrice')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-description" class="flex flex-col gap-1 sm:col-span-2">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.description') }}</span>
+                    <input id="item-form-description" type="text" wire:model="itemDescription"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('itemDescription')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
+                <label for="item-form-stock-tracked" class="flex items-center gap-2 sm:col-span-2">
+                    <input id="item-form-stock-tracked" type="checkbox" wire:model="itemIsStockTracked"
+                           class="rounded border-border-primary text-primary focus:ring-primary/50"/>
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.inventory_item_form.is_stock_tracked') }}</span>
+                </label>
+
+                <div class="flex flex-col gap-2 sm:col-span-2">
+                    <label for="item-form-image" class="text-xs font-medium text-charcoal/70">
+                        {{ __('opes.inventory_item_form.image') }}
+                    </label>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        {{-- wire:key on the wrapper so Livewire replaces the
+                             thumbnail when the path changes instead of
+                             reusing a stale img. --}}
+                        <span wire:key="item-image-preview-{{ $itemImagePath }}"
+                              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded border border-border-primary bg-sand">
+                            @if ($itemImageUpload !== null)
+                                <img src="{{ $itemImageUpload->temporaryUrl() }}" alt="{{ __('opes.inventory_item_form.image_preview') }}"
+                                     class="max-h-full max-w-full object-contain"/>
+                            @elseif ($itemImagePath !== '')
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($itemImagePath) }}"
+                                     alt="{{ __('opes.inventory_item_form.image_preview') }}"
+                                     class="max-h-full max-w-full object-contain"/>
+                            @else
+                                <span class="text-xs text-charcoal/40">{{ __('opes.inventory_item_form.no_image') }}</span>
+                            @endif
+                        </span>
+
+                        <input id="item-form-image" type="file" wire:model="itemImageUpload"
+                               accept="image/png,image/jpeg,image/webp"
+                               class="text-sm text-charcoal"/>
+
+                        @if ($itemImageUpload !== null || $itemImagePath !== '')
+                            <button type="button" wire:click="removeItemImage"
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-heritage-red hover:bg-sand/40">
+                                {{ __('opes.inventory_item_form.image_remove') }}
+                            </button>
+                        @endif
+                    </div>
+
+                    <p class="text-xs text-charcoal/60">{{ __('opes.inventory_item_form.image_hint') }}</p>
+
+                    @error('itemImageUpload')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                    {{ $editingItemId === null ? __('opes.inventory_item_form.submit_create') : __('opes.inventory_item_form.submit_edit') }}
+                </button>
+                <button type="button" wire:click="toggleItemForm"
+                        class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                    {{ __('opes.inventory_item_form.cancel') }}
+                </button>
+            </div>
+        </form>
+    </section>
+@endif
+
 {{-- Inline "Issue Stock" panel. --}}
 @if ($showIssueForm)
     <section aria-label="Issue stock" class="mb-4 rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
@@ -578,6 +767,10 @@
 >
     <x-slot:actions>
         @can(\App\Modules\Inventory\Domain\InventoryPermission::MANAGE)
+            <button type="button" wire:click="toggleItemForm"
+                    class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
+                {{ $showItemForm ? __('opes.inventory_item_form.hide_form') : __('opes.inventory_item_form.new_item') }}
+            </button>
             <button type="button" wire:click="toggleReceiveForm"
                     class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal hover:bg-sand/40">
                 {{ $showReceiveForm ? 'Hide receive form' : 'Receive Stock' }}
@@ -750,10 +943,18 @@
                     <x-status-pill :status="$itemTone[$row->status] ?? 'ok'" :label="ucfirst($row->status)"/>
                 </td>
                 <td class="px-4 py-2.5">
-                    <a href="{{ route('inventory.items.show', $row->id) }}"
-                       class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
-                        View
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('inventory.items.show', $row->id) }}"
+                           class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                            View
+                        </a>
+                        @can(\App\Modules\Inventory\Domain\InventoryPermission::MANAGE)
+                            <button type="button" wire:click="editItem({{ $row->id }})"
+                                    class="rounded border border-border-primary px-2.5 py-1 text-xs font-medium text-primary hover:bg-sand/40">
+                                {{ __('opes.inventory_item_form.edit') }}
+                            </button>
+                        @endcan
+                    </div>
                 </td>
             @elseif ($tab === 'movements')
                 <td class="px-4 py-2.5 text-charcoal/80">{{ $row->moved_on }}</td>
