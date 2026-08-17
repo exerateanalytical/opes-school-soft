@@ -248,6 +248,11 @@ final class Navigation
             // than .view, matching its route: unlike the settings BROWSER
             // above, this screen has nothing useful to show read-only.
             ['key' => 'branding', 'route' => '/settings/branding', 'permission' => Permission::SettingEdit, 'enabled' => true, 'built' => true, 'section' => 'administration'],
+            // The Meta WhatsApp Business credentials. SettingEdit matches the
+            // route's `can:setting.edit`, per this file's nav-and-route-agree
+            // -by-construction contract; the screen only ever writes secrets,
+            // so there is nothing for a view-only role to see.
+            ['key' => 'whatsapp', 'route' => '/settings/whatsapp', 'permission' => Permission::SettingEdit, 'enabled' => true, 'built' => true, 'section' => 'administration'],
         ];
     }
 

@@ -17,7 +17,13 @@ use RuntimeException;
  * BankStatementLine, ReconciliationSession, ReconciliationMatch, Invoice,
  * Payment, CreditNote, SupplierInvoice, SupplierPayment, PayrollRun,
  * PayrollItem, DepreciationRun, DepreciationSchedule, StockMovement, Asset,
- * AuditLog, DocumentPrintLog.
+ * AuditLog, DocumentPrintLog, WhatsAppDeliveryLog.
+ *
+ * The last two are not accounting records, and the refusal message below
+ * cites AUDCIF at them slightly wrongly. They are here for the same reason
+ * the rule exists: both are evidence that something left the building (a
+ * printed document, a message to a parent), both are what a later dispute is
+ * settled with, and both are useless if a routine cleanup can remove them.
  *
  * Anchored on `created_at`, not a per-model "fiscal year end" lookup: not
  * every model here carries a fiscal-year reference (AuditLog and
