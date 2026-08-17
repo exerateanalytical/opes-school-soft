@@ -213,6 +213,17 @@
                 'reason' => __('opes.assessment_screen.col_reason'),
             ]),
 
+            {{-- A validated row's cells are disabled for a REASON, and a
+                 control that refuses without saying why reads as broken. The
+                 sentence travels through @js for the same apostrophe reason
+                 as the labels above. --}}
+            lockedHint: @js(__('opes.assessment_screen.locked_hint')),
+
+            {{-- State-button titles, keyed by state, so a locked cell can swap
+                 its tooltip for the lock explanation without interpolating a
+                 translated label into a JS string literal. --}}
+            stateTitles: @js(array_column($stateControls, 'label', 'value')),
+
             baseline: {},
             autosaveTimer: null,
 
@@ -430,6 +441,7 @@
                                            :data-mark-index="index"
                                            :aria-label="row.student"
                                            :disabled="locked(row)"
+                                           :title="locked(row) ? lockedHint : null"
                                            x-model="row.score"
                                            @input="onInput(row)"
                                            @keydown="onKey($event, index, row)"
@@ -455,7 +467,7 @@
                                                     :class="row.state === '{{ $control['value'] }}'
                                                         ? 'rounded border border-primary bg-primary px-1.5 py-0.5 text-xs font-semibold text-white'
                                                         : 'rounded border border-border-primary px-1.5 py-0.5 text-xs font-medium text-charcoal/70 hover:border-primary/50'"
-                                                    title="{{ $control['label'] }}">
+                                                    :title="locked(row) ? lockedHint : stateTitles['{{ $control['value'] }}']">
                                                 {{ $control['marker'] !== '' ? $control['marker'] : __('opes.assessment_screen.state_short_scored') }}
                                             </button>
                                         @endforeach
@@ -476,6 +488,7 @@
                                            x-model="row.comment"
                                            @input="scheduleAutosave()"
                                            :disabled="locked(row)"
+                                           :title="locked(row) ? lockedHint : null"
                                            placeholder="{{ __('opes.assessment_screen.reason_placeholder') }}"
                                            :aria-label="labels.reason + ' — ' + row.student"
                                            class="w-44 rounded border border-border-primary px-2 py-1 text-sm text-charcoal">
@@ -541,9 +554,9 @@
                              internally; this only keeps the button from
                              rendering for an actor who could not use it. --}}
                         <button type="button" wire:click="approveMarks"
-                                wire:confirm="Approve these marks? They move to the validated stage."
+                                wire:confirm="{{ __('opes.assessment_screen.approve_confirm') }}"
                                 class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
-                            Approve
+                            {{ __('opes.assessment_screen.approve') }}
                         </button>
 
                         {{-- §7.4: the validator's return-to-teacher action.
@@ -551,7 +564,7 @@
                              a small inline panel rather than firing on click. --}}
                         <button type="button" wire:click="toggleRejectForm"
                                 class="rounded border border-heritage-red px-3 py-1.5 text-sm font-medium text-heritage-red hover:bg-heritage-red/10">
-                            {{ $showRejectForm ? 'Cancel return' : 'Return to teacher' }}
+                            {{ $showRejectForm ? __('opes.assessment_screen.reject_cancel') : __('opes.assessment_screen.reject_open') }}
                         </button>
                     @endif
                 </div>
@@ -560,7 +573,7 @@
             @if ($canReject && $showRejectForm)
                 <div class="rounded border border-heritage-red/40 bg-heritage-red/5 px-3 py-3">
                     <label for="reject-reason" class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-charcoal/70">Reason for returning these marks</span>
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.assessment_screen.reject_reason_label') }}</span>
                         <textarea id="reject-reason" wire:model="rejectReason" rows="2" maxlength="500"
                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
                         @error('rejectReason')
@@ -569,13 +582,13 @@
                     </label>
                     <div class="mt-2 flex items-center gap-2">
                         <button type="button" wire:click="rejectMarks"
-                                wire:confirm="Return this submission to the teacher for correction?"
+                                wire:confirm="{{ __('opes.assessment_screen.reject_confirm') }}"
                                 class="rounded bg-heritage-red px-3 py-1.5 text-sm font-medium text-white hover:bg-heritage-red/90">
-                            Confirm return
+                            {{ __('opes.assessment_screen.reject_submit') }}
                         </button>
                         <button type="button" wire:click="toggleRejectForm"
                                 class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/70 hover:text-charcoal">
-                            Cancel
+                            {{ __('opes.assessment_screen.reject_dismiss') }}
                         </button>
                     </div>
                 </div>

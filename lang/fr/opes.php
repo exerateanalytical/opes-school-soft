@@ -1499,6 +1499,7 @@ return [
         'keyboard_move' => "passer d'un élève à l'autre",
         'out_of_range' => 'hors barème',
         'reason_placeholder' => 'Motif (obligatoire)',
+        'locked_hint' => "Cette note a été validée et ne peut plus être modifiée ici ; demandez au chef de département de la retourner d'abord.",
 
         'footer_entered' => 'saisies',
         'footer_pending' => 'en attente',
@@ -1511,6 +1512,15 @@ return [
         'submit_confirm' => "Transmettre ces notes au chef de département ? Vous ne pourrez plus les modifier tant qu'elles ne vous auront pas été retournées.",
         'submitted' => ':submitted note(s) transmise(s) pour validation ; :pending restent non saisies.',
         'approved' => ':validated note(s) validée(s).',
+        'approve' => 'Approuver',
+        'approve_confirm' => 'Approuver ces notes ? Elles passent au stade validé.',
+        'reject_open' => "Retourner à l'enseignant",
+        'reject_cancel' => 'Annuler le retour',
+        'reject_reason_label' => 'Motif du retour de ces notes',
+        'reject_submit' => 'Confirmer le retour',
+        'reject_confirm' => "Retourner cette transmission à l'enseignant pour correction ?",
+        'reject_dismiss' => 'Annuler',
+        'returned' => ":returned note(s) retournée(s) à l'enseignant pour correction.",
         'saved_count' => '{0} Rien à enregistrer.|{1} Une note enregistrée.|[2,*] :count notes enregistrées.',
         'nothing_changed' => "Rien n'a changé depuis le dernier enregistrement.",
 
