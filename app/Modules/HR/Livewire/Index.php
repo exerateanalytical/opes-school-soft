@@ -77,6 +77,34 @@ final class Index extends Component
 
     public string $hireHiredOn = '';
 
+    public string $hireOtherNames = '';
+
+    public string $hirePlaceOfBirth = '';
+
+    public string $hireNationality = 'CM';
+
+    public string $hireNationalIdType = '';
+
+    public string $hireNationalIdNumber = '';
+
+    public string $hireCnpsNumber = '';
+
+    public string $hireNiu = '';
+
+    public string $hireBankName = '';
+
+    public string $hireBankAccount = '';
+
+    public string $hireMobileMoneyNumber = '';
+
+    public string $hireMaritalStatus = '';
+
+    public string $hireNextOfKinName = '';
+
+    public string $hireNextOfKinRelationship = '';
+
+    public string $hireNextOfKinPhone = '';
+
     // ── Open contract form (Contracts tab) ──────────────────────────────
     public bool $showContractForm = false;
 
@@ -201,9 +229,41 @@ final class Index extends Component
         }
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
+    private function hireRules(): array
+    {
+        return [
+            'hireFirstName' => ['required', 'string', 'max:255'],
+            'hireLastName' => ['required', 'string', 'max:255'],
+            'hireGender' => ['required', 'in:male,female'],
+            'hireDateOfBirth' => ['required', 'date'],
+            'hirePhone' => ['required', 'string', 'max:32'],
+            'hireHiredOn' => ['nullable', 'date'],
+            'hireOtherNames' => ['nullable', 'string', 'max:255'],
+            'hireEmail' => ['nullable', 'email', 'max:255'],
+            'hirePlaceOfBirth' => ['nullable', 'string', 'max:255'],
+            'hireNationality' => ['required', 'string', 'size:2'],
+            'hireNationalIdType' => ['nullable', 'string', 'max:64'],
+            'hireNationalIdNumber' => ['nullable', 'string', 'max:64'],
+            'hireCnpsNumber' => ['nullable', 'string', 'max:64'],
+            'hireNiu' => ['nullable', 'string', 'max:64'],
+            'hireBankName' => ['nullable', 'string', 'max:255'],
+            'hireBankAccount' => ['nullable', 'string', 'max:64'],
+            'hireMobileMoneyNumber' => ['nullable', 'string', 'max:32'],
+            'hireMaritalStatus' => ['nullable', 'string', 'max:32'],
+            'hireNextOfKinName' => ['nullable', 'string', 'max:255'],
+            'hireNextOfKinRelationship' => ['nullable', 'string', 'max:64'],
+            'hireNextOfKinPhone' => ['nullable', 'string', 'max:32'],
+        ];
+    }
+
     public function saveHire(HireStaffMember $hireStaffMember): void
     {
         Gate::authorize(HrPermission::MANAGE);
+
+        $this->validate($this->hireRules());
 
         try {
             $hireStaffMember->handle(
@@ -213,7 +273,21 @@ final class Index extends Component
                 dateOfBirth: $this->hireDateOfBirth,
                 phone: $this->hirePhone,
                 hiredOn: $this->hireHiredOn === '' ? null : $this->hireHiredOn,
+                otherNames: $this->hireOtherNames === '' ? null : $this->hireOtherNames,
                 email: $this->hireEmail === '' ? null : $this->hireEmail,
+                placeOfBirth: $this->hirePlaceOfBirth === '' ? null : $this->hirePlaceOfBirth,
+                nationality: $this->hireNationality === '' ? 'CM' : $this->hireNationality,
+                nationalIdType: $this->hireNationalIdType === '' ? null : $this->hireNationalIdType,
+                nationalIdNumber: $this->hireNationalIdNumber === '' ? null : $this->hireNationalIdNumber,
+                cnpsNumber: $this->hireCnpsNumber === '' ? null : $this->hireCnpsNumber,
+                niu: $this->hireNiu === '' ? null : $this->hireNiu,
+                bankName: $this->hireBankName === '' ? null : $this->hireBankName,
+                bankAccount: $this->hireBankAccount === '' ? null : $this->hireBankAccount,
+                mobileMoneyNumber: $this->hireMobileMoneyNumber === '' ? null : $this->hireMobileMoneyNumber,
+                maritalStatus: $this->hireMaritalStatus === '' ? null : $this->hireMaritalStatus,
+                nextOfKinName: $this->hireNextOfKinName === '' ? null : $this->hireNextOfKinName,
+                nextOfKinRelationship: $this->hireNextOfKinRelationship === '' ? null : $this->hireNextOfKinRelationship,
+                nextOfKinPhone: $this->hireNextOfKinPhone === '' ? null : $this->hireNextOfKinPhone,
             );
         } catch (ValidationException $e) {
             $this->addError('hire', implode(' ', $e->validator->errors()->all()));
@@ -228,6 +302,11 @@ final class Index extends Component
         $this->reset([
             'showHireForm', 'hireFirstName', 'hireLastName', 'hireGender',
             'hireDateOfBirth', 'hirePhone', 'hireEmail', 'hireHiredOn',
+            'hireOtherNames', 'hirePlaceOfBirth', 'hireNationality',
+            'hireNationalIdType', 'hireNationalIdNumber', 'hireCnpsNumber',
+            'hireNiu', 'hireBankName', 'hireBankAccount', 'hireMobileMoneyNumber',
+            'hireMaritalStatus', 'hireNextOfKinName', 'hireNextOfKinRelationship',
+            'hireNextOfKinPhone',
         ]);
         $this->tab = 'staff';
         $this->resetPage();
