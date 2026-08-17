@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Procurement\Livewire\Payments;
 
+use App\Modules\Fees\Domain\PaymentMethod;
 use App\Modules\Procurement\Actions\ComputeInvoiceSettlement;
 use App\Modules\Procurement\Actions\RecordSupplierPayment;
 use App\Modules\Procurement\Domain\SupplierPaymentPermission;
@@ -184,6 +185,13 @@ final class Pay extends Component
             'suppliers' => $suppliers,
             'treasuryAccounts' => $treasuryAccounts,
             'openInvoices' => $this->openInvoices(),
+            // RecordSupplierPayment validates the submitted method against
+            // this same enum, so the select is built from it rather than
+            // from a list typed into the Blade.
+            'paymentMethods' => array_map(
+                static fn (PaymentMethod $m): string => $m->value,
+                PaymentMethod::cases(),
+            ),
         ]);
     }
 }

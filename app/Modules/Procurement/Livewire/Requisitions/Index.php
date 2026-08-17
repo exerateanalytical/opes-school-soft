@@ -157,7 +157,15 @@ final class Index extends Component
             return;
         }
 
-        app(SubmitRequisition::class)->handle($requisitionId, $user->toAuditActor());
+        try {
+            app(SubmitRequisition::class)->handle($requisitionId, $user->toAuditActor());
+        } catch (DomainException $e) {
+            $this->addError('submit', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', __('opes.procurement_screen.requisition_submitted'));
     }
 
     public function approve(int $requisitionId): void
@@ -168,8 +176,16 @@ final class Index extends Component
             return;
         }
 
-        $result = app(ApproveRequisition::class)->handle($requisitionId, $user->toAuditActor());
+        try {
+            $result = app(ApproveRequisition::class)->handle($requisitionId, $user->toAuditActor());
+        } catch (DomainException $e) {
+            $this->addError('approve', $e->getMessage());
+
+            return;
+        }
+
         $this->warnings = $result->warnings;
+        session()->flash('status', __('opes.procurement_screen.requisition_approved'));
     }
 
     public function reject(int $requisitionId): void
@@ -180,8 +196,18 @@ final class Index extends Component
             return;
         }
 
-        app(RejectRequisition::class)->handle($requisitionId, $this->rejectReason, $user->toAuditActor());
+        try {
+            app(RejectRequisition::class)->handle($requisitionId, $this->rejectReason, $user->toAuditActor());
+        } catch (DomainException $e) {
+            // The typed reason survives the refusal; clearing it first made
+            // the operator retype it to find out what was wrong.
+            $this->addError('reject', $e->getMessage());
+
+            return;
+        }
+
         $this->rejectReason = '';
+        session()->flash('status', __('opes.procurement_screen.requisition_rejected'));
     }
 
     private function baseQuery(): QueryBuilder

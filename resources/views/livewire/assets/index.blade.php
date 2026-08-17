@@ -499,7 +499,6 @@
     :breadcrumb="['Dashboard', 'Assets']"
     :paginator="$rows"
     empty-message="No asset records match these filters yet. Assets, maintenance requests and depreciation runs appear here as they are set up."
-    rail-title="Asset Overview"
 >
     <x-slot:actions>
         <button type="button" wire:click="toggleAssetForm"
@@ -744,6 +743,13 @@
                         <x-status-pill :status="$assetTone[$row->status] ?? 'ok'" :label="$label($row->status)"/>
                     </div>
                     <p class="mt-1 text-sm text-charcoal/70">{{ $row->category_name }} · NBV {{ $row->net_book_value !== null ? Money::of((int) $row->net_book_value)->format(false) : '—' }}</p>
+                    {{-- Below md the table (and with it the row actions) is
+                         hidden, so without this the detail page is unreachable
+                         from a handset. --}}
+                    <a href="{{ route('assets.show', $row->id) }}"
+                       class="mt-2 inline-block rounded border border-border-primary px-2 py-1 text-xs font-semibold text-charcoal hover:bg-sand/40">
+                        View
+                    </a>
                 @elseif ($tab === 'maintenance')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ $row->title }}</p>

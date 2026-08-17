@@ -39,7 +39,7 @@
             <label class="flex flex-col gap-1 text-sm">
                 <span class="text-xs font-medium text-charcoal/70">{{ __('opes.supplier_payment_screen.method') }}</span>
                 <select wire:model="paymentMethod" class="rounded border border-border-primary px-2 py-1.5">
-                    @foreach (['cash', 'mobile_money', 'bank'] as $method)
+                    @foreach ($paymentMethods as $method)
                         <option value="{{ $method }}">{{ str_replace('_', ' ', $method) }}</option>
                     @endforeach
                 </select>

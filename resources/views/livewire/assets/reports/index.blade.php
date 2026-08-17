@@ -151,7 +151,7 @@
                     @if ($tab === 'depreciation')
                         <td class="px-4 py-2.5 font-medium text-charcoal">{{ $row->tag_number }}</td>
                         <td class="px-4 py-2.5 text-charcoal/80">{{ $row->asset_name }}</td>
-                        <td class="px-4 py-2.5 text-charcoal/80">{{ $row->fiscal_year_id }}</td>
+                        <td class="px-4 py-2.5 text-charcoal/80">{{ $row->fiscal_year_code }}</td>
                         <td class="px-4 py-2.5 text-charcoal/80">{{ $row->period_month }}</td>
                         <td class="px-4 py-2.5 text-right tabular-nums">{{ Money::of((int) $row->charge)->format(false) }}</td>
                         <td class="px-4 py-2.5 text-right tabular-nums">{{ Money::of((int) $row->closing_accumulated)->format(false) }}</td>
@@ -231,7 +231,7 @@
                         @if ($tab === 'depreciation')
                             <td class="py-1">{{ $row->tag_number }}</td>
                             <td class="py-1">{{ $row->asset_name }}</td>
-                            <td class="py-1">{{ $row->fiscal_year_id }}</td>
+                            <td class="py-1">{{ $row->fiscal_year_code }}</td>
                             <td class="py-1">{{ $row->period_month }}</td>
                             <td class="py-1 text-right">{{ number_format((float) $row->charge) }}</td>
                             <td class="py-1 text-right">{{ number_format((float) $row->closing_accumulated) }}</td>

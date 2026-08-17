@@ -14,6 +14,18 @@
         </p>
     @endif
 
+    {{-- The error list used to live INSIDE the create-requisition panel, so a
+         refusal from Submit / Approve / Reject / Cancel on a table row landed
+         in a banner nobody could see unless the form happened to be open -
+         the row buttons read as doing nothing at all. --}}
+    @if (! $showForm && $errors->any())
+        <ul class="rounded border border-heritage-red/40 bg-heritage-red/10 p-2 text-sm text-heritage-red" role="alert">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
+
     @if ($showForm)
         <section class="rounded border border-border-primary bg-white p-4"
                  x-data="{

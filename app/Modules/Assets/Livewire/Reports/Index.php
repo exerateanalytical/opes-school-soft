@@ -244,13 +244,17 @@ final class Index extends Component
         return DB::table('depreciation_schedules as ds')
             ->join('assets as a', 'a.id', '=', 'ds.asset_id')
             ->join('asset_categories as c', 'c.id', '=', 'a.asset_category_id')
+            ->join('fiscal_years as fy', 'fy.id', '=', 'ds.fiscal_year_id')
             ->where('ds.basis', 'accounting')
             ->when($this->category !== '', fn ($q) => $q->where('a.asset_category_id', (int) $this->category))
             ->orderBy('a.tag_number')
             ->orderByDesc('ds.fiscal_year_id')
             ->orderByDesc('ds.period_month')
             ->select([
-                'ds.id', 'a.tag_number', 'a.name as asset_name', 'ds.fiscal_year_id', 'ds.period_month',
+                // The column is headed "Fiscal Year", so it carries the year's
+                // code ("2026"), not the internal row id the operator cannot
+                // read and did not ask for.
+                'ds.id', 'a.tag_number', 'a.name as asset_name', 'fy.code as fiscal_year_code', 'ds.period_month',
                 'ds.charge', 'ds.closing_accumulated', 'ds.net_book_value',
             ]);
     }
@@ -269,11 +273,11 @@ final class Index extends Component
     private function depreciationExportRows(): iterable
     {
         foreach ($this->depreciationQuery()->limit(self::EXPORT_ROW_LIMIT)->get() as $row) {
-            /** @var object{tag_number: string, asset_name: string, fiscal_year_id: int|string, period_month: int|string, charge: int|string, closing_accumulated: int|string, net_book_value: int|string} $row */
+            /** @var object{tag_number: string, asset_name: string, fiscal_year_code: string, period_month: int|string, charge: int|string, closing_accumulated: int|string, net_book_value: int|string} $row */
             yield [
                 $row->tag_number,
                 $row->asset_name,
-                $row->fiscal_year_id,
+                $row->fiscal_year_code,
                 $row->period_month,
                 $row->charge,
                 $row->closing_accumulated,

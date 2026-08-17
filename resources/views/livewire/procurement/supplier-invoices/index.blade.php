@@ -52,7 +52,7 @@
             <select id="invoices-status" wire:model.live="status"
                     class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                 <option value="">{{ __('opes.ui.all') }}</option>
-                @foreach (['draft', 'pending_approval', 'match_exception', 'approved', 'posted', 'partially_paid', 'paid', 'cancelled'] as $option)
+                @foreach ($statusOptions as $option)
                     <option value="{{ $option }}">{{ str_replace('_', ' ', $option) }}</option>
                 @endforeach
             </select>

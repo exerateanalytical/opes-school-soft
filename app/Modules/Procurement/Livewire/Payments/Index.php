@@ -8,6 +8,7 @@ use App\Modules\Procurement\Actions\ApproveSupplierPayment;
 use App\Modules\Procurement\Actions\PaySupplierPayment;
 use App\Modules\Procurement\Actions\VoidSupplierPayment;
 use App\Modules\Procurement\Domain\SupplierPaymentPermission;
+use App\Modules\Procurement\Domain\SupplierPaymentStatus;
 use DomainException;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
@@ -54,6 +55,17 @@ final class Index extends Component
 
     public function updatedStatus(): void
     {
+        $this->page = 1;
+    }
+
+    /**
+     * x-list-screen always draws a Reset control beside the filter bar, and
+     * it calls `resetFilters` by default (binding rule 3). Without this the
+     * button on this screen raised "Method [resetFilters] does not exist".
+     */
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'status']);
         $this->page = 1;
     }
 
@@ -158,6 +170,13 @@ final class Index extends Component
         return view('livewire.procurement.payments.index', [
             'payments' => $paginator,
             'kpis' => $kpis,
+            // From the enum, like PurchaseOrders\Index: a filter list typed
+            // out in the Blade silently stops covering the lifecycle the day
+            // a status is added.
+            'statusOptions' => array_map(
+                static fn (SupplierPaymentStatus $s): string => $s->value,
+                SupplierPaymentStatus::cases(),
+            ),
             'canApprove' => Gate::allows(SupplierPaymentPermission::APPROVE),
             'canVoid' => Gate::allows(SupplierPaymentPermission::VOID),
         ]);
