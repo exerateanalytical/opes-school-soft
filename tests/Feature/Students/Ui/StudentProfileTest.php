@@ -240,3 +240,54 @@ it('says so instead of showing an empty medical table', function () {
         ->call('selectTab', 'medical')
         ->assertSee(__('opes.students_screen.medical_empty'));
 });
+
+it('paints the profile in design tokens only, never stock Tailwind colours', function () {
+    // The user's rule: "every form in the platform must be clean, no colour
+    // collision and pop up when necessary rather than squeezing on the side."
+    // This screen was the last one in the platform still painting its forms in
+    // raw Tailwind palette classes (text-red-600, bg-emerald-*, bg-amber-*),
+    // which collide with the heritage palette every other module uses. This
+    // assertion is the fix's only guard: nothing about a colour class fails
+    // loudly at runtime, so a regression here is silent until someone looks.
+    actingAs(studentsUiUserAs(Role::Administrator));
+
+    $student = Student::factory()->create();
+
+    // The edit form is opened so its markup is actually in the payload - a
+    // closed modal renders nothing at all, and a test asserting against an
+    // empty dialog would pass for the wrong reason.
+    $rendered = Livewire::test(Show::class, ['student' => $student])
+        ->call('toggleEditForm');
+
+    foreach ([
+        'text-red-600', 'text-red-700', 'bg-red-600', 'bg-red-700', 'border-red-300',
+        'bg-emerald-50', 'bg-emerald-600', 'bg-emerald-700', 'border-emerald-300',
+        'text-emerald-700', 'text-emerald-800',
+        'bg-amber-50', 'bg-amber-600', 'bg-amber-700', 'border-amber-300', 'text-amber-700',
+    ] as $stockColour) {
+        $rendered->assertDontSeeHtml($stockColour);
+    }
+
+    // ...and the tokens really are there in their place.
+    $rendered->assertSeeHtml('text-heritage-red');
+});
+
+it('pops the lifecycle forms up as dialogs rather than squeezing them inline', function () {
+    // Each of the five forms lived inline in the page flow, four of them
+    // stacked in one shared section, so opening one shoved the profile down
+    // the screen. They are dialogs now - x-opes-modal-form, the platform's one
+    // popup shell - and the boolean properties that drive them are unchanged,
+    // which is what lets the existing lifecycle behaviour still hold.
+    actingAs(studentsUiUserAs(Role::Administrator));
+
+    $student = Student::factory()->create();
+
+    Livewire::test(Show::class, ['student' => $student])
+        // Closed: no dialog in the DOM at all.
+        ->assertDontSeeHtml('role="dialog"')
+        ->call('toggleEditForm')
+        ->assertSet('showEditForm', true)
+        ->assertSeeHtml('role="dialog"')
+        ->assertSeeHtml('aria-modal="true"')
+        ->assertSeeHtml('wire:model="edit_first_name"');
+});
