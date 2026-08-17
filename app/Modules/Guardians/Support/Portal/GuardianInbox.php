@@ -110,7 +110,13 @@ final class GuardianInbox
             ->where('m.message_thread_id', $threadId)
             ->orderBy('m.id')
             ->limit($limit)
-            ->get(['m.id', 'm.sender_id', 'm.body', 'm.is_system', 'm.created_at', 'u.name as sender_name']);
+            // The official-account tick matters most here: this is the screen
+            // where a guardian reads a fee demand and has to know it came
+            // from the school and not from someone naming themselves after it.
+            ->get([
+                'm.id', 'm.sender_id', 'm.body', 'm.is_system', 'm.created_at',
+                'u.name as sender_name', 'u.is_official as sender_is_official',
+            ]);
     }
 
     public function isParticipant(int $threadId, int $userId): bool

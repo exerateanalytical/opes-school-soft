@@ -11,6 +11,7 @@ use App\Modules\Communication\Actions\Messaging\StartThread;
 use App\Modules\Communication\Models\MessageThread;
 use App\Modules\Communication\Models\MessageThreadParticipant;
 use App\Modules\Identity\Actions\FindUserIdByEmail;
+use App\Modules\Identity\Actions\FindUserIdByUsername;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -83,13 +84,26 @@ final class Index extends Component
     {
         $this->error = '';
 
-        // Identity's door, not Identity's model: StartThread already speaks
+        // Identity's doors, not Identity's model: StartThread already speaks
         // in user IDs, so nothing here ever needed the record (00-core §6.2
         // rule 2).
-        $recipientId = app(FindUserIdByEmail::class)->handle($this->newRecipient);
+        //
+        // Handle first, address second. A handle cannot contain `@` (see
+        // Identity\Domain\Username) so the two namespaces cannot collide, and
+        // trying the cheaper, more specific one first means a teacher who
+        // types `amina.n` never has that read as a malformed email.
+        $recipient = trim($this->newRecipient);
+
+        $recipientId = app(FindUserIdByUsername::class)->handle($recipient);
+        $recipientId ??= app(FindUserIdByEmail::class)->handle($recipient);
 
         if ($recipientId === null) {
-            $this->error = __('opes.messages_screen.recipient_not_found');
+            // Naming what was tried, because "not found" against a field that
+            // accepts two things leaves the sender guessing which one it read
+            // their input as.
+            $this->error = __('opes.messages_screen.recipient_not_found', [
+                'recipient' => $recipient,
+            ]);
 
             return;
         }
@@ -129,7 +143,13 @@ final class Index extends Component
                     ->join('users as u', 'u.id', '=', 'm.sender_id')
                     ->where('m.message_thread_id', $this->activeThreadId)
                     ->orderBy('m.created_at')
-                    ->get(['m.id', 'm.body', 'm.created_at', 'm.sender_id', 'u.name as sender_name']);
+                    // sender_is_official rides along on the join the sender
+                    // name already needed, so the tick costs no extra query.
+                    ->get([
+                        'm.id', 'm.body', 'm.created_at', 'm.sender_id',
+                        'u.name as sender_name', 'u.username as sender_username',
+                        'u.is_official as sender_is_official',
+                    ]);
             }
         }
 

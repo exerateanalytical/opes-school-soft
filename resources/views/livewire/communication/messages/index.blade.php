@@ -51,7 +51,13 @@
             <div class="flex-1 space-y-3 overflow-y-auto p-3" style="max-height: 24rem;">
                 @foreach ($activeMessages as $message)
                     <div class="{{ $message->sender_id === auth()->id() ? 'ml-auto max-w-[80%] rounded-lg bg-primary/10 p-2' : 'mr-auto max-w-[80%] rounded-lg bg-sand/30 p-2' }}">
-                        <p class="text-xs font-semibold text-charcoal">{{ $message->sender_name }}</p>
+                        <p class="flex items-center gap-1 text-xs font-semibold text-charcoal">
+                            <span>{{ $message->sender_name }}</span>
+                            <x-verified-badge :official="(bool) $message->sender_is_official"/>
+                            @if ($message->sender_username)
+                                <span class="font-normal text-charcoal/60">&commat;{{ $message->sender_username }}</span>
+                            @endif
+                        </p>
                         <p class="mt-0.5 text-sm text-charcoal whitespace-pre-wrap">{{ $message->body }}</p>
                         <p class="mt-0.5 text-[10px] text-charcoal/60">{{ $message->created_at }}</p>
                     </div>
@@ -78,8 +84,11 @@
                     <input type="text" wire:model="newTitle" class="mt-1 w-full rounded border border-border-primary p-2">
                 </label>
                 <label class="text-sm">
-                    <span class="block text-charcoal/70">{{ __('opes.messages_screen.recipient_email') }}</span>
-                    <input type="text" wire:model="newRecipient" class="mt-1 w-full rounded border border-border-primary p-2">
+                    <span class="block text-charcoal/70">{{ __('opes.messages_screen.recipient') }}</span>
+                    <input type="text" wire:model="newRecipient" autocomplete="off"
+                           placeholder="{{ __('opes.messages_screen.recipient_placeholder') }}"
+                           class="mt-1 w-full rounded border border-border-primary p-2">
+                    <span class="mt-1 block text-xs text-charcoal/60">{{ __('opes.messages_screen.recipient_hint') }}</span>
                 </label>
             </div>
 

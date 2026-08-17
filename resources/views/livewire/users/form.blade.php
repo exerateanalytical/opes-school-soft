@@ -55,6 +55,20 @@
             </label>
         </div>
 
+        {{-- The blue tick. Only reachable from here, under `user.manage` -
+             never from /account, because a badge you can award yourself
+             certifies nothing. --}}
+        <label class="flex items-start gap-2 rounded border border-border-primary bg-sand/20 p-3">
+            <input id="user-is-official" type="checkbox" wire:model="isOfficial" class="mt-0.5"/>
+            <span class="text-sm">
+                <span class="flex items-center gap-1 font-medium text-charcoal">
+                    {{ __('opes.users.official_label') }}
+                    <x-verified-badge :official="true"/>
+                </span>
+                <span class="block text-xs text-charcoal/60">{{ __('opes.users.official_hint') }}</span>
+            </span>
+        </label>
+
         <div class="flex items-center gap-2 border-t border-border-primary pt-5">
             <button type="submit"
                     class="rounded border border-primary bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90">

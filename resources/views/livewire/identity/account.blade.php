@@ -27,6 +27,19 @@
                     <dd class="font-medium text-charcoal">{{ $email }}</dd>
                 </div>
                 <div>
+                    <dt class="text-charcoal/55">{{ __('opes.account.username') }}</dt>
+                    <dd class="font-medium text-charcoal">
+                        @if ($username !== '')
+                            &commat;{{ $username }}
+                        @else
+                            <span class="font-normal text-charcoal/55">{{ __('opes.account.username_unset') }}</span>
+                        @endif
+                        {{-- Read-only on purpose: the tick is granted by an
+                             administrator under `user.manage`, never claimed. --}}
+                        <x-verified-badge :official="$isOfficial"/>
+                    </dd>
+                </div>
+                <div>
                     <dt class="text-charcoal/55">{{ __('opes.account.roles') }}</dt>
                     <dd class="mt-1 flex flex-wrap gap-1.5">
                         @foreach ($roles as $role)
@@ -36,6 +49,22 @@
                 </div>
             </dl>
             <p class="mt-4 text-xs text-charcoal/55">{{ __('opes.account.name_changes_via_admin') }}</p>
+
+            {{-- The handle IS yours to set, unlike the name and email above:
+                 it exists so colleagues and parents can message you without
+                 knowing your email address. --}}
+            <form wire:submit="saveUsername" class="mt-5 border-t border-border-primary pt-4">
+                <label class="block text-sm">
+                    <span class="mb-1 block font-medium text-charcoal">{{ __('opes.account.choose_username') }}</span>
+                    <input type="text" wire:model="username" autocomplete="username" maxlength="32"
+                           class="w-full rounded-lg border border-border-primary px-3 py-2 text-sm text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                    <span class="mt-1 block text-xs text-charcoal/55">{{ __('opes.account.username_hint') }}</span>
+                    @error('username') <span class="mt-1 block text-xs font-medium text-danger-text">{{ $message }}</span> @enderror
+                </label>
+                <button type="submit" class="mt-3 rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90">
+                    {{ __('opes.account.save_username') }}
+                </button>
+            </form>
         </section>
 
         <section class="rounded-xl border border-border-primary bg-white p-5 shadow-sm">

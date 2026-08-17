@@ -200,13 +200,18 @@ final class CommunicationController
             ->where('m.message_thread_id', $thread)
             ->orderBy('m.id')
             ->limit(500)
-            ->get(['m.id', 'm.sender_id', 'm.body', 'm.is_system', 'm.created_at', 'u.name as sender_name']);
+            ->get([
+                'm.id', 'm.sender_id', 'm.body', 'm.is_system', 'm.created_at',
+                'u.name as sender_name', 'u.is_official as sender_is_official',
+            ]);
 
         return response()->json([
             'data' => $rows->map(static fn (object $row): array => [
                 'id' => (int) $row->id,
                 'sender_id' => (int) $row->sender_id,
                 'sender_name' => $row->sender_name === null ? null : (string) $row->sender_name,
+                // So the mobile app can draw the same tick the web thread does.
+                'sender_is_official' => (bool) $row->sender_is_official,
                 'body' => (string) $row->body,
                 'is_system' => (bool) $row->is_system,
                 'sent_at' => $row->created_at,

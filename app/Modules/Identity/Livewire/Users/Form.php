@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Identity\Livewire\Users;
 
 use App\Modules\Identity\Actions\CreateUser;
+use App\Modules\Identity\Actions\MarkUserOfficial;
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Identity\Models\User;
@@ -32,6 +33,14 @@ final class Form extends Component
 
     public string $password = '';
 
+    /**
+     * The blue tick, for the school's own accounts (the Bursar's office, the
+     * Proviseur). It lives on THIS screen and not on /account because the
+     * whole point of a verified badge is that nobody can award it to
+     * themselves; MarkUserOfficial re-checks `user.manage` regardless.
+     */
+    public bool $isOfficial = false;
+
     public function mount(): void
     {
         Gate::authorize(Permission::UserManage->value);
@@ -51,13 +60,17 @@ final class Form extends Component
         /** @var User $actor */
         $actor = auth()->user();
 
-        $createUser->handle(
+        $user = $createUser->handle(
             name: $validated['name'],
             email: $validated['email'],
             role: Role::from($validated['role']),
             plainPassword: $validated['password'],
             actor: $actor,
         );
+
+        if ($this->isOfficial) {
+            app(MarkUserOfficial::class)->handle($user, true, $actor);
+        }
 
         session()->flash('status', __('opes.users.created'));
 
