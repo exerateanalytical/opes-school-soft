@@ -132,6 +132,18 @@ return [
         'branding' => 'Identité visuelle',
         'nav_disabled_title' => 'Disponible dans une phase ultérieure',
     ],
+    'nav_section' => [
+        'overview' => 'Aperçu',
+        'academics' => 'Académique',
+        'students' => 'Élèves & Admissions',
+        'hr' => 'Ressources humaines',
+        'finance' => 'Finances & Comptabilité',
+        'assets' => 'Biens & Inventaire',
+        'welfare' => 'Vie scolaire & Bien-être',
+        'communication' => 'Communication',
+        'reports' => 'Rapports',
+        'administration' => 'Administration',
+    ],
     // La page d'accueil des modules planifiés, vers laquelle pointe chaque
     // élément de la barre latérale dont le module n'est pas encore construit
     // (shell/module-placeholder.blade.php). Même URL que le futur module :

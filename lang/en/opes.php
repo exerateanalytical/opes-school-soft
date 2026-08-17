@@ -142,6 +142,22 @@ return [
         'branding' => 'Branding',
         'nav_disabled_title' => 'Arrives in a later phase',
     ],
+    // Sidebar section headings (Navigation::items()'s 'section' key). Grouped
+    // by module family so a 50+ item flat list reads as a map instead of a
+    // wall of links - order here matches the order sections first appear in
+    // Navigation::items().
+    'nav_section' => [
+        'overview' => 'Overview',
+        'academics' => 'Academics',
+        'students' => 'Students & Admissions',
+        'hr' => 'Human Resources',
+        'finance' => 'Finance & Accounting',
+        'assets' => 'Assets & Inventory',
+        'welfare' => 'Student Life & Welfare',
+        'communication' => 'Communication',
+        'reports' => 'Reports',
+        'administration' => 'Administration',
+    ],
     // The scheduled-module landing page every not-yet-built sidebar item
     // links to (shell/module-placeholder.blade.php). Same URL the real
     // module will occupy later, so a bookmark made today survives it
