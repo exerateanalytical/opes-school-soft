@@ -28,9 +28,26 @@ use Illuminate\Support\Facades\Gate;
  * the SAME path. Deleting on replace therefore asks the register whether any
  * OTHER row still points at the old path before removing the file - the
  * per-record analogue of DocumentProfile's "no longer held by any slot" rule.
+ *
+ * WHERE the bytes go is not StoredImage's default. The default is `branding/`
+ * on the `public` disk - symlinked into the web root and served with no
+ * authentication - which is right for a school crest and wrong for a
+ * photograph of a named employee: the content hash is obscurity, not access
+ * control, and a URL once seen answers to no permission ever again. So this
+ * Action writes to its own directory on the PRIVATE default disk and
+ * StaffPhotoController is the only way back to the bytes, exactly as
+ * SetGuardianPhoto and GuardianPhotoController already do.
  */
 final class SetStaffPhoto
 {
+    /**
+     * Staff photos are their own directory, not `branding/`. A photograph of a
+     * person and the school crest have different retention rules, and sharing
+     * a directory would put a staff-purge one path-prefix mistake away from
+     * deleting the crest.
+     */
+    public const DIRECTORY = 'staff-photos';
+
     /** The storage slot name; the content hash makes the filename unique. */
     private const SLOT = 'staff-photo';
 
@@ -45,7 +62,7 @@ final class SetStaffPhoto
         // Store BEFORE the transaction: a failed write must not leave the
         // column pointing at a file that was never persisted, and an orphaned
         // file on a rolled-back save is the cheap direction of that trade.
-        $path = StoredImage::putContents(self::SLOT, $contents, $extension);
+        $path = StoredImage::putContents(self::SLOT, $contents, $extension, self::DIRECTORY, $this->disk());
 
         $previous = DB::transaction(function () use ($staffMemberId, $path, $actor): ?string {
             /** @var StaffMember $staff */
@@ -111,7 +128,16 @@ final class SetStaffPhoto
             return;
         }
 
-        StoredImage::forget($previous, $keep);
+        // Directory and disk must match the WRITE. forget() uses the pair as
+        // both its "never delete outside this directory" guard and the place
+        // it looks, so leaving it on the branding/public default would mean
+        // replaced photos are never actually removed.
+        StoredImage::forget($previous, $keep, self::DIRECTORY, $this->disk());
+    }
+
+    private function disk(): string
+    {
+        return (string) config('filesystems.default');
     }
 
     private function audit(StaffMember $staff, ?string $before, ?string $after, Actor $actor): void

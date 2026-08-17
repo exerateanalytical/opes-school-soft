@@ -464,7 +464,10 @@
                         @if ($photoUpload !== null)
                             <img src="{{ $photoUpload->temporaryUrl() }}" alt="" class="max-h-full max-w-full object-contain">
                         @elseif ($photo_path !== '')
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photo_path) }}"
+                            {{-- The stored photo is on the PRIVATE disk and has
+                                 no public URL; admissions.photo streams it
+                                 behind admissions.manage. --}}
+                            <img src="{{ route('admissions.photo', ['application' => $applicationId]) }}"
                                  alt="{{ __('opes.admissions_screen.photo') }}"
                                  class="max-h-full max-w-full object-contain">
                         @else
