@@ -378,6 +378,51 @@ return [
         'stamp' => "Cachet de l'établissement",
     ],
 
+    // 10-documents.md §11.3 - LEAVE-APP, variante élève.
+    'leave_application' => [
+        'title' => 'Demande de congé',
+        'student_name' => "Nom de l'élève",
+        'class_group' => 'Classe',
+        'date_requested' => 'Date de la demande',
+        'from' => 'Du',
+        'to' => 'Au',
+        'reason' => 'Motif du congé',
+        'footer_note' => 'À signer par le parent / tuteur.',
+    ],
+
+    // 10-documents.md §12.4 - GATE-PASS.
+    'gate_pass' => [
+        'title' => 'Autorisation de sortie',
+        'pass_no' => "N° d'autorisation",
+        'student_name' => "Nom de l'élève",
+        'class_group' => 'Classe',
+        'reason' => 'Motif',
+        'date' => 'Date',
+        'time_out' => 'Heure de sortie',
+        'notification_notice' => 'Une notification est mise en file d\'attente pour le parent/tuteur lorsque le paramètre de l\'école l\'exige.',
+    ],
+
+    // 10-documents.md §12.1 - ID-STU / ID-STAFF.
+    'id_card' => [
+        'card_no' => 'N° de carte',
+        'admission_no' => "N° d'admission",
+        'class_group' => 'Classe',
+        'date_of_birth' => 'Date de naissance',
+        'academic_session' => 'Année scolaire',
+        'section' => 'Section',
+        'date_issued' => 'Date de délivrance',
+        'valid_until' => "Valable jusqu'au",
+        'terms_title' => 'Conditions générales',
+        'terms' => [
+            'En cas de découverte, veuillez la retourner à l\'école.',
+            "Cette carte demeure la propriété de l'école.",
+            'Signaler immédiatement toute perte ou tout vol au bureau de l\'école.',
+            'Non transférable à toute autre personne.',
+            'Doit être restituée en cas de retrait ou de transfert.',
+        ],
+        'registrar_signature' => 'Registraire académique',
+    ],
+
     'assessment' => [
         'broadsheet_title' => 'Tableau de notes de la classe',
         'broadsheet_student' => 'Élève',

@@ -384,6 +384,51 @@ return [
         'stamp' => 'School stamp',
     ],
 
+    // 10-documents.md §11.3 - LEAVE-APP, student variant.
+    'leave_application' => [
+        'title' => 'Leave Application',
+        'student_name' => 'Student name',
+        'class_group' => 'Class',
+        'date_requested' => 'Date requested',
+        'from' => 'From',
+        'to' => 'To',
+        'reason' => 'Reason for leave',
+        'footer_note' => 'To be signed by the Parent / Guardian.',
+    ],
+
+    // 10-documents.md §12.4 - GATE-PASS.
+    'gate_pass' => [
+        'title' => 'Gate Pass',
+        'pass_no' => 'Pass No.',
+        'student_name' => 'Student name',
+        'class_group' => 'Class',
+        'reason' => 'Reason',
+        'date' => 'Date',
+        'time_out' => 'Time out',
+        'notification_notice' => 'A notification is queued to the parent/guardian where the school setting requires it.',
+    ],
+
+    // 10-documents.md §12.1 - ID-STU / ID-STAFF.
+    'id_card' => [
+        'card_no' => 'Card No.',
+        'admission_no' => 'Admission No.',
+        'class_group' => 'Class',
+        'date_of_birth' => 'Date of birth',
+        'academic_session' => 'Academic session',
+        'section' => 'Section',
+        'date_issued' => 'Date issued',
+        'valid_until' => 'Valid until',
+        'terms_title' => 'Terms & Conditions',
+        'terms' => [
+            'If found, please return to the school.',
+            'This card remains the property of the school.',
+            'Report loss or theft immediately to the school office.',
+            'Not transferable to any other person.',
+            'Must be surrendered on withdrawal or transfer.',
+        ],
+        'registrar_signature' => 'Academic Registrar',
+    ],
+
     'assessment' => [
         'broadsheet_title' => 'Class Broadsheet',
         'broadsheet_student' => 'Student',
