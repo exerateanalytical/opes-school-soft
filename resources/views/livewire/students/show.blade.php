@@ -97,7 +97,7 @@
     </nav>
 
     @if (session('status'))
-        <div class="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <div class="rounded border border-success/40 bg-success-bg px-3 py-2 text-sm font-medium text-success-text" role="status">
             {{ session('status') }}
         </div>
     @endif
@@ -123,33 +123,31 @@
          UpdateStudent::EDITABLE that biography edits are permitted to touch;
          matricule, admission_no and status are structurally absent because
          the Action drops them before the model is ever touched. --}}
-    @if ($showEditForm)
-        <section class="rounded border border-border-primary bg-white p-4">
-            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal/70">Edit profile</h2>
+    <x-opes-modal-form wire-model="showEditForm" :open="$showEditForm" title="Edit profile" max-width="3xl">
             <form wire:submit.prevent="saveEdit" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_first_name">First name</label>
                     <input id="edit_first_name" type="text" wire:model="edit_first_name"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_first_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_first_name') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_middle_name">Middle name</label>
                     <input id="edit_middle_name" type="text" wire:model="edit_middle_name"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_middle_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_middle_name') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_last_name">Last name</label>
                     <input id="edit_last_name" type="text" wire:model="edit_last_name"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_last_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_last_name') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_date_of_birth">Date of birth</label>
                     <input id="edit_date_of_birth" type="date" wire:model="edit_date_of_birth"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_date_of_birth') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_date_of_birth') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_gender">Gender</label>
@@ -158,21 +156,21 @@
                         <option value="male">{{ __('opes.students_screen.gender_male') }}</option>
                         <option value="female">{{ __('opes.students_screen.gender_female') }}</option>
                     </select>
-                    @error('edit_gender') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_gender') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_phone">Phone</label>
                     <input id="edit_phone" type="text" wire:model="edit_phone"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_phone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_phone') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="text-xs text-charcoal/55" for="edit_email">Email</label>
                     <input id="edit_email" type="email" wire:model="edit_email"
                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                    @error('edit_email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('edit_email') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
                 </div>
-                @error('showEditForm') <p class="text-xs text-red-600 sm:col-span-2 lg:col-span-3">{{ $message }}</p> @enderror
+                @error('showEditForm') <p class="text-xs text-heritage-red sm:col-span-2 lg:col-span-3">{{ $message }}</p> @enderror
                 <div class="flex items-center gap-2 sm:col-span-2 lg:col-span-3">
                     <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                         Save changes
@@ -182,8 +180,7 @@
                     </button>
                 </div>
             </form>
-        </section>
-    @endif
+    </x-opes-modal-form>
 
     {{-- ── Enrollment lifecycle ───────────────────────────────────────────
          Acts on the student's one LIVE enrollment (pending/active/suspended -
@@ -210,119 +207,147 @@
                     @endif
                     @if ($canManageEnrollmentLifecycle && $enrollmentIsActive)
                         <button type="button" wire:click="toggleSuspendForm"
-                                class="rounded border border-amber-300 px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50">
+                                class="rounded border border-warning/50 px-3 py-1.5 text-sm font-medium text-warning-text hover:bg-warning-bg">
                             {{ $showSuspendForm ? 'Cancel suspend' : 'Suspend' }}
                         </button>
                     @endif
                     @if ($canManageEnrollmentLifecycle && $enrollmentIsSuspended)
                         <button type="button" wire:click="toggleReinstateForm"
-                                class="rounded border border-emerald-300 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
+                                class="rounded border border-success/50 px-3 py-1.5 text-sm font-medium text-success-text hover:bg-success-bg">
                             {{ $showReinstateForm ? 'Cancel reinstate' : 'Reinstate' }}
                         </button>
                     @endif
                     @if ($canEditStudent && $enrollmentIsLive)
                         <button type="button" wire:click="toggleWithdrawForm"
-                                class="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                                class="rounded border border-danger/50 px-3 py-1.5 text-sm font-medium text-danger-text hover:bg-danger-bg">
                             {{ $showWithdrawForm ? 'Cancel withdraw' : 'Withdraw' }}
                         </button>
                     @endif
                 </div>
             </div>
+        </section>
 
-            {{-- Suspend --}}
-            @if ($showSuspendForm)
-                <form wire:submit.prevent="saveSuspend" class="mt-3 flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
-                    <div class="min-w-[16rem] flex-1">
-                        <label class="text-xs text-charcoal/55" for="suspend_reason">Reason for suspension</label>
-                        <input id="suspend_reason" type="text" wire:model="suspend_reason"
-                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                        @error('suspend_reason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                        @error('showSuspendForm') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <button type="submit" class="rounded bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700">
+        {{-- The four lifecycle forms are POPUPS, not inline panels. They used
+             to be stacked inside the section above, each toggled by its own
+             boolean, so opening one squeezed a row of inputs into the page
+             flow and pushed the profile down. x-opes-modal-form is the
+             platform's one dialog shell (focus trap, ESC, backdrop, scroll
+             lock); the boolean properties and the wire:submit handlers below
+             are untouched - only where they render changed. --}}
+
+        {{-- Suspend --}}
+        <x-opes-modal-form wire-model="showSuspendForm" :open="$showSuspendForm" title="Suspend enrollment" max-width="md">
+            <form wire:submit.prevent="saveSuspend" class="space-y-3">
+                <div>
+                    <label class="text-xs text-charcoal/55" for="suspend_reason">Reason for suspension</label>
+                    <input id="suspend_reason" type="text" wire:model="suspend_reason"
+                           class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    @error('suspend_reason') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                    @error('showSuspendForm') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="submit" class="rounded bg-warning px-3 py-1.5 text-sm font-medium text-white hover:bg-warning-text">
                         Confirm suspend
                     </button>
-                </form>
-            @endif
+                    <button type="button" wire:click="$set('showSuspendForm', false)"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </x-opes-modal-form>
 
-            {{-- Reinstate --}}
-            @if ($showReinstateForm)
-                <form wire:submit.prevent="saveReinstate" class="mt-3 flex flex-wrap items-end gap-2 border-t border-border-primary pt-3">
-                    <div class="min-w-[16rem] flex-1">
-                        <label class="text-xs text-charcoal/55" for="reinstate_reason">Reason for reinstatement</label>
-                        <input id="reinstate_reason" type="text" wire:model="reinstate_reason"
-                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                        @error('reinstate_reason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                        @error('showReinstateForm') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+        {{-- Reinstate --}}
+        <x-opes-modal-form wire-model="showReinstateForm" :open="$showReinstateForm" title="Reinstate enrollment" max-width="md">
+            <form wire:submit.prevent="saveReinstate" class="space-y-3">
+                <div>
+                    <label class="text-xs text-charcoal/55" for="reinstate_reason">Reason for reinstatement</label>
+                    <input id="reinstate_reason" type="text" wire:model="reinstate_reason"
+                           class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    @error('reinstate_reason') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                    @error('showReinstateForm') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="submit" class="rounded bg-success px-3 py-1.5 text-sm font-medium text-white hover:bg-success-text">
                         Confirm reinstate
                     </button>
-                </form>
-            @endif
+                    <button type="button" wire:click="$set('showReinstateForm', false)"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </x-opes-modal-form>
 
-            {{-- Withdraw --}}
-            @if ($showWithdrawForm)
-                <form wire:submit.prevent="saveWithdraw" class="mt-3 grid grid-cols-1 gap-3 border-t border-border-primary pt-3 sm:grid-cols-3">
-                    <div>
-                        <label class="text-xs text-charcoal/55" for="withdraw_on">Effective date</label>
-                        <input id="withdraw_on" type="date" wire:model="withdraw_on"
-                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                        @error('withdraw_on') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="text-xs text-charcoal/55" for="withdraw_to">Outcome</label>
-                        <select id="withdraw_to" wire:model="withdraw_to"
-                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
-                            <option value="withdrawn">Withdrawn</option>
-                            <option value="transferred_out">Transferred out (to another school)</option>
-                        </select>
-                        @error('withdraw_to') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <div class="sm:col-span-1">
-                        <label class="text-xs text-charcoal/55" for="withdraw_reason">Reason</label>
-                        <input id="withdraw_reason" type="text" wire:model="withdraw_reason"
-                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                        @error('withdraw_reason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    @error('showWithdrawForm') <p class="text-xs text-red-600 sm:col-span-3">{{ $message }}</p> @enderror
-                    <div class="sm:col-span-3">
-                        <button type="submit" class="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700">
-                            Confirm withdraw
-                        </button>
-                    </div>
-                </form>
-            @endif
+        {{-- Withdraw --}}
+        <x-opes-modal-form wire-model="showWithdrawForm" :open="$showWithdrawForm" title="Withdraw student" max-width="xl">
+            <form wire:submit.prevent="saveWithdraw" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                    <label class="text-xs text-charcoal/55" for="withdraw_on">Effective date</label>
+                    <input id="withdraw_on" type="date" wire:model="withdraw_on"
+                           class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    @error('withdraw_on') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="text-xs text-charcoal/55" for="withdraw_to">Outcome</label>
+                    <select id="withdraw_to" wire:model="withdraw_to"
+                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
+                        <option value="withdrawn">Withdrawn</option>
+                        <option value="transferred_out">Transferred out (to another school)</option>
+                    </select>
+                    @error('withdraw_to') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="text-xs text-charcoal/55" for="withdraw_reason">Reason</label>
+                    <input id="withdraw_reason" type="text" wire:model="withdraw_reason"
+                           class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    @error('withdraw_reason') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                @error('showWithdrawForm') <p class="text-xs text-heritage-red sm:col-span-2">{{ $message }}</p> @enderror
+                <div class="flex flex-wrap items-center gap-2 sm:col-span-2">
+                    <button type="submit" class="rounded bg-danger px-3 py-1.5 text-sm font-medium text-white hover:bg-danger-text">
+                        Confirm withdraw
+                    </button>
+                    <button type="button" wire:click="$set('showWithdrawForm', false)"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </x-opes-modal-form>
 
-            {{-- Transfer class (mid-year, same academic year and class level) --}}
-            @if ($showTransferForm)
-                <form wire:submit.prevent="saveTransfer" class="mt-3 grid grid-cols-1 gap-3 border-t border-border-primary pt-3 sm:grid-cols-3">
-                    <div>
-                        <label class="text-xs text-charcoal/55" for="transfer_class_group_id">Target class group</label>
-                        <select id="transfer_class_group_id" wire:model="transfer_class_group_id"
-                                class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
-                            <option value="">Select...</option>
-                            @foreach ($transferClassGroupOptions as $groupId => $groupName)
-                                <option value="{{ $groupId }}">{{ $groupName }}</option>
-                            @endforeach
-                        </select>
-                        @error('transfer_class_group_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="text-xs text-charcoal/55" for="transfer_effective_on">Effective date</label>
-                        <input id="transfer_effective_on" type="date" wire:model="transfer_effective_on"
-                               class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                        @error('transfer_effective_on') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    @error('showTransferForm') <p class="text-xs text-red-600 sm:col-span-3">{{ $message }}</p> @enderror
-                    <div class="sm:col-span-3">
-                        <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
-                            Confirm transfer
-                        </button>
-                    </div>
-                </form>
-            @endif
-        </section>
+        {{-- Transfer class (mid-year, same academic year and class level) --}}
+        <x-opes-modal-form wire-model="showTransferForm" :open="$showTransferForm" title="Transfer class" max-width="xl">
+            <form wire:submit.prevent="saveTransfer" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                    <label class="text-xs text-charcoal/55" for="transfer_class_group_id">Target class group</label>
+                    <select id="transfer_class_group_id" wire:model="transfer_class_group_id"
+                            class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm">
+                        <option value="">Select...</option>
+                        @foreach ($transferClassGroupOptions as $groupId => $groupName)
+                            <option value="{{ $groupId }}">{{ $groupName }}</option>
+                        @endforeach
+                    </select>
+                    @error('transfer_class_group_id') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="text-xs text-charcoal/55" for="transfer_effective_on">Effective date</label>
+                    <input id="transfer_effective_on" type="date" wire:model="transfer_effective_on"
+                           class="mt-1 w-full rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                    @error('transfer_effective_on') <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                </div>
+                @error('showTransferForm') <p class="text-xs text-heritage-red sm:col-span-2">{{ $message }}</p> @enderror
+                <div class="flex flex-wrap items-center gap-2 sm:col-span-2">
+                    <button type="submit" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+                        Confirm transfer
+                    </button>
+                    <button type="button" wire:click="$set('showTransferForm', false)"
+                            class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </x-opes-modal-form>
     @endif
 
     {{-- ── Identity header ────────────────────────────────────────────────
@@ -431,7 +456,9 @@
          x-kpi-card draws an em dash for null rather than a 0 (09-ui 3.3). A
          child with no register taken has not been absent. --}}
     @if ($tab === 'overview')
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {{-- grid-cols-1 is spelled out, not left implicit: an auto track is
+             what overflowed a real phone in 4e77f64. --}}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <x-kpi-card :label="__('opes.students_screen.overview_attendance')"
                         :value="$overviewSummary['attendance_rate']"
                         :sub="$overviewSummary['attendance_rate'] === null ? __('opes.students_screen.overview_no_attendance') : null"
