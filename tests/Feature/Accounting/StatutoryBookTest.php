@@ -172,15 +172,29 @@ it('supersedes rather than replaces when a book is regenerated', function (): vo
         ->and($first->line_count)->toBeGreaterThan(0);
 });
 
-it("refuses to render the livre d'inventaire through the generic renderer", function (): void {
+it("generates the livre d'inventaire, transcribing the other statements plus the physical inventory", function (): void {
     [$fiscalYear] = bookFixture();
 
-    expect(fn () => app(GenerateStatutoryBook::class)->handle(
+    $book = app(GenerateStatutoryBook::class)->handle(
         StatutoryBookType::LivreInventaire,
         (int) $fiscalYear->id,
         '2035-01-01',
         '2035-12-31',
-    ))->toThrow(DomainException::class);
+    );
+
+    // bookFixture()'s accounts live under the class-9 (off-balance) branch
+    // - the ONE part of the tree a factory can extend without colliding
+    // with seeded statutory data (see ChartOfAccountFactory's own docblock)
+    // - so the bilan/resultat/flux/stock/assets sections all legitimately
+    // see zero lines here; that is the excluded-account path being
+    // exercised correctly, not a bug. What this test protects is that
+    // handle() completes the whole LivreInventaire pipeline (all five
+    // sub-Actions, the dedicated Blade view, hashing, storage) without
+    // throwing and writes a well-formed StatutoryBook row.
+    expect($book->book_type)->toBe(StatutoryBookType::LivreInventaire)
+        ->and($book->sha256)->toHaveLength(64)
+        ->and($book->entry_count)->toBe(4)
+        ->and($book->file_path)->toContain('livre_inventaire');
 });
 
 it('carries a running balance per account in the grand livre', function (): void {

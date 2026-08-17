@@ -35,6 +35,7 @@ final class GenerateStatutoryBook
         private readonly BuildLivreJournal $livreJournal,
         private readonly BuildGrandLivre $grandLivre,
         private readonly BuildBalanceGenerale $balanceGenerale,
+        private readonly BuildLivreInventaireContent $livreInventaire,
         private readonly ReadSetting $settings,
     ) {}
 
@@ -58,11 +59,8 @@ final class GenerateStatutoryBook
             throw new DomainException("Fiscal year {$fiscalYearId} does not exist.");
         }
 
-        [$headers, $rows, $stats] = $this->content($type, $fiscalYearId, $periodStart, $periodEnd);
-
         $generatedAt = now();
-
-        $pdf = Pdf::loadView('reports.statutory-book', [
+        $header = [
             'schoolName' => (string) $this->settings->handle('school.name', 'School'),
             'bookLabel' => $type->label(),
             'fiscalYearCode' => (string) $fiscalYear->code,
@@ -71,9 +69,25 @@ final class GenerateStatutoryBook
             'generatedAt' => $generatedAt->format('Y-m-d H:i'),
             'generatedBy' => (string) $user->name,
             'coteParaphe' => (string) $this->settings->handle('accounting.books_cote_paraphe_reference', ''),
-            'headers' => $headers,
-            'rows' => $rows,
-        ])->setPaper('a4', 'landscape');
+        ];
+
+        if ($type === StatutoryBookType::LivreInventaire) {
+            $content = $this->livreInventaire->handle($fiscalYearId, $periodStart, $periodEnd);
+            $stats = $this->livreInventaireStats($content);
+
+            $pdf = Pdf::loadView('reports.statutory-book-inventaire', [
+                ...$header,
+                ...$content,
+            ])->setPaper('a4', 'portrait');
+        } else {
+            [$headers, $rows, $stats] = $this->content($type, $fiscalYearId, $periodStart, $periodEnd);
+
+            $pdf = Pdf::loadView('reports.statutory-book', [
+                ...$header,
+                'headers' => $headers,
+                'rows' => $rows,
+            ])->setPaper('a4', 'landscape');
+        }
 
         $binary = $pdf->output();
         $sha256 = hash('sha256', $binary);
@@ -133,11 +147,36 @@ final class GenerateStatutoryBook
             StatutoryBookType::BalanceGenerale => $this->balanceGeneraleContent($fiscalYearId, $start, $end),
             StatutoryBookType::GrandLivre => $this->grandLivreContent($fiscalYearId, $start, $end),
             StatutoryBookType::LivreInventaire => throw new DomainException(
-                "The livre d'inventaire is generated at year-end close by its own Action (§14.2): it "
-                .'transcribes the Bilan, the Compte de resultat, the Tableau des flux and the summary '
-                .'of the physical inventory, none of which this generic renderer produces.'
+                'The livre d\'inventaire never reaches the generic (headers, rows) renderer - '
+                .'handle() branches to BuildLivreInventaireContent and reports.statutory-book-inventaire before content() is called.'
             ),
         };
+    }
+
+    /**
+     * @param  array{
+     *     bilan: array{total_actif: int, total_passif: int, actif: list<array{lines: list<mixed>}>, passif: list<array{lines: list<mixed>}>},
+     *     resultat: array{charges: list<mixed>, produits: list<mixed>},
+     *     flux: array{lines: list<mixed>},
+     *     stock: array{lines: list<mixed>, total_system_value: int},
+     *     assets: array{lines: list<mixed>, total_net_book_value: int},
+     * }  $content
+     * @return array<string, mixed>
+     */
+    private function livreInventaireStats(array $content): array
+    {
+        $lineCount = count($content['bilan']['actif']) + count($content['bilan']['passif'])
+            + count($content['resultat']['charges']) + count($content['resultat']['produits'])
+            + count($content['flux']['lines']) + count($content['stock']['lines']) + count($content['assets']['lines']);
+
+        return [
+            'first_piece_no' => null,
+            'last_piece_no' => null,
+            'total_debit' => $content['bilan']['total_actif'],
+            'total_credit' => $content['bilan']['total_passif'],
+            'entry_count' => 4,
+            'line_count' => $lineCount,
+        ];
     }
 
     /**
