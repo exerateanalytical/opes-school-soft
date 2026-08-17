@@ -12,6 +12,7 @@
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~5.0.5",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@shopify/flash-list": "1.7.6",
     "expo": "~53.0.0",
@@ -26,12 +27,14 @@
     "expo-status-bar": "~2.2.0",
     "i18n-js": "^4.5.1",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-svg": "15.11.2"
+    "react-native-svg": "15.11.2",
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@types/react": "~19.0.10",

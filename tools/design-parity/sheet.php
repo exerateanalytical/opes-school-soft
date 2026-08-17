@@ -9,7 +9,15 @@
  * exactly the judgement the sheet exists to support.
  */
 
-$scratch = 'C:/Users/PC/AppData/Local/Temp/claude/C--laragon-www-opeschool-cloud-mobile/'
+/*
+ * The scratch directory moves with the session, and the Expo-app harness
+ * (tools/design-parity/mobile) reuses this compositor rather than forking it -
+ * two sheet builders would drift on the one thing that must not drift, which
+ * is how the two panels are scaled relative to each other. PARITY_SCRATCH
+ * overrides it; the literal below stays as the original session's default so
+ * nothing that already worked stops working.
+ */
+$scratch = getenv('PARITY_SCRATCH') ?: 'C:/Users/PC/AppData/Local/Temp/claude/C--laragon-www-opeschool-cloud-mobile/'
     .'40799381-a682-4802-99ce-b08ff80a5985/scratchpad';
 
 $slug = $argv[1] ?? 'parent-dashboard';
