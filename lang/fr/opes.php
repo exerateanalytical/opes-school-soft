@@ -1659,6 +1659,7 @@ return [
         'je_continue_draft' => 'Continuer',
         'kpi_entries_this_year' => 'Écritures de cet exercice',
         'kpi_unposted_drafts' => 'Brouillons non validés',
+        'kpi_no_open_year' => "Aucun exercice n'est ouvert — il ne s'agit pas d'un décompte nul.",
 
         // Formulaire d'écriture
         'je_form_title_new' => 'Nouvelle écriture',
@@ -2652,6 +2653,9 @@ return [
         'title' => 'Rapprochement bancaire et de trésorerie',
         'import_statement' => 'Importer un relevé',
         'cancel_import' => "Annuler l'import",
+        'why_no_post' => "Vous n'avez pas la permission ledger.post ; ce rapprochement est en lecture seule pour vous.",
+        'why_no_statement' => "Aucun relevé bancaire n'a encore été importé pour cette période : il n'y a rien à rapprocher.",
+        'why_no_selection' => 'Sélectionnez au moins une ligne de relevé et au moins une ligne du grand livre avant de rapprocher.',
         'statement_reference' => 'Référence du relevé',
         'accounting_period' => 'Période comptable',
         'period_start' => 'Début de période',
@@ -2737,6 +2741,8 @@ return [
         'supersedes' => 'Remplace',
         'empty' => "Aucun livre n'a encore été généré pour cet exercice.",
         'select_year' => "Sélectionnez d'abord un exercice.",
+        'generated_ok' => ':book — :lines lignes, sha256 :hash',
+        'showing' => 'Affichage des :shown générations les plus récentes sur :total. Les générations antérieures sont conservées et font toujours partie du registre légal.',
     ],
 
     /*
@@ -2921,6 +2927,9 @@ return [
         'schema_version' => 'Version du schéma',
         'hash' => 'SHA-256',
         'empty' => "Rien n'a encore été généré.",
+        'supersedes' => 'Remplace',
+        'generating' => 'Génération de la version en cours — la configuration en vigueur est relue, cela prend un instant.',
+        'showing' => 'Affichage des :shown versions les plus récentes sur :total. Les versions antérieures sont conservées.',
     ],
 
     /*

@@ -18,7 +18,16 @@
             <p class="text-xs uppercase tracking-wide text-charcoal/50">Dashboard / Ledger / Year-end</p>
             <h1 class="text-xl font-semibold text-charcoal">Year-End Console (OHADA §17 / §18)</h1>
             <p class="mt-1 text-xs text-charcoal/60">
-                The thirteen-step close sequence, its sign-offs and its waivers. Every step refuses rather than guesses.
+                {{-- The step count is READ off the checklist this screen is
+                     about to render, not spelled out in prose. A hardcoded
+                     "thirteen" becomes a lie the day a step is added, and this
+                     header renders before the $state guard, so an unknown
+                     count is stated as unknown rather than guessed. --}}
+                @if ($state === null)
+                    The close sequence, its sign-offs and its waivers. Every step refuses rather than guesses.
+                @else
+                    The {{ count($state['items']) }}-step close sequence, its sign-offs and its waivers. Every step refuses rather than guesses.
+                @endif
             </p>
         </div>
 
@@ -33,8 +42,12 @@
                 </select>
             </label>
 
-            <button type="button" wire:click="exportPdf"
-                    class="self-end rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+            {{-- exportPdf() resolves the fiscal year with findOrFail(), so with
+                 no year selected this button used to render live and then throw
+                 a bare 404 instead of surfacing $errorMessage. --}}
+            <button type="button" wire:click="exportPdf" @disabled($fiscalYear === null)
+                    @if ($fiscalYear === null) title="Select a fiscal year first — there is no checklist to export." @endif
+                    class="self-end rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary disabled:opacity-50">
                 Checklist PDF
             </button>
             <button type="button" onclick="window.print()"
@@ -341,8 +354,13 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 rounded border border-border-primary bg-white p-3 no-print">
-            <button type="button" wire:click="closeYear"
-                    class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+            {{-- The screen already knows whether the year is closable (the
+                 Checklist card above says so). The control must agree with it
+                 rather than look live and then be refused by YE-1, and the
+                 disable states its own reason. --}}
+            <button type="button" wire:click="closeYear" @disabled(! $state['can_close'])
+                    @unless ($state['can_close']) title="YE-1: at least one mandatory step is still pending or unwaived. See the blockers and the checklist above." @endunless
+                    class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
                 Close fiscal year {{ $fiscalYear->code }}
             </button>
             <p class="text-xs text-charcoal/60">

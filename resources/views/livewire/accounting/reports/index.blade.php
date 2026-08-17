@@ -78,6 +78,14 @@
                     </select>
                 </label>
             @endif
+            {{-- resetFilters() existed on the component with nothing bound to it;
+                 this is that control, not new behaviour. --}}
+            <div class="flex flex-col justify-end">
+                <button type="button" wire:click="resetFilters"
+                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                    {{ __('opes.ui.reset') }}
+                </button>
+            </div>
         </x-slot:filters>
 
         <x-slot:tabs>
@@ -176,7 +184,10 @@
                     <td class="px-4 py-2.5 text-charcoal/80">{{ $entry->date->format('d/m/Y') }}</td>
                     <td class="px-4 py-2.5 text-charcoal/80">{{ $journalOptions->get($entry->journal_id)?->code ?? '—' }}</td>
                     <td class="px-4 py-2.5">
-                        <x-status-pill :status="$entry->status === 'reversed' ? 'red' : 'ok'" :label="ucfirst($entry->status)"/>
+                        {{-- A journal entry is draft|posted|reversed. `draft` carries no
+                             accounting reality yet, so it must NOT read as a settled green
+                             pill; `reversed` is the only red one. --}}
+                        <x-status-pill :status="match ($entry->status) { 'reversed' => 'red', 'draft' => 'amber', default => 'ok' }" :label="ucfirst($entry->status)"/>
                     </td>
                     <td class="px-4 py-2.5 text-right font-mono text-charcoal">{{ Money::of($entry->total_debit)->format(false) }}</td>
                 </tr>

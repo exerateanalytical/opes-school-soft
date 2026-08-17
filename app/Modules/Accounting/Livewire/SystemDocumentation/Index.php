@@ -16,6 +16,17 @@ use Livewire\Component;
  */
 final class Index extends Component
 {
+    /**
+     * How many hex characters of the sha256 the screen shows. ONE constant,
+     * because the generate() banner and the table column show a prefix of the
+     * SAME hash - two different lengths read to an operator as two different
+     * hashes.
+     */
+    public const HASH_PREFIX = 16;
+
+    /** Newest snapshots listed. The table states this cap on screen. */
+    public const LIST_LIMIT = 20;
+
     public string $message = '';
 
     public string $error = '';
@@ -30,7 +41,7 @@ final class Index extends Component
             $this->message = sprintf(
                 '%s — sha256 %s',
                 __('opes.system_doc_screen.generated'),
-                substr($snapshot->sha256, 0, 12),
+                substr($snapshot->sha256, 0, self::HASH_PREFIX),
             );
         } catch (\Throwable $e) {
             $this->error = $e->getMessage();
@@ -40,7 +51,10 @@ final class Index extends Component
     public function render(): View
     {
         return view('livewire.accounting.system-documentation.index', [
-            'snapshots' => SystemDocumentationSnapshot::query()->orderByDesc('id')->limit(20)->get(),
+            'snapshots' => SystemDocumentationSnapshot::query()->orderByDesc('id')->limit(self::LIST_LIMIT)->get(),
+            'snapshotTotal' => SystemDocumentationSnapshot::query()->count(),
+            'listLimit' => self::LIST_LIMIT,
+            'hashPrefix' => self::HASH_PREFIX,
         ]);
     }
 }

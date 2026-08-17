@@ -58,10 +58,10 @@
                         @foreach ($checks as $check)
                             <tr class="border-t border-charcoal/10">
                                 <td class="py-2 pr-4">{{ $check->label }}</td>
-                                <td class="py-2 pr-4 text-right tabular-nums">{{ $check->expected === null ? '—' : number_format($check->expected) }}</td>
-                                <td class="py-2 pr-4 text-right tabular-nums">{{ $check->actual === null ? '—' : number_format($check->actual) }}</td>
+                                <td class="py-2 pr-4 text-right tabular-nums">{{ $check->expected === null ? '—' : \App\Support\Money\Money::of((int) $check->expected)->format(false) }}</td>
+                                <td class="py-2 pr-4 text-right tabular-nums">{{ $check->actual === null ? '—' : \App\Support\Money\Money::of((int) $check->actual)->format(false) }}</td>
                                 <td class="py-2 pr-4 text-right tabular-nums {{ $check->difference !== 0 ? 'font-semibold text-red-700' : '' }}">
-                                    {{ number_format($check->difference) }}
+                                    {{ \App\Support\Money\Money::of((int) $check->difference)->format(false) }}
                                 </td>
                                 <td class="py-2">
                                     @if ($check->status === ControlStatus::Reconciled)
@@ -89,7 +89,7 @@
         @forelse ($suspense as $row)
             <div class="flex justify-between border-t border-charcoal/10 py-2 text-sm">
                 <span><span class="font-mono text-xs text-charcoal/60">{{ $row->code }}</span> {{ $row->name }}</span>
-                <span class="tabular-nums font-medium text-amber-700">{{ number_format($row->balance) }}</span>
+                <span class="tabular-nums font-medium text-amber-700">{{ \App\Support\Money\Money::of((int) $row->balance)->format(false) }}</span>
             </div>
         @empty
             <p class="text-sm text-emerald-700">&check; {{ __('opes.accounting.review.suspense_empty') }}</p>

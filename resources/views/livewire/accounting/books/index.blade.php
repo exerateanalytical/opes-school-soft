@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <header>
         <h1 class="text-xl font-semibold text-charcoal">{{ __('opes.books_screen.title') }}</h1>
-        <p class="mt-1 max-w-3xl text-sm text-slate-600">{{ __('opes.books_screen.intro') }}</p>
+        <p class="mt-1 max-w-3xl text-sm text-charcoal/70">{{ __('opes.books_screen.intro') }}</p>
     </header>
 
     @if ($message !== '')
@@ -15,7 +15,7 @@
     <section class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
         <div class="flex flex-wrap items-end gap-3">
             <label class="text-sm">
-                <span class="block text-slate-600">{{ __('opes.books_screen.fiscal_year') }}</span>
+                <span class="block text-charcoal/70">{{ __('opes.books_screen.fiscal_year') }}</span>
                 <select wire:model="fiscalYearId" class="mt-1 rounded border border-border-primary p-2">
                     @foreach ($fiscalYears as $year)
                         <option value="{{ $year->id }}">{{ $year->code }}</option>
@@ -24,7 +24,7 @@
             </label>
 
             <label class="text-sm">
-                <span class="block text-slate-600">{{ __('opes.books_screen.book_type') }}</span>
+                <span class="block text-charcoal/70">{{ __('opes.books_screen.book_type') }}</span>
                 <select wire:model="bookType" class="mt-1 rounded border border-border-primary p-2">
                     @foreach ($bookTypes as $type)
                         <option value="{{ $type->value }}">{{ $type->label() }}</option>
@@ -60,17 +60,24 @@
                     <td class="p-2 whitespace-nowrap">{{ $book->period_start?->format('Y-m-d') }} → {{ $book->period_end?->format('Y-m-d') }}</td>
                     <td class="p-2 whitespace-nowrap">{{ $book->generated_at?->format('Y-m-d H:i') }}</td>
                     <td class="p-2 text-right font-mono">{{ number_format($book->line_count) }}</td>
-                    <td class="p-2 text-right font-mono">{{ number_format($book->total_debit) }}</td>
-                    <td class="p-2 text-right font-mono">{{ number_format($book->total_credit) }}</td>
-                    <td class="p-2 font-mono text-xs">{{ substr($book->sha256, 0, 16) }}…</td>
+                    <td class="p-2 text-right font-mono">{{ \App\Support\Money\Money::of((int) $book->total_debit)->format(false) }}</td>
+                    <td class="p-2 text-right font-mono">{{ \App\Support\Money\Money::of((int) $book->total_credit)->format(false) }}</td>
+                    <td class="p-2 font-mono text-xs" title="{{ $book->sha256 }}">{{ substr($book->sha256, 0, $hashPrefix) }}…</td>
                     <td class="p-2">{{ $book->supersedes_book_id ? '#'.$book->supersedes_book_id : '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="p-4 text-center text-slate-500">{{ __('opes.books_screen.empty') }}</td>
+                    <td colspan="8" class="p-4 text-center text-charcoal/60">{{ __('opes.books_screen.empty') }}</td>
                 </tr>
             @endforelse
             </tbody>
         </table>
     </section>
+
+    {{-- A statutory register must never look shorter than it is. --}}
+    @if ($bookTotal > $listLimit)
+        <p class="text-xs text-charcoal/60">
+            {{ __('opes.books_screen.showing', ['shown' => $listLimit, 'total' => $bookTotal]) }}
+        </p>
+    @endif
 </div>

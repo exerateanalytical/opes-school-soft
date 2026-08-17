@@ -204,10 +204,18 @@ final class Index extends Component
             // open fiscal year - AccountingPeriod (the calendar-month grain)
             // is not this pass's model to query, and the KPI label says
             // "fiscal year" rather than overclaiming month-level precision.
-            'entriesThisFiscalYear' => $currentFiscalYear === null ? 0 : JournalEntry::query()
+            //
+            // NULL, not 0, when no year is open: "no year is open" and "the
+            // open year has no posted entries" are different facts, and the
+            // KPI card renders null as an em dash rather than a confident
+            // zero (09-ui §3.3). The reason is named in the card's sub-line.
+            'entriesThisFiscalYear' => $currentFiscalYear === null ? null : JournalEntry::query()
                 ->where('fiscal_year_id', $currentFiscalYear->id)
                 ->postedLedger()
                 ->count(),
+            'entriesYearReason' => $currentFiscalYear === null
+                ? __('opes.ledger_screen.kpi_no_open_year')
+                : null,
             'unpostedDrafts' => JournalEntry::query()->where('status', JournalEntry::STATUS_DRAFT)->count(),
             'canReverse' => Gate::allows(Permission::LedgerPost->value),
         ]);

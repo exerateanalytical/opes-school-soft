@@ -47,9 +47,19 @@
             </select>
         </label>
 
+        @php
+            // A disabled control must say WHY it is disabled, and when two
+            // reasons can apply at once the operator must be able to tell them
+            // apart ("no permission" is not the same as "nothing imported").
+            $whyNoPost = __('opes.reconciliation_screen.why_no_post');
+            $whyNoStatement = __('opes.reconciliation_screen.why_no_statement');
+            $whyAutoMatch = ! $canPost ? $whyNoPost : ($statement === null ? $whyNoStatement : null);
+        @endphp
+
         <div class="mt-4 flex flex-wrap items-center gap-2">
             @if ($session === null)
                 <button type="button" wire:click="openSession" @disabled(! $canPost)
+                        @if (! $canPost) title="{{ $whyNoPost }}" @endif
                         class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">
                     Open reconciliation
                 </button>
@@ -59,11 +69,13 @@
                 </span>
 
                 @if ($session->isDraft())
-                    <button type="button" wire:click="autoMatch" @disabled(! $canPost || $statement === null)
+                    <button type="button" wire:click="autoMatch" @disabled($whyAutoMatch !== null)
+                            @if ($whyAutoMatch !== null) title="{{ $whyAutoMatch }}" @endif
                             class="rounded border border-primary px-3 py-1.5 text-sm font-semibold text-primary disabled:opacity-50">
                         Auto-match
                     </button>
                     <button type="button" wire:click="closeSession" @disabled(! $canPost)
+                            @if (! $canPost) title="{{ $whyNoPost }}" @endif
                             class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">
                         Complete reconciliation
                     </button>
@@ -76,6 +88,7 @@
             @endif
 
             <button type="button" wire:click="toggleImportForm" @disabled(! $canPost)
+                    @if (! $canPost) title="{{ $whyNoPost }}" @endif
                     class="rounded border border-border-primary px-3 py-1.5 text-sm text-charcoal disabled:opacity-50">
                 {{ $showImportForm ? __('opes.reconciliation_screen.cancel_import') : __('opes.reconciliation_screen.import_statement') }}
             </button>
@@ -234,8 +247,16 @@
 
     @if ($session?->isDraft())
         <div class="flex flex-wrap items-center gap-3">
+            @php
+                $whyMatch = ! $canPost
+                    ? __('opes.reconciliation_screen.why_no_post')
+                    : (($selectedStatementLines === [] || $selectedLedgerLines === [])
+                        ? __('opes.reconciliation_screen.why_no_selection')
+                        : null);
+            @endphp
             <button type="button" wire:click="matchSelected"
-                    @disabled(! $canPost || $selectedStatementLines === [] || $selectedLedgerLines === [])
+                    @disabled($whyMatch !== null)
+                    @if ($whyMatch !== null) title="{{ $whyMatch }}" @endif
                     class="rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">
                 Match {{ count($selectedStatementLines) }} relevé line(s) to {{ count($selectedLedgerLines) }} ledger line(s)
             </button>

@@ -32,7 +32,7 @@
     </x-slot:actions>
 
     <x-slot:kpis>
-        <x-kpi-card :label="__('opes.ledger_screen.kpi_entries_this_year')" :value="$entriesThisFiscalYear" icon-bg="bg-primary">
+        <x-kpi-card :label="__('opes.ledger_screen.kpi_entries_this_year')" :value="$entriesThisFiscalYear" :sub="$entriesYearReason" icon-bg="bg-primary">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path stroke-linecap="round" d="M3 9h18M8 4v3M16 4v3"/></svg>
             </x-slot:icon>
@@ -78,6 +78,14 @@
             <input id="je-filter-date-to" type="date" wire:model.live="dateTo"
                    class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal"/>
         </label>
+        {{-- resetFilters() existed on the component with nothing bound to it;
+             this is that control, not new behaviour. --}}
+        <div class="flex flex-col justify-end">
+            <button type="button" wire:click="resetFilters"
+                    class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                {{ __('opes.ui.reset') }}
+            </button>
+        </div>
     </x-slot:filters>
 
     <x-slot:head>
@@ -102,7 +110,7 @@
             <td class="px-4 py-2.5 text-right font-mono text-charcoal">{{ Money::of($entry->total_debit)->format(false) }}</td>
             <td class="px-4 py-2.5 text-right font-mono text-charcoal">{{ Money::of($entry->total_credit)->format(false) }}</td>
             <td class="px-4 py-2.5">
-                <x-status-pill :status="$statusTone[$entry->status] ?? 'ok'" :label="__('opes.ledger_screen.je_status_'.$entry->status)"/>
+                <x-status-pill :status="$statusTone[$entry->status] ?? 'amber'" :label="__('opes.ledger_screen.je_status_'.$entry->status)"/>
             </td>
             <td class="px-4 py-2.5 text-right">
                 @if ($entry->status === \App\Modules\Accounting\Models\JournalEntry::STATUS_DRAFT)
@@ -152,7 +160,7 @@
                         <div class="font-mono text-sm font-medium text-charcoal">{{ $entry->piece_no ?? __('opes.ledger_screen.je_piece_draft_placeholder') }}</div>
                         <div class="truncate text-sm text-charcoal/80">{{ $entry->label }}</div>
                     </div>
-                    <x-status-pill :status="$statusTone[$entry->status] ?? 'ok'" :label="__('opes.ledger_screen.je_status_'.$entry->status)"/>
+                    <x-status-pill :status="$statusTone[$entry->status] ?? 'amber'" :label="__('opes.ledger_screen.je_status_'.$entry->status)"/>
                 </div>
                 <dl class="mt-2 space-y-1 text-sm text-charcoal/80">
                     <div class="flex justify-between">

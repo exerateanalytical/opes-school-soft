@@ -1,7 +1,12 @@
 @php
     use App\Support\Money\Money;
 
-    $partnerTypeOptions = ['student', 'guardian', 'supplier', 'staff', 'organisation'];
+    // The five §8.2 counterparty kinds, read off the PartnerType enum rather
+    // than transcribed. This is the fallback used when an account leaves
+    // `allowed_partner_types` null, which ImportOpeningAuxiliaryBalances reads
+    // as "no restriction" - so the fallback must be exactly the enum, and a new
+    // case must not need a second edit here to show up.
+    $partnerTypeOptions = array_column(App\Modules\Accounting\Domain\PartnerType::cases(), 'value');
 @endphp
 
 <div class="min-w-0 space-y-4">
