@@ -214,6 +214,10 @@
                     @else
                         <span class="text-charcoal/40">Portal linked</span>
                     @endif
+                    <button type="button" wire:click="toggleStaffPhotoForm({{ $row->id }})"
+                            class="ml-2 rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal/80 hover:bg-sand/50">
+                        {{ $row->photo_path === null ? __('opes.staff_photo.add') : __('opes.staff_photo.change') }}
+                    </button>
                 </td>
             @elseif ($tab === 'contracts')
                 <td class="px-4 py-2.5 font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</td>
@@ -274,6 +278,10 @@
                             Enable portal access
                         </button>
                     @endif
+                    <button type="button" wire:click="toggleStaffPhotoForm({{ $row->id }})"
+                            class="mt-2 rounded border border-border-primary px-2 py-1 text-xs font-medium text-charcoal/80 hover:bg-sand/50">
+                        {{ $row->photo_path === null ? __('opes.staff_photo.add') : __('opes.staff_photo.change') }}
+                    </button>
                 @elseif ($tab === 'contracts')
                     <div class="flex items-center justify-between gap-2">
                         <p class="font-medium text-charcoal">{{ trim($row->first_name.' '.$row->last_name) }}</p>
@@ -513,6 +521,50 @@
                             Grant Access
                         </button>
                     @endif
+                </section>
+            @endif
+
+            @if ($photoStaffId !== null)
+                <section aria-label="{{ __('opes.staff_photo.panel_title') }}" class="rounded border border-border-primary bg-white p-3">
+                    <h3 class="mb-2 text-sm font-semibold text-charcoal">{{ __('opes.staff_photo.panel_title') }}</h3>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-[6rem_minmax(0,1fr)]">
+                        <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded border border-border-primary bg-sand/40">
+                            {{-- isPreviewable(): temporaryUrl() throws on a file Livewire cannot preview, so a mis-picked .txt must not blow up the render before validation gets to say so. --}}
+                            @if ($photoUpload !== null && $photoUpload->isPreviewable())
+                                <img src="{{ $photoUpload->temporaryUrl() }}" alt="{{ __('opes.staff_photo.preview_alt') }}" class="h-full w-full object-cover"/>
+                            @elseif ($photoCurrentPath !== '')
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photoCurrentPath) }}"
+                                     alt="{{ __('opes.staff_photo.preview_alt') }}" class="h-full w-full object-cover"/>
+                            @else
+                                <span class="px-1 text-center text-xs text-charcoal/50">{{ __('opes.staff_photo.none') }}</span>
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+                                {{ __('opes.staff_photo.choose') }}
+                                <input type="file" accept="image/*" wire:model="photoUpload"
+                                       class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+                            </label>
+                            @error('photoUpload')<span class="block text-xs text-heritage-red">{{ $message }}</span>@enderror
+                            <p class="text-xs text-charcoal/60">{{ __('opes.staff_photo.hint', ['kb' => \App\Support\Storage\StoredImage::MAX_KILOBYTES, 'px' => \App\Support\Storage\StoredImage::MAX_DIMENSION]) }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <button type="button" wire:click="saveStaffPhoto"
+                                class="rounded bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90">
+                            {{ __('opes.staff_photo.save') }}
+                        </button>
+                        @if ($photoCurrentPath !== '')
+                            <button type="button" wire:click="removeStaffPhoto"
+                                    wire:confirm="{{ __('opes.staff_photo.remove_confirm') }}"
+                                    class="rounded border border-heritage-red px-3 py-2 text-sm font-medium text-heritage-red hover:bg-heritage-red/10">
+                                {{ __('opes.staff_photo.remove') }}
+                            </button>
+                        @endif
+                    </div>
                 </section>
             @endif
 
