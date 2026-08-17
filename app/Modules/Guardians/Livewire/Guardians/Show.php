@@ -7,6 +7,7 @@ namespace App\Modules\Guardians\Livewire\Guardians;
 use App\Modules\Guardians\Actions\IssuePortalInvitation;
 use App\Modules\Guardians\Actions\RevokePortalInvitation;
 use App\Modules\Guardians\Actions\SetGuardianAuthorization;
+use App\Modules\Guardians\Actions\SetGuardianPhoto;
 use App\Modules\Guardians\Actions\UnlinkGuardian;
 use App\Modules\Guardians\Domain\PortalSubjectType;
 use App\Modules\Guardians\Models\Guardian;
@@ -16,6 +17,7 @@ use App\Modules\Guardians\Models\PortalInvitation;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Identity\Domain\Permission;
 use App\Support\Audit\Actor;
+use App\Support\Storage\StoredImage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +25,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * Guardian Profile, docs/specs/07-students.md 11.3.
@@ -66,6 +70,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 final class Show extends Component
 {
+    use WithFileUploads;
+
     private const TAB_LIST_LIMIT = 50;
 
     public Guardian $guardian;
@@ -114,6 +120,9 @@ final class Show extends Component
     public bool $authIsFeePayer = false;
 
     public string $authorizationReason = '';
+
+    // ── Photograph ───────────────────────────────────────────────────────
+    public ?TemporaryUploadedFile $photoUpload = null;
 
     public function mount(Guardian $guardian): void
     {
@@ -413,6 +422,73 @@ final class Show extends Component
         $this->authorizationLinkId = null;
         $this->authorizationReason = '';
         session()->flash('status', 'Authorization updated. The change takes effect tomorrow, unless the link had not started yet.');
+    }
+
+    // ── Photograph ───────────────────────────────────────────────────────
+
+    /**
+     * `image` plus an explicit mimes list plus a dimension cap, all three -
+     * the same reasoning as DocumentProfile: `image` alone admits SVG (a
+     * script-capable document served from this app's own origin), the mimes
+     * list alone admits a 12 000 px scan, and the dimension cap alone admits
+     * a renamed executable.
+     *
+     * @return array<string, mixed>
+     */
+    private function photoRules(): array
+    {
+        return [
+            'photoUpload' => [
+                'required',
+                'image',
+                'mimes:'.implode(',', StoredImage::ALLOWED_EXTENSIONS),
+                'max:'.StoredImage::MAX_KILOBYTES,
+                'dimensions:max_width='.StoredImage::MAX_DIMENSION.',max_height='.StoredImage::MAX_DIMENSION,
+            ],
+        ];
+    }
+
+    public function savePhoto(SetGuardianPhoto $setGuardianPhoto): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        $this->validate($this->photoRules(), [
+            'photoUpload.required' => (string) __('opes.guardians_screen.photo_required'),
+            'photoUpload.image' => (string) __('opes.school_identity.upload_not_an_image'),
+            'photoUpload.mimes' => (string) __('opes.school_identity.upload_wrong_type', [
+                'types' => strtoupper(implode(', ', StoredImage::ALLOWED_EXTENSIONS)),
+            ]),
+            'photoUpload.max' => (string) __('opes.school_identity.upload_too_large', [
+                'kb' => StoredImage::MAX_KILOBYTES,
+            ]),
+            'photoUpload.dimensions' => (string) __('opes.school_identity.upload_too_big', [
+                'px' => StoredImage::MAX_DIMENSION,
+            ]),
+        ]);
+
+        /** @var TemporaryUploadedFile $upload */
+        $upload = $this->photoUpload;
+
+        $setGuardianPhoto->handle($this->guardian, $upload, $this->actor());
+
+        // Released immediately: a TemporaryUploadedFile left on a public
+        // property is re-serialised into every subsequent request's payload.
+        $upload->delete();
+        $this->photoUpload = null;
+
+        session()->flash('status', (string) __('opes.guardians_screen.photo_saved'));
+    }
+
+    public function removePhoto(SetGuardianPhoto $setGuardianPhoto): void
+    {
+        Gate::authorize(Permission::GuardiansManage);
+
+        $this->photoUpload?->delete();
+        $this->photoUpload = null;
+
+        $setGuardianPhoto->handle($this->guardian, null, $this->actor());
+
+        session()->flash('status', (string) __('opes.guardians_screen.photo_removed'));
     }
 
     private function actor(): Actor

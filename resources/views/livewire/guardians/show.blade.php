@@ -81,12 +81,58 @@
         {{-- ── Left: identity + contact ────────────────────────────────── --}}
         <section class="space-y-4">
             <div class="rounded border border-border-primary bg-white p-4 text-center">
-                {{-- Initials, not the mockup's portrait: photo_path is a
-                     private-disk path (7.1) with no policy-checked serving
-                     controller in Phase 2. --}}
-                <span class="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-chrome text-2xl font-semibold uppercase text-white">
-                    {{ $initials }}
-                </span>
+                {{-- The portrait, read through the policy-checked
+                     guardians.photo endpoint - photo_path is a private-disk
+                     path (7.1). Initials remain the fallback: a guardian
+                     without a photograph, and a row whose file the disk no
+                     longer has, both land here. --}}
+                @if ($photoUpload !== null)
+                    <img src="{{ $photoUpload->temporaryUrl() }}" alt=""
+                         class="mx-auto h-24 w-24 rounded-full object-cover">
+                @elseif ($guardian->photo_path !== null)
+                    <img src="{{ route('guardians.photo', $guardian) }}"
+                         alt="{{ $guardian->fullName() }}"
+                         class="mx-auto h-24 w-24 rounded-full object-cover">
+                @else
+                    <span class="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-chrome text-2xl font-semibold uppercase text-white">
+                        {{ $initials }}
+                    </span>
+                @endif
+
+                @if ($canManageGuardians)
+                    <div class="mt-3 text-left">
+                        <label for="guardian-photo" class="block text-xs font-semibold uppercase tracking-wide text-charcoal/60">
+                            {{ __('opes.guardians_screen.photo_heading') }}
+                        </label>
+                        <p class="mt-1 text-xs text-charcoal/55">
+                            {{ __('opes.guardians_screen.photo_hint') }}
+                        </p>
+                        <input id="guardian-photo" type="file" wire:model="photoUpload"
+                               accept="image/png,image/jpeg,image/webp"
+                               class="mt-2 block w-full text-xs text-charcoal/80 file:mr-2 file:rounded file:border file:border-border-primary file:bg-chrome/5 file:px-2 file:py-1 file:text-xs file:text-charcoal">
+
+                        @error('photoUpload')
+                            <p class="mt-1 text-xs text-heritage-red">{{ $message }}</p>
+                        @enderror
+
+                        <div wire:loading wire:target="photoUpload" class="mt-1 text-xs text-charcoal/55">
+                            {{ __('opes.guardians_screen.photo_uploading') }}
+                        </div>
+
+                        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <button type="button" wire:click="savePhoto"
+                                    class="rounded bg-primary px-3 py-1.5 text-xs font-semibold text-white">
+                                {{ __('opes.guardians_screen.photo_save') }}
+                            </button>
+                            @if ($guardian->photo_path !== null)
+                                <button type="button" wire:click="removePhoto"
+                                        class="rounded border border-border-primary px-3 py-1.5 text-xs font-semibold text-charcoal">
+                                    {{ __('opes.guardians_screen.photo_remove') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
                 <div class="mt-3 flex justify-center">
                     <x-status-pill :status="$guardian->isActive() ? 'ok' : 'red'"
                                     :label="$guardian->isActive()

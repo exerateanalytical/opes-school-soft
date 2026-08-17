@@ -241,6 +241,15 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('can:students.view')->name('guardians.show');
 
     /*
+     * The guardian's photograph lives on the PRIVATE default disk, so it has
+     * no URL of its own; this is the policy-checked way to read it, gated the
+     * same as the profile that draws it.
+     */
+    Route::get('/guardians/{guardian}/photo', \App\Modules\Guardians\Http\Controllers\GuardianPhotoController::class)
+        ->whereNumber('guardian')
+        ->middleware('can:students.view')->name('guardians.photo');
+
+    /*
      * 07-students §6.2: the registrar's landing page is the application
      * QUEUE, not the intake wizard. /admissions used to drop straight into
      * the wizard, so a submitted application could be created but never
