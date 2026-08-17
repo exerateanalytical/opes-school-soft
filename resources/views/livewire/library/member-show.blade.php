@@ -1,4 +1,6 @@
 @php
+    use App\Support\Money\Money;
+
     $memberTone = [
         'active' => 'ok',
         'suspended' => 'amber',
@@ -57,7 +59,7 @@
                 </div>
                 <div>
                     <dt class="text-xs font-medium text-charcoal/60">Outstanding fines</dt>
-                    <dd class="text-sm font-semibold text-charcoal">{{ number_format($outstandingFinesTotal / 100, 2) }}</dd>
+                    <dd class="text-sm font-semibold text-charcoal">{{ Money::of((int) $outstandingFinesTotal)->format(false) }}</dd>
                 </div>
             </dl>
         </div>
@@ -165,8 +167,8 @@
                             <td class="px-2 py-2 font-medium text-charcoal">{{ $row->fine_no }}</td>
                             <td class="px-2 py-2 capitalize text-charcoal/80">{{ $row->fine_type }}</td>
                             <td class="px-2 py-2 text-charcoal/80">{{ $row->assessed_on }}</td>
-                            <td class="px-2 py-2 text-right tabular-nums">{{ number_format($row->amount / 100, 2) }}</td>
-                            <td class="px-2 py-2 text-right tabular-nums">{{ number_format($row->waived_amount / 100, 2) }}</td>
+                            <td class="px-2 py-2 text-right tabular-nums">{{ Money::of((int) $row->amount)->format(false) }}</td>
+                            <td class="px-2 py-2 text-right tabular-nums">{{ Money::of((int) $row->waived_amount)->format(false) }}</td>
                             <td class="px-2 py-2">
                                 <x-status-pill :status="$fineTone[$row->status] ?? 'ok'" :label="$label($row->status)"/>
                             </td>

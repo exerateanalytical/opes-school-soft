@@ -78,6 +78,14 @@ final class Index extends Component
 
     public string $claimAmount = '';
 
+    /**
+     * RecordClaim has always taken a ClaimStatus and documents Draft as the
+     * way to hold a claim back, but the form never passed one - so `draft`
+     * was unreachable, and both the Draft status filter and the rail's Draft
+     * counter were permanently empty.
+     */
+    public string $claimStatus = 'submitted';
+
     // ── Save policy form ────────────────────────────────────────────────
     public bool $showPolicyForm = false;
 
@@ -242,7 +250,9 @@ final class Index extends Component
             'claimIncidentDate' => ['required', 'date'],
             'claimDescription' => ['required', 'string', 'min:1'],
             'claimAmount' => ['required', 'integer', 'min:1'],
+            'claimStatus' => ['required', 'string', 'in:draft,submitted'],
         ], [], [
+            'claimStatus' => 'status',
             'claimPolicyId' => 'policy',
             'claimStudentInsuranceId' => 'certificate',
             'claimIncidentDate' => 'incident date',
@@ -258,6 +268,7 @@ final class Index extends Component
                 (int) $this->claimAmount,
                 $this->actor(),
                 $this->claimStudentInsuranceId === '' ? null : (int) $this->claimStudentInsuranceId,
+                ClaimStatus::from($this->claimStatus),
             );
         } catch (ValidationException $e) {
             $this->addError('claimDescription', $e->getMessage());
@@ -271,7 +282,7 @@ final class Index extends Component
 
         $this->reset([
             'showClaimForm', 'claimPolicyId', 'claimStudentInsuranceId',
-            'claimIncidentDate', 'claimDescription', 'claimAmount',
+            'claimIncidentDate', 'claimDescription', 'claimAmount', 'claimStatus',
         ]);
         $this->tab = 'claims';
         $this->resetPage();
@@ -599,7 +610,11 @@ final class Index extends Component
                         ->where('si.status', 'active')
                         ->where('p.cover_type', 'student')
                         ->where('p.status', 'active')
-                        ->whereColumn('p.academic_year_id', 'e.academic_year_id');
+                        ->whereColumn('p.academic_year_id', 'e.academic_year_id')
+                        // The uninsured TABLE honours the policy filter; this
+                        // copy did not, so the KPI contradicted the rows
+                        // underneath it on any policy-filtered view.
+                        ->when($this->policy !== '', fn ($q) => $q->where('p.id', (int) $this->policy));
                 })
                 ->count(),
             'open_claims' => (int) DB::table('insurance_claims')

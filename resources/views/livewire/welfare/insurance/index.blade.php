@@ -132,6 +132,18 @@
                     @enderror
                 </label>
 
+                <label for="claim-form-status" class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.claim_status') }}</span>
+                    <select id="claim-form-status" wire:model="claimStatus"
+                            class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                        <option value="submitted">{{ __('opes.welfare_detail.claim_status_submitted') }}</option>
+                        <option value="draft">{{ __('opes.welfare_detail.claim_status_draft') }}</option>
+                    </select>
+                    @error('claimStatus')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
                 <label for="claim-form-description" class="flex flex-col gap-1 sm:col-span-2">
                     <span class="text-xs font-medium text-charcoal/70">Description</span>
                     <textarea id="claim-form-description" wire:model="claimDescription" rows="3"

@@ -128,7 +128,16 @@
                         @enderror
                     </label>
 
-                    <label for="medical-refer-reason" class="flex flex-col gap-1">
+                    <label for="medical-refer-on" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.referred_on') }}</span>
+                        <input id="medical-refer-on" type="date" wire:model="referOn"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('referOn')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="medical-refer-reason" class="flex flex-col gap-1 sm:col-span-2">
                         <span class="text-xs font-medium text-charcoal/70">Clinical reason</span>
                         <textarea id="medical-refer-reason" rows="2" wire:model="referReason"
                                   class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"></textarea>
@@ -155,6 +164,15 @@
             <h2 class="text-base font-semibold text-charcoal">Close Referral #{{ $closeReferralId }}</h2>
 
             <form wire:submit="confirmClose" class="mt-4 space-y-4">
+                <label for="medical-close-on" class="flex flex-col gap-1 sm:max-w-xs">
+                    <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.followed_up_on') }}</span>
+                    <input id="medical-close-on" type="date" wire:model="closeFollowedUpOn"
+                           class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                    @error('closeFollowedUpOn')
+                        <span class="text-xs text-heritage-red">{{ $message }}</span>
+                    @enderror
+                </label>
+
                 <label for="medical-close-notes" class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-charcoal/70">Follow-up notes (optional)</span>
                     <textarea id="medical-close-notes" rows="2" wire:model="closeNotes"

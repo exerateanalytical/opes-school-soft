@@ -105,6 +105,16 @@
                         @enderror
                     </label>
 
+                    <label for="visitor-form-gate-pass" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.gate_pass_optional') }}</span>
+                        <input id="visitor-form-gate-pass" type="text" wire:model="formGatePass"
+                               placeholder="e.g. GP-2026-001"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('formGatePass')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
                     <label for="visitor-form-checked-in" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Checked in at</span>
                         <input id="visitor-form-checked-in" type="datetime-local" wire:model="formCheckedInAt"
@@ -226,10 +236,21 @@
                 </td>
                 <td class="px-4 py-2.5 text-right">
                     @if ($row->checked_out_at === null)
-                        <button type="button" wire:click="checkOut({{ $row->id }})"
-                                class="text-sm font-medium text-primary hover:underline">
-                            Check out
-                        </button>
+                        <div class="flex items-center justify-end gap-2">
+                            <label for="visitor-checkout-pass-{{ $row->id }}" class="sr-only">
+                                {{ __('opes.welfare_detail.gate_pass_optional') }}
+                            </label>
+                            <input id="visitor-checkout-pass-{{ $row->id }}" type="text"
+                                   wire:model="checkoutGatePass.{{ $row->id }}"
+                                   placeholder="{{ __('opes.welfare_detail.gate_pass_short') }}"
+                                   class="w-28 rounded border border-border-primary bg-white px-2 py-1 text-xs text-charcoal focus:border-primary/50"/>
+                            <button type="button" wire:click="checkOut({{ $row->id }})"
+                                    class="text-sm font-medium text-primary hover:underline">
+                                Check out
+                            </button>
+                        </div>
+                    @else
+                        <span class="font-mono text-xs text-charcoal/60">{{ $row->gate_pass_no ?? '—' }}</span>
                     @endif
                 </td>
             </tr>
@@ -248,10 +269,19 @@
                         {{ $row->checked_in_at->format('Y-m-d H:i') }} · Badge {{ $row->badge_no }} · {{ $hosts[$row->id] ?? $hostTypeLabel[$row->host_type->value] }}
                     </p>
                     @if ($row->checked_out_at === null)
-                        <button type="button" wire:click="checkOut({{ $row->id }})"
-                                class="mt-2 text-sm font-medium text-primary hover:underline">
-                            Check out
-                        </button>
+                        <div class="mt-2 flex items-center gap-2">
+                            <label for="visitor-card-pass-{{ $row->id }}" class="sr-only">
+                                {{ __('opes.welfare_detail.gate_pass_optional') }}
+                            </label>
+                            <input id="visitor-card-pass-{{ $row->id }}" type="text"
+                                   wire:model="checkoutGatePass.{{ $row->id }}"
+                                   placeholder="{{ __('opes.welfare_detail.gate_pass_short') }}"
+                                   class="w-28 rounded border border-border-primary bg-white px-2 py-1 text-xs text-charcoal focus:border-primary/50"/>
+                            <button type="button" wire:click="checkOut({{ $row->id }})"
+                                    class="text-sm font-medium text-primary hover:underline">
+                                Check out
+                            </button>
+                        </div>
                     @endif
                 </article>
             @endforeach

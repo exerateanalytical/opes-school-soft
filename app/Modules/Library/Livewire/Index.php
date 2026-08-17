@@ -54,6 +54,23 @@ final class Index extends Component
 
     public int $perPage = 25;
 
+    // ── Return book panel ───────────────────────────────────────────────
+    // ReturnBook accepts a condition and a return date; the desk used to fire
+    // a bare one-click return, so `damaged` was unreachable and a book handed
+    // in on Friday but keyed on Monday was dated wrong.
+    public ?int $returningIssueId = null;
+
+    public string $returnCondition = 'good';
+
+    public string $returnedOn = '';
+
+    // ── Waive fine panel ────────────────────────────────────────────────
+    public ?int $waivingFineId = null;
+
+    public string $waiveReason = '';
+
+    public string $waivedOn = '';
+
     // ── Issue book form ─────────────────────────────────────────────────
     public bool $showIssueForm = false;
 
@@ -341,14 +358,44 @@ final class Index extends Component
         session()->flash('status', 'Copies added.');
     }
 
-    public function returnIssue(int $issueId, ReturnBook $returnBook): void
+    public function startReturn(int $issueId): void
     {
         Gate::authorize(LibraryPermission::CIRCULATE);
 
+        $this->returningIssueId = $issueId;
+        $this->returnCondition = 'good';
+        $this->returnedOn = Carbon::now()->toDateString();
+    }
+
+    public function cancelReturn(): void
+    {
+        $this->returningIssueId = null;
+    }
+
+    public function returnIssue(ReturnBook $returnBook): void
+    {
+        Gate::authorize(LibraryPermission::CIRCULATE);
+
+        if ($this->returningIssueId === null) {
+            return;
+        }
+
+        $this->validate([
+            'returnCondition' => ['required', 'string', 'in:good,damaged'],
+            'returnedOn' => ['required', 'date'],
+        ], [], [
+            'returnCondition' => 'condition',
+            'returnedOn' => 'return date',
+        ]);
+
         try {
             $returnBook->handle([
-                'issue_id' => $issueId,
-                'returned_on' => Carbon::now()->toDateString(),
+                'issue_id' => $this->returningIssueId,
+                'returned_on' => $this->returnedOn,
+                // ReturnBook does its own ReturnCondition::from(), so this
+                // stays a string. `lost` is deliberately not offered: the
+                // Action refuses it and routes loss through MarkIssueLost.
+                'condition' => $this->returnCondition,
             ], $this->actor());
         } catch (DomainException $e) {
             $this->addError('circulation', $e->getMessage());
@@ -356,6 +403,7 @@ final class Index extends Component
             return;
         }
 
+        $this->returningIssueId = null;
         session()->flash('status', 'Book returned.');
     }
 
@@ -377,20 +425,51 @@ final class Index extends Component
         session()->flash('status', 'Loan renewed.');
     }
 
-    public function waiveFine(int $fineId, WaiveFine $waiveFine): void
+    public function startWaive(int $fineId): void
     {
         Gate::authorize(LibraryPermission::WAIVE_FINE);
 
+        $this->waivingFineId = $fineId;
+        $this->waiveReason = '';
+        $this->waivedOn = Carbon::now()->toDateString();
+    }
+
+    public function cancelWaive(): void
+    {
+        $this->waivingFineId = null;
+    }
+
+    public function waiveFine(WaiveFine $waiveFine): void
+    {
+        Gate::authorize(LibraryPermission::WAIVE_FINE);
+
+        if ($this->waivingFineId === null) {
+            return;
+        }
+
+        // §10.6 requires a reason on every waiver. This used to be a canned
+        // literal, which defeated the audit control it exists to provide.
+        $this->validate([
+            'waiveReason' => ['required', 'string', 'min:3', 'max:255'],
+            'waivedOn' => ['required', 'date'],
+        ], [], [
+            'waiveReason' => 'reason',
+            'waivedOn' => 'waiver date',
+        ]);
+
         try {
             $waiveFine->handle([
-                'fine_id' => $fineId,
-                'reason' => 'Waived from the library screen',
+                'fine_id' => $this->waivingFineId,
+                'reason' => $this->waiveReason,
+                'waived_on' => $this->waivedOn,
             ], $this->actor());
         } catch (DomainException $e) {
             $this->addError('fines', $e->getMessage());
 
             return;
         }
+
+        $this->waivingFineId = null;
 
         session()->flash('status', 'Fine waived.');
     }

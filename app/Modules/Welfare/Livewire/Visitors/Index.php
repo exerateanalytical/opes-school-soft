@@ -71,6 +71,21 @@ final class Index extends Component
 
     public string $formCheckedInAt = '';
 
+    /**
+     * Gate pass number issued with the badge at the desk. CheckInVisitor has
+     * always accepted it; the form simply never asked for it.
+     */
+    public string $formGatePass = '';
+
+    /**
+     * Gate pass numbers captured on the way OUT, keyed by visitor log id.
+     * CheckOutVisitor writes one when supplied and keeps the check-in value
+     * otherwise, so a pass issued at exit is recordable too.
+     *
+     * @var array<int|string, string>
+     */
+    public array $checkoutGatePass = [];
+
     public function mount(): void
     {
         Gate::authorize(VisitorPermission::MANAGE);
@@ -158,6 +173,7 @@ final class Index extends Component
                 $this->formBadge,
                 $this->formCheckedInAt === '' ? Carbon::now() : Carbon::parse($this->formCheckedInAt),
                 $this->actor(),
+                $this->formGatePass === '' ? null : $this->formGatePass,
             );
         } catch (ValidationException $e) {
             $this->addError('formName', $e->getMessage());
@@ -172,6 +188,7 @@ final class Index extends Component
         $this->reset([
             'showForm', 'formName', 'formPhone', 'formIdRef', 'formPurpose',
             'formHostType', 'formHostRef', 'formBadge', 'formCheckedInAt',
+            'formGatePass',
         ]);
         $this->tab = 'onsite';
         $this->resetPage();
@@ -182,13 +199,24 @@ final class Index extends Component
     {
         Gate::authorize(VisitorPermission::MANAGE);
 
+        // A pass issued at the barrier on the way out overrides the one taken
+        // at check-in; CheckOutVisitor keeps the existing value when null.
+        $gatePass = trim($this->checkoutGatePass[$visitorLogId] ?? '');
+
         try {
-            $checkOut->handle($visitorLogId, Carbon::now(), $this->actor());
+            $checkOut->handle(
+                $visitorLogId,
+                Carbon::now(),
+                $this->actor(),
+                $gatePass === '' ? null : $gatePass,
+            );
         } catch (DomainException $e) {
             $this->addError('checkout', $e->getMessage());
 
             return;
         }
+
+        unset($this->checkoutGatePass[$visitorLogId]);
 
         session()->flash('status', 'Visitor checked out; the badge is free again.');
     }
