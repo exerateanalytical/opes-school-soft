@@ -7,6 +7,7 @@ namespace App\Modules\Inventory\Livewire;
 use App\Modules\Inventory\Actions\AdjustStock;
 use App\Modules\Inventory\Actions\ApproveStockTake;
 use App\Modules\Inventory\Actions\ApproveStoreRequisition;
+use App\Modules\Inventory\Actions\CreateItem;
 use App\Modules\Inventory\Actions\CreateStoreRequisition;
 use App\Modules\Inventory\Actions\IssueStock;
 use App\Modules\Inventory\Actions\PostStockTakeVariance;
@@ -14,7 +15,9 @@ use App\Modules\Inventory\Actions\ReceiveStock;
 use App\Modules\Inventory\Actions\RecordStockTakeCounts;
 use App\Modules\Inventory\Actions\StartStockTake;
 use App\Modules\Inventory\Actions\TransferStock;
+use App\Modules\Inventory\Actions\UpdateItem;
 use App\Modules\Inventory\Domain\InventoryPermission;
+use App\Support\Storage\StoredImage;
 use DomainException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
@@ -24,6 +27,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * Inventory read screen at /inventory, gated `inventory.view`: KPI strip
@@ -40,6 +45,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 final class Index extends Component
 {
+    use WithFileUploads;
+
     /** Which table is showing: items | movements | requisitions. */
     #[Url]
     public string $tab = 'items';
@@ -60,6 +67,41 @@ final class Index extends Component
     public int $page = 1;
 
     public int $perPage = 25;
+
+    // ── Create/Edit Item form ───────────────────────────────────────────
+    public bool $showItemForm = false;
+
+    /** Null while creating; the row's id while editing it. */
+    public ?int $editingItemId = null;
+
+    public string $itemCode = '';
+
+    public string $itemName = '';
+
+    public string $itemBarcode = '';
+
+    public ?int $itemCategoryId = null;
+
+    public string $itemType = 'consumable';
+
+    public ?int $itemUnitOfMeasureId = null;
+
+    public bool $itemIsStockTracked = true;
+
+    public string $itemReorderLevel = '';
+
+    public string $itemReorderQuantity = '';
+
+    public string $itemSalePrice = '';
+
+    public string $itemStatus = 'active';
+
+    public string $itemDescription = '';
+
+    /** The stored, content-hashed path the item's picture is at (or ''). */
+    public string $itemImagePath = '';
+
+    public ?TemporaryUploadedFile $itemImageUpload = null;
 
     // ── Issue Stock form ────────────────────────────────────────────────
     public bool $showIssueForm = false;
@@ -191,6 +233,202 @@ final class Index extends Component
     public function updatedPerPage(): void
     {
         $this->resetPage();
+    }
+
+    /**
+     * The image slot's validation: `image` plus an explicit mimes list plus a
+     * dimension cap, all three - `image` alone admits SVG (script-capable,
+     * served from this app's own origin), the mimes list alone admits a
+     * 12 000 px scan, and the dimension cap alone admits a renamed
+     * executable. Same reasoning as the branding slots.
+     *
+     * @return array<string, mixed>
+     */
+    protected function rules(): array
+    {
+        return [
+            'itemImageUpload' => [
+                'nullable',
+                'image',
+                'mimes:'.implode(',', StoredImage::ALLOWED_EXTENSIONS),
+                'max:'.StoredImage::MAX_KILOBYTES,
+                'dimensions:max_width='.StoredImage::MAX_DIMENSION.',max_height='.StoredImage::MAX_DIMENSION,
+            ],
+        ];
+    }
+
+    public function toggleItemForm(): void
+    {
+        Gate::authorize(InventoryPermission::MANAGE);
+
+        if ($this->showItemForm) {
+            $this->closeItemForm();
+
+            return;
+        }
+
+        $this->resetItemForm();
+        $this->showItemForm = true;
+    }
+
+    public function editItem(int $itemId): void
+    {
+        Gate::authorize(InventoryPermission::MANAGE);
+
+        $row = DB::table('items')->where('id', $itemId)->first();
+
+        if ($row === null) {
+            return;
+        }
+
+        $this->resetItemForm();
+
+        $this->editingItemId = $itemId;
+        $this->itemCode = (string) $row->item_code;
+        $this->itemName = (string) $row->name;
+        $this->itemBarcode = (string) ($row->barcode ?? '');
+        $this->itemCategoryId = (int) $row->item_category_id;
+        $this->itemType = (string) $row->item_type;
+        $this->itemUnitOfMeasureId = (int) $row->unit_of_measure_id;
+        $this->itemIsStockTracked = (bool) $row->is_stock_tracked;
+        $this->itemReorderLevel = (string) $row->reorder_level;
+        $this->itemReorderQuantity = (string) $row->reorder_quantity;
+        $this->itemSalePrice = $row->standard_sale_price === null ? '' : (string) (int) $row->standard_sale_price;
+        $this->itemStatus = (string) $row->status;
+        $this->itemDescription = (string) ($row->description ?? '');
+        $this->itemImagePath = (string) ($row->image_path ?? '');
+        $this->showItemForm = true;
+    }
+
+    /**
+     * Clear the picture from the form. The FILE is deleted at save, not here:
+     * an operator who clicks Remove and then Cancel must get their image
+     * back, and a delete on click cannot be undone.
+     */
+    public function removeItemImage(): void
+    {
+        Gate::authorize(InventoryPermission::MANAGE);
+
+        $this->itemImageUpload = null;
+        $this->itemImagePath = '';
+    }
+
+    public function saveItem(CreateItem $createItem, UpdateItem $updateItem): void
+    {
+        Gate::authorize(InventoryPermission::MANAGE);
+
+        $this->validate([
+            'itemCode' => ['required', 'string', 'max:30'],
+            'itemName' => ['required', 'string', 'max:160'],
+            'itemBarcode' => ['nullable', 'string', 'max:64'],
+            'itemCategoryId' => ['required', 'integer'],
+            'itemType' => ['required', 'in:consumable,equipment,merchandise'],
+            'itemUnitOfMeasureId' => ['required', 'integer'],
+            'itemReorderLevel' => ['nullable', 'numeric', 'gte:0'],
+            'itemReorderQuantity' => ['nullable', 'numeric', 'gte:0'],
+            'itemSalePrice' => ['nullable', 'numeric', 'gte:0'],
+            'itemStatus' => ['required', 'in:active,discontinued,archived'],
+            'itemDescription' => ['nullable', 'string', 'max:2000'],
+        ] + $this->rules(), [
+            'itemImageUpload.image' => (string) __('opes.inventory_item_form.image_not_an_image'),
+            'itemImageUpload.mimes' => (string) __('opes.inventory_item_form.image_wrong_type', [
+                'types' => strtoupper(implode(', ', StoredImage::ALLOWED_EXTENSIONS)),
+            ]),
+            'itemImageUpload.max' => (string) __('opes.inventory_item_form.image_too_large', [
+                'kb' => StoredImage::MAX_KILOBYTES,
+            ]),
+            'itemImageUpload.dimensions' => (string) __('opes.inventory_item_form.image_too_big', [
+                'px' => StoredImage::MAX_DIMENSION,
+            ]),
+        ], [
+            'itemCode' => 'item code',
+            'itemName' => 'name',
+            'itemBarcode' => 'barcode',
+            'itemCategoryId' => 'category',
+            'itemType' => 'item type',
+            'itemUnitOfMeasureId' => 'unit of measure',
+            'itemReorderLevel' => 'reorder level',
+            'itemReorderQuantity' => 'reorder quantity',
+            'itemSalePrice' => 'standard sale price',
+            'itemStatus' => 'status',
+            'itemDescription' => 'description',
+            'itemImageUpload' => 'item image',
+        ]);
+
+        $this->storeItemImageUpload();
+
+        $attributes = [
+            'item_code' => $this->itemCode,
+            'name' => $this->itemName,
+            'barcode' => $this->itemBarcode === '' ? null : $this->itemBarcode,
+            'item_category_id' => (int) $this->itemCategoryId,
+            'item_type' => $this->itemType,
+            'unit_of_measure_id' => (int) $this->itemUnitOfMeasureId,
+            'is_stock_tracked' => $this->itemIsStockTracked,
+            'reorder_level' => $this->itemReorderLevel,
+            'reorder_quantity' => $this->itemReorderQuantity,
+            // Whole FCFA, integer minor units - never a float in the column.
+            'standard_sale_price' => $this->itemSalePrice === '' ? null : (int) round((float) $this->itemSalePrice),
+            'status' => $this->itemStatus,
+            'description' => $this->itemDescription,
+            'image_path' => $this->itemImagePath === '' ? null : $this->itemImagePath,
+        ];
+
+        try {
+            if ($this->editingItemId === null) {
+                $createItem->handle($attributes, $this->actor());
+            } else {
+                $updateItem->handle($this->editingItemId, $attributes, $this->actor());
+            }
+        } catch (DomainException $e) {
+            $this->addError('itemCode', $e->getMessage());
+
+            return;
+        }
+
+        $saved = $this->editingItemId === null ? 'Item created.' : 'Item updated.';
+
+        $this->closeItemForm();
+        $this->tab = 'items';
+        $this->resetPage();
+        session()->flash('status', $saved);
+    }
+
+    /**
+     * Move the pending upload into permanent, content-hashed storage. The
+     * temporary file is released immediately: a TemporaryUploadedFile held on
+     * a public property is re-serialised into every subsequent payload.
+     */
+    private function storeItemImageUpload(): void
+    {
+        if (! $this->itemImageUpload instanceof TemporaryUploadedFile) {
+            return;
+        }
+
+        $this->itemImagePath = StoredImage::putContents(
+            'item-'.$this->itemCode,
+            (string) file_get_contents((string) $this->itemImageUpload->getRealPath()),
+            strtolower($this->itemImageUpload->getClientOriginalExtension()),
+        );
+
+        $this->itemImageUpload->delete();
+        $this->itemImageUpload = null;
+    }
+
+    private function closeItemForm(): void
+    {
+        $this->resetItemForm();
+        $this->showItemForm = false;
+    }
+
+    private function resetItemForm(): void
+    {
+        $this->reset([
+            'editingItemId', 'itemCode', 'itemName', 'itemBarcode', 'itemCategoryId', 'itemType',
+            'itemUnitOfMeasureId', 'itemIsStockTracked', 'itemReorderLevel', 'itemReorderQuantity',
+            'itemSalePrice', 'itemStatus', 'itemDescription', 'itemImagePath', 'itemImageUpload',
+        ]);
+        $this->resetErrorBag();
     }
 
     public function toggleIssueForm(): void
@@ -919,6 +1157,24 @@ final class Index extends Component
     /**
      * @return list<array{id: int, label: string}>
      */
+    private function unitOptions(): array
+    {
+        $options = [];
+
+        foreach (
+            DB::table('units_of_measure')->where('is_active', true)->orderBy('code')->get(['id', 'code', 'name'])
+            as $row
+        ) {
+            /** @var object{id: int|string, code: string, name: string} $row */
+            $options[] = ['id' => (int) $row->id, 'label' => $row->code.' — '.$row->name];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return list<array{id: int, label: string}>
+     */
     private function itemOptions(): array
     {
         $options = [];
@@ -997,6 +1253,7 @@ final class Index extends Component
             'categoryOptions' => $this->categoryOptions(),
             'locationOptions' => $this->locationOptions(),
             'itemOptions' => $this->itemOptions(),
+            'unitOptions' => $this->unitOptions(),
             'statusOptions' => $this->statusOptions(),
             'recordingLines' => $this->recordingLines(),
         ]);
