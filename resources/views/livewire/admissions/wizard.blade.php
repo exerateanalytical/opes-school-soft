@@ -452,6 +452,60 @@
             {{-- ============= Step 5: Documents & Review ============= --}}
             @if ($currentStep->value === 5)
                 <h3 class="mt-5 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
+                    {{ __('opes.admissions_screen.section_photo') }}
+                </h3>
+
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[auto_1fr]">
+                    {{-- wire:key on the wrapper so Livewire replaces the
+                         thumbnail when the path changes rather than reusing a
+                         stale img element. --}}
+                    <span wire:key="applicant-photo-{{ $photo_path }}"
+                          class="flex h-28 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-primary bg-sand">
+                        @if ($photoUpload !== null)
+                            <img src="{{ $photoUpload->temporaryUrl() }}" alt="" class="max-h-full max-w-full object-contain">
+                        @elseif ($photo_path !== '')
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photo_path) }}"
+                                 alt="{{ __('opes.admissions_screen.photo') }}"
+                                 class="max-h-full max-w-full object-contain">
+                        @else
+                            <span class="px-2 text-center text-xs text-charcoal/40">{{ __('opes.admissions_screen.photo_none') }}</span>
+                        @endif
+                    </span>
+
+                    <div class="min-w-0">
+                        @if (! $locked)
+                            <input type="file" wire:model="photoUpload"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-sm text-charcoal file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90"/>
+
+                            <div wire:loading wire:target="photoUpload" class="mt-1 text-xs text-text-secondary">
+                                {{ __('opes.admissions_screen.photo_uploading') }}
+                            </div>
+
+                            <p class="mt-1 text-xs text-charcoal/50">{{ __('opes.admissions_screen.photo_hint') }}</p>
+
+                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                <button type="button" wire:click="savePhoto"
+                                        class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:border-primary/50 hover:text-primary">
+                                    {{ __('opes.admissions_screen.photo_save') }}
+                                </button>
+
+                                @if ($photo_path !== '' || $photoUpload !== null)
+                                    <button type="button" wire:click="removePhoto"
+                                            class="text-xs font-medium text-heritage-red hover:underline">
+                                        {{ __('opes.admissions_screen.photo_remove') }}
+                                    </button>
+                                @endif
+                            </div>
+                        @else
+                            <p class="text-xs text-charcoal/50">{{ __('opes.admissions_screen.photo_locked') }}</p>
+                        @endif
+
+                        @error('photoUpload') <p class="mt-2 text-xs text-heritage-red">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <h3 class="mt-6 border-b border-border-primary pb-2 text-sm font-semibold text-primary">
                     {{ __('opes.admissions_screen.section_review') }}
                 </h3>
 
