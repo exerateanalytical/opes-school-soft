@@ -83,6 +83,12 @@
                         <input type="text" wire:model="categoryNameFr" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
                         @error('categoryNameFr') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
                     </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.category_display_order') }}</span>
+                        <input type="number" min="0" step="1" wire:model="categoryDisplayOrder" class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
+                        <span class="text-xs text-charcoal/60">{{ __('opes.fees_screen.category_display_order_hint') }}</span>
+                        @error('categoryDisplayOrder') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
+                    </label>
                     <div class="sm:col-span-3">
                         <button type="submit" class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
                             {{ __('opes.fees_screen.new_category') }}

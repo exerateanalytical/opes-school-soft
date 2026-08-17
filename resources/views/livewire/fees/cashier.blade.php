@@ -394,6 +394,64 @@
                         @error('reference')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
                     </label>
 
+                    {{-- Who actually paid (04-fees §11). Defaulted to the
+                         selected student on selection, but a receipt is
+                         issued to a PERSON: at this counter that person is
+                         very often a guardian or an employer, and the
+                         payer's own name and phone are what a disputed
+                         payment is later matched against. --}}
+                    <label for="cashier-payer-name" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.payer_name') }}</span>
+                        <input id="cashier-payer-name" type="text" maxlength="160" wire:model="payerName"
+                               placeholder="{{ __('opes.fees_screen.payer_name_placeholder') }}"
+                               @disabled($selected === null)
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                        <span class="text-xs text-charcoal/60">{{ __('opes.fees_screen.payer_name_hint') }}</span>
+                        @error('payerName')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                    </label>
+
+                    <label for="cashier-payer-phone" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.payer_phone') }}</span>
+                        <input id="cashier-payer-phone" type="tel" maxlength="40" wire:model="payerPhone"
+                               placeholder="{{ __('opes.fees_screen.payer_phone_placeholder') }}"
+                               @disabled($selected === null)
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"/>
+                        @error('payerPhone')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                    </label>
+
+                    {{-- The operator/bank commission (§2.4 / §15.6), typed as
+                         it was charged - this screen owns no tariff table and
+                         computes nothing. It enters the books only when the
+                         SCHOOL bears it; that choice is the bearer select. --}}
+                    <label for="cashier-fee-amount" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.transaction_fee') }}</span>
+                        <input id="cashier-fee-amount" type="number" min="0" step="1" wire:model="feeAmount"
+                               @disabled($selected === null)
+                               class="rounded border border-border-primary bg-white px-2 py-1.5 text-right font-mono text-sm text-charcoal disabled:bg-sand/40"/>
+                        <span class="text-xs text-charcoal/60">{{ __('opes.fees_screen.transaction_fee_hint') }}</span>
+                        @error('feeAmount')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                    </label>
+
+                    <label for="cashier-fee-bearer" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.fee_bearer') }}</span>
+                        <select id="cashier-fee-bearer" wire:model="feeBearer" @disabled($selected === null)
+                                class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40">
+                            @foreach ($feeBearerOptions as $bearerOption)
+                                <option value="{{ $bearerOption }}">{{ __('opes.fees_screen.fee_bearer_'.$bearerOption) }}</option>
+                            @endforeach
+                        </select>
+                        @error('feeBearer')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                    </label>
+
+                    <label for="cashier-notes" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.fees_screen.payment_notes') }}</span>
+                        <textarea id="cashier-notes" rows="2" maxlength="500" wire:model="notes"
+                                  placeholder="{{ __('opes.fees_screen.payment_notes_placeholder') }}"
+                                  @disabled($selected === null)
+                                  class="rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal disabled:bg-sand/40"></textarea>
+                        @error('notes')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+                    </label>
+
                     <div class="flex items-center gap-2">
                         <button type="submit" @disabled($selected === null || ! $canCollect)
                                 @if (! $canCollect) title="{{ __('opes.nav.nav_disabled_title') }}" @endif
