@@ -2999,6 +2999,23 @@ return [
         'primary' => 'Principal',
         'outstanding' => 'Reste à régler',
 
+        // Visitor gate pass
+        'gate_pass_optional' => 'N° de laissez-passer (facultatif)',
+        'gate_pass_short' => 'Laissez-passer',
+
+        // Vehicle compliance expiry
+        'insurance_expires_on' => 'Assurance expire le',
+        'inspection_expires_on' => 'Visite technique expire le',
+
+        // Medical referral dates
+        'referred_on' => 'Orienté le',
+        'followed_up_on' => 'Suivi le',
+
+        // Insurance claim intake
+        'claim_status' => 'Statut du sinistre',
+        'claim_status_draft' => 'Brouillon (à retenir)',
+        'claim_status_submitted' => 'Soumis',
+
         // Chambre d'internat
         'room_details' => 'Détails de la chambre',
         'hostel_inactive' => 'Internat fermé',

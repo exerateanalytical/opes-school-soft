@@ -53,6 +53,91 @@
         @enderror
     @endforeach
 
+    {{-- Inline return panel: ReturnBook takes a condition and a date, so a
+         damaged return and a back-dated one are both reachable from here. --}}
+    @if ($returningIssueId !== null)
+        <section aria-label="Return copy" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Return Copy (Issue #{{ $returningIssueId }})</h2>
+
+            <form wire:submit="returnIssue" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <label for="return-condition" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Condition on return</span>
+                        <select id="return-condition" wire:model="returnCondition"
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="good">Good</option>
+                            <option value="damaged">Damaged</option>
+                        </select>
+                        @error('returnCondition')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="return-on" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Returned on</span>
+                        <input id="return-on" type="date" wire:model="returnedOn"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('returnedOn')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Confirm return
+                    </button>
+                    <button type="button" wire:click="cancelReturn"
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
+    {{-- Inline waive panel: §10.6 requires a reason on every waiver. --}}
+    @if ($waivingFineId !== null)
+        <section aria-label="Waive fine" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
+            <h2 class="text-base font-semibold text-charcoal">Waive Fine #{{ $waivingFineId }}</h2>
+
+            <form wire:submit="waiveFine" class="mt-4 space-y-4">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <label for="waive-reason" class="flex flex-col gap-1 sm:col-span-2">
+                        <span class="text-xs font-medium text-charcoal/70">Reason for the waiver</span>
+                        <input id="waive-reason" type="text" wire:model="waiveReason"
+                               placeholder="Why is this balance being written off?"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('waiveReason')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="waived-on" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Waived on</span>
+                        <input id="waived-on" type="date" wire:model="waivedOn"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('waivedOn')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                        Confirm waiver
+                    </button>
+                    <button type="button" wire:click="cancelWaive"
+                            class="rounded border border-border-primary px-4 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    @endif
+
     {{-- Inline issue-book panel. --}}
     @if ($showIssueForm)
         <section aria-label="Issue book" class="rounded-lg border border-border-primary bg-white p-4 shadow-sm sm:p-5">
@@ -564,8 +649,7 @@
                     <td class="px-4 py-2.5">
                         @if (in_array($row->status, ['open', 'overdue'], true))
                             <div class="flex items-center gap-2">
-                                <button type="button" wire:click="returnIssue({{ $row->id }})"
-                                        wire:confirm="Mark this copy as returned today?"
+                                <button type="button" wire:click="startReturn({{ $row->id }})"
                                         class="rounded border border-primary px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/10">
                                     Return
                                 </button>
@@ -590,8 +674,7 @@
                 @can(\App\Modules\Library\Domain\LibraryPermission::WAIVE_FINE)
                     <td class="px-4 py-2.5">
                         @if (in_array($row->status, ['assessed', 'invoiced'], true))
-                            <button type="button" wire:click="waiveFine({{ $row->id }})"
-                                    wire:confirm="Waive the remaining balance of this fine?"
+                            <button type="button" wire:click="startWaive({{ $row->id }})"
                                     class="rounded border border-primary px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/10">
                                 Waive
                             </button>

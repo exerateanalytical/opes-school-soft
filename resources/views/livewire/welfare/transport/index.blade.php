@@ -215,6 +215,24 @@
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
                     </label>
+
+                    <label for="vehicle-form-insurance-expires" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.insurance_expires_on') }}</span>
+                        <input id="vehicle-form-insurance-expires" type="date" wire:model="vehicleFormInsuranceExpiresOn"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('vehicleFormInsuranceExpiresOn')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label for="vehicle-form-inspection-expires" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">{{ __('opes.welfare_detail.inspection_expires_on') }}</span>
+                        <input id="vehicle-form-inspection-expires" type="date" wire:model="vehicleFormInspectionExpiresOn"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('vehicleFormInspectionExpiresOn')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -433,6 +451,15 @@
                         @enderror
                     </label>
 
+                    <label for="maintenance-log-form-date" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Date</span>
+                        <input id="maintenance-log-form-date" type="date" wire:model="maintenanceLogFormDate"
+                               class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50"/>
+                        @error('maintenanceLogFormDate')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
+
                     <label for="maintenance-log-form-cost" class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-charcoal/70">Cost (XAF, optional)</span>
                         <input id="maintenance-log-form-cost" type="number" min="0" wire:model="maintenanceLogFormCostAmount"
@@ -474,6 +501,7 @@
     rail-title="Transport Overview"
 >
     <x-slot:actions>
+        @if ($canManage)
         @if ($tab === 'routes')
             <button type="button" wire:click="toggleRouteForm"
                     class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
@@ -504,6 +532,7 @@
                     class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
                 {{ $showMaintenanceLogForm ? 'Hide form' : 'Record maintenance' }}
             </button>
+        @endif
         @endif
     </x-slot:actions>
 
@@ -691,7 +720,7 @@
                     <x-status-pill :status="$row->status === 'active' ? 'ok' : 'amber'" :label="$row->status === 'active' ? 'Active' : 'Ended'"/>
                 </td>
                 <td class="px-4 py-2.5">
-                    @if ($row->status === 'active')
+                    @if ($row->status === 'active' && $canManage)
                         <button type="button" wire:click="endAllocation({{ $row->id }})"
                                 wire:confirm="End this transport allocation?"
                                 class="rounded border border-heritage-red px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">
@@ -745,7 +774,7 @@
                         <x-status-pill :status="$row->status === 'active' ? 'ok' : 'amber'" :label="$row->status === 'active' ? 'Active' : 'Ended'"/>
                     </div>
                     <p class="mt-1 text-sm text-charcoal/70">{{ $row->route_code }} · {{ $row->stop_name }} · {{ $row->direction }}</p>
-                    @if ($row->status === 'active')
+                    @if ($row->status === 'active' && $canManage)
                         <button type="button" wire:click="endAllocation({{ $row->id }})"
                                 wire:confirm="End this transport allocation?"
                                 class="mt-2 rounded border border-heritage-red px-2.5 py-1 text-xs font-semibold text-heritage-red hover:bg-heritage-red/10">

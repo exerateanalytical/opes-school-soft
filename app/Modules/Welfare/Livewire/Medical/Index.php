@@ -83,10 +83,24 @@ final class Index extends Component
 
     public string $referReason = '';
 
+    /**
+     * The date the referral was written up. RecordReferral has always taken
+     * it; the panel used to hardcode "today", which mis-dates a referral
+     * entered the morning after the consultation.
+     */
+    public string $referOn = '';
+
     // ── Close-referral form (per referral row) ──────────────────────────
     public ?int $closeReferralId = null;
 
     public string $closeNotes = '';
+
+    /**
+     * The date the follow-up actually happened. CloseReferral compares it
+     * against the referral's `referred_on`, a guard that could never trip
+     * while the panel hardcoded "now".
+     */
+    public string $closeFollowedUpOn = '';
 
     public function mount(): void
     {
@@ -207,6 +221,7 @@ final class Index extends Component
         $this->referConsultationId = $consultationId;
         $this->referTo = '';
         $this->referReason = '';
+        $this->referOn = Carbon::today()->toDateString();
     }
 
     public function cancelReferral(): void
@@ -227,7 +242,7 @@ final class Index extends Component
                 $this->referConsultationId,
                 $this->referTo,
                 $this->referReason,
-                Carbon::today(),
+                $this->referOn === '' ? Carbon::today() : Carbon::parse($this->referOn),
                 $this->actor(),
             );
         } catch (ValidationException $e) {
@@ -246,6 +261,7 @@ final class Index extends Component
 
         $this->closeReferralId = $referralId;
         $this->closeNotes = '';
+        $this->closeFollowedUpOn = Carbon::today()->toDateString();
     }
 
     public function cancelClose(): void
@@ -264,7 +280,7 @@ final class Index extends Component
         try {
             $close->handle(
                 $this->closeReferralId,
-                Carbon::now(),
+                $this->closeFollowedUpOn === '' ? Carbon::now() : Carbon::parse($this->closeFollowedUpOn),
                 $this->closeNotes === '' ? null : $this->closeNotes,
                 $this->actor(),
             );

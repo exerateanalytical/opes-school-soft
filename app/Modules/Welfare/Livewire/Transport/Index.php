@@ -101,6 +101,16 @@ final class Index extends Component
 
     public string $vehicleFormStatus = 'operational';
 
+    /**
+     * Compliance expiry dates. SaveVehicle has always accepted both (they are
+     * on Vehicle::$fillable), and the Insurance/Inspection columns, the
+     * "Maintenance Due" KPI and the "Upcoming Maintenance" rail all read them
+     * - but no form ever collected them, so all four were permanently blank.
+     */
+    public string $vehicleFormInsuranceExpiresOn = '';
+
+    public string $vehicleFormInspectionExpiresOn = '';
+
     // ── Record Trip Log form ────────────────────────────────────────────
     public bool $showTripLogForm = false;
 
@@ -141,6 +151,14 @@ final class Index extends Component
     public string $maintenanceLogFormDescription = '';
 
     public string $maintenanceLogFormCostAmount = '';
+
+    /**
+     * `vehicle_maintenance_logs.date` is NOT NULL and RecordMaintenanceLog
+     * reads it straight out of $data, but the form never asked for it - so
+     * every submission inserted NULL and failed. Defaulted in the toggle,
+     * exactly like the trip and fuel log forms alongside it.
+     */
+    public string $maintenanceLogFormDate = '';
 
     public function mount(): void
     {
@@ -310,7 +328,11 @@ final class Index extends Component
             'vehicleFormModel' => ['nullable', 'string', 'max:100'],
             'vehicleFormCapacity' => ['required', 'integer', 'min:1'],
             'vehicleFormStatus' => ['required', 'string', 'in:operational,under_maintenance,out_of_service'],
+            'vehicleFormInsuranceExpiresOn' => ['nullable', 'date'],
+            'vehicleFormInspectionExpiresOn' => ['nullable', 'date'],
         ], [], [
+            'vehicleFormInsuranceExpiresOn' => 'insurance expiry',
+            'vehicleFormInspectionExpiresOn' => 'inspection expiry',
             'vehicleFormRegistrationNo' => 'registration number',
             'vehicleFormMake' => 'make',
             'vehicleFormModel' => 'model',
@@ -325,6 +347,8 @@ final class Index extends Component
                 'model' => $this->vehicleFormModel !== '' ? $this->vehicleFormModel : null,
                 'capacity' => (int) $this->vehicleFormCapacity,
                 'status' => VehicleStatus::from($this->vehicleFormStatus),
+                'insurance_expires_on' => $this->vehicleFormInsuranceExpiresOn !== '' ? $this->vehicleFormInsuranceExpiresOn : null,
+                'inspection_expires_on' => $this->vehicleFormInspectionExpiresOn !== '' ? $this->vehicleFormInspectionExpiresOn : null,
             ], $this->actor());
         } catch (ValidationException $e) {
             foreach ($e->errors() as $field => $messages) {
@@ -341,6 +365,7 @@ final class Index extends Component
         $this->reset([
             'showVehicleForm', 'vehicleFormRegistrationNo', 'vehicleFormMake',
             'vehicleFormModel', 'vehicleFormCapacity', 'vehicleFormStatus',
+            'vehicleFormInsuranceExpiresOn', 'vehicleFormInspectionExpiresOn',
         ]);
         $this->vehicleFormStatus = 'operational';
         $this->tab = 'vehicles';
@@ -353,7 +378,8 @@ final class Index extends Component
         Gate::authorize(TransportPermission::MANAGE);
 
         try {
-            $endTransportAllocation->handle($allocationId, Carbon::now(), $this->actor());
+            // `ends_on` is a DATE column; Carbon::now() was silently truncated.
+            $endTransportAllocation->handle($allocationId, Carbon::today(), $this->actor());
         } catch (DomainException $e) {
             session()->flash('status', $e->getMessage());
 
@@ -493,6 +519,10 @@ final class Index extends Component
         Gate::authorize(TransportPermission::MANAGE);
 
         $this->showMaintenanceLogForm = ! $this->showMaintenanceLogForm;
+
+        if ($this->showMaintenanceLogForm && $this->maintenanceLogFormDate === '') {
+            $this->maintenanceLogFormDate = Carbon::now()->format('Y-m-d');
+        }
     }
 
     public function saveMaintenanceLog(RecordMaintenanceLog $recordMaintenanceLog): void
@@ -502,11 +532,13 @@ final class Index extends Component
         $this->validate([
             'maintenanceLogFormVehicleId' => ['required', 'integer', 'min:1'],
             'maintenanceLogFormType' => ['required', 'string', 'in:service,repair,inspection,other'],
+            'maintenanceLogFormDate' => ['required', 'date'],
             'maintenanceLogFormDescription' => ['required', 'string', 'max:500'],
             'maintenanceLogFormCostAmount' => ['nullable', 'integer', 'min:0'],
         ], [], [
             'maintenanceLogFormVehicleId' => 'vehicle',
             'maintenanceLogFormType' => 'type',
+            'maintenanceLogFormDate' => 'date',
             'maintenanceLogFormDescription' => 'description',
             'maintenanceLogFormCostAmount' => 'cost',
         ]);
@@ -515,6 +547,7 @@ final class Index extends Component
             $recordMaintenanceLog->handle([
                 'vehicle_id' => (int) $this->maintenanceLogFormVehicleId,
                 'type' => VehicleMaintenanceType::from($this->maintenanceLogFormType),
+                'date' => $this->maintenanceLogFormDate,
                 'description' => $this->maintenanceLogFormDescription,
                 'cost_amount' => $this->maintenanceLogFormCostAmount !== '' ? (int) $this->maintenanceLogFormCostAmount : null,
             ], $this->actor());
@@ -533,6 +566,7 @@ final class Index extends Component
         $this->reset([
             'showMaintenanceLogForm', 'maintenanceLogFormVehicleId', 'maintenanceLogFormType',
             'maintenanceLogFormDescription', 'maintenanceLogFormCostAmount',
+            'maintenanceLogFormDate',
         ]);
         $this->maintenanceLogFormType = 'service';
         $this->tab = 'logs';
@@ -906,6 +940,10 @@ final class Index extends Component
             'statusOptions' => $this->statusOptions(),
             'vehicleStatusBreakdown' => $this->vehicleStatusBreakdown(),
             'upcomingMaintenance' => $this->upcomingMaintenance(),
+            // Every toggle*/save*/endAllocation method authorizes MANAGE, so a
+            // view-only user was being shown buttons that 403 on click. The
+            // hostel screen already guards its actions this way.
+            'canManage' => Gate::allows(TransportPermission::MANAGE),
         ]);
     }
 }

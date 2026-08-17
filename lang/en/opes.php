@@ -3042,6 +3042,23 @@ return [
         'primary' => 'Primary',
         'outstanding' => 'Outstanding',
 
+        // Visitor gate pass
+        'gate_pass_optional' => 'Gate pass no. (optional)',
+        'gate_pass_short' => 'Gate pass',
+
+        // Vehicle compliance expiry
+        'insurance_expires_on' => 'Insurance expires on',
+        'inspection_expires_on' => 'Inspection expires on',
+
+        // Medical referral dates
+        'referred_on' => 'Referred on',
+        'followed_up_on' => 'Followed up on',
+
+        // Insurance claim intake
+        'claim_status' => 'Claim status',
+        'claim_status_draft' => 'Draft (hold back)',
+        'claim_status_submitted' => 'Submitted',
+
         // Hostel room
         'room_details' => 'Room details',
         'hostel_inactive' => 'Hostel closed',
