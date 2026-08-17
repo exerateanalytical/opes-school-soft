@@ -8,6 +8,7 @@ use App\Modules\Reporting\Models\BulkPrintJob;
 use App\Modules\Reporting\Models\DocumentTemplate;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use setasign\Fpdi\Fpdi;
 use Throwable;
 
 /**
@@ -31,9 +32,12 @@ use Throwable;
  * payload builder here; wiring them needs a batch seam on those Actions,
  * which is a change to code this build was told not to modify.
  *
- * The merged-PDF half of §18.2 is NOT implemented. `output_path` points at a
- * JSON index of the per-subject files RenderDocument already wrote, so the
- * screen can link to real produced documents; nothing claims a merge happened.
+ * §18.2's merge half: `output_path` holds the one combined PDF, built here
+ * from the already-rendered, already-hashed per-subject files RenderDocument
+ * wrote - the merge never re-renders a document or touches its hash, it only
+ * concatenates the finished pages. `manifest_path` holds the JSON index of
+ * those per-subject files, which the screen still reads to link to each
+ * individually hashed, print-logged document.
  */
 final class ProcessBulkPrint
 {
@@ -89,14 +93,15 @@ final class ProcessBulkPrint
                 'succeeded' => $succeeded,
                 'failed' => $failed,
                 'status' => $failed === 0 ? 'completed' : ($succeeded === 0 ? 'failed' : 'partial'),
-                'output_path' => $this->writeIndex($job, $outcome),
+                'manifest_path' => $this->writeIndex($job, $outcome),
+                'output_path' => $succeeded > 0 ? $this->mergePdfs($job, $outcome) : null,
                 'finished_at' => now(),
             ]);
         } catch (Throwable $e) {
             $job->update([
                 'status' => 'failed',
                 'finished_at' => now(),
-                'output_path' => $this->writeFailureNote($job, $e->getMessage()),
+                'manifest_path' => $this->writeFailureNote($job, $e->getMessage()),
             ]);
         }
 
@@ -241,6 +246,53 @@ final class ProcessBulkPrint
             'documents' => $documents,
             'failures' => $outcome['failures'],
         ]);
+    }
+
+    /**
+     * §18.2's merge, finally implemented: import every page of every
+     * successfully-rendered subject file, in the SAME order `writeIndex()`
+     * lists them, and write one combined PDF. FPDI only imports pages - it
+     * never touches the source file's bytes, so the individual per-subject
+     * PDFs (and their hashes, already written by RenderDocument) are
+     * untouched by this step; the merge is additive output, not a rewrite.
+     *
+     * @param  array{results: array<int, \App\Modules\Reporting\Domain\RenderedDocument>, failures: array<int, string>}  $outcome
+     */
+    private function mergePdfs(BulkPrintJob $job, array $outcome): ?string
+    {
+        if ($outcome['results'] === []) {
+            return null;
+        }
+
+        $pdf = new Fpdi();
+
+        foreach ($outcome['results'] as $document) {
+            $sourcePath = storage_path($document->storagePath);
+            $pageCount = $pdf->setSourceFile($sourcePath);
+
+            for ($page = 1; $page <= $pageCount; $page++) {
+                $templateId = $pdf->importPage($page);
+                $size = $pdf->getTemplateSize($templateId);
+
+                $pdf->AddPage(
+                    $size['orientation'],
+                    [$size['width'], $size['height']],
+                );
+                $pdf->useTemplate($templateId);
+            }
+        }
+
+        $relative = sprintf('documents/bulk/%d-merged.pdf', (int) $job->getKey());
+        $absolute = storage_path($relative);
+        $dir = dirname($absolute);
+
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $pdf->Output('F', $absolute);
+
+        return $relative;
     }
 
     private function writeFailureNote(BulkPrintJob $job, string $message): string

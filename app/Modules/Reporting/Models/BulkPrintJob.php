@@ -15,9 +15,11 @@ use Illuminate\Support\Carbon;
  * that model, mapped onto the existing columns exactly as migrated (no new
  * columns, no new migration).
  *
- * `output_path` holds the RELATIVE storage path of the run's produced-file
- * index (a small JSON manifest of per-subject paths), not a merged PDF: the
- * merge step of §18.2 is not implemented here and nothing pretends it is.
+ * `output_path` holds the RELATIVE storage path of the one merged PDF this
+ * run produced (§18.2's merge step). `manifest_path` holds the RELATIVE
+ * storage path of the small JSON index of the per-subject files
+ * RenderDocument wrote, which the Bulk Prints screen still reads to link to
+ * each individual (hashed, print-logged) document.
  *
  * @property int $id
  * @property int $document_template_id
@@ -37,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @property int $succeeded
  * @property int $failed
  * @property string|null $output_path
+ * @property string|null $manifest_path
  * @property int $requested_by
  * @property Carbon $requested_at
  * @property Carbon|null $started_at
@@ -50,7 +53,7 @@ final class BulkPrintJob extends Model
         'academic_year_id', 'class_group_id', 'assessment_period_id',
         'mode', 'subject_ids', 'language', 'paper_size',
         'copies', 'collate', 'duplex',
-        'status', 'total', 'succeeded', 'failed', 'output_path',
+        'status', 'total', 'succeeded', 'failed', 'output_path', 'manifest_path',
         'requested_by', 'requested_at', 'started_at', 'finished_at',
     ];
 

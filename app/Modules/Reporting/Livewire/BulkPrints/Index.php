@@ -169,19 +169,19 @@ final class Index extends Component
     }
 
     /**
-     * The per-subject files this job produced, read from the index
-     * ProcessBulkPrint wrote. Empty for a job that produced nothing, which is
-     * shown as such rather than as a broken link.
+     * The per-subject files this job produced, read from the manifest
+     * ProcessBulkPrint wrote at `manifest_path`. Empty for a job that
+     * produced nothing, which is shown as such rather than as a broken link.
      *
      * @return list<array{subject_id: int, serial: string|null, path: string, print_log_id: int, is_duplicate: bool}>
      */
     private function documentsFor(BulkPrintJob $job): array
     {
-        if ($job->output_path === null) {
+        if ($job->manifest_path === null) {
             return [];
         }
 
-        $absolute = storage_path($job->output_path);
+        $absolute = storage_path($job->manifest_path);
 
         if (! is_file($absolute)) {
             return [];
