@@ -501,6 +501,35 @@ final class Index extends Component
     }
 
     /**
+     * Active tax codes, the per-line VAT treatment RecordExpense already
+     * accepts. Read with DB::table: `tax_codes` belongs to Tax, not
+     * Accounting (ModuleBoundaryTest).
+     *
+     * @return list<array{id: int, label: string}>
+     */
+    private function taxCodes(): array
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('tax_codes')) {
+            return [];
+        }
+
+        $rows = DB::table('tax_codes')
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->limit(300)
+            ->get(['id', 'code', 'name']);
+
+        $codes = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, code: string, name: string} $row */
+            $codes[] = ['id' => (int) $row->id, 'label' => $row->code.' — '.$row->name];
+        }
+
+        return $codes;
+    }
+
+    /**
      * Treasury spend per float over the last 90 days - the rail's answer to
      * "which tin is this coming out of".
      *
@@ -577,6 +606,7 @@ final class Index extends Component
             'treasuryAccounts' => $this->treasuryAccounts(),
             'chargeAccounts' => $this->chargeAccounts(),
             'analyticValues' => $this->analyticValues(),
+            'taxCodes' => $this->taxCodes(),
             'spendByFloat' => $this->spendByFloat(),
             'spendByAccount' => $this->spendByAccount(),
             'payeeTypes' => ExpensePayeeType::cases(),

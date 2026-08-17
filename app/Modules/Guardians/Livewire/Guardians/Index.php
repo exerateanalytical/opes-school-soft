@@ -72,6 +72,8 @@ final class Index extends Component
 
     public string $createDateOfBirth = '';
 
+    public string $createIdNumber = '';
+
     // ── Link Guardian to Student form (opened per row) ──────────────────
     public bool $showLinkForm = false;
 
@@ -242,9 +244,15 @@ final class Index extends Component
                 'alternative_phone' => $this->createAlternativePhone === '' ? null : $this->createAlternativePhone,
                 'email' => $this->createEmail === '' ? null : $this->createEmail,
                 'date_of_birth' => $this->createDateOfBirth === '' ? null : $this->createDateOfBirth,
+                'id_number' => trim($this->createIdNumber) === '' ? null : trim($this->createIdNumber),
             ], $this->actor());
         } catch (ValidationException $e) {
-            $this->addError('createPhone', $e->getMessage());
+            // The tier-1 refusal (7.7) names the ID number, and it must land
+            // on the ID field the operator just filled - not on the phone box,
+            // which is where every other CreateGuardian failure surfaces.
+            $field = array_key_exists('id_number', $e->errors()) ? 'createIdNumber' : 'createPhone';
+
+            $this->addError($field, $e->getMessage());
 
             return;
         }
@@ -272,6 +280,7 @@ final class Index extends Component
         $this->reset([
             'showCreateForm', 'createFirstName', 'createLastName', 'createGender',
             'createPhone', 'createAlternativePhone', 'createEmail', 'createDateOfBirth',
+            'createIdNumber',
         ]);
         $this->createGender = 'male';
     }

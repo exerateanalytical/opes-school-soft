@@ -206,6 +206,20 @@
                             <span class="text-xs text-heritage-red">{{ $message }}</span>
                         @enderror
                     </label>
+
+                    <label for="hostel-form-warden" class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-charcoal/70">Warden (optional)</span>
+                        <select id="hostel-form-warden" wire:model="hostelWardenUserId"
+                                class="rounded border border-border-primary bg-white px-3 py-1.5 text-sm text-charcoal focus:border-primary/50">
+                            <option value="">Unassigned</option>
+                            @foreach ($wardenOptions as $warden)
+                                <option value="{{ $warden['id'] }}">{{ $warden['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('hostelWardenUserId')
+                            <span class="text-xs text-heritage-red">{{ $message }}</span>
+                        @enderror
+                    </label>
                 </div>
 
                 <div class="flex items-center gap-3">

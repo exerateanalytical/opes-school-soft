@@ -161,6 +161,7 @@
                                     <th scope="col" class="px-3 py-2">Account (class 6 or 2)</th>
                                     <th scope="col" class="px-3 py-2">Label</th>
                                     <th scope="col" class="px-3 py-2">Analytic</th>
+                                    <th scope="col" class="px-3 py-2">Tax code</th>
                                     <th scope="col" class="px-3 py-2 text-right">Amount (FCFA)</th>
                                     <th scope="col" class="px-3 py-2"><span class="sr-only">Remove</span></th>
                                 </tr>
@@ -194,6 +195,16 @@
                                                 @endforeach
                                             </select>
                                         </td>
+                                        <td class="px-3 py-2">
+                                            <select wire:model="formLines.{{ $index }}.tax_code_id"
+                                                    aria-label="Tax code for line {{ $index + 1 }}"
+                                                    class="w-full rounded border border-border-primary bg-white px-2 py-1.5 text-sm text-charcoal">
+                                                <option value="">—</option>
+                                                @foreach ($taxCodes as $taxCode)
+                                                    <option value="{{ $taxCode['id'] }}">{{ $taxCode['label'] }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
                                         <td class="px-3 py-2 text-right">
                                             <input type="number" min="1" step="1"
                                                    wire:model.live.debounce.400ms="formLines.{{ $index }}.amount"
@@ -214,7 +225,7 @@
                             </tbody>
                             <tfoot>
                                 <tr class="border-t border-border-primary bg-sand/20">
-                                    <td colspan="3" class="px-3 py-2 text-right text-xs font-semibold uppercase text-charcoal/60">Total</td>
+                                    <td colspan="4" class="px-3 py-2 text-right text-xs font-semibold uppercase text-charcoal/60">Total</td>
                                     <td class="px-3 py-2 text-right font-mono font-semibold text-charcoal">
                                         {{ Money::of($formTotal)->format(false) }}
                                     </td>

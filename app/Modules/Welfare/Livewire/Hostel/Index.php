@@ -90,6 +90,8 @@ final class Index extends Component
 
     public string $hostelGender = 'boys';
 
+    public string $hostelWardenUserId = '';
+
     // ── Add-room form ────────────────────────────────────────────────────
     public bool $showRoomForm = false;
 
@@ -279,10 +281,13 @@ final class Index extends Component
                 'code' => trim($this->hostelCode),
                 'name' => trim($this->hostelName),
                 'gender' => $this->hostelGender,
+                'warden_user_id' => $this->hostelWardenUserId === '' ? null : (int) $this->hostelWardenUserId,
             ], $this->actor());
         } catch (ValidationException $e) {
             foreach ($e->errors() as $field => $messages) {
-                $this->addError('hostel'.ucfirst($field), (string) ($messages[0] ?? $e->getMessage()));
+                $property = $field === 'warden_user_id' ? 'hostelWardenUserId' : 'hostel'.ucfirst($field);
+
+                $this->addError($property, (string) ($messages[0] ?? $e->getMessage()));
             }
 
             return;
@@ -292,7 +297,7 @@ final class Index extends Component
             return;
         }
 
-        $this->reset(['showHostelForm', 'hostelCode', 'hostelName', 'hostelGender']);
+        $this->reset(['showHostelForm', 'hostelCode', 'hostelName', 'hostelGender', 'hostelWardenUserId']);
         $this->hostelGender = 'boys';
         $this->tab = 'occupancy';
         $this->resetPage();
@@ -760,6 +765,34 @@ final class Index extends Component
     }
 
     /**
+     * Candidate wardens: the users behind an active staff member. Read with
+     * DB::table because both `users` and `staff_members` belong to other
+     * modules (ModuleBoundaryTest) - and scoped to staff so the dropdown is
+     * not the entire user table, guardians' portal accounts included.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function wardenOptions(): array
+    {
+        $rows = DB::table('staff_members as sm')
+            ->join('users as u', 'u.id', '=', 'sm.portal_user_id')
+            ->whereNotNull('sm.portal_user_id')
+            ->where('sm.status', 'active')
+            ->orderBy('sm.last_name')->orderBy('sm.first_name')
+            ->limit(300)
+            ->get(['u.id', 'u.name', 'sm.staff_no']);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            /** @var object{id: int|string, name: string, staff_no: string} $row */
+            $options[] = ['id' => (int) $row->id, 'name' => $row->name.' ('.$row->staff_no.')'];
+        }
+
+        return $options;
+    }
+
+    /**
      * Per-tab status filter choices (the WORD carries the meaning, 09-ui 10).
      *
      * @return list<array{value: string, label: string}>
@@ -806,6 +839,7 @@ final class Index extends Component
             'openInspections' => $this->openInspections(),
             'availableBedOptions' => $this->availableBedOptions(),
             'roomOptions' => $this->roomOptions(),
+            'wardenOptions' => $this->wardenOptions(),
             'canManage' => Gate::allows(HostelPermission::MANAGE),
         ]);
     }
