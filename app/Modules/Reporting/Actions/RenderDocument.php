@@ -20,6 +20,7 @@ use App\Modules\Reporting\Models\DocumentSeries;
 use App\Modules\Reporting\Models\DocumentTemplate;
 use App\Modules\Reporting\Models\IssuedDocument;
 use App\Modules\SchoolProfile\Actions\ReadSetting;
+use App\Modules\SchoolProfile\Actions\ResolveSchoolLogo;
 use App\Support\Audit\Actor;
 use App\Support\Clock\BusinessDate;
 use App\Support\Fiscal\FiscalIdentityGate;
@@ -924,7 +925,17 @@ final class RenderDocument
             'state_header' => $stateHeader,
             'branding' => $profile === null ? [] : [
                 'crest_path' => $profile->crest_path,
-                'logo_path' => $profile->logo_path,
+                // The CANONICAL logo, so a school that uploads one on
+                // /settings/branding gets it on the sidebar, the sign-in page,
+                // the portal AND its letterhead. This is the LIVE read only -
+                // schoolChrome() returns before here whenever a frozen
+                // envelope or a captured snapshot payload exists, so no
+                // already-issued document's bytes can move.
+                //
+                // The crest above deliberately does NOT go through the
+                // resolver: crest and logo are two different marks on a
+                // Cameroon school document.
+                'logo_path' => app(ResolveSchoolLogo::class)->handle() ?? $profile->logo_path,
                 'principal_signature_path' => $profile->principal_signature_path,
                 'registrar_signature_path' => $profile->registrar_signature_path,
                 'school_stamp_path' => $profile->school_stamp_path,

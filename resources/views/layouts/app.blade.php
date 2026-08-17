@@ -2,6 +2,7 @@
     use App\Modules\Identity\Domain\Role;
     use App\Modules\Identity\Support\Navigation;
     use App\Modules\SchoolProfile\Actions\ReadSetting;
+    use App\Modules\SchoolProfile\Actions\ResolveSchoolLogo;
     use App\Modules\SchoolProfile\Livewire\Branding;
     use App\Support\Branding\BrandTokens;
 
@@ -21,7 +22,6 @@
     // defensively: a hand-edited or stale palette must never take every
     // page in the app down over a cosmetic preference.
     $brandVariables = [];
-    $appLogoPath = '';
     $faviconPath = '';
 
     try {
@@ -34,21 +34,21 @@
             is_array($storedPalette) ? $storedPalette : BrandTokens::DEFAULTS
         )->toCssVariables();
 
-        $appLogoPath = (string) $reader->handle('branding.app_logo_path', '');
         $faviconPath = (string) $reader->handle('branding.favicon_path', '');
     } catch (\Throwable) {
         $brandVariables = BrandTokens::defaults()->toCssVariables();
-        $appLogoPath = '';
         $faviconPath = '';
     }
 
+    // ONE resolver, shared with the sign-in page, the guardian portal and the
+    // letterhead of newly issued documents. See ResolveSchoolLogo for the
+    // precedence and for why the favicon below is NOT part of it (a favicon
+    // is a 32px square, not the logo at a small size).
+    $appLogoUrl = app(ResolveSchoolLogo::class)->url();
+
     // Only ever a relative path under branding/ on the `public` disk (the
     // uploader's own contract, mirrored by the settings validation_rule) -
-    // so nothing hand-typed can become an arbitrary <img src> or icon href.
-    $appLogoUrl = ($appLogoPath !== '' && str_starts_with($appLogoPath, 'branding/'))
-        ? \Illuminate\Support\Facades\Storage::disk('public')->url($appLogoPath)
-        : null;
-
+    // so nothing hand-typed can become an arbitrary icon href.
     $faviconUrl = ($faviconPath !== '' && str_starts_with($faviconPath, 'branding/'))
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($faviconPath)
         : null;

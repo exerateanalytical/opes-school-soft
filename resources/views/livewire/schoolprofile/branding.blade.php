@@ -148,6 +148,18 @@
                                    accept="image/png,image/jpeg,image/webp"
                                    class="block w-full text-sm text-charcoal file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90">
 
+                            {{-- Spelled out on the screen itself, not just in
+                                 the docs: this upload is the ONE logo, and a
+                                 school needs to know before it clicks Save
+                                 that it also changes the page its parents sign
+                                 in on and the letterhead of everything issued
+                                 from now on. --}}
+                            @if ($key === 'app_logo')
+                                <p class="mt-2 text-xs leading-relaxed text-charcoal/60">
+                                    {{ __('opes.branding.app_logo_scope') }}
+                                </p>
+                            @endif
+
                             <div wire:loading wire:target="{{ $uploadModel }}" class="mt-1 text-xs text-text-secondary">
                                 {{ __('opes.school_identity.uploading') }}
                             </div>

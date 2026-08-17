@@ -2,6 +2,11 @@
     /** @var \App\Modules\Identity\Models\User|null $portalUser */
     $portalUser = auth()->user();
 
+    // The SAME logo the sidebar, the sign-in page and the letterhead use. The
+    // drawn x-portal.crest stays as the fallback for a school that has not
+    // uploaded one - a fresh install must show a mark, not a broken image.
+    $portalLogoUrl = app(\App\Modules\SchoolProfile\Actions\ResolveSchoolLogo::class)->url();
+
     $portalUnread = $portalUser === null ? 0 : app(\App\Modules\Guardians\Support\Portal\GuardianInbox::class)
         ->unreadNotificationCount((int) $portalUser->getKey());
 
@@ -117,7 +122,16 @@
         <div class="mx-auto w-full max-w-5xl px-4 pb-2 pt-3 sm:px-6">
             <div class="flex items-center gap-2.5">
                 <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-2">
-                    <x-portal.crest size="md"/>
+                    @if ($portalLogoUrl !== null)
+                        {{-- Height-matched to the drawn crest's `md` box (44px)
+                             but width-auto, because a school logo is any aspect
+                             ratio and this header has one row on a 426px
+                             screen. --}}
+                        <img src="{{ $portalLogoUrl }}" alt="{{ __('opes.branding.app_logo_alt') }}"
+                             class="h-11 w-auto max-w-[64px] shrink-0 object-contain">
+                    @else
+                        <x-portal.crest size="md"/>
+                    @endif
 
                     {{-- The wordmark is SPLIT, as the reference sets it: the
                          first word large, the remainder small beneath it, then
