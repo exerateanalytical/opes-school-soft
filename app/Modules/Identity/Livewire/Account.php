@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Livewire;
 
+use App\Modules\Identity\Actions\SetUsername;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -31,6 +32,10 @@ final class Account extends Component
 
     public string $email = '';
 
+    public string $username = '';
+
+    public bool $isOfficial = false;
+
     public string $currentPassword = '';
 
     public string $newPassword = '';
@@ -47,6 +52,38 @@ final class Account extends Component
 
         $this->name = (string) $user->name;
         $this->email = (string) $user->email;
+        $this->username = (string) ($user->username ?? '');
+        $this->isOfficial = (bool) $user->is_official;
+    }
+
+    /**
+     * Claim or change your own handle.
+     *
+     * Name and email still change only through an administrator, but the
+     * handle is yours: it exists so colleagues and parents can address you in
+     * the messenger without knowing your email address. The Action carries the
+     * format and uniqueness rules; this method only turns its refusal into a
+     * field error.
+     *
+     * `is_official` is pointedly absent - see the read-only note on the view.
+     * A screen where you may award yourself a verified tick is a screen where
+     * the tick means nothing.
+     */
+    public function saveUsername(): void
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            abort(403);
+        }
+
+        try {
+            $this->username = app(SetUsername::class)->handle($user, $this->username, $user);
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['username' => $e->getMessage()]);
+        }
+
+        session()->flash('status', __('opes.account.username_saved'));
     }
 
     public function changePassword(): void

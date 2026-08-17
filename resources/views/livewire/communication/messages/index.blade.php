@@ -51,7 +51,13 @@
             <div class="flex-1 space-y-3 overflow-y-auto p-3" style="max-height: 24rem;">
                 @foreach ($activeMessages as $message)
                     <div class="{{ $message->sender_id === auth()->id() ? 'ml-auto max-w-[80%] rounded-lg bg-primary/10 p-2' : 'mr-auto max-w-[80%] rounded-lg bg-sand/30 p-2' }}">
-                        <p class="text-xs font-semibold text-charcoal">{{ $message->sender_name }}</p>
+                        <p class="flex items-center gap-1 text-xs font-semibold text-charcoal">
+                            <span>{{ $message->sender_name }}</span>
+                            <x-verified-badge :official="(bool) $message->sender_is_official"/>
+                            @if ($message->sender_username)
+                                <span class="font-normal text-slate-500">&commat;{{ $message->sender_username }}</span>
+                            @endif
+                        </p>
                         <p class="mt-0.5 text-sm text-charcoal whitespace-pre-wrap">{{ $message->body }}</p>
                         <p class="mt-0.5 text-[10px] text-slate-500">{{ $message->created_at }}</p>
                     </div>
@@ -72,30 +78,38 @@
         <div class="lg:col-span-3 rounded-lg border border-primary/40 bg-primary/5 p-4">
             <h2 class="text-sm font-semibold text-charcoal">{{ __('opes.messages_screen.new_conversation') }}</h2>
 
-            <div class="mt-2 grid gap-2 sm:grid-cols-2">
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.messages_screen.title_label') }}</span>
-                    <input type="text" wire:model="newTitle" class="mt-1 w-full rounded border border-border-primary p-2">
-                </label>
-                <label class="text-sm">
-                    <span class="block text-slate-600">{{ __('opes.messages_screen.recipient_email') }}</span>
-                    <input type="text" wire:model="newRecipient" class="mt-1 w-full rounded border border-border-primary p-2">
-                </label>
-            </div>
+            {{-- A real <form>, so Enter sends - matching the reply form above.
+                 It was a div with a wire:click button, which meant the most
+                 natural thing a sender does with a compose box did nothing. --}}
+            <form wire:submit.prevent="startThread">
+                <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                    <label class="text-sm">
+                        <span class="block text-slate-600">{{ __('opes.messages_screen.title_label') }}</span>
+                        <input type="text" wire:model="newTitle" class="mt-1 w-full rounded border border-border-primary p-2">
+                    </label>
+                    <label class="text-sm">
+                        <span class="block text-slate-600">{{ __('opes.messages_screen.recipient') }}</span>
+                        <input type="text" wire:model="newRecipient" autocomplete="off"
+                               placeholder="{{ __('opes.messages_screen.recipient_placeholder') }}"
+                               class="mt-1 w-full rounded border border-border-primary p-2">
+                        <span class="mt-1 block text-xs text-slate-500">{{ __('opes.messages_screen.recipient_hint') }}</span>
+                    </label>
+                </div>
 
-            <label class="mt-2 block text-sm">
-                <span class="block text-slate-600">{{ __('opes.messages_screen.message') }}</span>
-                <textarea wire:model="newBody" rows="3" class="mt-1 w-full rounded border border-border-primary p-2"></textarea>
-            </label>
+                <label class="mt-2 block text-sm">
+                    <span class="block text-slate-600">{{ __('opes.messages_screen.message') }}</span>
+                    <textarea wire:model="newBody" rows="3" class="mt-1 w-full rounded border border-border-primary p-2"></textarea>
+                </label>
 
-            <div class="mt-2 flex gap-2">
-                <button type="button" wire:click="startThread" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
-                    {{ __('opes.messages_screen.send') }}
-                </button>
-                <button type="button" wire:click="$set('showCompose', false)" class="rounded border border-border-primary px-4 py-2 text-sm">
-                    {{ __('opes.messages_screen.cancel') }}
-                </button>
-            </div>
+                <div class="mt-2 flex gap-2">
+                    <button type="submit" class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white">
+                        {{ __('opes.messages_screen.send') }}
+                    </button>
+                    <button type="button" wire:click="$set('showCompose', false)" class="rounded border border-border-primary px-4 py-2 text-sm">
+                        {{ __('opes.messages_screen.cancel') }}
+                    </button>
+                </div>
+            </form>
         </div>
     @endif
 </div>

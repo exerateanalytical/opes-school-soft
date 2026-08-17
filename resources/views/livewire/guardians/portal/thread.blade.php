@@ -29,7 +29,10 @@
                     ])>
                         @unless ($mine)
                             @if ($message->sender_name)
-                                <p class="text-xs font-semibold text-primary">{{ $message->sender_name }}</p>
+                                <p class="flex items-center gap-1 text-xs font-semibold text-primary">
+                                    <span>{{ $message->sender_name }}</span>
+                                    <x-verified-badge :official="(bool) ($message->sender_is_official ?? false)"/>
+                                </p>
                             @endif
                         @endunless
                         <p class="whitespace-pre-line">{{ $message->body }}</p>

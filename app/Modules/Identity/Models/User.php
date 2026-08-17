@@ -16,6 +16,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string|null $username
+ * @property bool $is_official
  * @property string $status
  * @property string|null $password
  * @property \Illuminate\Support\Carbon|null $must_change_password_at
@@ -35,7 +37,10 @@ class User extends Authenticatable
     use Notifiable;
 
     /** @var list<string> */
-    protected $fillable = ['name', 'email', 'password', 'status'];
+    // `is_official` is deliberately NOT fillable: the blue tick is worth
+    // nothing if a mass-assigned array can award it. Identity\Actions\
+    // MarkUserOfficial sets the attribute directly, under `user.manage`.
+    protected $fillable = ['name', 'email', 'username', 'password', 'status'];
 
     /** @var list<string> */
     protected $hidden = ['password', 'remember_token'];
@@ -48,6 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_official' => 'boolean',
             'must_change_password_at' => 'datetime',
         ];
     }
