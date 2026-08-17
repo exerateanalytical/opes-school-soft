@@ -29,12 +29,12 @@
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">First name</span>
                 <input type="text" wire:model="createFirstName" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                @error('createFirstName') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                @error('createFirstName') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Last name</span>
                 <input type="text" wire:model="createLastName" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                @error('createLastName') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                @error('createLastName') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Gender</span>
@@ -46,7 +46,7 @@
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Phone</span>
                 <input type="text" wire:model="createPhone" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                @error('createPhone') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                @error('createPhone') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Alternative phone</span>
@@ -59,6 +59,12 @@
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Date of birth</span>
                 <input type="date" wire:model="createDateOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="text-xs font-medium text-charcoal/70">ID number (optional)</span>
+                <input type="text" wire:model="createIdNumber" placeholder="National ID / passport"
+                       class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
+                @error('createIdNumber') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
         </div>
 
@@ -83,7 +89,7 @@
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Student admission no.</span>
                 <input type="text" wire:model="linkStudentAdmissionNo" class="rounded border border-border-primary px-2 py-1.5 text-sm"/>
-                @error('linkStudentAdmissionNo') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                @error('linkStudentAdmissionNo') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-charcoal/70">Relationship</span>
@@ -92,7 +98,7 @@
                         <option value="{{ $case->value }}">{{ ucwords(str_replace('_', ' ', $case->value)) }}</option>
                     @endforeach
                 </select>
-                @error('linkRelationship') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                @error('linkRelationship') <span class="text-xs text-heritage-red">{{ $message }}</span> @enderror
             </label>
             @if ($linkRelationship === 'other')
                 <label class="flex flex-col gap-1">

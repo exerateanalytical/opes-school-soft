@@ -173,3 +173,26 @@ it('never shows a thread to a user who is not a participant', function (): void 
 
     expect($strangerInbox)->toBe([]);
 });
+
+// ── The compose panel is a real form ─────────────────────────────────────
+
+it('starts a conversation from the compose form, which submits on Enter', function (): void {
+    $teacher = messagingUser();
+    $guardian = messagingUser();
+
+    Pest\Laravel\actingAs($teacher);
+
+    // A <form wire:submit.prevent> is what gives the panel Enter-to-submit;
+    // a wire:click button alone leaves the keyboard dead.
+    Livewire\Livewire::test(App\Modules\Communication\Livewire\Messages\Index::class)
+        ->set('showCompose', true)
+        ->assertSeeHtml('wire:submit.prevent="startThread"')
+        ->set('newTitle', 'About Amina\'s homework')
+        ->set('newRecipient', $guardian->email)
+        ->set('newBody', 'Amina did not submit her assignment today.')
+        ->call('startThread')
+        ->assertSet('showCompose', false)
+        ->assertSet('error', '');
+
+    expect(app(ListThreadsForUser::class)->handle((int) $guardian->getKey()))->toHaveCount(1);
+});
