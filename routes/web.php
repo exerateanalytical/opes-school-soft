@@ -1,8 +1,96 @@
 <?php
 
+use App\Modules\Academics\Livewire\Settings\AcademicSettings;
+use App\Modules\Accounting\Livewire\AccountingDashboard;
+use App\Modules\Accounting\Livewire\FinanceDashboard;
+use App\Modules\Accounting\Livewire\Reports\TrialBalance;
+use App\Modules\Accounting\Livewire\Review\ControlCentre;
+use App\Modules\Accounting\Livewire\Review\Journals;
+use App\Modules\Accounting\Livewire\YearEnd\Console;
+use App\Modules\Activities\Livewire\Show;
+use App\Modules\Admissions\Http\Controllers\ApplicantPhotoController;
+use App\Modules\Admissions\Livewire\Wizard;
+use App\Modules\Assessment\Http\Controllers\PrintReportCardController;
+use App\Modules\Attendance\Livewire\CoverageReport;
+use App\Modules\Attendance\Livewire\Index;
+use App\Modules\Attendance\Livewire\TakeRegister;
+use App\Modules\Fees\Http\Controllers\PrintInvoiceController;
+use App\Modules\Fees\Http\Controllers\PrintReceiptController;
+use App\Modules\Fees\Http\Controllers\PrintStatementController;
+use App\Modules\Fees\Livewire\Cashier;
+use App\Modules\Fees\Livewire\Statement;
+use App\Modules\Forms\Livewire\UnfinishedWork;
+use App\Modules\Guardians\Http\Controllers\GuardianPhotoController;
+use App\Modules\Guardians\Http\Controllers\PortalDocumentController;
+use App\Modules\Guardians\Http\Controllers\PortalPhotoController;
+use App\Modules\Guardians\Livewire\Portal\Academics;
+use App\Modules\Guardians\Livewire\Portal\AccountEdit;
+use App\Modules\Guardians\Livewire\Portal\AccountSettings;
+use App\Modules\Guardians\Livewire\Portal\Announcements;
+use App\Modules\Guardians\Livewire\Portal\Assignments;
+use App\Modules\Guardians\Livewire\Portal\Attendance;
+use App\Modules\Guardians\Livewire\Portal\ChildOverview;
+use App\Modules\Guardians\Livewire\Portal\ChildProfile;
+use App\Modules\Guardians\Livewire\Portal\Children;
+use App\Modules\Guardians\Livewire\Portal\Contacts;
+use App\Modules\Guardians\Livewire\Portal\Discipline;
+use App\Modules\Guardians\Livewire\Portal\Documents;
+use App\Modules\Guardians\Livewire\Portal\Entry;
+use App\Modules\Guardians\Livewire\Portal\FeeDetail;
+use App\Modules\Guardians\Livewire\Portal\Fees;
+use App\Modules\Guardians\Livewire\Portal\Health;
+use App\Modules\Guardians\Livewire\Portal\HealthDetail;
+use App\Modules\Guardians\Livewire\Portal\HelpSupport;
+use App\Modules\Guardians\Livewire\Portal\Invoice;
+use App\Modules\Guardians\Livewire\Portal\Meeting;
+use App\Modules\Guardians\Livewire\Portal\Messages;
+use App\Modules\Guardians\Livewire\Portal\Notifications;
+use App\Modules\Guardians\Livewire\Portal\NotificationSettings;
+use App\Modules\Guardians\Livewire\Portal\Payments;
+use App\Modules\Guardians\Livewire\Portal\Receipt;
+use App\Modules\Guardians\Livewire\Portal\Results;
+use App\Modules\Guardians\Livewire\Portal\SchoolIdCard;
+use App\Modules\Guardians\Livewire\Portal\SchoolLife;
+use App\Modules\Guardians\Livewire\Portal\Search;
+use App\Modules\Guardians\Livewire\Portal\Security;
+use App\Modules\Guardians\Livewire\Portal\Thread;
+use App\Modules\Guardians\Livewire\Portal\Timetable;
+use App\Modules\HR\Http\Controllers\StaffPhotoController;
+use App\Modules\Identity\Livewire\Account;
 use App\Modules\Identity\Livewire\Auth\Login;
+use App\Modules\Identity\Livewire\Users\Form;
+use App\Modules\Identity\Livewire\Users\Tokens;
+use App\Modules\Identity\Support\Navigation;
+use App\Modules\Library\Livewire\BookShow;
+use App\Modules\Library\Livewire\MemberShow;
+use App\Modules\Notifications\Http\Controllers\PushSubscriptionController;
 use App\Modules\Operations\Http\HealthController;
 use App\Modules\Operations\Livewire\Dashboard;
+use App\Modules\Operations\Livewire\LicencePanel;
+use App\Modules\Operations\Livewire\RolloverWizard;
+use App\Modules\Payroll\Http\Controllers\PrintPayslipController;
+use App\Modules\Procurement\Http\Controllers\PrintPaymentVoucherController;
+use App\Modules\Procurement\Livewire\PayablesDashboard;
+use App\Modules\Procurement\Livewire\Payments\Pay;
+use App\Modules\Procurement\Livewire\PurchaseOrders\Edit;
+use App\Modules\Procurement\Livewire\SupplierInvoices\Capture;
+use App\Modules\Reporting\Http\MarkNoIndex;
+use App\Modules\Reporting\Livewire\Reports\Hub;
+use App\Modules\Reporting\Livewire\Verify;
+use App\Modules\SchoolProfile\Livewire\Branding;
+use App\Modules\SchoolProfile\Livewire\DocumentProfile;
+use App\Modules\SchoolProfile\Livewire\SettingsHub;
+use App\Modules\Students\Http\Controllers\PrintBlankAdmissionFormController;
+use App\Modules\Students\Http\Controllers\PrintStudentDocumentController;
+use App\Modules\Tax\Http\Controllers\PrintWithholdingAttestationController;
+use App\Modules\Tax\Livewire\FiscalIdentity;
+use App\Modules\Tax\Livewire\TaxConfiguration;
+use App\Modules\Tax\Livewire\TaxDashboard;
+use App\Modules\Welfare\Livewire\Discipline\CaseShow;
+use App\Modules\Welfare\Livewire\Hostel\RoomShow;
+use App\Modules\Welfare\Livewire\Insurance\PolicyShow;
+use App\Modules\Welfare\Livewire\Transport\VehicleShow;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +114,7 @@ Route::middleware('guest')->group(function (): void {
      * password emails and has no 2FA (spec 1 non-goals), and a field that
      * posted nowhere would be worse than a sentence saying who to ask.
      */
-    Route::get('/welcome/{view?}', \App\Modules\Guardians\Livewire\Portal\Entry::class)
+    Route::get('/welcome/{view?}', Entry::class)
         ->whereIn('view', ['splash', 'welcome', 'reset', 'otp'])
         ->name('portal.entry');
 });
@@ -48,7 +136,7 @@ Route::middleware('auth')->group(function (): void {
      * password, and gating it on any permission would reproduce the gap it
      * exists to close - a teacher unable to change their own password.
      */
-    Route::get('/account', \App\Modules\Identity\Livewire\Account::class)->name('account.index');
+    Route::get('/account', Account::class)->name('account.index');
 
     /*
      * The operator's UI language, not the school's document language - see
@@ -56,7 +144,7 @@ Route::middleware('auth')->group(function (): void {
      * rejected value comes back as a validation error rather than silently
      * leaving the interface as it was.
      */
-    Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    Route::post('/locale', function (Request $request) {
         $validated = $request->validate(['locale' => 'required|in:en,fr']);
         session(['locale' => $validated['locale']]);
 
@@ -69,10 +157,10 @@ Route::middleware('auth')->group(function (): void {
      * without `user.view`, and hiding a link is presentation, never a control
      * (00-core 6.2). The route has to refuse on its own.
      */
-    Route::get('/users', \App\Modules\Identity\Livewire\Users\Index::class)
+    Route::get('/users', App\Modules\Identity\Livewire\Users\Index::class)
         ->middleware('can:user.view')->name('users.index');
 
-    Route::get('/users/create', \App\Modules\Identity\Livewire\Users\Form::class)
+    Route::get('/users/create', Form::class)
         ->middleware('can:user.manage')->name('users.create');
 
     /*
@@ -89,10 +177,10 @@ Route::middleware('auth')->group(function (): void {
      * credential that works from outside the building, the same class
      * of right as an API token.
      */
-    Route::get('/webhooks', \App\Modules\Reporting\Livewire\Webhooks\Index::class)
+    Route::get('/webhooks', App\Modules\Reporting\Livewire\Webhooks\Index::class)
         ->middleware('can:api.manage_tokens')->name('reporting.webhooks');
 
-    Route::get('/users/{user}/tokens', \App\Modules\Identity\Livewire\Users\Tokens::class)
+    Route::get('/users/{user}/tokens', Tokens::class)
         ->middleware('can:api.manage_tokens')->whereNumber('user')->name('users.tokens');
 
     /*
@@ -101,13 +189,13 @@ Route::middleware('auth')->group(function (): void {
      * presentation - the route refuses on its own. Settings is gated harder
      * (`academics.manage`) because it shapes the structure the rest read.
      */
-    Route::get('/academics/settings', \App\Modules\Academics\Livewire\Settings\AcademicSettings::class)
+    Route::get('/academics/settings', AcademicSettings::class)
         ->middleware('can:academics.manage')->name('academics.settings');
 
-    Route::get('/classes', \App\Modules\Academics\Livewire\ClassGroups\Index::class)
+    Route::get('/classes', App\Modules\Academics\Livewire\ClassGroups\Index::class)
         ->middleware('can:academics.view')->name('classes.index');
 
-    Route::get('/subjects', \App\Modules\Academics\Livewire\Subjects\Index::class)
+    Route::get('/subjects', App\Modules\Academics\Livewire\Subjects\Index::class)
         ->middleware('can:academics.view')->name('subjects.index');
 
     /*
@@ -118,7 +206,7 @@ Route::middleware('auth')->group(function (): void {
      * component and re-authorized in AssignTimetableSlot/RemoveTimetableSlot,
      * the same screen-vs-write split every module above uses.
      */
-    Route::get('/timetable', \App\Modules\Academics\Livewire\Timetable\Index::class)
+    Route::get('/timetable', App\Modules\Academics\Livewire\Timetable\Index::class)
         ->middleware('can:timetable.view')->name('timetable.index');
 
     /*
@@ -129,13 +217,13 @@ Route::middleware('auth')->group(function (): void {
      * component and OpenAttendanceRegister/SubmitAttendanceRegister
      * re-authorize it, so the route's `can:` is the outer gate only.
      */
-    Route::get('/attendance', \App\Modules\Attendance\Livewire\Index::class)
+    Route::get('/attendance', Index::class)
         ->middleware('can:attendance.view')->name('attendance.index');
 
-    Route::get('/attendance/take', \App\Modules\Attendance\Livewire\TakeRegister::class)
+    Route::get('/attendance/take', TakeRegister::class)
         ->middleware('can:attendance.take')->name('attendance.take');
 
-    Route::get('/attendance/coverage', \App\Modules\Attendance\Livewire\CoverageReport::class)
+    Route::get('/attendance/coverage', CoverageReport::class)
         ->middleware('can:attendance.view')->name('attendance.coverage');
 
     /*
@@ -149,7 +237,7 @@ Route::middleware('auth')->group(function (): void {
      * so `guardians.show` is gated on `students.view`; `guardians.manage`
      * gates writing, which happens inside the student screens.
      */
-    Route::get('/students', \App\Modules\Students\Livewire\Students\Index::class)
+    Route::get('/students', App\Modules\Students\Livewire\Students\Index::class)
         ->middleware('can:students.view')->name('students.index');
 
     /*
@@ -165,7 +253,7 @@ Route::middleware('auth')->group(function (): void {
      * carries no numeric constraint, so "promotion" would otherwise match it
      * as a student id and this route would never be reached.
      */
-    Route::get('/students/promotion', \App\Modules\Students\Livewire\Promotion\Wizard::class)
+    Route::get('/students/promotion', App\Modules\Students\Livewire\Promotion\Wizard::class)
         ->middleware('can:promotion.evaluate')->name('students.promotion');
 
     /*
@@ -184,10 +272,10 @@ Route::middleware('auth')->group(function (): void {
      * be ticked to turn a red row green - a school gets green by
      * configuring the thing.
      */
-    Route::get('/setup', \App\Modules\Operations\Livewire\Setup\Index::class)
+    Route::get('/setup', App\Modules\Operations\Livewire\Setup\Index::class)
         ->middleware('can:setting.view')->name('operations.setup');
 
-    Route::get('/students/import', \App\Modules\Students\Livewire\Import\Index::class)
+    Route::get('/students/import', App\Modules\Students\Livewire\Import\Index::class)
         ->middleware('can:students.manage')->name('students.import');
 
     // ── Student documents ──────────────────────────────────────────────
@@ -197,10 +285,10 @@ Route::middleware('auth')->group(function (): void {
     // re-checks it and adds documents.reprint on a second render of the
     // same certificate. The blank admission-form route MUST precede
     // /students/{student}: "documents" would otherwise match as an id.
-    Route::get('/students/documents/admission-form/print', \App\Modules\Students\Http\Controllers\PrintBlankAdmissionFormController::class)
+    Route::get('/students/documents/admission-form/print', PrintBlankAdmissionFormController::class)
         ->middleware('can:documents.print')->name('students.documents.admission-form');
 
-    Route::get('/students/{student}/documents/{document}/print', \App\Modules\Students\Http\Controllers\PrintStudentDocumentController::class)
+    Route::get('/students/{student}/documents/{document}/print', PrintStudentDocumentController::class)
         ->middleware('can:documents.print')->whereNumber('student')
         ->whereIn('document', [
             'admission-form', 'info-sheet', 'transfer-certificate', 'leaving-certificate',
@@ -209,7 +297,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('students.documents.print');
     // ── End student documents ──────────────────────────────────────────
 
-    Route::get('/students/{student}', \App\Modules\Students\Livewire\Students\Show::class)
+    Route::get('/students/{student}', App\Modules\Students\Livewire\Students\Show::class)
         ->middleware('can:students.view')->name('students.show');
 
     /*
@@ -223,7 +311,7 @@ Route::middleware('auth')->group(function (): void {
      * in Phase 2 with no UI. MUST precede /guardians/{guardian} below,
      * same ordering reason as /students/promotion.
      */
-    Route::get('/guardians/meetings', \App\Modules\Guardians\Livewire\Meetings\Index::class)
+    Route::get('/guardians/meetings', App\Modules\Guardians\Livewire\Meetings\Index::class)
         ->middleware('can:guardians.manage')->name('guardians.meetings');
 
     /*
@@ -231,13 +319,13 @@ Route::middleware('auth')->group(function (): void {
      * body distinct from an individual guardian's meeting with the
      * school. Not in docs/specs.
      */
-    Route::get('/guardians/pta', \App\Modules\Guardians\Livewire\Pta\Index::class)
+    Route::get('/guardians/pta', App\Modules\Guardians\Livewire\Pta\Index::class)
         ->middleware('can:guardians.manage')->name('guardians.pta');
 
-    Route::get('/guardians', \App\Modules\Guardians\Livewire\Guardians\Index::class)
+    Route::get('/guardians', App\Modules\Guardians\Livewire\Guardians\Index::class)
         ->middleware('can:guardians.manage')->name('guardians.index');
 
-    Route::get('/guardians/{guardian}', \App\Modules\Guardians\Livewire\Guardians\Show::class)
+    Route::get('/guardians/{guardian}', App\Modules\Guardians\Livewire\Guardians\Show::class)
         ->middleware('can:students.view')->name('guardians.show');
 
     /*
@@ -245,7 +333,7 @@ Route::middleware('auth')->group(function (): void {
      * no URL of its own; this is the policy-checked way to read it, gated the
      * same as the profile that draws it.
      */
-    Route::get('/guardians/{guardian}/photo', \App\Modules\Guardians\Http\Controllers\GuardianPhotoController::class)
+    Route::get('/guardians/{guardian}/photo', GuardianPhotoController::class)
         ->whereNumber('guardian')
         ->middleware('can:students.view')->name('guardians.photo');
 
@@ -256,18 +344,28 @@ Route::middleware('auth')->group(function (): void {
      * triaged. The wizard keeps its own URL and is now reached from the
      * queue (or directly, for a fresh intake).
      */
-    Route::get('/admissions', \App\Modules\Admissions\Livewire\Index::class)
+    Route::get('/admissions', App\Modules\Admissions\Livewire\Index::class)
         ->middleware('can:admissions.manage')->name('admissions.index');
 
-    Route::get('/admissions/wizard', \App\Modules\Admissions\Livewire\Wizard::class)
+    Route::get('/admissions/wizard', Wizard::class)
         ->middleware('can:admissions.manage')->name('admissions.wizard');
+
+    /*
+     * The applicant's photograph is a photograph of a CHILD and lives on the
+     * PRIVATE default disk, so it has no URL of its own; this is the
+     * policy-checked way to read it, gated the same as the wizard that draws
+     * it. Registered AFTER /admissions/wizard so the literal segment wins.
+     */
+    Route::get('/admissions/{application}/photo', ApplicantPhotoController::class)
+        ->whereNumber('application')
+        ->middleware('can:admissions.manage')->name('admissions.photo');
 
     /*
      * 09-ui §8.11: the audit log has always been written and hash-chained;
      * it simply had no viewer. "An un-viewable audit log satisfies no
      * auditor." Chain verification runs the existing VerifyAuditChain.
      */
-    Route::get('/audit-log', \App\Modules\Identity\Livewire\AuditLog\Index::class)
+    Route::get('/audit-log', App\Modules\Identity\Livewire\AuditLog\Index::class)
         ->middleware('can:audit.view')->name('audit.index');
 
     /*
@@ -278,14 +376,14 @@ Route::middleware('auth')->group(function (): void {
      * Administrator by Role::defaultPermissions) and is surfaced, not
      * automated.
      */
-    Route::get('/operations/backups', \App\Modules\Operations\Livewire\Backups\Index::class)
+    Route::get('/operations/backups', App\Modules\Operations\Livewire\Backups\Index::class)
         ->middleware('can:backup.run')->name('operations.backups');
 
     /*
      * 10-documents §18: bulk print jobs. The table shipped in Phase 13 with
      * no model, Action or screen behind it.
      */
-    Route::get('/documents/bulk-prints', \App\Modules\Reporting\Livewire\BulkPrints\Index::class)
+    Route::get('/documents/bulk-prints', App\Modules\Reporting\Livewire\BulkPrints\Index::class)
         ->middleware('can:documents.bulk_print')->name('documents.bulk-prints');
 
     /*
@@ -306,7 +404,7 @@ Route::middleware('auth')->group(function (): void {
      * marks.enter, the permission a teacher already holds for the
      * classes assigned to them.
      */
-    Route::get('/homework', \App\Modules\Assessment\Livewire\Homework\Index::class)
+    Route::get('/homework', App\Modules\Assessment\Livewire\Homework\Index::class)
         ->middleware('can:marks.enter')->name('assessment.homework');
 
     /*
@@ -314,27 +412,27 @@ Route::middleware('auth')->group(function (): void {
      * whole subsystem is modelled on) waiting for the operator to come
      * back to them.
      */
-    Route::get('/unfinished-work', \App\Modules\Forms\Livewire\UnfinishedWork::class)
+    Route::get('/unfinished-work', UnfinishedWork::class)
         ->name('forms.unfinished_work');
 
     /*
      * Web Push subscription endpoints - plain JSON, called by
      * PushManager.subscribe() in the browser, not by Livewire.
      */
-    Route::get('/push/vapid-public-key', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'vapidPublicKey'])
+    Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidPublicKey'])
         ->name('push.vapid_public_key');
-    Route::post('/push/subscribe', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'subscribe'])
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'subscribe'])
         ->name('push.subscribe');
-    Route::post('/push/unsubscribe', [\App\Modules\Notifications\Http\Controllers\PushSubscriptionController::class, 'unsubscribe'])
+    Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe'])
         ->name('push.unsubscribe');
 
-    Route::get('/messages', \App\Modules\Communication\Livewire\Messages\Index::class)
+    Route::get('/messages', App\Modules\Communication\Livewire\Messages\Index::class)
         ->name('communication.messages');
 
-    Route::get('/communication/outbox', \App\Modules\Communication\Livewire\Outbox\Index::class)
+    Route::get('/communication/outbox', App\Modules\Communication\Livewire\Outbox\Index::class)
         ->middleware('can:communication.view')->name('communication.outbox');
 
-    Route::get('/communication/templates', \App\Modules\Communication\Livewire\Templates\Index::class)
+    Route::get('/communication/templates', App\Modules\Communication\Livewire\Templates\Index::class)
         ->middleware('can:communication.view')->name('communication.templates');
 
     /*
@@ -354,16 +452,16 @@ Route::middleware('auth')->group(function (): void {
      * convention of specific-before-parameterised, though neither collides
      * with /marks in practice.
      */
-    Route::get('/examinations', \App\Modules\Assessment\Livewire\Examinations\Index::class)
+    Route::get('/examinations', App\Modules\Assessment\Livewire\Examinations\Index::class)
         ->middleware('can:assessment.configure')->name('assessment.examinations.index');
 
-    Route::get('/examinations/{exam}', \App\Modules\Assessment\Livewire\Examinations\Show::class)
+    Route::get('/examinations/{exam}', App\Modules\Assessment\Livewire\Examinations\Show::class)
         ->middleware('can:assessment.configure')->whereNumber('exam')->name('assessment.examinations.show');
 
-    Route::get('/results', \App\Modules\Assessment\Livewire\Results\Index::class)
+    Route::get('/results', App\Modules\Assessment\Livewire\Results\Index::class)
         ->middleware('can:academics.view')->name('assessment.results.index');
 
-    Route::get('/marks', \App\Modules\Assessment\Livewire\Marks\Entry::class)
+    Route::get('/marks', App\Modules\Assessment\Livewire\Marks\Entry::class)
         ->middleware('can:marks.enter')->name('marks.entry');
 
     /*
@@ -372,16 +470,16 @@ Route::middleware('auth')->group(function (): void {
      * route refuses on its own. Journal-entry creation is gated harder
      * (`ledger.post`) because it writes to the books; the rest is read-only.
      */
-    Route::get('/ledger/chart-of-accounts', \App\Modules\Accounting\Livewire\ChartOfAccounts\Index::class)
+    Route::get('/ledger/chart-of-accounts', App\Modules\Accounting\Livewire\ChartOfAccounts\Index::class)
         ->middleware('can:ledger.view')->name('ledger.chart-of-accounts');
 
-    Route::get('/ledger/journal-entries', \App\Modules\Accounting\Livewire\JournalEntries\Index::class)
+    Route::get('/ledger/journal-entries', App\Modules\Accounting\Livewire\JournalEntries\Index::class)
         ->middleware('can:ledger.view')->name('ledger.journal-entries.index');
 
-    Route::get('/ledger/journal-entries/create', \App\Modules\Accounting\Livewire\JournalEntries\Form::class)
+    Route::get('/ledger/journal-entries/create', App\Modules\Accounting\Livewire\JournalEntries\Form::class)
         ->middleware('can:ledger.post')->name('ledger.journal-entries.create');
 
-    Route::get('/ledger/trial-balance', \App\Modules\Accounting\Livewire\Reports\TrialBalance::class)
+    Route::get('/ledger/trial-balance', TrialBalance::class)
         ->middleware('can:ledger.view')->name('ledger.trial-balance');
 
     /*
@@ -400,10 +498,10 @@ Route::middleware('auth')->group(function (): void {
      */
     Route::redirect('/finance', '/finance/invoices');
 
-    Route::get('/finance/invoices', \App\Modules\Fees\Livewire\Invoices\Index::class)
+    Route::get('/finance/invoices', App\Modules\Fees\Livewire\Invoices\Index::class)
         ->middleware('can:fee.view')->name('fees.invoices.index');
 
-    Route::get('/finance/cashier', \App\Modules\Fees\Livewire\Cashier::class)
+    Route::get('/finance/cashier', Cashier::class)
         ->middleware('can:fee.view')->name('fees.cashier');
 
     /*
@@ -411,10 +509,10 @@ Route::middleware('auth')->group(function (): void {
      * own collections, expected vs counted, and the variance with its written
      * reason. Read-only - opening and closing happen on the Cashier screen.
      */
-    Route::get('/finance/cash-desk/{session}', \App\Modules\Fees\Livewire\CashDesk\Show::class)
+    Route::get('/finance/cash-desk/{session}', App\Modules\Fees\Livewire\CashDesk\Show::class)
         ->middleware('can:fee.view')->whereNumber('session')->name('fees.cashdesk.show');
 
-    Route::get('/finance/statement/{student}', \App\Modules\Fees\Livewire\Statement::class)
+    Route::get('/finance/statement/{student}', Statement::class)
         ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement');
 
     /*
@@ -425,13 +523,13 @@ Route::middleware('auth')->group(function (): void {
      * payment/invoice) is re-checked inside RenderDocument itself, the
      * same screen-vs-act split every other module in this file uses.
      */
-    Route::get('/finance/payments/{payment}/receipt', \App\Modules\Fees\Http\Controllers\PrintReceiptController::class)
+    Route::get('/finance/payments/{payment}/receipt', PrintReceiptController::class)
         ->middleware('can:fee.view')->whereNumber('payment')->name('fees.payments.receipt');
 
-    Route::get('/finance/invoices/{invoice}/print', \App\Modules\Fees\Http\Controllers\PrintInvoiceController::class)
+    Route::get('/finance/invoices/{invoice}/print', PrintInvoiceController::class)
         ->middleware('can:fee.view')->whereNumber('invoice')->name('fees.invoices.print');
 
-    Route::get('/finance/statement/{student}/print', \App\Modules\Fees\Http\Controllers\PrintStatementController::class)
+    Route::get('/finance/statement/{student}/print', PrintStatementController::class)
         ->middleware('can:fee.view')->whereNumber('student')->name('fees.students.statement.print');
 
     /*
@@ -452,53 +550,53 @@ Route::middleware('auth')->group(function (): void {
      */
     Route::redirect('/procurement', '/procurement/suppliers');
 
-    Route::get('/procurement/suppliers', \App\Modules\Procurement\Livewire\Suppliers\Index::class)
+    Route::get('/procurement/suppliers', App\Modules\Procurement\Livewire\Suppliers\Index::class)
         ->middleware('can:procurement.view')->name('procurement.suppliers.index');
 
-    Route::get('/procurement/suppliers/{supplier}', \App\Modules\Procurement\Livewire\Suppliers\Show::class)
+    Route::get('/procurement/suppliers/{supplier}', App\Modules\Procurement\Livewire\Suppliers\Show::class)
         ->middleware('can:procurement.view')->whereNumber('supplier')->name('procurement.suppliers.show');
 
-    Route::get('/procurement/requisitions', \App\Modules\Procurement\Livewire\Requisitions\Index::class)
+    Route::get('/procurement/requisitions', App\Modules\Procurement\Livewire\Requisitions\Index::class)
         ->middleware('can:procurement.view')->name('procurement.requisitions.index');
 
-    Route::get('/procurement/orders', \App\Modules\Procurement\Livewire\PurchaseOrders\Index::class)
+    Route::get('/procurement/orders', App\Modules\Procurement\Livewire\PurchaseOrders\Index::class)
         ->middleware('can:procurement.view')->name('procurement.orders.index');
 
-    Route::get('/procurement/orders/capture', \App\Modules\Procurement\Livewire\PurchaseOrders\Edit::class)
+    Route::get('/procurement/orders/capture', Edit::class)
         ->middleware('can:procurement.order_manage')->name('procurement.orders.capture');
 
-    Route::get('/procurement/orders/{order}', \App\Modules\Procurement\Livewire\PurchaseOrders\Show::class)
+    Route::get('/procurement/orders/{order}', App\Modules\Procurement\Livewire\PurchaseOrders\Show::class)
         ->middleware('can:procurement.view')->whereNumber('order')->name('procurement.orders.show');
 
-    Route::get('/procurement/receipts', \App\Modules\Procurement\Livewire\GoodsReceipts\Index::class)
+    Route::get('/procurement/receipts', App\Modules\Procurement\Livewire\GoodsReceipts\Index::class)
         ->middleware('can:procurement.view')->name('procurement.receipts.index');
 
-    Route::get('/procurement/invoices', \App\Modules\Procurement\Livewire\SupplierInvoices\Index::class)
+    Route::get('/procurement/invoices', App\Modules\Procurement\Livewire\SupplierInvoices\Index::class)
         ->middleware('can:procurement.invoice_view')->name('procurement.invoices.index');
 
-    Route::get('/procurement/invoices/capture', \App\Modules\Procurement\Livewire\SupplierInvoices\Capture::class)
+    Route::get('/procurement/invoices/capture', Capture::class)
         ->middleware('can:procurement.invoice_create')->name('procurement.invoices.capture');
 
-    Route::get('/procurement/invoices/{invoice}', \App\Modules\Procurement\Livewire\SupplierInvoices\Show::class)
+    Route::get('/procurement/invoices/{invoice}', App\Modules\Procurement\Livewire\SupplierInvoices\Show::class)
         ->middleware('can:procurement.invoice_view')->whereNumber('invoice')->name('procurement.invoices.show');
 
-    Route::get('/procurement/payments', \App\Modules\Procurement\Livewire\Payments\Index::class)
+    Route::get('/procurement/payments', App\Modules\Procurement\Livewire\Payments\Index::class)
         ->middleware('can:procurement.payment_record')->name('procurement.payments.index');
 
-    Route::get('/procurement/payments/pay', \App\Modules\Procurement\Livewire\Payments\Pay::class)
+    Route::get('/procurement/payments/pay', Pay::class)
         ->middleware('can:procurement.payment_record')->name('procurement.payments.pay');
 
-    Route::get('/procurement/payments/{payment}', \App\Modules\Procurement\Livewire\Payments\Show::class)
+    Route::get('/procurement/payments/{payment}', App\Modules\Procurement\Livewire\Payments\Show::class)
         ->middleware('can:procurement.payment_record')->whereNumber('payment')->name('procurement.payments.show');
 
-    Route::get('/procurement/payables', \App\Modules\Procurement\Livewire\PayablesDashboard::class)
+    Route::get('/procurement/payables', PayablesDashboard::class)
         ->middleware('can:procurement.view')->name('procurement.payables');
 
     /*
      * Payment Voucher print button, docs/plans/phase-12-13.md D3 - same gate
      * as the Payments screens above.
      */
-    Route::get('/procurement/payments/{payment}/voucher', \App\Modules\Procurement\Http\Controllers\PrintPaymentVoucherController::class)
+    Route::get('/procurement/payments/{payment}/voucher', PrintPaymentVoucherController::class)
         ->middleware('can:procurement.payment_record')->whereNumber('payment')->name('procurement.payments.voucher');
 
     /*
@@ -508,19 +606,19 @@ Route::middleware('auth')->group(function (): void {
      * fiscal identity live under /settings behind ledger.configure, the
      * same right that shapes the ledger those settings feed.
      */
-    Route::get('/tax', \App\Modules\Tax\Livewire\TaxDashboard::class)
+    Route::get('/tax', TaxDashboard::class)
         ->middleware('can:tax.view')->name('tax.dashboard');
 
-    Route::get('/tax/declarations', \App\Modules\Tax\Livewire\Declarations\Index::class)
+    Route::get('/tax/declarations', App\Modules\Tax\Livewire\Declarations\Index::class)
         ->middleware('can:tax.declare')->name('tax.declarations.index');
 
-    Route::get('/tax/declarations/{declaration}', \App\Modules\Tax\Livewire\Declarations\Show::class)
+    Route::get('/tax/declarations/{declaration}', App\Modules\Tax\Livewire\Declarations\Show::class)
         ->middleware('can:tax.declare')->whereNumber('declaration')->name('tax.declarations.show');
 
-    Route::get('/settings/fiscal-identity', \App\Modules\Tax\Livewire\FiscalIdentity::class)
+    Route::get('/settings/fiscal-identity', FiscalIdentity::class)
         ->middleware('can:ledger.configure')->name('tax.fiscal-identity');
 
-    Route::get('/settings/tax', \App\Modules\Tax\Livewire\TaxConfiguration::class)
+    Route::get('/settings/tax', TaxConfiguration::class)
         ->middleware('can:ledger.configure')->name('tax.settings');
 
     /*
@@ -535,14 +633,14 @@ Route::middleware('auth')->group(function (): void {
      * browser it used to serve moved to /settings/advanced, where it is one
      * card among eight rather than the only thing a principal finds.
      */
-    Route::get('/settings', \App\Modules\SchoolProfile\Livewire\SettingsHub::class)
+    Route::get('/settings', SettingsHub::class)
         ->middleware('can:setting.view')->name('settings.index');
 
-    Route::get('/settings/advanced', \App\Modules\SchoolProfile\Livewire\Index::class)
+    Route::get('/settings/advanced', App\Modules\SchoolProfile\Livewire\Index::class)
         ->middleware('can:setting.view')->name('settings.advanced');
 
     // The school's one brand-colour picker.
-    Route::get('/settings/branding', \App\Modules\SchoolProfile\Livewire\Branding::class)
+    Route::get('/settings/branding', Branding::class)
         ->middleware('can:setting.edit')->name('settings.branding');
 
     /*
@@ -552,7 +650,7 @@ Route::middleware('auth')->group(function (): void {
      * rows and no writer, so every document printed bare. `setting.edit`,
      * matching /settings/branding beside it.
      */
-    Route::get('/settings/school-identity', \App\Modules\SchoolProfile\Livewire\DocumentProfile::class)
+    Route::get('/settings/school-identity', DocumentProfile::class)
         ->middleware('can:setting.edit')->name('settings.school-identity');
 
     /*
@@ -560,7 +658,7 @@ Route::middleware('auth')->group(function (): void {
      * 10-documents §15's WHT-CERT (phase-12-13 D3) - gated tax.view, the
      * same read right the Tax dashboard uses.
      */
-    Route::get('/tax/withholding-attestations/{attestation}/print', \App\Modules\Tax\Http\Controllers\PrintWithholdingAttestationController::class)
+    Route::get('/tax/withholding-attestations/{attestation}/print', PrintWithholdingAttestationController::class)
         ->middleware('can:tax.view')->whereNumber('attestation')->name('tax.withholding-attestations.print');
 
     /*
@@ -570,7 +668,7 @@ Route::middleware('auth')->group(function (): void {
      * re-authorizes it, so the route's `can:` is the outer gate only, same
      * screen-vs-write split as everywhere above.
      */
-    Route::get('/operations/rollover', \App\Modules\Operations\Livewire\RolloverWizard::class)
+    Route::get('/operations/rollover', RolloverWizard::class)
         ->middleware('can:rollover.run')->name('operations.rollover');
 
     /*
@@ -580,7 +678,7 @@ Route::middleware('auth')->group(function (): void {
      * serves the scheduled-module page, while this concrete settings screen
      * has its own address, as /settings/tax and /settings/fiscal-identity do.
      */
-    Route::get('/settings/licence', \App\Modules\Operations\Livewire\LicencePanel::class)
+    Route::get('/settings/licence', LicencePanel::class)
         ->middleware('can:licence.manage')->name('settings.licence');
 
     /*
@@ -590,8 +688,8 @@ Route::middleware('auth')->group(function (): void {
      * construction, and verifying a presented certificate is front-desk work.
      * noindex via header per §17.2.
      */
-    Route::get('/documents/verify', \App\Modules\Reporting\Livewire\Verify::class)
-        ->middleware(\App\Modules\Reporting\Http\MarkNoIndex::class)
+    Route::get('/documents/verify', Verify::class)
+        ->middleware(MarkNoIndex::class)
         ->name('documents.verify');
 
     /*
@@ -604,10 +702,10 @@ Route::middleware('auth')->group(function (): void {
      * and re-authorized in the Actions, the same screen-vs-write split every
      * module above uses.
      */
-    Route::get('/welfare/discipline', \App\Modules\Welfare\Livewire\Discipline\Index::class)
+    Route::get('/welfare/discipline', App\Modules\Welfare\Livewire\Discipline\Index::class)
         ->middleware('can:discipline.view')->name('welfare.discipline.index');
 
-    Route::get('/welfare/discipline/{case}', \App\Modules\Welfare\Livewire\Discipline\CaseShow::class)
+    Route::get('/welfare/discipline/{case}', CaseShow::class)
         ->middleware('can:discipline.view')->whereNumber('case')->name('welfare.discipline.show');
 
     /*
@@ -617,28 +715,28 @@ Route::middleware('auth')->group(function (): void {
      * `.view` permission, matching Navigation::items() below, per this
      * file's nav-and-route-agree-by-construction contract.
      */
-    Route::get('/transport', \App\Modules\Welfare\Livewire\Transport\Index::class)
+    Route::get('/transport', App\Modules\Welfare\Livewire\Transport\Index::class)
         ->middleware('can:transport.view')->name('welfare.transport.index');
 
-    Route::get('/transport/vehicles/{vehicle}', \App\Modules\Welfare\Livewire\Transport\VehicleShow::class)
+    Route::get('/transport/vehicles/{vehicle}', VehicleShow::class)
         ->middleware('can:transport.view')->whereNumber('vehicle')->name('transport.vehicles.show');
 
-    Route::get('/hostel', \App\Modules\Welfare\Livewire\Hostel\Index::class)
+    Route::get('/hostel', App\Modules\Welfare\Livewire\Hostel\Index::class)
         ->middleware('can:hostel.view')->name('welfare.hostel.index');
 
-    Route::get('/hostel/rooms/{room}', \App\Modules\Welfare\Livewire\Hostel\RoomShow::class)
+    Route::get('/hostel/rooms/{room}', RoomShow::class)
         ->middleware('can:hostel.view')->whereNumber('room')->name('hostel.rooms.show');
 
-    Route::get('/medical', \App\Modules\Welfare\Livewire\Medical\Index::class)
+    Route::get('/medical', App\Modules\Welfare\Livewire\Medical\Index::class)
         ->middleware('can:medical.view')->name('welfare.medical.index');
 
-    Route::get('/visitors', \App\Modules\Welfare\Livewire\Visitors\Index::class)
+    Route::get('/visitors', App\Modules\Welfare\Livewire\Visitors\Index::class)
         ->middleware('can:visitor.manage')->name('welfare.visitors.index');
 
-    Route::get('/insurance', \App\Modules\Welfare\Livewire\Insurance\Index::class)
+    Route::get('/insurance', App\Modules\Welfare\Livewire\Insurance\Index::class)
         ->middleware('can:insurance.view')->name('welfare.insurance.index');
 
-    Route::get('/welfare/insurance/policies/{policy}', \App\Modules\Welfare\Livewire\Insurance\PolicyShow::class)
+    Route::get('/welfare/insurance/policies/{policy}', PolicyShow::class)
         ->middleware('can:insurance.view')->whereNumber('policy')->name('insurance.policies.show');
 
     // ── Activities module ──────────────────────────────────────────────
@@ -648,10 +746,10 @@ Route::middleware('auth')->group(function (): void {
     // enrol, sessions, attendance, excursion consent - row 15) are gated
     // harder (activity.manage) inside the components and re-authorized in
     // the Actions, the same screen-vs-write split every module above uses.
-    Route::get('/activities', \App\Modules\Activities\Livewire\Index::class)
+    Route::get('/activities', App\Modules\Activities\Livewire\Index::class)
         ->middleware('can:activity.view')->name('activities.index');
 
-    Route::get('/activities/{activity}', \App\Modules\Activities\Livewire\Show::class)
+    Route::get('/activities/{activity}', Show::class)
         ->middleware('can:activity.view')->whereNumber('activity')->name('activities.show');
     // ── End Activities module ──────────────────────────────────────────
     // ── Curriculum module ──
@@ -659,10 +757,10 @@ Route::middleware('auth')->group(function (): void {
     // of study (curricula, units/topics, competencies). Gated on the
     // module's `.view` permission, matching Navigation::items(), per this
     // file's nav-and-route-agree-by-construction contract.
-    Route::get('/curriculum', \App\Modules\Curriculum\Livewire\Index::class)
+    Route::get('/curriculum', App\Modules\Curriculum\Livewire\Index::class)
         ->middleware('can:curriculum.view')->name('curriculum.index');
 
-    Route::get('/curriculum/{curriculum}', \App\Modules\Curriculum\Livewire\Show::class)
+    Route::get('/curriculum/{curriculum}', App\Modules\Curriculum\Livewire\Show::class)
         ->middleware('can:curriculum.view')->whereNumber('curriculum')->name('curriculum.show');
     // ── /Curriculum module ──
 
@@ -672,25 +770,25 @@ Route::middleware('auth')->group(function (): void {
      * sidebar - this pass closes that gap, same as the Welfare block above.
      * Gated on each module's `.view` permission, matching Navigation::items().
      */
-    Route::get('/assets', \App\Modules\Assets\Livewire\Index::class)
+    Route::get('/assets', App\Modules\Assets\Livewire\Index::class)
         ->middleware('can:asset.view')->name('assets.index');
 
-    Route::get('/assets/{asset}', \App\Modules\Assets\Livewire\Show::class)
+    Route::get('/assets/{asset}', App\Modules\Assets\Livewire\Show::class)
         ->middleware('can:asset.view')->whereNumber('asset')->name('assets.show');
 
-    Route::get('/inventory', \App\Modules\Inventory\Livewire\Index::class)
+    Route::get('/inventory', App\Modules\Inventory\Livewire\Index::class)
         ->middleware('can:inventory.view')->name('inventory.index');
 
-    Route::get('/inventory/items/{item}', \App\Modules\Inventory\Livewire\Show::class)
+    Route::get('/inventory/items/{item}', App\Modules\Inventory\Livewire\Show::class)
         ->middleware('can:inventory.view')->whereNumber('item')->name('inventory.items.show');
 
-    Route::get('/library', \App\Modules\Library\Livewire\Index::class)
+    Route::get('/library', App\Modules\Library\Livewire\Index::class)
         ->middleware('can:library.view')->name('library.index');
 
-    Route::get('/library/books/{book}', \App\Modules\Library\Livewire\BookShow::class)
+    Route::get('/library/books/{book}', BookShow::class)
         ->middleware('can:library.view')->whereNumber('book')->name('library.books.show');
 
-    Route::get('/library/members/{member}', \App\Modules\Library\Livewire\MemberShow::class)
+    Route::get('/library/members/{member}', MemberShow::class)
         ->middleware('can:library.view')->whereNumber('member')->name('library.members.show');
 
     // ── Alumni module ──────────────────────────────────────────────────────
@@ -698,20 +796,29 @@ Route::middleware('auth')->group(function (): void {
     // enrollment graph closes. Gated on alumni.view, matching
     // Navigation::items(); the write doors (convert, engage, mark deceased)
     // are gated harder (alumni.manage) inside the screens and Actions.
-    Route::get('/alumni', \App\Modules\Alumni\Livewire\Index::class)
+    Route::get('/alumni', App\Modules\Alumni\Livewire\Index::class)
         ->middleware('can:alumni.view')->name('alumni.index');
 
-    Route::get('/alumni/{alumnus}', \App\Modules\Alumni\Livewire\Show::class)
+    Route::get('/alumni/{alumnus}', App\Modules\Alumni\Livewire\Show::class)
         ->middleware('can:alumni.view')->whereNumber('alumnus')->name('alumni.show');
     // ── End Alumni module ──────────────────────────────────────────────────
 
-    Route::get('/staff', \App\Modules\HR\Livewire\Index::class)
+    Route::get('/staff', App\Modules\HR\Livewire\Index::class)
         ->middleware('can:staff.view')->name('hr.index');
 
-    Route::get('/payroll', \App\Modules\Payroll\Livewire\Index::class)
+    /*
+     * A staff member's photograph lives on the PRIVATE default disk, so it has
+     * no URL of its own; this is the policy-checked way to read it, gated the
+     * same as the register that draws it.
+     */
+    Route::get('/staff/{staffMember}/photo', StaffPhotoController::class)
+        ->whereNumber('staffMember')
+        ->middleware('can:staff.view')->name('hr.staff.photo');
+
+    Route::get('/payroll', App\Modules\Payroll\Livewire\Index::class)
         ->middleware('can:payroll.view')->name('payroll.index');
 
-    Route::get('/payroll/runs/{run}', \App\Modules\Payroll\Livewire\Show::class)
+    Route::get('/payroll/runs/{run}', App\Modules\Payroll\Livewire\Show::class)
         ->middleware('can:payroll.view')->whereNumber('run')->name('payroll.runs.show');
 
     /*
@@ -720,13 +827,13 @@ Route::middleware('auth')->group(function (): void {
      * their own routes below/nearby as they ship; the hub lists only the
      * ones that exist (Route::has() guard in Hub::categories()).
      */
-    Route::get('/reports', \App\Modules\Reporting\Livewire\Reports\Hub::class)
+    Route::get('/reports', Hub::class)
         ->middleware('can:reports.view')->name('reports.hub');
 
-    Route::get('/reports/academic', \App\Modules\Academics\Livewire\Reports\Index::class)
+    Route::get('/reports/academic', App\Modules\Academics\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.academic');
 
-    Route::get('/reports/financial', \App\Modules\Accounting\Livewire\Reports\Index::class)
+    Route::get('/reports/financial', App\Modules\Accounting\Livewire\Reports\Index::class)
         ->middleware('can:ledger.view')->name('reports.financial');
 
     /*
@@ -735,7 +842,7 @@ Route::middleware('auth')->group(function (): void {
      * donut, top outstanding, and the treasury position split by float
      * (cash / bank / MTN / Orange) rather than lumped together.
      */
-    Route::get('/finance/dashboard', \App\Modules\Accounting\Livewire\FinanceDashboard::class)
+    Route::get('/finance/dashboard', FinanceDashboard::class)
         ->middleware('can:ledger.view')->name('finance.dashboard');
 
     /*
@@ -745,7 +852,7 @@ Route::middleware('auth')->group(function (): void {
      * view, this one answers "can I trust these books and what needs doing
      * today," which is a different job even though both are ledger.view.
      */
-    Route::get('/accounting/dashboard', \App\Modules\Accounting\Livewire\AccountingDashboard::class)
+    Route::get('/accounting/dashboard', AccountingDashboard::class)
         ->middleware('can:ledger.view')->name('accounting.dashboard');
 
     /*
@@ -754,7 +861,7 @@ Route::middleware('auth')->group(function (): void {
      * comparatives. Separate from /reports/financial, which carries the
      * working reports (trial balance, general ledger, journal register).
      */
-    Route::get('/reports/statements', \App\Modules\Accounting\Livewire\Statements\Index::class)
+    Route::get('/reports/statements', App\Modules\Accounting\Livewire\Statements\Index::class)
         ->middleware('can:ledger.view')->name('accounting.statements');
 
     /*
@@ -762,7 +869,7 @@ Route::middleware('auth')->group(function (): void {
      * entry, result appropriation and the a-nouveaux carry-forward. Without
      * this the ledger could never enter a second fiscal year.
      */
-    Route::get('/accounting/year-end', \App\Modules\Accounting\Livewire\YearEnd\Console::class)
+    Route::get('/accounting/year-end', Console::class)
         ->middleware('can:ledger.view')->name('accounting.year-end');
 
     /*
@@ -774,10 +881,10 @@ Route::middleware('auth')->group(function (): void {
      * AUDCIF §14.4 - the generated documentation du systeme
      * comptable. Cannot drift because nobody hand-writes it.
      */
-    Route::get('/accounting/system-documentation', \App\Modules\Accounting\Livewire\SystemDocumentation\Index::class)
+    Route::get('/accounting/system-documentation', App\Modules\Accounting\Livewire\SystemDocumentation\Index::class)
         ->middleware('can:ledger.view')->name('accounting.system_documentation');
 
-    Route::get('/accounting/books', \App\Modules\Accounting\Livewire\Books\Index::class)
+    Route::get('/accounting/books', App\Modules\Accounting\Livewire\Books\Index::class)
         ->middleware('can:ledger.view')->name('accounting.books');
 
     /*
@@ -786,10 +893,10 @@ Route::middleware('auth')->group(function (): void {
      * configuration gates that are still open. Gated exactly as the other
      * ledger screens - the sidebar hides, the route refuses.
      */
-    Route::get('/accounting/review', \App\Modules\Accounting\Livewire\Review\ControlCentre::class)
+    Route::get('/accounting/review', ControlCentre::class)
         ->middleware('can:ledger.view')->name('accounting.review');
 
-    Route::get('/accounting/review/journals', \App\Modules\Accounting\Livewire\Review\Journals::class)
+    Route::get('/accounting/review/journals', Journals::class)
         ->middleware('can:ledger.view')->name('accounting.review.journals');
 
     /*
@@ -797,7 +904,7 @@ Route::middleware('auth')->group(function (): void {
      * reconciles against its own operator statement - which is the whole
      * point of having split MTN 5521 from Orange 5522 in the first place.
      */
-    Route::get('/accounting/reconciliation', \App\Modules\Accounting\Livewire\Reconciliation\Index::class)
+    Route::get('/accounting/reconciliation', App\Modules\Accounting\Livewire\Reconciliation\Index::class)
         ->middleware('can:ledger.view')->name('accounting.reconciliation');
 
     /*
@@ -805,7 +912,7 @@ Route::middleware('auth')->group(function (): void {
      * gives chart_of_accounts.budget_control a reader - the column has
      * shipped seeded since Phase 4 with nothing consuming it.
      */
-    Route::get('/accounting/budgets', \App\Modules\Accounting\Livewire\Budgets\Index::class)
+    Route::get('/accounting/budgets', App\Modules\Accounting\Livewire\Budgets\Index::class)
         ->middleware('can:ledger.view')->name('accounting.budgets');
 
     /*
@@ -814,10 +921,10 @@ Route::middleware('auth')->group(function (): void {
      * Recording and approving are DIFFERENT rights on purpose: the
      * maker-checker split is the control, so they are gated separately.
      */
-    Route::get('/accounting/expenses', \App\Modules\Accounting\Livewire\Expenses\Index::class)
+    Route::get('/accounting/expenses', App\Modules\Accounting\Livewire\Expenses\Index::class)
         ->middleware('can:ledger.view')->name('accounting.expenses.index');
 
-    Route::get('/accounting/expenses/{expense}', \App\Modules\Accounting\Livewire\Expenses\Show::class)
+    Route::get('/accounting/expenses/{expense}', App\Modules\Accounting\Livewire\Expenses\Show::class)
         ->middleware('can:ledger.view')->whereNumber('expense')->name('accounting.expenses.show');
 
     /*
@@ -827,39 +934,39 @@ Route::middleware('auth')->group(function (): void {
      * documents.print / documents.reprint gates are enforced inside
      * RenderDocument itself, so the route carries only the read gate.
      */
-    Route::get('/assessment/report-cards/{enrollment}/{period}/print', \App\Modules\Assessment\Http\Controllers\PrintReportCardController::class)
+    Route::get('/assessment/report-cards/{enrollment}/{period}/print', PrintReportCardController::class)
         ->middleware('can:academics.view')->whereNumber('enrollment')->whereNumber('period')
         ->name('assessment.report-cards.print');
 
-    Route::get('/payroll/payslips/{payrollItem}/print', \App\Modules\Payroll\Http\Controllers\PrintPayslipController::class)
+    Route::get('/payroll/payslips/{payrollItem}/print', PrintPayslipController::class)
         ->middleware('can:payroll.view')->whereNumber('payrollItem')
         ->name('payroll.payslips.print');
 
-    Route::get('/reports/assessment', \App\Modules\Assessment\Livewire\Reports\Index::class)
+    Route::get('/reports/assessment', App\Modules\Assessment\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.assessment');
 
-    Route::get('/reports/fees', \App\Modules\Fees\Livewire\Reports\Index::class)
+    Route::get('/reports/fees', App\Modules\Fees\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.fees');
 
-    Route::get('/reports/hr', \App\Modules\HR\Livewire\Reports\Index::class)
+    Route::get('/reports/hr', App\Modules\HR\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.hr');
 
-    Route::get('/reports/procurement', \App\Modules\Procurement\Livewire\Reports\Index::class)
+    Route::get('/reports/procurement', App\Modules\Procurement\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.procurement');
 
-    Route::get('/reports/library', \App\Modules\Library\Livewire\Reports\Index::class)
+    Route::get('/reports/library', App\Modules\Library\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.library');
 
-    Route::get('/reports/students-guardians', \App\Modules\Students\Livewire\Reports\Index::class)
+    Route::get('/reports/students-guardians', App\Modules\Students\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.students-guardians');
 
-    Route::get('/reports/welfare', \App\Modules\Welfare\Livewire\Reports\Index::class)
+    Route::get('/reports/welfare', App\Modules\Welfare\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.welfare');
 
-    Route::get('/reports/assets-inventory', \App\Modules\Assets\Livewire\Reports\Index::class)
+    Route::get('/reports/assets-inventory', App\Modules\Assets\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.assets-inventory');
 
-    Route::get('/reports/tax', \App\Modules\Tax\Livewire\Reports\Index::class)
+    Route::get('/reports/tax', App\Modules\Tax\Livewire\Reports\Index::class)
         ->middleware('can:reports.view')->name('reports.tax');
 
     /*
@@ -871,7 +978,7 @@ Route::middleware('auth')->group(function (): void {
      * cannot drift apart. Auth only - the page contains nothing but
      * translation strings, so there is no data to gate.
      */
-    foreach (\App\Modules\Identity\Support\Navigation::placeholderRoutes() as $navKey => $path) {
+    foreach (Navigation::placeholderRoutes() as $navKey => $path) {
         Route::get($path, fn () => view('shell.module-placeholder', ['moduleKey' => $navKey]))
             ->name('placeholder.'.$navKey);
     }
@@ -888,17 +995,17 @@ Route::middleware('auth')->group(function (): void {
  * catch.
  */
 Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function (): void {
-    Route::get('/', \App\Modules\Guardians\Livewire\Portal\Dashboard::class)->name('portal.dashboard');
+    Route::get('/', App\Modules\Guardians\Livewire\Portal\Dashboard::class)->name('portal.dashboard');
 
-    Route::get('/children/{student}/results', \App\Modules\Guardians\Livewire\Portal\Results::class)
+    Route::get('/children/{student}/results', Results::class)
         ->whereNumber('student')->name('portal.children.results');
-    Route::get('/children/{student}/fees', \App\Modules\Guardians\Livewire\Portal\Fees::class)
+    Route::get('/children/{student}/fees', Fees::class)
         ->whereNumber('student')->name('portal.children.fees');
-    Route::get('/children/{student}/profile', \App\Modules\Guardians\Livewire\Portal\ChildProfile::class)
+    Route::get('/children/{student}/profile', ChildProfile::class)
         ->whereNumber('student')->name('portal.children.profile');
-    Route::get('/children/{student}/discipline', \App\Modules\Guardians\Livewire\Portal\Discipline::class)
+    Route::get('/children/{student}/discipline', Discipline::class)
         ->whereNumber('student')->name('portal.children.discipline');
-    Route::get('/children/{student}/documents', \App\Modules\Guardians\Livewire\Portal\Documents::class)
+    Route::get('/children/{student}/documents', Documents::class)
         ->whereNumber('student')->name('portal.children.documents');
 
     /*
@@ -908,13 +1015,13 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
      * added here without a capability check inside its component is exactly
      * what that test exists to catch.
      */
-    Route::get('/children/{student}/attendance', \App\Modules\Guardians\Livewire\Portal\Attendance::class)
+    Route::get('/children/{student}/attendance', Attendance::class)
         ->whereNumber('student')->name('portal.children.attendance');          // rows 11/12
-    Route::get('/children/{student}/timetable', \App\Modules\Guardians\Livewire\Portal\Timetable::class)
+    Route::get('/children/{student}/timetable', Timetable::class)
         ->whereNumber('student')->name('portal.children.timetable');           // row 26
-    Route::get('/children/{student}/health', \App\Modules\Guardians\Livewire\Portal\Health::class)
+    Route::get('/children/{student}/health', Health::class)
         ->whereNumber('student')->name('portal.children.health');              // rows 3/4
-    Route::get('/children/{student}/meeting', \App\Modules\Guardians\Livewire\Portal\Meeting::class)
+    Route::get('/children/{student}/meeting', Meeting::class)
         ->whereNumber('student')->name('portal.children.meeting');             // row 27
 
     // The three detail screens the API already served but the portal did not:
@@ -922,27 +1029,27 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
     // resolved THROUGH the child's enrollment, so an id belonging to another
     // family is simply not found - 404, never 403, which would confirm it
     // exists somewhere.
-    Route::get('/children/{student}/invoices/{invoice}', \App\Modules\Guardians\Livewire\Portal\Invoice::class)
+    Route::get('/children/{student}/invoices/{invoice}', Invoice::class)
         ->whereNumber('student')->whereNumber('invoice')
         ->name('portal.children.invoice');                                     // row 13
-    Route::get('/children/{student}/receipts/{payment}', \App\Modules\Guardians\Livewire\Portal\Receipt::class)
+    Route::get('/children/{student}/receipts/{payment}', Receipt::class)
         ->whereNumber('student')->whereNumber('payment')
         ->name('portal.children.receipt');                                     // row 15
 
     // A controller, not a Livewire component: this returns BYTES, and Livewire
     // renders HTML over the wire.
     Route::get('/children/{student}/documents/{kind}/{document}/download',
-        [\App\Modules\Guardians\Http\Controllers\PortalDocumentController::class, 'download'])
+        [PortalDocumentController::class, 'download'])
         ->whereNumber('student')->whereIn('kind', ['school', 'supplied'])->whereNumber('document')
         ->name('portal.children.documents.download');                          // rows 22/23
 
     // Guardian-scoped, not child-scoped: rows 16/26/29 are granted on "any
     // valid link" without naming a child.
-    Route::get('/payments', \App\Modules\Guardians\Livewire\Portal\Payments::class)
+    Route::get('/payments', Payments::class)
         ->name('portal.payments');                                             // rows 16/17
-    Route::get('/announcements', \App\Modules\Guardians\Livewire\Portal\Announcements::class)
+    Route::get('/announcements', Announcements::class)
         ->name('portal.announcements');                                        // row 26
-    Route::get('/search', \App\Modules\Guardians\Livewire\Portal\Search::class)
+    Route::get('/search', Search::class)
         ->name('portal.search');                                               // per-row, per child
     /*
      * The account area, built to mobile/parent-profile.png and
@@ -951,17 +1058,17 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
      * expired can still see who the school thinks they are and how to reach
      * the office. The screens that WRITE (edit, notifications) carry row 29.
      */
-    Route::get('/account', \App\Modules\Guardians\Livewire\Portal\Account::class)
+    Route::get('/account', App\Modules\Guardians\Livewire\Portal\Account::class)
         ->name('portal.account');
-    Route::get('/account/settings', \App\Modules\Guardians\Livewire\Portal\AccountSettings::class)
+    Route::get('/account/settings', AccountSettings::class)
         ->name('portal.account.settings');
-    Route::get('/account/edit', \App\Modules\Guardians\Livewire\Portal\AccountEdit::class)
+    Route::get('/account/edit', AccountEdit::class)
         ->name('portal.account.edit');                                         // row 29 (and row 30's refusal)
-    Route::get('/account/notifications', \App\Modules\Guardians\Livewire\Portal\NotificationSettings::class)
+    Route::get('/account/notifications', NotificationSettings::class)
         ->name('portal.account.notifications');                                // row 29
-    Route::get('/account/security', \App\Modules\Guardians\Livewire\Portal\Security::class)
+    Route::get('/account/security', Security::class)
         ->name('portal.account.security');
-    Route::get('/help', \App\Modules\Guardians\Livewire\Portal\HelpSupport::class)
+    Route::get('/help', HelpSupport::class)
         ->name('portal.help');
 
     /*
@@ -978,54 +1085,54 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
      * same statement, the health views the same records. Six near-identical
      * components would be six chances for one capability check to drift.
      */
-    Route::get('/children/{student}/academics/{view?}', \App\Modules\Guardians\Livewire\Portal\Academics::class)
+    Route::get('/children/{student}/academics/{view?}', Academics::class)
         ->whereNumber('student')
         ->whereIn('view', ['subjects', 'analytics', 'terms', 'report-card', 'bulletin', 'transcript'])
         ->name('portal.children.academics');                                   // rows 5, 9, 10
 
-    Route::get('/children/{student}/assignments', \App\Modules\Guardians\Livewire\Portal\Assignments::class)
+    Route::get('/children/{student}/assignments', Assignments::class)
         ->whereNumber('student')->name('portal.children.assignments');         // row 26
 
-    Route::get('/children/{student}/fee-detail/{view?}', \App\Modules\Guardians\Livewire\Portal\FeeDetail::class)
+    Route::get('/children/{student}/fee-detail/{view?}', FeeDetail::class)
         ->whereNumber('student')->whereIn('view', ['structure', 'outstanding', 'pay'])
         ->name('portal.children.fee-detail');                                  // rows 13/14/16/18
 
-    Route::get('/children/{student}/health-detail/{view?}', \App\Modules\Guardians\Livewire\Portal\HealthDetail::class)
+    Route::get('/children/{student}/health-detail/{view?}', HealthDetail::class)
         ->whereNumber('student')->whereIn('view', ['history', 'immunisations', 'documents', 'card'])
         ->name('portal.children.health-detail');                               // rows 3, 4, 23
 
-    Route::get('/children/{student}/id-card', \App\Modules\Guardians\Livewire\Portal\SchoolIdCard::class)
+    Route::get('/children/{student}/id-card', SchoolIdCard::class)
         ->whereNumber('student')->name('portal.children.id-card');             // row 1
 
-    Route::get('/children/{student}/contacts', \App\Modules\Guardians\Livewire\Portal\Contacts::class)
+    Route::get('/children/{student}/contacts', Contacts::class)
         ->whereNumber('student')->name('portal.children.contacts');            // row 31
 
-    Route::get('/school-life/{view?}', \App\Modules\Guardians\Livewire\Portal\SchoolLife::class)
+    Route::get('/school-life/{view?}', SchoolLife::class)
         ->whereIn('view', ['activities', 'excursions', 'sports', 'school'])
         ->name('portal.school-life');                                          // row 26
-    Route::get('/school-life/activity/{activity}', \App\Modules\Guardians\Livewire\Portal\SchoolLife::class)
+    Route::get('/school-life/activity/{activity}', SchoolLife::class)
         ->whereNumber('activity')->defaults('view', 'detail')
         ->name('portal.school-life.detail');
 
     // mobile/my-children.png and child-overview.png - the list and the per-child
     // hub, which the dashboard carousel and the profile tab only half covered.
-    Route::get('/children', \App\Modules\Guardians\Livewire\Portal\Children::class)
+    Route::get('/children', Children::class)
         ->name('portal.children.index');                                       // row 1
-    Route::get('/children/{student}/overview', \App\Modules\Guardians\Livewire\Portal\ChildOverview::class)
+    Route::get('/children/{student}/overview', ChildOverview::class)
         ->whereNumber('student')->name('portal.children.overview');            // row 1
 
-    Route::get('/photo/me', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'self'])
+    Route::get('/photo/me', [PortalPhotoController::class, 'self'])
         ->name('portal.photo.self');
-    Route::get('/photo/children/{student}', [\App\Modules\Guardians\Http\Controllers\PortalPhotoController::class, 'child'])
+    Route::get('/photo/children/{student}', [PortalPhotoController::class, 'child'])
         ->whereNumber('student')->name('portal.photo.child');
 
     // Not matrix territory at all - a notification is scoped by its own
     // `user_id`, a thread by participation. See GuardianInbox.
-    Route::get('/notifications', \App\Modules\Guardians\Livewire\Portal\Notifications::class)
+    Route::get('/notifications', Notifications::class)
         ->name('portal.notifications');
-    Route::get('/messages', \App\Modules\Guardians\Livewire\Portal\Messages::class)
+    Route::get('/messages', Messages::class)
         ->name('portal.messages');
-    Route::get('/messages/{thread}', \App\Modules\Guardians\Livewire\Portal\Thread::class)
+    Route::get('/messages/{thread}', Thread::class)
         ->whereNumber('thread')->name('portal.messages.thread');
 });
 
@@ -1037,7 +1144,7 @@ Route::prefix('portal')->middleware(['auth', 'guardian.portal'])->group(function
  * shell (Identity\Domain\Role: the two scopes are evaluated independently).
  */
 Route::prefix('portal')->middleware(['auth', 'staff.portal'])->group(function (): void {
-    Route::get('/staff', \App\Modules\HR\Livewire\Portal\Show::class)->name('portal.staff');
+    Route::get('/staff', App\Modules\HR\Livewire\Portal\Show::class)->name('portal.staff');
 });
 
 /*

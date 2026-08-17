@@ -26,8 +26,23 @@ uses(RefreshDatabase::class);
  * defined by the time this file runs.
  */
 
-it('stores an applicant photo and puts the file on disk', function () {
+/**
+ * The photograph lives on the PRIVATE default disk, not `public` - see
+ * SetApplicantPhoto. Faking the default disk is what makes these assertions
+ * about the real storage path rather than about a disk nothing reads.
+ */
+function admissionsPhotoDisk(): string
+{
+    return (string) config('filesystems.default');
+}
+
+beforeEach(function (): void {
+    // Both, so a test can assert the bytes did NOT land on the public one.
+    Storage::fake(admissionsPhotoDisk());
     Storage::fake('public');
+});
+
+it('stores an applicant photo and puts the file on disk', function () {
     actingAs(admissionsUserAs(Role::Registrar));
 
     $application = admissionsCompleteDraft(admissionsFixture());
@@ -40,7 +55,7 @@ it('stores an applicant photo and puts the file on disk', function () {
     expect($saved->photo_path)->toBeString()
         ->and($saved->photo_path)->toStartWith(SetApplicantPhoto::DIRECTORY.'/');
 
-    Storage::disk('public')->assertExists((string) $saved->photo_path);
+    Storage::disk(admissionsPhotoDisk())->assertExists((string) $saved->photo_path);
 
     // The column, not just the in-memory model.
     expect((string) DB::table('admission_applications')
@@ -49,7 +64,6 @@ it('stores an applicant photo and puts the file on disk', function () {
 });
 
 it('deletes the previous file when the photo is replaced', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $action = app(SetApplicantPhoto::class);
@@ -70,12 +84,11 @@ it('deletes the previous file when the photo is replaced', function () {
 
     expect($second)->not->toBe($first);
 
-    Storage::disk('public')->assertMissing($first);
-    Storage::disk('public')->assertExists($second);
+    Storage::disk(admissionsPhotoDisk())->assertMissing($first);
+    Storage::disk(admissionsPhotoDisk())->assertExists($second);
 });
 
 it('clears the column and the file when the photo is removed', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $action = app(SetApplicantPhoto::class);
@@ -89,11 +102,10 @@ it('clears the column and the file when the photo is removed', function () {
     $action->handle(admissionsReload((int) $application->getKey()), null);
 
     expect(admissionsReload((int) $application->getKey())->photo_path)->toBeNull();
-    Storage::disk('public')->assertMissing($path);
+    Storage::disk(admissionsPhotoDisk())->assertMissing($path);
 });
 
 it('refuses to change the photo once the application has left draft', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $submitted = app(SubmitApplication::class)->handle(
@@ -107,8 +119,6 @@ it('refuses to change the photo once the application has left draft', function (
 });
 
 it('denies the applicant photo to a role without admissions.manage', function () {
-    Storage::fake('public');
-
     actingAs(admissionsUserAs(Role::Registrar));
     $application = admissionsCompleteDraft(admissionsFixture());
 
@@ -125,7 +135,6 @@ it('denies the applicant photo to a role without admissions.manage', function ()
 });
 
 it('uploads and removes the photo from the wizard screen', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $application = admissionsCompleteDraft(admissionsFixture());
@@ -138,16 +147,15 @@ it('uploads and removes the photo from the wizard screen', function () {
     $path = (string) admissionsReload((int) $application->getKey())->photo_path;
 
     expect($path)->not->toBe('');
-    Storage::disk('public')->assertExists($path);
+    Storage::disk(admissionsPhotoDisk())->assertExists($path);
 
     $component->call('removePhoto')->assertHasNoErrors();
 
     expect(admissionsReload((int) $application->getKey())->photo_path)->toBeNull();
-    Storage::disk('public')->assertMissing($path);
+    Storage::disk(admissionsPhotoDisk())->assertMissing($path);
 });
 
 it('refuses a non-image upload on the wizard screen', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $application = admissionsCompleteDraft(admissionsFixture());
@@ -161,7 +169,6 @@ it('refuses a non-image upload on the wizard screen', function () {
 });
 
 it('carries the applicant photo onto the student at enrolment', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $fixture = admissionsFixture();
@@ -186,11 +193,10 @@ it('carries the applicant photo onto the student at enrolment', function () {
 
     // The file the student's row now points at is still there: conversion
     // hands the reference on, it does not move or re-write the file.
-    Storage::disk('public')->assertExists($path);
+    Storage::disk(admissionsPhotoDisk())->assertExists($path);
 });
 
 it('leaves the student photo empty when the applicant had none', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     $fixture = admissionsFixture();
@@ -202,7 +208,6 @@ it('leaves the student photo empty when the applicant had none', function () {
 });
 
 it('keeps an application photo out of the branding directory', function () {
-    Storage::fake('public');
     actingAs(admissionsUserAs(Role::Registrar));
 
     // The school crest and a child's photograph share StoredImage but must
@@ -214,4 +219,77 @@ it('keeps an application photo out of the branding directory', function () {
     );
 
     expect((string) $saved->photo_path)->not->toStartWith('branding/');
+});
+
+/*
+ * ── Privacy: the bytes are not on a publicly served disk ────────────────────
+ *
+ * The `public` disk is symlinked into the web root and served with no
+ * authentication. A content-hashed filename is obscurity, not access control,
+ * and this is a photograph of a CHILD.
+ */
+
+it('never writes an applicant photo to the public disk', function () {
+    actingAs(admissionsUserAs(Role::Registrar));
+
+    $saved = app(SetApplicantPhoto::class)->handle(
+        admissionsCompleteDraft(admissionsFixture()),
+        UploadedFile::fake()->image('applicant.jpg', 400, 500),
+    );
+
+    $path = (string) $saved->photo_path;
+
+    Storage::disk(admissionsPhotoDisk())->assertExists($path);
+    Storage::disk('public')->assertMissing($path);
+
+    // Nothing at all on the public disk, whatever the path happens to be.
+    expect(Storage::disk('public')->allFiles())->toBe([]);
+});
+
+it('refuses the applicant photo endpoint to an unauthenticated request', function () {
+    actingAs(admissionsUserAs(Role::Registrar));
+
+    $application = admissionsCompleteDraft(admissionsFixture());
+
+    app(SetApplicantPhoto::class)->handle(
+        $application,
+        UploadedFile::fake()->image('applicant.jpg', 400, 500),
+    );
+
+    auth()->logout();
+
+    $this->get(route('admissions.photo', ['application' => $application->getKey()]))
+        ->assertRedirect('/login');
+});
+
+it('refuses the applicant photo endpoint to a user without admissions.manage', function () {
+    actingAs(admissionsUserAs(Role::Registrar));
+
+    $application = admissionsCompleteDraft(admissionsFixture());
+
+    app(SetApplicantPhoto::class)->handle(
+        $application,
+        UploadedFile::fake()->image('applicant.jpg', 400, 500),
+    );
+
+    actingAs(admissionsUserAs(Role::Teacher));
+
+    $this->get(route('admissions.photo', ['application' => $application->getKey()]))
+        ->assertForbidden();
+});
+
+it('streams the applicant photo to an authorised user', function () {
+    actingAs(admissionsUserAs(Role::Registrar));
+
+    $application = admissionsCompleteDraft(admissionsFixture());
+
+    app(SetApplicantPhoto::class)->handle(
+        $application,
+        UploadedFile::fake()->image('applicant.jpg', 400, 500),
+    );
+
+    $response = $this->get(route('admissions.photo', ['application' => $application->getKey()]));
+
+    $response->assertOk();
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
 });

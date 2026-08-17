@@ -30,6 +30,20 @@ use RuntimeException;
  * content hash is what makes a REPLACE safe: new bytes get a new path, so the
  * old file can be deleted without any chance of the surviving row pointing at
  * a path whose contents have quietly changed underneath it.
+ *
+ * WHY NOT THE PUBLIC DISK. StoredImage defaults to the `public` disk because
+ * that is where the school CREST belongs; this is a photograph of a CHILD, and
+ * the public disk is symlinked and served straight off the web root with no
+ * authentication at all. A content-hashed filename is obscurity, not access
+ * control - anyone who ever saw the URL keeps it forever, and it answers to no
+ * permission. So the bytes go to the private default disk, exactly as
+ * SetGuardianPhoto does, and ApplicantPhotoController is the only way back to
+ * them.
+ *
+ * That is also what makes the carry-forward work end to end: ConvertApplication
+ * hands `photo_path` to CreateStudent unchanged, and the portal serves a child's
+ * photo (PortalPhotoController) off the DEFAULT disk. On the public disk the
+ * carried path resolved to nothing there.
  */
 final class SetApplicantPhoto
 {
@@ -79,7 +93,7 @@ final class SetApplicantPhoto
 
             $path = $photo === null
                 ? null
-                : StoredImage::put('applicant-'.$locked->getKey(), $photo, self::DIRECTORY);
+                : StoredImage::put('applicant-'.$locked->getKey(), $photo, self::DIRECTORY, $this->disk());
 
             $locked->photo_path = $path;
             $locked->updated_by = $actor->id;
@@ -102,9 +116,19 @@ final class SetApplicantPhoto
         // actually committed. Inside the transaction a later rollback would
         // lose the file and keep the stale path; the reverse - an orphaned
         // file after a rollback - costs disk and nothing else.
-        StoredImage::forget($result['previous'], $result['path'], self::DIRECTORY);
+        // The disk must be passed here too. forget()'s directory/disk pair is
+        // both the guard ("never delete outside admission-photos/") and the
+        // place it looks; a forget() left on the default public disk would
+        // silently never find - and so never delete - a file the write put on
+        // the private one.
+        StoredImage::forget($result['previous'], $result['path'], self::DIRECTORY, $this->disk());
 
         return $result['application'];
+    }
+
+    private function disk(): string
+    {
+        return (string) config('filesystems.default');
     }
 
     private function currentActor(): Actor

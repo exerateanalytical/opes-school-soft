@@ -491,7 +491,9 @@
                             @if ($photoUpload !== null && $photoUpload->isPreviewable())
                                 <img src="{{ $photoUpload->temporaryUrl() }}" alt="{{ __('opes.staff_photo.preview_alt') }}" class="h-full w-full object-cover"/>
                             @elseif ($photoCurrentPath !== '')
-                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photoCurrentPath) }}"
+                                {{-- The stored photo is on the PRIVATE disk and has no public
+                                     URL; hr.staff.photo streams it behind staff.view. --}}
+                                <img src="{{ route('hr.staff.photo', ['staffMember' => $photoStaffId]) }}"
                                      alt="{{ __('opes.staff_photo.preview_alt') }}" class="h-full w-full object-cover"/>
                             @else
                                 <span class="px-1 text-center text-xs text-charcoal/50">{{ __('opes.staff_photo.none') }}</span>

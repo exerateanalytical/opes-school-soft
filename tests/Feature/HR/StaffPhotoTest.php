@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\HR\Actions\HireStaffMember;
 use App\Modules\HR\Actions\SetStaffPhoto;
 use App\Modules\HR\Models\StaffMember;
+use App\Modules\Identity\Domain\Role;
 use App\Modules\Identity\Models\User;
 use App\Support\Audit\Actor;
 use App\Support\Storage\StoredImage;
@@ -20,14 +21,30 @@ use function Pest\Laravel\actingAs;
 uses(RefreshDatabase::class);
 
 /**
+ * The photograph lives on the PRIVATE default disk, not `public` - see
+ * SetStaffPhoto. Faking the default disk is what makes these assertions about
+ * the real storage path rather than about a disk nothing reads.
+ */
+function staffPhotoDisk(): string
+{
+    return (string) config('filesystems.default');
+}
+
+beforeEach(function (): void {
+    // Both, so a test can assert the bytes did NOT land on the public one.
+    Storage::fake(staffPhotoDisk());
+    Storage::fake('public');
+});
+
+/**
  * @return array{0: User, 1: StaffMember}
  */
 function staffPhotoFixture(): array
 {
-    (new RolePermissionSeeder())->run();
+    (new RolePermissionSeeder)->run();
 
     $admin = User::factory()->create();
-    $admin->assignRole(\App\Modules\Identity\Domain\Role::Administrator->value);
+    $admin->assignRole(Role::Administrator->value);
 
     actingAs($admin);
 
@@ -51,8 +68,6 @@ function staffPhotoBytes(string $name, int $width = 240, int $height = 240): str
 }
 
 it('stores a staff photo, persists the path and writes the file', function (): void {
-    Storage::fake('public');
-
     [$admin, $staff] = staffPhotoFixture();
 
     $path = app(SetStaffPhoto::class)->set(
@@ -63,12 +78,10 @@ it('stores a staff photo, persists the path and writes the file', function (): v
     );
 
     expect(DB::table('staff_members')->where('id', $staff->getKey())->value('photo_path'))->toBe($path);
-    Storage::disk(StoredImage::DISK)->assertExists($path);
+    Storage::disk(staffPhotoDisk())->assertExists($path);
 });
 
 it('deletes the previous file when a photo is replaced', function (): void {
-    Storage::fake('public');
-
     [$admin, $staff] = staffPhotoFixture();
     $action = app(SetStaffPhoto::class);
 
@@ -76,13 +89,11 @@ it('deletes the previous file when a photo is replaced', function (): void {
     $second = $action->set((int) $staff->getKey(), staffPhotoBytes('two.png', 200, 300), 'png', $admin->toAuditActor());
 
     expect($second)->not->toBe($first);
-    Storage::disk(StoredImage::DISK)->assertMissing($first);
-    Storage::disk(StoredImage::DISK)->assertExists($second);
+    Storage::disk(staffPhotoDisk())->assertMissing($first);
+    Storage::disk(staffPhotoDisk())->assertExists($second);
 });
 
 it('keeps a file another staff member still references', function (): void {
-    Storage::fake('public');
-
     [$admin, $staff] = staffPhotoFixture();
     $action = app(SetStaffPhoto::class);
 
@@ -106,13 +117,11 @@ it('keeps a file another staff member still references', function (): void {
 
     $action->remove((int) $staff->getKey(), $admin->toAuditActor());
 
-    Storage::disk(StoredImage::DISK)->assertExists($shared);
+    Storage::disk(staffPhotoDisk())->assertExists($shared);
     expect(DB::table('staff_members')->where('id', $other->getKey())->value('photo_path'))->toBe($shared);
 });
 
 it('clears the column and deletes the file on remove', function (): void {
-    Storage::fake('public');
-
     [$admin, $staff] = staffPhotoFixture();
     $action = app(SetStaffPhoto::class);
 
@@ -121,12 +130,10 @@ it('clears the column and deletes the file on remove', function (): void {
     $action->remove((int) $staff->getKey(), $admin->toAuditActor());
 
     expect(DB::table('staff_members')->where('id', $staff->getKey())->value('photo_path'))->toBeNull();
-    Storage::disk(StoredImage::DISK)->assertMissing($path);
+    Storage::disk(staffPhotoDisk())->assertMissing($path);
 });
 
 it('refuses a user without staff.manage', function (): void {
-    Storage::fake('public');
-
     [, $staff] = staffPhotoFixture();
 
     // A bare user holds no HR ability at all.
@@ -139,3 +146,78 @@ it('refuses a user without staff.manage', function (): void {
         Actor::system(),
     );
 })->throws(AuthorizationException::class);
+
+/*
+ * ── Privacy: the bytes are not on a publicly served disk ────────────────────
+ *
+ * The `public` disk is symlinked into the web root and served with no
+ * authentication. StoredImage defaults there because that is where the school
+ * CREST belongs; a photograph of a named employee must not follow it.
+ */
+
+it('never writes a staff photo to the public disk or the branding directory', function (): void {
+    [$admin, $staff] = staffPhotoFixture();
+
+    $path = app(SetStaffPhoto::class)->set(
+        (int) $staff->getKey(),
+        staffPhotoBytes('private.png'),
+        'png',
+        $admin->toAuditActor(),
+    );
+
+    expect($path)->toStartWith(SetStaffPhoto::DIRECTORY.'/')
+        ->and($path)->not->toStartWith(StoredImage::DIRECTORY.'/');
+
+    Storage::disk(staffPhotoDisk())->assertExists($path);
+    Storage::disk('public')->assertMissing($path);
+    expect(Storage::disk('public')->allFiles())->toBe([]);
+});
+
+it('refuses the staff photo endpoint to an unauthenticated request', function (): void {
+    [$admin, $staff] = staffPhotoFixture();
+
+    app(SetStaffPhoto::class)->set(
+        (int) $staff->getKey(),
+        staffPhotoBytes('ada.png'),
+        'png',
+        $admin->toAuditActor(),
+    );
+
+    auth()->logout();
+
+    $this->get(route('hr.staff.photo', ['staffMember' => $staff->getKey()]))
+        ->assertRedirect('/login');
+});
+
+it('refuses the staff photo endpoint to a user without staff.view', function (): void {
+    [$admin, $staff] = staffPhotoFixture();
+
+    app(SetStaffPhoto::class)->set(
+        (int) $staff->getKey(),
+        staffPhotoBytes('ada.png'),
+        'png',
+        $admin->toAuditActor(),
+    );
+
+    // A bare user holds no HR ability at all.
+    actingAs(User::factory()->create());
+
+    $this->get(route('hr.staff.photo', ['staffMember' => $staff->getKey()]))
+        ->assertForbidden();
+});
+
+it('streams the staff photo to an authorised user', function (): void {
+    [$admin, $staff] = staffPhotoFixture();
+
+    app(SetStaffPhoto::class)->set(
+        (int) $staff->getKey(),
+        staffPhotoBytes('ada.png'),
+        'png',
+        $admin->toAuditActor(),
+    );
+
+    $response = $this->get(route('hr.staff.photo', ['staffMember' => $staff->getKey()]));
+
+    $response->assertOk();
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+});
