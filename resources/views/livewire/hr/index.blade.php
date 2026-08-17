@@ -307,49 +307,6 @@
     {{-- Right rail: kept minimal for this read-only pass. --}}
     <x-slot:rail>
         <div class="space-y-4">
-            @if ($showHireForm)
-                <section aria-label="Hire staff member" class="rounded border border-border-primary bg-white p-3">
-                    <h3 class="mb-2 text-sm font-semibold text-charcoal">Hire Staff Member</h3>
-                    <div class="space-y-2">
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            First name
-                            <input type="text" wire:model="hireFirstName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Last name
-                            <input type="text" wire:model="hireLastName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Gender
-                            <select wire:model="hireGender" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Date of birth
-                            <input type="date" wire:model="hireDateOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Phone
-                            <input type="text" wire:model="hirePhone" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Email (optional)
-                            <input type="email" wire:model="hireEmail" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
-                            Hired on
-                            <input type="date" wire:model="hireHiredOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
-                        </label>
-                        <button type="button" wire:click="saveHire" wire:confirm="Hire this staff member?"
-                                class="w-full rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
-                            Save
-                        </button>
-                    </div>
-                </section>
-            @endif
-
             @if ($showContractForm)
                 <section aria-label="Open staff contract" class="rounded border border-border-primary bg-white p-3">
                     <h3 class="mb-2 text-sm font-semibold text-charcoal">Open Contract</h3>
@@ -523,3 +480,134 @@
         </div>
     </x-slot:rail>
 </x-list-screen>
+
+<x-opes-modal-form wire-model="showHireForm" :open="$showHireForm" title="Hire Staff Member" max-width="3xl">
+    <div class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
+        <p class="sm:col-span-2 text-xs font-semibold uppercase tracking-wide text-charcoal/50">Identity</p>
+
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            First name
+            <input type="text" wire:model="hireFirstName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hireFirstName')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Last name
+            <input type="text" wire:model="hireLastName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hireLastName')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Other names (optional)
+            <input type="text" wire:model="hireOtherNames" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Gender
+            <select wire:model="hireGender" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            @error('hireGender')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Date of birth
+            <input type="date" wire:model="hireDateOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hireDateOfBirth')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Place of birth (optional)
+            <input type="text" wire:model="hirePlaceOfBirth" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Nationality (ISO 2-letter)
+            <input type="text" maxlength="2" wire:model="hireNationality" class="rounded border border-border-primary px-2 py-1.5 text-sm uppercase text-charcoal"/>
+            @error('hireNationality')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Marital status (optional)
+            <select wire:model="hireMaritalStatus" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal">
+                <option value="">Select…</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+                <option value="widowed">Widowed</option>
+            </select>
+        </label>
+
+        <p class="sm:col-span-2 mt-1 text-xs font-semibold uppercase tracking-wide text-charcoal/50">Contact & employment</p>
+
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Phone
+            <input type="text" wire:model="hirePhone" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hirePhone')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Email (optional)
+            <input type="email" wire:model="hireEmail" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hireEmail')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Hired on
+            <input type="date" wire:model="hireHiredOn" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+            @error('hireHiredOn')<span class="text-xs text-heritage-red">{{ $message }}</span>@enderror
+        </label>
+
+        <p class="sm:col-span-2 mt-1 text-xs font-semibold uppercase tracking-wide text-charcoal/50">Statutory identifiers (optional)</p>
+
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            National ID type
+            <input type="text" wire:model="hireNationalIdType" placeholder="e.g. CNI, passport" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            National ID number
+            <input type="text" wire:model="hireNationalIdNumber" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            CNPS number
+            <input type="text" wire:model="hireCnpsNumber" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            NIU
+            <input type="text" wire:model="hireNiu" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+
+        <p class="sm:col-span-2 mt-1 text-xs font-semibold uppercase tracking-wide text-charcoal/50">Payment coordinates (optional)</p>
+
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Bank name
+            <input type="text" wire:model="hireBankName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Bank account
+            <input type="text" wire:model="hireBankAccount" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Mobile money number
+            <input type="text" wire:model="hireMobileMoneyNumber" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+
+        <p class="sm:col-span-2 mt-1 text-xs font-semibold uppercase tracking-wide text-charcoal/50">Next of kin (optional)</p>
+
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Name
+            <input type="text" wire:model="hireNextOfKinName" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Relationship
+            <input type="text" wire:model="hireNextOfKinRelationship" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+        <label class="flex flex-col gap-1 text-xs font-medium text-charcoal/70">
+            Phone
+            <input type="text" wire:model="hireNextOfKinPhone" class="rounded border border-border-primary px-2 py-1.5 text-sm text-charcoal"/>
+        </label>
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2 border-t border-border-primary pt-4">
+        <button type="button" wire:click="$set('showHireForm', false)"
+                class="rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal hover:bg-sand">
+            Cancel
+        </button>
+        <button type="button" wire:click="saveHire" wire:confirm="Hire this staff member?"
+                class="rounded border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90">
+            Save
+        </button>
+    </div>
+</x-opes-modal-form>
