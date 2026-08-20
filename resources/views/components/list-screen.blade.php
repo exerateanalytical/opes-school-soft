@@ -156,8 +156,14 @@
                  exactly as before; capping each CHILD at 22rem is what stops
                  the degenerate case - /users shipped `TOTAL USERS 37` alone
                  across the full 1133px, which reads as a layout accident
-                 rather than a stat. --}}
-            <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] lg:[&>*]:max-w-[22rem]">
+                 rather than a stat.
+
+                 The floor is 185px, not 12rem (204px at this app's 17px
+                 root). 12rem fitted five cards and wrapped the sixth onto a
+                 row of its own; the dashboard reference's own strip measures
+                 six cards at ~190px across the same content width, so 185
+                 is the floor that reproduces it. --}}
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(185px,1fr))] lg:[&>*]:max-w-[22rem]">
                 {{ $kpis }}
             </div>
         </div>

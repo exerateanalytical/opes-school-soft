@@ -469,7 +469,6 @@
     :breadcrumb="['Dashboard', 'Library']"
     :paginator="$rows"
     empty-message="No library records match these filters yet. Books, members and issues appear here as they are set up."
-    rail-title="Library Overview"
 >
     <x-slot:actions>
         @can(\App\Modules\Library\Domain\LibraryPermission::CIRCULATE)
@@ -507,6 +506,11 @@
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path stroke-linecap="round" d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4"/></svg>
             </x-slot:icon>
         </x-kpi-card>
+        <x-kpi-card :label="__('opes.library_screen.kpi_active_members')" :value="$kpis['active_members']" icon-bg="bg-badge-purple">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
         <x-kpi-card label="Overdue Items" :value="$kpis['overdue']" icon-bg="bg-heritage-red">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 3"/></svg>
@@ -515,6 +519,12 @@
         <x-kpi-card label="Unpaid Fines" :value="Money::of($kpis['unpaid_fines'])->format(false)" icon-bg="bg-badge-orange">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('opes.library_screen.kpi_new_titles')" :value="$kpis['new_titles']"
+                    :sub="__('opes.library_screen.kpi_new_titles_sub')" icon-bg="bg-badge-teal">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5v13z"/><path stroke-linecap="round" d="M12 8v6M9 11h6"/></svg>
             </x-slot:icon>
         </x-kpi-card>
     </x-slot:kpis>
@@ -721,15 +731,42 @@
 
     <x-slot:rail>
         <div class="space-y-4">
-            <section aria-label="Library summary" class="rounded border border-border-primary bg-white p-3">
-                <h3 class="mb-2 text-sm font-semibold text-charcoal">Library Overview</h3>
-                <ul class="space-y-2 text-sm text-charcoal/80">
-                    <li class="flex items-center justify-between"><span>Total titles</span><span class="tabular-nums">{{ $kpis['titles'] }}</span></li>
-                    <li class="flex items-center justify-between"><span>Copies on loan</span><span class="tabular-nums">{{ $kpis['copies_on_loan'] }}</span></li>
-                    <li class="flex items-center justify-between"><span>Overdue items</span><span class="tabular-nums">{{ $kpis['overdue'] }}</span></li>
-                    <li class="flex items-center justify-between"><span>Unpaid fines</span><span class="tabular-nums">{{ Money::of($kpis['unpaid_fines'])->format(false) }}</span></li>
-                </ul>
-            </section>
+            {{-- The reference's rail: what is on the shelves, then what is out
+                 on loan. Both read the same rows the tabs above already page
+                 through, so the rail cannot disagree with the table. --}}
+            <x-shell.panel :title="__('opes.library_screen.rail_by_category')">
+                <x-shell.donut :slices="$categoryDistribution"
+                               :centre-value="number_format(collect($categoryDistribution)->sum('value'))"
+                               :centre-label="__('opes.library_screen.rail_copies')"
+                               stacked
+                               :size="132"
+                               :thickness="22"
+                               class="py-1"/>
+            </x-shell.panel>
+
+            <x-shell.panel :title="__('opes.library_screen.rail_recent_loans')">
+                @if ($recentLoans === [])
+                    <p class="py-3 text-[13px] text-charcoal/55">{{ __('opes.library_screen.rail_no_loans') }}</p>
+                @else
+                    <ul class="divide-y divide-shell-divider">
+                        @foreach ($recentLoans as $loan)
+                            <li class="py-2">
+                                <p class="truncate text-[13px] font-medium text-charcoal">{{ $loan['borrower'] }}</p>
+                                <p class="truncate text-[12px] text-charcoal/65">{{ $loan['title'] }}</p>
+                                {{-- The due date carries the state: a loan
+                                     past its date is the one fact a librarian
+                                     is scanning this list for, so it is
+                                     coloured as well as dated. --}}
+                                <p class="mt-1 text-[11px] {{ $loan['overdue'] ? 'font-semibold text-danger-text' : 'text-charcoal/55' }}">
+                                    {{ __('opes.library_screen.rail_due', [
+                                        'date' => \Illuminate\Support\Carbon::parse($loan['due_on'])->translatedFormat('d M Y'),
+                                    ]) }}
+                                </p>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </x-shell.panel>
         </div>
     </x-slot:rail>
 </x-list-screen>

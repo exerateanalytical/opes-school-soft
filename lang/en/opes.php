@@ -1122,6 +1122,16 @@ return [
         'stream_created' => 'Stream created.',
     ],
     // Students screens, docs/specs/07-students.md 11.1 and 11.2. Phase 2.
+    'library_screen' => [
+        'kpi_active_members' => 'Active Members',
+        'kpi_new_titles' => 'New Titles',
+        'kpi_new_titles_sub' => 'This academic year',
+        'rail_by_category' => 'Books by Category',
+        'rail_copies' => 'Copies',
+        'rail_recent_loans' => 'Recent Book Loans',
+        'rail_no_loans' => 'Nothing is out on loan.',
+        'rail_due' => 'Due :date',
+    ],
     'students_screen' => [
         'title' => 'Student Management',
         'breadcrumb_dashboard' => 'Dashboard',

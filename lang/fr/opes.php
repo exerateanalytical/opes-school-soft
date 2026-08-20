@@ -1109,6 +1109,16 @@ return [
         'stream_created' => 'Série créée.',
     ],
     // Écrans Élèves, docs/specs/07-students.md 11.1 et 11.2. Phase 2.
+    'library_screen' => [
+        'kpi_active_members' => 'Membres actifs',
+        'kpi_new_titles' => 'Nouveaux titres',
+        'kpi_new_titles_sub' => 'Cette annee scolaire',
+        'rail_by_category' => 'Livres par categorie',
+        'rail_copies' => 'Exemplaires',
+        'rail_recent_loans' => 'Prets recents',
+        'rail_no_loans' => 'Aucun pret en cours.',
+        'rail_due' => 'Echeance :date',
+    ],
     'students_screen' => [
         'title' => 'Gestion des élèves',
         'breadcrumb_dashboard' => 'Tableau de bord',

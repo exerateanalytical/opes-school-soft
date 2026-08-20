@@ -731,7 +731,103 @@ final class Index extends Component
             'unpaid_fines' => (int) DB::table('library_fines')
                 ->whereIn('status', ['assessed', 'invoiced'])
                 ->sum(DB::raw('amount - waived_amount')),
+
+            // The reference's "Active Members" and "New Books". Members are
+            // counted by STATUS, not by row: an expired or suspended card is
+            // still a member record and counting it would overstate who can
+            // actually borrow today.
+            'active_members' => (int) DB::table('library_members')->where('status', 'active')->count(),
+
+            // "New this academic year", not the reference's "This Term":
+            // books carry an acquisition/creation date, not a term, and
+            // naming a term needs the assessment-period calendar. The label
+            // says which window it means rather than borrowing a word the
+            // figure cannot support.
+            'new_titles' => (int) DB::table('books')
+                ->where('is_archived', false)
+                ->where('created_at', '>=', $this->academicYearStart())
+                ->count(),
         ];
+    }
+
+    /**
+     * The current academic year's start, for "new this year" windows.
+     *
+     * Falls back to the start of the calendar year when no academic year is
+     * marked current - a wrong-but-stated window beats a fatal on a fresh
+     * install that has not run setup yet.
+     */
+    private function academicYearStart(): string
+    {
+        $starts = DB::table('academic_years')->where('is_current', true)->value('starts_on');
+
+        return is_string($starts) ? $starts : now()->startOfYear()->toDateString();
+    }
+
+    /**
+     * Copies per book category, for the rail donut.
+     *
+     * Counts COPIES rather than titles: "how much of the shelf is science"
+     * is a question about physical stock, and a category with one title in
+     * forty copies is not the same shelf as one with forty titles.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function categoryDistribution(): array
+    {
+        return DB::table('book_categories as bc')
+            ->join('books as b', 'b.book_category_id', '=', 'bc.id')
+            ->join('book_copies as cp', 'cp.book_id', '=', 'b.id')
+            ->where('b.is_archived', false)
+            ->whereNot('cp.status', 'withdrawn')
+            ->groupBy('bc.id', 'bc.name')
+            ->orderByDesc(DB::raw('COUNT(cp.id)'))
+            ->selectRaw('bc.name as label, COUNT(cp.id) as value')
+            ->get()
+            ->map(static fn (object $row): array => [
+                'label' => (string) $row->label,
+                'value' => (int) $row->value,
+            ])
+            ->all();
+    }
+
+    /**
+     * The most recent open loans, for the rail.
+     *
+     * @return list<array{borrower: string, title: string, issued_on: string, due_on: string, overdue: bool}>
+     */
+    private function recentLoans(): array
+    {
+        return DB::table('library_issues as li')
+            ->join('book_copies as cp', 'cp.id', '=', 'li.book_copy_id')
+            ->join('books as b', 'b.id', '=', 'cp.book_id')
+            ->join('library_members as lm', 'lm.id', '=', 'li.library_member_id')
+            ->leftJoin('students as st', 'st.id', '=', 'lm.student_id')
+            ->leftJoin('staff_members as sm', 'sm.id', '=', 'lm.staff_member_id')
+            ->whereNull('li.returned_on')
+            ->orderByDesc('li.issued_on')
+            ->limit(5)
+            ->selectRaw("
+                COALESCE(
+                    CONCAT(st.first_name, ' ', st.last_name),
+                    CONCAT(sm.first_name, ' ', sm.last_name),
+                    lm.external_name,
+                    lm.member_no
+                ) as borrower,
+                b.title as title,
+                li.issued_on as issued_on,
+                li.due_on as due_on,
+                li.status as status
+            ")
+            ->get()
+            ->map(static fn (object $row): array => [
+                'borrower' => (string) $row->borrower,
+                'title' => (string) $row->title,
+                'issued_on' => (string) $row->issued_on,
+                'due_on' => (string) $row->due_on,
+                'overdue' => $row->status === 'overdue',
+            ])
+            ->all();
     }
 
     /**
@@ -796,6 +892,8 @@ final class Index extends Component
         return view('livewire.library.index', [
             'rows' => $this->rows(),
             'kpis' => $this->kpis(),
+            'categoryDistribution' => $this->categoryDistribution(),
+            'recentLoans' => $this->recentLoans(),
             'tabCounts' => $tabCounts,
             'categoryOptions' => $this->categoryOptions(),
             'statusOptions' => $this->statusOptions(),

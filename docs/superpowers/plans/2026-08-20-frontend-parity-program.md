@@ -244,7 +244,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 11 | `/examinations` | TODO | |
 | 12 | `/results` | TODO | |
 | 13 | `/finance/dashboard` | TODO | |
-| 14 | `/library` | TODO | |
+| 14 | `/library` vs `Library.png` | DONE | added Active Members + New Titles KPIs (six now fit one row); rail is a copies-by-category donut + Recent Book Loans with overdue colouring. Only one book category exists in the demo, so the donut is one slice - correct, not broken |
 | 15 | `/inventory` | TODO | |
 | 16 | `/transport` | TODO | |
 | 17 | `/hostel` | TODO | |
@@ -270,6 +270,8 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/library` | "Library Reports" / "Export Data" buttons | absent | Export has no route. Reports exists at `/reports/library` and is reachable from the nav; a duplicate header button is queued, not urgent. |
+| `/library` | KPI "New Books (This Term)" | "New Titles (This academic year)" | Books carry an acquisition date, not a term. The label states the window it actually measures instead of borrowing a word the figure cannot support. |
 | `/classes` | per-row Room | absent | `rooms` is empty and `class_groups.room_id` is unset on every row; a column of em dashes is noise. |
 | `/students` | KPI "New Admissions (This Term)" | absent | Enrolments carry a YEAR, not a term; naming a term needs the assessment-period calendar. Pre-existing decision, kept. |
 | `/students` | trend line under every KPI | absent | Needs a persisted daily snapshot table, which does not exist. A trend from the only number we have would be invented. |
