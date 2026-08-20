@@ -1171,6 +1171,16 @@ return [
         'kpi_examinations' => 'Examens',
         'kpi_examinations_sub' => 'Programmes',
     ],
+    'settings_screen' => [
+        'rail_system_status' => 'Etat du systeme',
+        'status_database' => 'Base de donnees',
+        'status_connected' => 'Connectee',
+        'status_unreachable' => 'Injoignable',
+        'status_last_backup' => 'Derniere sauvegarde',
+        'status_never' => 'Jamais',
+        'status_php' => 'Version PHP',
+        'status_version' => 'Version du systeme',
+    ],
     'students_screen' => [
         'title' => 'Gestion des élèves',
         'breadcrumb_dashboard' => 'Tableau de bord',

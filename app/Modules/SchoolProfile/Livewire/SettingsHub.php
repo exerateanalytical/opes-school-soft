@@ -238,10 +238,76 @@ final class SettingsHub extends Component
         ];
     }
 
+    /**
+     * The System Status strip the reference's settings screen carries.
+     *
+     * DELIBERATELY CHEAP - single-row reads and constants. The obvious source
+     * is CollectHealth, which the dashboard uses, but that pages the whole
+     * audit_logs table to verify the hash chain and would put that cost on
+     * every settings load.
+     *
+     * `database` is a real round trip rather than "we booted, so it must be
+     * up": Laravel resolves connections lazily, so this page can render
+     * perfectly with a dead database until something actually asks it a
+     * question.
+     *
+     * @return list<array{label: string, value: string, ok: bool}>
+     */
+    private function systemStatus(): array
+    {
+        $databaseUp = true;
+
+        try {
+            DB::connection()->getPdo()->query('SELECT 1');
+        } catch (\Throwable) {
+            $databaseUp = false;
+        }
+
+        $lastBackup = null;
+
+        try {
+            $lastBackup = DB::table('backups')
+                ->where('status', 'completed')
+                ->whereNotNull('completed_at')
+                ->max('completed_at');
+        } catch (\Throwable) {
+            $lastBackup = null;
+        }
+
+        return [
+            [
+                'label' => (string) __('opes.settings_screen.status_database'),
+                'value' => (string) __($databaseUp ? 'opes.settings_screen.status_connected' : 'opes.settings_screen.status_unreachable'),
+                'ok' => $databaseUp,
+            ],
+            [
+                'label' => (string) __('opes.settings_screen.status_last_backup'),
+                // Never taken is NOT ok. A school with no backup is one bad
+                // afternoon from losing its year, and a green dot beside an
+                // em dash would say the opposite.
+                'value' => is_string($lastBackup)
+                    ? \Illuminate\Support\Carbon::parse($lastBackup)->translatedFormat('d M Y H:i')
+                    : (string) __('opes.settings_screen.status_never'),
+                'ok' => is_string($lastBackup),
+            ],
+            [
+                'label' => (string) __('opes.settings_screen.status_php'),
+                'value' => PHP_VERSION,
+                'ok' => true,
+            ],
+            [
+                'label' => (string) __('opes.settings_screen.status_version'),
+                'value' => (string) config('app.version', 'dev'),
+                'ok' => true,
+            ],
+        ];
+    }
+
     public function render(): mixed
     {
         return view('livewire.schoolprofile.settings-hub', [
             'cards' => $this->visibleCards(),
+            'systemStatus' => $this->systemStatus(),
         ]);
     }
 }

@@ -82,6 +82,7 @@ $map = [
     'staff' => '/staff',
     'reports' => '/reports',
     'settings' => '/settings',
+    'settings-advanced' => '/settings/advanced',
     'users' => '/users',
 ];
 

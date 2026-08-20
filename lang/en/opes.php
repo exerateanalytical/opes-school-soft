@@ -1184,6 +1184,16 @@ return [
         'kpi_examinations' => 'Examinations',
         'kpi_examinations_sub' => 'Scheduled',
     ],
+    'settings_screen' => [
+        'rail_system_status' => 'System Status',
+        'status_database' => 'Database',
+        'status_connected' => 'Connected',
+        'status_unreachable' => 'Unreachable',
+        'status_last_backup' => 'Last backup',
+        'status_never' => 'Never',
+        'status_php' => 'PHP version',
+        'status_version' => 'System version',
+    ],
     'students_screen' => [
         'title' => 'Student Management',
         'breadcrumb_dashboard' => 'Dashboard',

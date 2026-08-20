@@ -253,8 +253,8 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels, role donut. Fixed a filtered Total Users count |
 | 18 | `/guardians` | TODO | |
 | 19 | `/staff` | TODO | no dedicated reference; `teacher profile.png` is a profile |
-| 20 | `/reports` | TODO | |
-| 21 | `/settings` | TODO | |
+| 20 | `/reports` vs `report an analytics.png` | PARTIAL | headline strip added. Keeps its HUB shape rather than the reference's report CATALOGUE - that needs a report registry with run history |
+| 21 | `/settings` vs `general setting.png` | PARTIAL | System Status strip added to the hub AND to /settings/advanced. Keeps the hub-of-sub-screens shape rather than the reference's in-place workspace |
 | 22 | `/admissions/wizard` | TODO | |
 | 23 | Print templates (ID, transcript, certificate, statement) | TODO | different medium - paper sizes, not viewport |
 
@@ -290,8 +290,8 @@ grown out of. All eleven are closed.
 | 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels instead of raw slugs, role-distribution donut. Fixed a real bug: Total Users showed the FILTERED paginator total |
 | 18 | `/guardians` | TODO | |
 | 19 | `/staff` | TODO | |
-| 20 | `/reports` | TODO | |
-| 21 | `/settings` | TODO | |
+| 20 | `/reports` vs `report an analytics.png` | PARTIAL | headline strip added. Keeps its HUB shape rather than the reference's report CATALOGUE - that needs a report registry with run history |
+| 21 | `/settings` vs `general setting.png` | PARTIAL | System Status strip added to the hub AND to /settings/advanced. Keeps the hub-of-sub-screens shape rather than the reference's in-place workspace |
 | 22 | `/admissions/wizard` | TODO | |
 | 23 | Print templates (ID, transcript, certificate, statement) | TODO | different medium — paper sizes, not viewport |
 
@@ -310,6 +310,10 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/reports` | KPI "Pass Rate (Overall)" | absent | A pass mark is per assessment framework and nothing is published to average. Inventing it on the reports screen would be the worst place to start guessing. |
+| `/reports` | report catalogue with last-generated and per-row export format | hub of category screens | Needs a report registry with run history. Faking it would put fabricated "last generated" dates in front of an auditor. |
+| `/settings` | in-place editing workspace with a left section nav | hub of sub-screens | Each settings area is its own screen with its own permission. Converting to in-place editing is a rewrite of a permission-sensitive area, not a restyle. |
+| `/settings` | "Storage Overview" donut | absent | No storage metering exists. |
 | `/users` | KPI "Students" | "Guardians" | This product does not give a pupil a back-office login - their guardian gets one. Labelling a guardian count "Students" on the screen whose whole job is who can sign in would be a plain untruth. |
 | `/users` | photo thumbnails, select-all, Department column, Export | absent | No user-photo controller, no bulk action, no department on users, no export route. |
 | `/subjects` | KPI "Practical Subjects" | "Unallocated" | `subjects` records code, name, department and is_active - there is no practical/theory attribute anywhere in the schema. Its place is taken by the count of subjects on no timetable, which the reference does not show and which somebody actually has to act on. |

@@ -253,6 +253,26 @@
     {{-- Right rail: settings-by-class breakdown. --}}
     <x-slot:rail>
         <div class="space-y-4">
+            {{-- The reference's System Status panel. Cheap reads only - see
+                 the note on systemStatus() for why this is not CollectHealth.
+
+                 The dot is the state and the WORD says it too: "Connected",
+                 "Never", a version string. Colour alone is not a reading. --}}
+            <x-shell.panel :title="__('opes.settings_screen.rail_system_status')">
+                <ul class="divide-y divide-shell-divider">
+                    @foreach ($systemStatus as $line)
+                        <li class="flex items-center gap-2.5 py-[7px]">
+                            <span class="h-2 w-2 shrink-0 rounded-full {{ $line['ok'] ? 'bg-success' : 'bg-shell-alert' }}"
+                                  aria-hidden="true"></span>
+                            <span class="min-w-0 flex-1 truncate text-[13px] text-charcoal">{{ $line['label'] }}</span>
+                            <span class="shrink-0 text-[12px] {{ $line['ok'] ? 'text-charcoal/65' : 'font-semibold text-danger-text' }}">
+                                {{ $line['value'] }}
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </x-shell.panel>
+
             <section aria-label="Settings by class" class="rounded border border-border-primary bg-white p-3">
                 <h3 class="mb-2 text-sm font-semibold text-charcoal">Settings by Class</h3>
                 <ul class="space-y-2.5">
