@@ -1409,6 +1409,12 @@ return [
     ],
     // Guardian profile, docs/specs/07-students.md 11.3. Phase 2.
     'guardians_screen' => [
+        'kpi_linked_students' => 'Linked Students',
+        'kpi_linked_students_sub' => 'Pupils with a guardian',
+        'kpi_without_portal' => 'No Portal Account',
+        'kpi_without_portal_sub' => 'Cannot sign in',
+        'rail_by_relationship' => 'Guardians by Relationship',
+        'rail_links' => 'Links',
         'photo_heading' => 'Photograph',
         'photo_hint' => 'Shown to staff releasing a child at pickup.',
         'photo_uploading' => 'Uploading…',

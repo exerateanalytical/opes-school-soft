@@ -1390,6 +1390,12 @@ return [
     ],
     // Fiche tuteur, docs/specs/07-students.md 11.3. Phase 2.
     'guardians_screen' => [
+        'kpi_linked_students' => 'Eleves rattaches',
+        'kpi_linked_students_sub' => 'Eleves ayant un parent',
+        'kpi_without_portal' => 'Sans compte portail',
+        'kpi_without_portal_sub' => 'Ne peuvent pas se connecter',
+        'rail_by_relationship' => 'Parents par lien',
+        'rail_links' => 'Liens',
         'photo_heading' => 'Photographie',
         'photo_hint' => "Affichée au personnel lors de la remise de l'enfant.",
         'photo_uploading' => 'Téléversement…',

@@ -251,7 +251,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 16 | `/transport` | PARTIAL | rail already matched; duplicate heading removed. Driver/Vehicle columns queued |
 | 17 | `/hostel` | PARTIAL | duplicate heading removed; not compared in detail |
 | 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels, role donut. Fixed a filtered Total Users count |
-| 18 | `/guardians` | TODO | |
+| 18 | `/guardians` | DONE | 5 KPIs (added Linked Students + No Portal Account) and a by-relationship donut. Counts LINKS not people, so one guardian standing for four children reads as four covered pupils |
 | 19 | `/staff` | TODO | no dedicated reference; `teacher profile.png` is a profile |
 | 20 | `/reports` vs `report an analytics.png` | PARTIAL | headline strip added. Keeps its HUB shape rather than the reference's report CATALOGUE - that needs a report registry with run history |
 | 21 | `/settings` vs `general setting.png` | PARTIAL | System Status strip added to the hub AND to /settings/advanced. Keeps the hub-of-sub-screens shape rather than the reference's in-place workspace |
@@ -288,7 +288,7 @@ grown out of. All eleven are closed.
 | 16 | `/transport` | TODO | |
 | 17 | `/hostel` | TODO | |
 | 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels instead of raw slugs, role-distribution donut. Fixed a real bug: Total Users showed the FILTERED paginator total |
-| 18 | `/guardians` | TODO | |
+| 18 | `/guardians` | DONE | 5 KPIs (added Linked Students + No Portal Account) and a by-relationship donut. Counts LINKS not people, so one guardian standing for four children reads as four covered pupils |
 | 19 | `/staff` | TODO | |
 | 20 | `/reports` vs `report an analytics.png` | PARTIAL | headline strip added. Keeps its HUB shape rather than the reference's report CATALOGUE - that needs a report registry with run history |
 | 21 | `/settings` vs `general setting.png` | PARTIAL | System Status strip added to the hub AND to /settings/advanced. Keeps the hub-of-sub-screens shape rather than the reference's in-place workspace |

@@ -151,6 +151,18 @@
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path stroke-linecap="round" d="M9 9h6M9 13h6"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
             </x-slot:icon>
         </x-kpi-card>
+        <x-kpi-card :label="__('opes.guardians_screen.kpi_linked_students')" :value="number_format($kpis['linked_students'])"
+                    :sub="__('opes.guardians_screen.kpi_linked_students_sub')" icon-bg="bg-badge-blue">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('opes.guardians_screen.kpi_without_portal')" :value="$kpis['without_portal']"
+                    :sub="__('opes.guardians_screen.kpi_without_portal_sub')" icon-bg="bg-heritage-red">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
     </x-slot:kpis>
 
     <x-slot:filters>
@@ -223,6 +235,22 @@
             </article>
         @endforeach
     </x-slot:cards>
+
+    <x-slot:rail>
+        {{-- Relationships as SHARES. Counted per LINK, not per guardian: the
+             same person can be a mother to one pupil and a legal guardian to
+             another, and collapsing that to one row would hide the second
+             relationship entirely. --}}
+        <x-shell.panel :title="__('opes.guardians_screen.rail_by_relationship')">
+            <x-shell.donut :slices="$relationshipDistribution"
+                           :centre-value="number_format(collect($relationshipDistribution)->sum('value'))"
+                           :centre-label="__('opes.guardians_screen.rail_links')"
+                           stacked
+                           :size="132"
+                           :thickness="22"
+                           class="py-1"/>
+        </x-shell.panel>
+    </x-slot:rail>
 </x-list-screen>
 
 </div>

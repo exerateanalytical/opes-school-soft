@@ -196,7 +196,46 @@ final class Index extends Component
             'total' => $total,
             'orphaned' => $orphaned,
             'portal_active' => $portalActive,
+
+            // Linked children, not linked guardians: the question a registrar
+            // asks of this screen is "how many pupils have somebody
+            // answerable for them", and one guardian standing for four
+            // children is four covered pupils, not one.
+            'linked_students' => (int) DB::table('student_guardians')
+                ->whereNull('valid_to')
+                ->distinct()
+                ->count('student_id'),
+
+            // Live links with no portal account behind them. This is the
+            // actionable number on the screen: a guardian the school can
+            // reach on paper but not in the app.
+            'without_portal' => max(0, $total - $portalActive),
         ];
+    }
+
+    /**
+     * Guardians per relationship, for the rail donut.
+     *
+     * Counts the LINK, not the guardian: the same person can be a mother to
+     * one pupil and a legal guardian to another, and collapsing that to one
+     * row would hide the second relationship entirely.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function relationshipDistribution(): array
+    {
+        return DB::table('student_guardians')
+            ->whereNull('valid_to')
+            ->whereNotNull('relationship')
+            ->groupBy('relationship')
+            ->orderByDesc(DB::raw('COUNT(*)'))
+            ->selectRaw('relationship as label, COUNT(*) as value')
+            ->get()
+            ->map(static fn (object $r): array => [
+                'label' => ucfirst(str_replace('_', ' ', (string) $r->label)),
+                'value' => (int) $r->value,
+            ])
+            ->all();
     }
 
     /**
@@ -378,6 +417,7 @@ final class Index extends Component
         return view('livewire.guardians.guardians.index', [
             'rows' => $this->rows(),
             'kpis' => $this->kpis(),
+            'relationshipDistribution' => $this->relationshipDistribution(),
             'relationshipOptions' => $this->relationshipOptions(),
             'relationshipCases' => GuardianRelationship::cases(),
         ]);
