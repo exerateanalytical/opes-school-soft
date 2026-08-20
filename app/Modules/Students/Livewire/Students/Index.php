@@ -139,16 +139,27 @@ final class Index extends Component
             ]);
 
         $query->when($this->search !== '', function (Builder $builder): void {
-            $term = '%'.$this->search.'%';
+            // Split on whitespace so a full-name query like "Achille Bassong"
+            // matches a first_name/last_name pair instead of failing outright:
+            // each word must independently match one of the name/ID columns,
+            // so "Achille Bassong" requires "Achille" in some column AND
+            // "Bassong" in some column (possibly different columns).
+            $words = preg_split('/\s+/', trim($this->search), -1, PREG_SPLIT_NO_EMPTY) ?: [$this->search];
 
-            $builder->where(function (Builder $inner) use ($term): void {
-                $inner->where('first_name', 'like', $term)
-                    ->orWhere('middle_name', 'like', $term)
-                    ->orWhere('last_name', 'like', $term)
-                    ->orWhere('preferred_name', 'like', $term)
-                    // Both identifiers the mockup's placeholder promises.
-                    ->orWhere('matricule', 'like', $term)
-                    ->orWhere('admission_no', 'like', $term);
+            $builder->where(function (Builder $outer) use ($words): void {
+                foreach ($words as $word) {
+                    $term = '%'.$word.'%';
+
+                    $outer->where(function (Builder $inner) use ($term): void {
+                        $inner->where('first_name', 'like', $term)
+                            ->orWhere('middle_name', 'like', $term)
+                            ->orWhere('last_name', 'like', $term)
+                            ->orWhere('preferred_name', 'like', $term)
+                            // Both identifiers the mockup's placeholder promises.
+                            ->orWhere('matricule', 'like', $term)
+                            ->orWhere('admission_no', 'like', $term);
+                    });
+                }
             });
         });
 
@@ -217,6 +228,50 @@ final class Index extends Component
     }
 
     /**
+     * The roll grouped by class LEVEL, for the rail's donut.
+     *
+     * Deliberately NOT classGroupOptions(). That returns one row per class
+     * GROUP - "Form 1 A", "Form 1 B", "Form 1 C" - which on this school is
+     * thirty rows, and thirty slices is not a donut, it is a colour wheel
+     * with an unreadable legend. The reference groups by level, which is the
+     * question a head teacher is actually asking of this chart.
+     *
+     * Counts the same enrolments the class-group query does, by the same
+     * rules (open segment, live enrolment status), so the two cannot disagree
+     * about the size of the roll.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function levelDistribution(): array
+    {
+        $labelColumn = app()->getLocale() === 'fr' ? 'cl.name_fr' : 'cl.name';
+
+        return DB::table('class_levels as cl')
+            ->join('class_groups as cg', 'cg.class_level_id', '=', 'cl.id')
+            ->join('academic_years as ay', 'ay.id', '=', 'cg.academic_year_id')
+            ->where('ay.is_current', '=', true)
+            ->leftJoin('enrollment_segments as seg', function ($join): void {
+                $join->on('seg.class_group_id', '=', 'cg.id')->whereNull('seg.ends_on');
+            })
+            ->leftJoin('enrollments as enr', function ($join): void {
+                $join->on('enr.id', '=', 'seg.enrollment_id')
+                    ->whereIn('enr.status', ['pending', 'active', 'suspended']);
+            })
+            ->groupBy('cl.id', 'cl.name', 'cl.name_fr', 'cl.order_index')
+            // The school's own order, not alphabetical: "Form 10" sorts before
+            // "Form 2" as text, and a roll that runs 1, 10, 2 reads as a bug
+            // to every teacher who sees it.
+            ->orderBy('cl.order_index')
+            ->selectRaw($labelColumn.' as label, COUNT(enr.id) as value')
+            ->get()
+            ->map(static fn (object $row): array => [
+                'label' => (string) $row->label,
+                'value' => (int) $row->value,
+            ])
+            ->all();
+    }
+
+    /**
      * Class groups of the CURRENT academic year, for the filter select and the
      * "Students by Class" rail. Query builder, not the Academics models - see
      * the class header.
@@ -275,6 +330,7 @@ final class Index extends Component
             'femaleCount' => $genderCounts[Gender::Female->value] ?? 0,
             'statusOptions' => $this->statusOptions(),
             'classGroupOptions' => $this->classGroupOptions(),
+            'levelDistribution' => $this->levelDistribution(),
         ]);
     }
 }

@@ -234,9 +234,9 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 3 | Triage the 31 `ChatGPT Image *.png` | DONE | see §4b — three conflicting design families; family A is canonical |
 | 3b | Card language across ALL screens (`x-kpi-card`) | DONE | tone now paints a 50px solid disc on a WHITE card, not a pastel wash; sentence-case 13px label, 26px numeral. Repaints all 42 call sites from one change. `icon-bg` demoted to a hue hint so no screen keeps an off-palette disc |
 | 3c | Shell applied to all 19 back-office screens | DONE | every one captures 200 with the new sidebar, top bar and ivory canvas; contact sheet verified |
-| 4 | `/students` content vs `student management.png` | TODO | shell + cards done; table, filters and right rail still to measure |
+| 4 | `/students` vs `student management.png` | DONE | table gained #, Gender, Admission Date; rail rebuilt as a level donut + real quick actions; header wired to admissions.wizard + students.import. Divergences recorded below |
 | 5 | `/students/{student}` | TODO | |
-| 6 | `/classes` | TODO | |
+| 6 | `/classes` vs `Class Management.png` | DONE | 5 KPIs (classes, students, teachers, average, rooms); table gained Class Teacher + Students; rail is a level donut + classroom utilisation. Rooms reads 0 because none are configured - honest, not a gap |
 | 7 | `/subjects` | TODO | |
 | 8 | `/academics/settings` | TODO | |
 | 9 | `/timetable` | TODO | |
@@ -254,6 +254,28 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 21 | `/settings` | TODO | |
 | 22 | `/admissions/wizard` | TODO | |
 | 23 | Print templates (ID, transcript, certificate, statement) | TODO | different medium — paper sizes, not viewport |
+
+---
+
+## 6b. Deliberate divergences from a reference, and why
+
+These are NOT unfinished work. Each is a place where reproducing the picture
+would have shipped something false or dead, and the reason is recorded so it
+is not "fixed" later by someone reading only the image.
+
+| Screen | Reference shows | Built instead | Why |
+|---|---|---|---|
+| `/students` | select-all checkbox column | absent | No bulk operation exists on this screen to select FOR. Same rule that keeps unbuilt modules out of the nav. Returns with the first bulk action. |
+| `/students` | photo thumbnails | initials avatar | `photo_path` is a private-disk path served through a policy-checked controller, and no student-photo controller exists. There is nothing safe to point an `<img>` at. |
+| `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
+| `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
+| `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/classes` | per-row Room | absent | `rooms` is empty and `class_groups.room_id` is unset on every row; a column of em dashes is noise. |
+| `/students` | KPI "New Admissions (This Term)" | absent | Enrolments carry a YEAR, not a term; naming a term needs the assessment-period calendar. Pre-existing decision, kept. |
+| `/students` | trend line under every KPI | absent | Needs a persisted daily snapshot table, which does not exist. A trend from the only number we have would be invented. |
+| dashboard | Quick Actions: School Calendar, Fee Structures | absent | No routes. Blocks exact 3x3 parity until those screens are built. |
+| dashboard | money as `FCFA 45,890,000` | `45,890,000 FCFA` | `Money::format()` also renders every invoice, receipt and statement. Symbol position is a product-wide decision, not a dashboard tweak. **Open question for the user.** |
+| all | table body 13px | reference sets it larger | The OPES sidebar is 270px against the reference shell's 168px, so the content area is ~105px narrower for the same table. `/students` ACTIONS hung off the edge until the body was set down. |
 
 ---
 

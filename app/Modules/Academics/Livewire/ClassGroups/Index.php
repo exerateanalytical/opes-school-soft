@@ -18,6 +18,7 @@ use App\Modules\Identity\Domain\Permission;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -385,10 +386,89 @@ final class Index extends Component
     /**
      * @return LengthAwarePaginator<int, ClassGroup>
      */
+    /**
+     * The five figures the reference's KPI strip carries.
+     *
+     * Counted for the CURRENT year only - a class group belongs to a year,
+     * and totalling every year's groups would report a number that grows
+     * forever and means nothing to anyone.
+     *
+     * @return array{classes: int, students: int, teachers: int, average: float|null, rooms: int}
+     */
+    private function classStats(AcademicYear $year): array
+    {
+        $classes = (int) DB::table('class_groups')
+            ->where('academic_year_id', $year->getKey())
+            ->count();
+
+        $students = (int) DB::table('enrollment_segments as seg')
+            ->join('enrollments as enr', 'enr.id', '=', 'seg.enrollment_id')
+            ->join('class_groups as cg', 'cg.id', '=', 'seg.class_group_id')
+            ->where('cg.academic_year_id', $year->getKey())
+            ->whereNull('seg.ends_on')
+            ->whereIn('enr.status', ['pending', 'active', 'suspended'])
+            ->count();
+
+        $teachers = (int) DB::table('class_groups')
+            ->where('academic_year_id', $year->getKey())
+            ->whereNotNull('class_teacher_staff_id')
+            ->distinct()
+            ->count('class_teacher_staff_id');
+
+        return [
+            'classes' => $classes,
+            'students' => $students,
+            'teachers' => $teachers,
+            // Null, not 0, when there are no classes: "no class has been set
+            // up" and "the average class holds nobody" are different facts.
+            'average' => $classes === 0 ? null : round($students / $classes, 1),
+            'rooms' => (int) DB::table('rooms')->count(),
+        ];
+    }
+
+    /**
+     * Classes per level, for the rail donut.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function levelDistribution(AcademicYear $year): array
+    {
+        $labelColumn = app()->getLocale() === 'fr' ? 'cl.name_fr' : 'cl.name';
+
+        return DB::table('class_levels as cl')
+            ->join('class_groups as cg', 'cg.class_level_id', '=', 'cl.id')
+            ->where('cg.academic_year_id', $year->getKey())
+            ->groupBy('cl.id', 'cl.name', 'cl.name_fr', 'cl.order_index')
+            ->orderBy('cl.order_index')
+            ->selectRaw($labelColumn.' as label, COUNT(cg.id) as value')
+            ->get()
+            ->map(static fn (object $row): array => [
+                'label' => (string) $row->label,
+                'value' => (int) $row->value,
+            ])
+            ->all();
+    }
+
     private function classGroups(AcademicYear $year): LengthAwarePaginator
     {
         return ClassGroup::query()
             ->with(['classLevel', 'stream'])
+            // The reference's table carries a class teacher and a live head
+            // count per row. Both as SUBQUERIES rather than eager-loaded
+            // relations: this is a paginated list, and a relation per row is
+            // the N+1 that turns a 30-row page into 61 queries.
+            ->addSelect([
+                'class_teacher_name' => DB::table('staff_members as sm')
+                    ->whereColumn('sm.id', 'class_groups.class_teacher_staff_id')
+                    ->selectRaw("CONCAT(sm.first_name, ' ', sm.last_name)")
+                    ->limit(1),
+                'student_count' => DB::table('enrollment_segments as seg')
+                    ->join('enrollments as enr', 'enr.id', '=', 'seg.enrollment_id')
+                    ->whereColumn('seg.class_group_id', 'class_groups.id')
+                    ->whereNull('seg.ends_on')
+                    ->whereIn('enr.status', ['pending', 'active', 'suspended'])
+                    ->selectRaw('COUNT(*)'),
+            ])
             ->where('academic_year_id', $year->getKey())
             ->when($this->search !== '', function ($query): void {
                 $query->where('name', 'like', '%'.$this->search.'%');
@@ -408,6 +488,8 @@ final class Index extends Component
             'streamOptions' => Stream::query()->where('is_active', true)->orderBy('name')->get(),
             'sectionOptions' => SchoolSection::query()->orderBy('display_order')->get(),
             'canManage' => Gate::allows(Permission::AcademicsManage->value),
+            'classStats' => $year === null ? null : $this->classStats($year),
+            'levelDistribution' => $year === null ? [] : $this->levelDistribution($year),
         ]);
     }
 }

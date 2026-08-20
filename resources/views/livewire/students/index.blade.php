@@ -72,7 +72,6 @@
     :breadcrumb="[__('opes.students_screen.breadcrumb_dashboard'), __('opes.students_screen.breadcrumb_students')]"
     :paginator="$students"
     :empty-message="__('opes.students_screen.empty')"
-    :rail-title="__('opes.students_screen.rail_title')"
 >
     <x-slot:actions>
         {{-- These were ONE inert grey control, on the grounds that "creation
@@ -225,48 +224,86 @@
 
     <x-slot:head>
         <tr class="bg-chrome text-white">
-            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_matricule') }}</th>
-            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_student') }}</th>
-            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_class') }}</th>
-            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.date_of_birth') }}</th>
-            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_status') }}</th>
-            <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_actions') }}</th>
+            {{-- The reference opens with a select-all checkbox. It is NOT
+                 reproduced: this screen has no bulk action to select FOR, and
+                 a checkbox that selects rows nothing can act on is a dead
+                 control - the same rule that keeps unbuilt modules out of the
+                 nav. It goes back in with the first bulk operation. --}}
+            <th scope="col" class="w-10 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_number') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_matricule') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_student') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_class') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_gender') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.date_of_birth') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_admission_date') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_status') }}</th>
+            <th scope="col" class="px-2.5 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.students_screen.column_actions') }}</th>
         </tr>
     </x-slot:head>
 
     @foreach ($students as $student)
-        <tr wire:key="student-row-{{ $student->id }}">
-            <td class="px-4 py-2.5 font-mono text-xs text-charcoal/80">{{ $student->matricule }}</td>
-            <td class="px-4 py-2.5">
+        {{-- 13px, not the scaffold's 15px. This table carries eight
+                 columns and the OPES sidebar is 270px against the reference
+                 shell's 168px, so the content area is ~105px narrower for
+                 the same table - which is exactly the width ACTIONS was
+                 hanging off the right edge by. The reference's own table
+                 body is set smaller than its page text for the same
+                 reason. --}}
+        <tr wire:key="student-row-{{ $student->id }}" class="text-[13px]">
+            {{-- The row's position in the WHOLE result set, not in the page:
+                 firstItem() is the paginator's own offset, so row 1 of page 2
+                 reads 26 rather than restarting the count. --}}
+            <td class="px-2.5 py-2 text-xs text-charcoal/55">{{ $students->firstItem() + $loop->index }}</td>
+            <td class="px-2.5 py-2 font-mono text-xs text-charcoal/80">{{ $student->matricule }}</td>
+            <td class="px-2.5 py-2">
                 <div class="flex items-center gap-2.5">
                     {{-- Initials avatar, not the mockup's photo: photo_path is
                          a PRIVATE-disk path served through a policy-checked
                          controller (8.1) and that controller does not exist
                          yet, so there is nothing safe to point an <img> at. --}}
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase text-white">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-chrome-light text-[10px] font-semibold uppercase text-white">
                         {{ $initials($student->first_name, $student->last_name) }}
                     </span>
-                    <div class="min-w-0">
-                        <div class="truncate font-medium text-charcoal">{{ $student->fullName() }}</div>
-                        <div class="truncate text-xs text-charcoal/60">{{ __('opes.students_screen.admission_no') }} {{ $student->admission_no }}</div>
-                    </div>
+                    {{-- Name only. The admission number used to sit under it
+                         and is already its own column - printing an identifier
+                         twice in one row costs ~140px of table width, which is
+                         what pushed STATUS and ACTIONS off the right edge. --}}
+                    <div class="min-w-0 truncate font-medium text-charcoal">{{ $student->fullName() }}</div>
                 </div>
             </td>
-            <td class="px-4 py-2.5">
+            <td class="px-2.5 py-2">
                 @if (is_string($student->current_class_name) && $student->current_class_name !== '')
-                    <span class="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                    <span class="inline-flex max-w-full items-center truncate whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+                          title="{{ $student->current_class_name }}">
                         {{ $student->current_class_name }}
                     </span>
                 @else
                     <span class="text-xs text-charcoal/50">{{ __('opes.students_screen.no_class') }}</span>
                 @endif
             </td>
-            <td class="px-4 py-2.5 text-charcoal/70">{{ $student->date_of_birth->translatedFormat('d M Y') }}</td>
-            <td class="px-4 py-2.5">
+            <td class="px-2.5 py-2">
+                @if ($student->gender !== null)
+                    <span class="inline-flex items-center gap-1.5 text-charcoal/80">
+                        <span aria-hidden="true"
+                              class="h-1.5 w-1.5 rounded-full {{ $student->gender->value === 'male' ? 'bg-kpi-blue-solid' : 'bg-kpi-pink-solid' }}"></span>
+                        {{ __('opes.students_screen.gender_'.$student->gender->value) }}
+                    </span>
+                @else
+                    <span class="text-xs text-charcoal/45">&mdash;</span>
+                @endif
+            </td>
+            <td class="whitespace-nowrap px-2.5 py-2 text-charcoal/70">{{ $student->date_of_birth->translatedFormat('d M Y') }}</td>
+            {{-- first_admission_date is nullable on a migrated record, and an
+                 em dash is the honest reading of "we were never told when this
+                 pupil first joined". --}}
+            <td class="whitespace-nowrap px-2.5 py-2 text-charcoal/70">
+                {{ $student->first_admission_date?->translatedFormat('d M Y') ?? '—' }}
+            </td>
+            <td class="px-2.5 py-2">
                 <x-status-pill :status="$statusTone[$student->status->value] ?? 'amber'"
                                 :label="__('opes.students_screen.status_'.$student->status->value)"/>
             </td>
-            <td class="px-4 py-2.5">
+            <td class="px-2.5 py-2">
                 <div class="flex items-center justify-end gap-1">
                     <a href="{{ route('students.show', $student) }}"
                        title="{{ __('opes.students_screen.view_profile') }}"
@@ -284,7 +321,7 @@
             <article wire:key="student-card-{{ $student->id }}" class="rounded border border-border-primary bg-white p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex items-center gap-2.5">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-chrome-light text-xs font-semibold uppercase text-white">
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-chrome-light text-[10px] font-semibold uppercase text-white">
                             {{ $initials($student->first_name, $student->last_name) }}
                         </span>
                         <div class="min-w-0">
@@ -317,25 +354,48 @@
          a charting dependency is a decision the owner has not made, and the
          Users screen set the precedent of CSS-only chrome for the same reason. --}}
     <x-slot:rail>
-        <div class="rounded border border-border-primary bg-white p-4">
-            @if ($classGroupOptions === [])
-                <p class="text-sm text-charcoal/60">{{ __('opes.ui.no_data') }}</p>
-            @else
-                <ul class="space-y-2">
-                    @foreach ($classGroupOptions as $option)
-                        <li>
-                            <div class="flex items-baseline justify-between gap-2 text-xs">
-                                <span class="truncate font-medium text-charcoal">{{ $option['name'] }}</span>
-                                <span class="shrink-0 text-charcoal/60">{{ $option['students'] }}</span>
-                            </div>
-                            <div class="mt-1 h-1.5 w-full rounded-full bg-sand">
-                                <div class="h-1.5 rounded-full bg-primary"
-                                     style="width: {{ $railTotal > 0 ? round(100 * $option['students'] / $railTotal) : 0 }}%"></div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
+        {{-- The reference's rail is two cards: a class donut, then a list of
+             student operations. The distribution was a stack of progress
+             bars; a donut reads the same data as SHARES, which is the
+             question "how is the roll spread across classes" actually asks. --}}
+        <x-shell.panel :title="__('opes.students_screen.rail_by_class')">
+            <x-shell.donut :slices="$levelDistribution"
+                           :centre-value="number_format($railTotal)"
+                           :centre-label="__('opes.students_screen.kpi_total')"
+                           stacked
+                           :size="132"
+                           :thickness="22"
+                           class="py-1"/>
+        </x-shell.panel>
+
+        {{-- Every row is a route that EXISTS. The reference lists seven; the
+             three it shows that this platform has no screen for - print a
+             student list, transfer students, export student data - are
+             absent rather than rendered as controls that go nowhere. They
+             are recorded as feature work in the parity plan. --}}
+        <x-shell.panel :title="__('opes.dashboard.quick_actions')" class="mt-4">
+            <ul class="divide-y divide-shell-divider">
+                @php
+                    $railActions = [
+                        ['key' => 'add_student', 'icon' => 'person_add', 'route' => 'admissions.wizard', 'can' => 'admissions.manage'],
+                        ['key' => 'bulk_import', 'icon' => 'cloud_up', 'route' => 'students.import', 'can' => 'students.manage'],
+                        ['key' => 'id_cards', 'icon' => 'boarding', 'route' => 'documents.bulk-prints', 'can' => 'documents.bulk_print'],
+                        ['key' => 'promotion', 'icon' => 'academics', 'route' => 'students.promotion', 'can' => 'promotion.evaluate'],
+                        ['key' => 'report', 'icon' => 'reports', 'route' => 'reports.students-guardians', 'can' => 'reports.view'],
+                    ];
+                @endphp
+
+                @foreach ($railActions as $action)
+                    @can($action['can'])
+                        <a href="{{ route($action['route'], absolute: false) }}" wire:navigate
+                           class="group flex h-[38px] items-center gap-2.5 text-[13px] text-charcoal transition hover:text-primary">
+                            <x-shell.icon :name="$action['icon']" class="h-[17px] w-[17px] text-primary"/>
+                            <span class="min-w-0 flex-1 truncate">{{ __('opes.students_screen.rail_'.$action['key']) }}</span>
+                            <x-shell.icon name="chevron_right" class="h-3.5 w-3.5 text-charcoal/35"/>
+                        </a>
+                    @endcan
+                @endforeach
+            </ul>
+        </x-shell.panel>
     </x-slot:rail>
 </x-list-screen>

@@ -142,17 +142,50 @@
                 @endif
             </x-slot:actions>
 
-            {{-- One real KPI: the paginator's dataset-wide total for the
-                 current year. Enrolment/teacher tiles arrive with their
-                 modules. --}}
+            {{-- The reference's five tiles, all counted for the CURRENT year.
+                 Its sixth element - a "+5.00% from last term" line under each
+                 - is absent for the same reason as everywhere else in this
+                 build: there is no persisted snapshot to compare against, so
+                 a trend would be invented. --}}
             <x-slot:kpis>
-                <x-kpi-card :label="__('opes.classes_screen.kpi_total')" :value="$classGroups->total()"
-                            icon-bg="bg-primary" class="col-span-2 sm:col-span-1">
+                <x-kpi-card :label="__('opes.classes_screen.kpi_total')" :value="$classStats['classes']"
+                            :sub="__('opes.classes_screen.kpi_total_sub')" icon-bg="bg-primary">
                     <x-slot:icon>
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <rect x="3" y="4" width="18" height="14" rx="2"/>
                             <path stroke-linecap="round" d="M8 21h8M12 18v3M7 9h6M7 13h4"/>
                         </svg>
+                    </x-slot:icon>
+                </x-kpi-card>
+
+                <x-kpi-card :label="__('opes.classes_screen.kpi_students')" :value="number_format($classStats['students'])"
+                            :sub="__('opes.classes_screen.kpi_students_sub')" icon-bg="bg-badge-blue">
+                    <x-slot:icon>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
+                    </x-slot:icon>
+                </x-kpi-card>
+
+                <x-kpi-card :label="__('opes.classes_screen.kpi_teachers')" :value="$classStats['teachers']"
+                            :sub="__('opes.classes_screen.kpi_teachers_sub')" icon-bg="bg-badge-purple">
+                    <x-slot:icon>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+                    </x-slot:icon>
+                </x-kpi-card>
+
+                {{-- Null average renders an em dash through x-kpi-card's own
+                     rule: no class set up is not "the average class is
+                     empty". --}}
+                <x-kpi-card :label="__('opes.classes_screen.kpi_average')" :value="$classStats['average']"
+                            :sub="__('opes.classes_screen.kpi_average_sub')" icon-bg="bg-badge-orange">
+                    <x-slot:icon>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l9 4.5-9 4.5-9-4.5L12 4z"/><path stroke-linecap="round" d="M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5"/></svg>
+                    </x-slot:icon>
+                </x-kpi-card>
+
+                <x-kpi-card :label="__('opes.classes_screen.kpi_rooms')" :value="$classStats['rooms']"
+                            :sub="__('opes.classes_screen.kpi_rooms_sub')" icon-bg="bg-badge-teal">
+                    <x-slot:icon>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21V9l9-6 9 6v12"/><path stroke-linecap="round" d="M9 21v-6h6v6"/></svg>
                     </x-slot:icon>
                 </x-kpi-card>
             </x-slot:kpis>
@@ -171,6 +204,8 @@
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_name') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_level') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_stream') }}</th>
+                    <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_teacher') }}</th>
+                    <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_students') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_capacity') }}</th>
                     <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.classes_screen.column_status') }}</th>
                     @if ($canManage)
@@ -187,6 +222,17 @@
                     </td>
                     <td class="px-4 py-2.5 text-charcoal/80">
                         {{ $classGroup->stream !== null ? (app()->getLocale() === 'fr' ? $classGroup->stream->name_fr : $classGroup->stream->name) : __('opes.classes_screen.no_stream') }}
+                    </td>
+                    <td class="px-4 py-2.5 text-charcoal/80">
+                        {{ $classGroup->class_teacher_name ?? __('opes.classes_screen.no_teacher') }}
+                    </td>
+                    {{-- Head count against capacity, so an over-subscribed
+                         class is visible in the list rather than only on the
+                         class's own screen. --}}
+                    <td class="px-4 py-2.5">
+                        <span class="{{ (int) $classGroup->student_count > (int) $classGroup->capacity ? 'font-semibold text-danger-text' : 'text-charcoal/80' }}">
+                            {{ (int) $classGroup->student_count }}
+                        </span>
                     </td>
                     <td class="px-4 py-2.5 text-charcoal/80">{{ $classGroup->capacity }}</td>
                     <td class="px-4 py-2.5">
@@ -243,6 +289,54 @@
                     </article>
                 @endforeach
             </x-slot:cards>
+            {{-- The reference's rail: how the classes spread across levels,
+                 then how full they are. Both read the same two figures the
+                 KPI strip and the table already show, so nothing here can
+                 disagree with the page around it. --}}
+            <x-slot:rail>
+                <x-shell.panel :title="__('opes.classes_screen.rail_by_level')">
+                    <x-shell.donut :slices="$levelDistribution"
+                                   :centre-value="number_format($classStats['classes'])"
+                                   :centre-label="__('opes.classes_screen.kpi_total')"
+                                   stacked
+                                   :size="132"
+                                   :thickness="22"
+                                   class="py-1"/>
+                </x-shell.panel>
+
+                @php
+                    // Utilisation is head count over declared capacity across
+                    // the year's groups. Guarded: a school that has not set a
+                    // capacity yet divides by zero, and "0% utilised" would be
+                    // a claim rather than the absence of one.
+                    $capacity = (int) $classGroups->getCollection()->sum('capacity');
+                    $occupied = (int) $classGroups->getCollection()->sum('student_count');
+                    $utilisation = $capacity > 0 ? round($occupied / $capacity * 100, 1) : null;
+                @endphp
+
+                <x-shell.panel :title="__('opes.classes_screen.rail_utilisation')" class="mt-4">
+                    @if ($utilisation === null)
+                        <p class="py-3 text-[13px] text-charcoal/55">{{ __('opes.classes_screen.no_capacity') }}</p>
+                    @else
+                        <div class="py-1">
+                            <div class="flex items-baseline justify-between">
+                                <span class="text-[22px] font-bold leading-none text-charcoal">{{ $utilisation }}%</span>
+                                <span class="text-[12px] text-charcoal/60">{{ $occupied }} / {{ $capacity }}</span>
+                            </div>
+                            <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-shell-divider">
+                                {{-- Clamped at 100 so an over-subscribed year
+                                     cannot draw a bar wider than its track;
+                                     the figure above still reads over 100. --}}
+                                <div class="h-2 rounded-full bg-primary"
+                                     style="width: {{ min(100, $utilisation) }}%"></div>
+                            </div>
+                            <p class="mt-2 text-[12px] text-charcoal/55">
+                                {{ __('opes.classes_screen.rail_utilisation_note') }}
+                            </p>
+                        </div>
+                    @endif
+                </x-shell.panel>
+            </x-slot:rail>
         </x-list-screen>
     @endif
 
