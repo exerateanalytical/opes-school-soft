@@ -171,16 +171,41 @@
     </div>
 
     {{-- --------------------------------- KPI row --------------------------------- --}}
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    {{-- Each tile carries a disc, as the reference does and as every other
+         KPI strip in the product now does. These were the one strip left
+         rendering as plain rectangles: x-kpi-card only draws the disc when it
+         is given an icon, and this caller passed none - so the money screen
+         looked like a different design from the dashboard it is reached
+         from.
+
+         Hue per METRIC, not per position, so a tile keeps its colour if the
+         order ever changes: money in is green, paperwork blue, money out
+         amber, the rate purple. --}}
+    @php
+        $financeTiles = [
+            'revenue' => ['icon' => 'finance', 'tone' => 'bg-primary'],
+            'invoices' => ['icon' => 'statements', 'tone' => 'bg-badge-blue'],
+            'payments' => ['icon' => 'ledger', 'tone' => 'bg-badge-teal'],
+            'outstanding' => ['icon' => 'expenses', 'tone' => 'bg-badge-orange'],
+            'collection_rate' => ['icon' => 'reports', 'tone' => 'bg-badge-purple'],
+        ];
+    @endphp
+
+    <div class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(185px,1fr))]">
         @foreach ($kpis as $kpi)
             <x-kpi-card
                 wire:key="kpi-{{ $kpi['key'] }}"
                 :label="$kpi['label']"
                 :value="$kpi['value'] === '' ? null : $kpi['value']"
                 :trend="$kpi['trend']"
+                :icon-bg="$financeTiles[$kpi['key']]['tone'] ?? 'bg-primary'"
                 :delta="$kpi['delta'] === null ? null : number_format(abs($kpi['delta']), 1).'% vs '.$window['prev_label']"
                 class="print-break-inside-avoid"
             >
+                <x-slot:icon>
+                    <x-opes-nav-icon :nav-key="$financeTiles[$kpi['key']]['icon'] ?? 'finance'" class="h-5 w-5"/>
+                </x-slot:icon>
+
                 @if ($kpi['delta'] === null)
                     <p class="mt-0.5 text-xs text-charcoal/50">No comparable figure for {{ $window['prev_label'] }}</p>
                 @endif

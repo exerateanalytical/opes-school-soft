@@ -245,7 +245,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 10 | `/attendance` | TODO | renders an honest empty state - no register taken today |
 | 11 | `/examinations` | PARTIAL | Upcoming Exams rail done. Reference models exam EVENTS, this product models SITTINGS - KPI set and table deliberately not forced |
 | 12 | `/results` | TODO | honest empty state - nothing published |
-| 13 | `/finance/dashboard` | TODO | already rich; not compared to `finance dashboard.png` |
+| 13 | `/finance/dashboard` vs `finance dashboard.png` | DONE | already carried the reference's five KPIs, the same tab set and the fee-collection donut. The strip was the last one in the product rendering without discs - x-kpi-card only draws one when given an icon, and this caller passed none |
 | 14 | `/library` vs `Library.png` | DONE | 6 KPIs in one row; category donut + Recent Book Loans |
 | 15 | `/inventory` vs `Inventory management.png` | DONE | reference's 5 KPIs; stock-status donut + Recent Stock Movements |
 | 16 | `/transport` | PARTIAL | rail already matched; duplicate heading removed. Driver/Vehicle columns queued |
