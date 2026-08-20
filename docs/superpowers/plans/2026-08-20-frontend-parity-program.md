@@ -248,6 +248,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 15 | `/inventory` vs `Inventory management.png` | DONE | KPI strip is now the reference's five (Total Items, Below Reorder, Stock Value, Out of Stock, Categories); rail is a stock-status donut + Recent Stock Movements with signed quantities |
 | 16 | `/transport` | TODO | |
 | 17 | `/hostel` | TODO | |
+| 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels instead of raw slugs, role-distribution donut. Fixed a real bug: Total Users showed the FILTERED paginator total |
 | 18 | `/guardians` | TODO | |
 | 19 | `/staff` | TODO | |
 | 20 | `/reports` | TODO | |
@@ -270,6 +271,8 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/users` | KPI "Students" | "Guardians" | This product does not give a pupil a back-office login - their guardian gets one. Labelling a guardian count "Students" on the screen whose whole job is who can sign in would be a plain untruth. |
+| `/users` | photo thumbnails, select-all, Department column, Export | absent | No user-photo controller, no bulk action, no department on users, no export route. |
 | `/subjects` | KPI "Practical Subjects" | "Unallocated" | `subjects` records code, name, department and is_active - there is no practical/theory attribute anywhere in the schema. Its place is taken by the count of subjects on no timetable, which the reference does not show and which somebody actually has to act on. |
 | `/subjects` | rail "Subject Categories" | "Subjects by Department" | Same reason: no category column exists. Department is this schema's real grouping. Currently reads "no subject has been given a department", which is true of the demo data. |
 | `/inventory` | KPIs "Movements This Month", "Pending Requisitions" | removed | Both are already tab counts a few pixels below ("Stock Movements 14", "Requisitions 0"). The strip was spending two of seven tiles restating the row under it, and seven tiles wrap. Nothing became unreachable. |

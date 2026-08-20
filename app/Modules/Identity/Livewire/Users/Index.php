@@ -13,6 +13,7 @@ use App\Modules\Identity\Models\User;
 use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -107,7 +108,12 @@ final class Index extends Component
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($inner): void {
                     $inner->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        // The reference's placeholder promises username too,
+                        // and the column exists - a search box that silently
+                        // ignores a third of what it offers to match on is
+                        // worse than one that offers less.
+                        ->orWhere('username', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->role !== '', function ($query): void {
@@ -120,6 +126,71 @@ final class Index extends Component
             })
             ->orderBy('name')
             ->paginate($this->perPage, ['*'], 'page', $this->page);
+    }
+
+    /**
+     * The user KPI strip.
+     *
+     * Counted off the SPATIE role tables rather than off a column on users,
+     * because that is where role membership actually lives - a users.role
+     * column would be a second source of truth for the same fact.
+     *
+     * @return array{total: int, active: int, administrators: int, teachers: int, students: int}
+     */
+    private function userStats(): array
+    {
+        // selectRaw + an ALIAS, not pluck(DB::raw(...)). pluck's first
+        // argument is a COLUMN NAME it reads off each row object, so handing
+        // it a raw expression makes it look for a property literally called
+        // "COUNT(DISTINCT mhr.model_id)" and fail with an undefined-property
+        // error at render time.
+        $byRole = DB::table('roles as r')
+            ->join('model_has_roles as mhr', 'mhr.role_id', '=', 'r.id')
+            ->where('mhr.model_type', User::class)
+            ->groupBy('r.name')
+            ->selectRaw('r.name as role_name, COUNT(DISTINCT mhr.model_id) as holders')
+            ->pluck('holders', 'role_name');
+
+        $administrators = (int) ($byRole['super_admin'] ?? 0) + (int) ($byRole['administrator'] ?? 0) + (int) ($byRole['admin'] ?? 0);
+
+        return [
+            'total' => (int) DB::table('users')->count(),
+            'active' => (int) DB::table('users')->where('status', 'active')->count(),
+            'administrators' => $administrators,
+            'teachers' => (int) ($byRole['teacher'] ?? 0),
+            // Guardians, not students: a pupil does not get a back-office
+            // login in this product, their guardian does. Labelling the tile
+            // "Students" over a guardian count would be a plain untruth, so
+            // the label says guardians and the figure matches it.
+            'guardians' => (int) ($byRole['guardian'] ?? 0),
+        ];
+    }
+
+    /**
+     * Users per role, for the rail donut.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function roleDistribution(): array
+    {
+        return DB::table('roles as r')
+            ->join('model_has_roles as mhr', 'mhr.role_id', '=', 'r.id')
+            ->where('mhr.model_type', User::class)
+            ->groupBy('r.name')
+            ->orderByDesc(DB::raw('COUNT(DISTINCT mhr.model_id)'))
+            ->selectRaw('r.name as label, COUNT(DISTINCT mhr.model_id) as value')
+            ->get()
+            ->map(static function (object $row): array {
+                $role = Role::tryFrom((string) $row->label);
+
+                return [
+                    // The enum's own label, so the donut reads "Teacher"
+                    // rather than the raw "teacher" slug the table stores.
+                    'label' => $role?->label(app()->getLocale()) ?? (string) $row->label,
+                    'value' => (int) $row->value,
+                ];
+            })
+            ->all();
     }
 
     /**
@@ -238,6 +309,8 @@ final class Index extends Component
         return view('livewire.users.index', [
             'users' => $this->users(),
             'roleOptions' => $this->roleOptions(),
+            'userStats' => $this->userStats(),
+            'roleDistribution' => $this->roleDistribution(),
         ]);
     }
 }

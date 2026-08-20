@@ -68,7 +68,12 @@ it('caps each KPI card so a single one cannot span the page', function (): void 
     // on the child, which is what stops one lone card spanning the page.
     $listScreen = (string) file_get_contents(resource_path('views/components/list-screen.blade.php'));
 
-    expect($listScreen)->toContain('minmax(12rem,1fr)');
+    // 185px, not 12rem. 12rem is 204px at this app's 17px root, which fitted
+    // five cards and wrapped a sixth onto a row of its own - /library shipped
+    // a 5 + 1 strip. The dashboard reference measures six cards at ~190px
+    // across the same content width, so 185 is the floor that reproduces it,
+    // and it is the same number the dashboard's own strip uses.
+    expect($listScreen)->toContain('minmax(185px,1fr)');
     expect($listScreen)->toContain('max-w-[22rem]');
 
     // The dashboard's own strip no longer uses this scaffold: it was rebuilt

@@ -61,7 +61,6 @@
     :breadcrumb="[__('opes.users.breadcrumb_dashboard'), __('opes.users.breadcrumb_users')]"
     :paginator="$users"
     :empty-message="__('opes.users.empty')"
-    rail-title="Status overview"
 >
     <x-slot:actions>
         @can('user.manage')
@@ -79,7 +78,44 @@
          file scope) - adding them here would mean fabricating numbers, which
          the brief explicitly forbids. Flagged as a follow-up, not faked. --}}
     <x-slot:kpis>
-        <x-kpi-card label="Total users" :value="$users->total()" icon-bg="bg-primary" class="col-span-2 sm:col-span-1">
+        <x-kpi-card :label="__('opes.users.kpi_total')" :value="$userStats['total']" icon-bg="bg-primary" class="col-span-2 sm:col-span-1">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+
+        {{-- Counted off the Spatie role tables, not off a column on users:
+             that is where role membership actually lives, and a users.role
+             column would be a second source of truth for the same fact.
+
+             The reference's fifth tile says "Students". This product does NOT
+             give a pupil a back-office login - their guardian gets one - so
+             the tile counts guardians and says so. Labelling a guardian count
+             "Students" would be a plain untruth on a screen whose whole job
+             is who can sign in. --}}
+        <x-kpi-card :label="__('opes.users.kpi_active')" :value="$userStats['active']"
+                    :sub="__('opes.users.kpi_active_sub')" icon-bg="bg-badge-blue">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7.5 3v5.5c0 4.2-3 7.9-7.5 9-4.5-1.1-7.5-4.8-7.5-9V6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+
+        <x-kpi-card :label="__('opes.users.kpi_administrators')" :value="$userStats['administrators']"
+                    :sub="__('opes.users.kpi_administrators_sub')" icon-bg="bg-badge-orange">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+
+        <x-kpi-card :label="__('opes.users.kpi_teachers')" :value="$userStats['teachers']"
+                    :sub="__('opes.users.kpi_teachers_sub')" icon-bg="bg-badge-purple">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l9 4.5-9 4.5-9-4.5L12 4z"/><path stroke-linecap="round" d="M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+
+        <x-kpi-card :label="__('opes.users.kpi_guardians')" :value="$userStats['guardians']"
+                    :sub="__('opes.users.kpi_guardians_sub')" icon-bg="bg-badge-teal">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
             </x-slot:icon>
@@ -119,6 +155,7 @@
     <x-slot:head>
         <tr class="bg-chrome text-white">
             <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.users.column_user') }}</th>
+            <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.users.column_username') }}</th>
             <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.users.column_role') }}</th>
             <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.users.column_status') }}</th>
             <th scope="col" class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{{ __('opes.users.column_last_login') }}</th>
@@ -139,10 +176,18 @@
                     </div>
                 </div>
             </td>
+            {{-- The username is what a user actually types to sign in, and the
+                 search box already matches on it - a column the search can
+                 find but the table cannot show is a column the reader has to
+                 take on trust. Monospace because it is an identifier, and an
+                 em dash where an older account has never been given one. --}}
+            <td class="px-4 py-2.5 font-mono text-xs text-charcoal/75">
+                {{ $user->username ?? '—' }}
+            </td>
             <td class="px-4 py-2.5">
                 @foreach ($user->roles as $userRole)
                     <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold {{ $roleBadgeTone[$userRole->name] ?? $defaultRoleTone }}">
-                        {{ $userRole->name }}
+                        {{ \App\Modules\Identity\Domain\Role::tryFrom($userRole->name)?->label(app()->getLocale()) ?? $userRole->name }}
                     </span>
                 @endforeach
             </td>
@@ -277,24 +322,14 @@
          for the rows actually on screen (see $pageActive/$pageSuspended
          above) - honestly scoped to "this page", not oversold as system-wide. --}}
     <x-slot:rail>
-        <div class="rounded border border-border-primary bg-white p-4">
-            <div class="mx-auto flex h-32 w-32 items-center justify-center rounded-full"
-                 style="background: conic-gradient(var(--color-primary) 0deg {{ $activeDeg }}deg, var(--color-heritage-red) {{ $activeDeg }}deg 360deg);">
-                <div class="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white text-center">
-                    <span class="text-lg font-semibold text-charcoal">{{ $users->getCollection()->count() }}</span>
-                    <span class="text-[10px] text-charcoal/60">This page</span>
-                </div>
-            </div>
-            <ul class="mt-3 space-y-1 text-xs text-charcoal/70">
-                <li class="flex items-center gap-1.5">
-                    <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true"></span>
-                    {{ __('opes.users.status_active') }}: {{ $pageActive }}
-                </li>
-                <li class="flex items-center gap-1.5">
-                    <span class="h-2 w-2 rounded-full bg-heritage-red" aria-hidden="true"></span>
-                    {{ __('opes.users.status_suspended') }}: {{ $pageSuspended }}
-                </li>
-            </ul>
-        </div>
+        <x-shell.panel :title="__('opes.users.rail_role_distribution')">
+            <x-shell.donut :slices="$roleDistribution"
+                           :centre-value="number_format($userStats['total'])"
+                           :centre-label="__('opes.users.kpi_total')"
+                           stacked
+                           :size="132"
+                           :thickness="22"
+                           class="py-1"/>
+        </x-shell.panel>
     </x-slot:rail>
 </x-list-screen>

@@ -507,6 +507,17 @@ return [
     ],
     // Gestion des utilisateurs, docs/specs/09-ui.md section 8.10.
     'users' => [
+        'kpi_total' => 'Total comptes',
+        'kpi_active' => 'Comptes actifs',
+        'kpi_active_sub' => 'Peuvent se connecter',
+        'kpi_administrators' => 'Administrateurs',
+        'kpi_administrators_sub' => 'Administrateurs systeme',
+        'kpi_teachers' => 'Enseignants',
+        'kpi_teachers_sub' => 'Personnel enseignant',
+        'kpi_guardians' => 'Parents',
+        'kpi_guardians_sub' => 'Comptes parents',
+        'column_username' => 'Identifiant',
+        'rail_role_distribution' => 'Repartition par role',
         'title' => 'Utilisateurs',
         'breadcrumb_dashboard' => 'Tableau de bord',
         'breadcrumb_users' => 'Utilisateurs',

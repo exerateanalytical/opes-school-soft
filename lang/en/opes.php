@@ -530,6 +530,17 @@ return [
     ],
     // User Management, docs/specs/09-ui.md section 8.10.
     'users' => [
+        'kpi_total' => 'Total Users',
+        'kpi_active' => 'Active Users',
+        'kpi_active_sub' => 'Can sign in',
+        'kpi_administrators' => 'Administrators',
+        'kpi_administrators_sub' => 'System administrators',
+        'kpi_teachers' => 'Teachers',
+        'kpi_teachers_sub' => 'Teaching staff',
+        'kpi_guardians' => 'Guardians',
+        'kpi_guardians_sub' => 'Parent accounts',
+        'column_username' => 'Username',
+        'rail_role_distribution' => 'User Role Distribution',
         'title' => 'Users',
         'breadcrumb_dashboard' => 'Dashboard',
         'breadcrumb_users' => 'Users',
