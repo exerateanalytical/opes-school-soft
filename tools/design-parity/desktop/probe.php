@@ -258,3 +258,61 @@ case 'darkrows': {   // same, for dark ink on a light card
     break;
 }
 }
+
+/*
+ * ---------------------------------------------------------------------------
+ * Corner radius.
+ *
+ * A rounded rectangle's top-left corner inset at the very top row IS its
+ * radius, and the curve straightens after exactly r rows. Measuring BOTH and
+ * reporting them together is the check: on a clean edge they agree, and when
+ * they do not, the shape is not a circular corner (or the edge is too
+ * antialiased to read, which is worth knowing before quoting a number).
+ * ---------------------------------------------------------------------------
+ */
+switch ($cmd) {
+
+case 'radius': {
+    [$left, $top] = [(int) $argv[3], (int) $argv[4]];
+    $probe = (int) ($argv[5] ?? 40);
+
+    $insets = [];
+
+    for ($y = $top; $y < $top + $probe; $y++) {
+        for ($x = $left - 4; $x <= $left + $probe; $x++) {
+            if (! isGround(rgb($im, $x, $y))) {
+                $insets[$y] = $x - $left;
+
+                break 1;
+            }
+        }
+    }
+
+    $first = $insets[$top] ?? null;
+    $straightAt = null;
+
+    foreach ($insets as $y => $inset) {
+        if ($inset <= 0) {
+            $straightAt = $y;
+
+            break;
+        }
+    }
+
+    printf("corner at (%d, %d)\n", $left, $top);
+    printf("  inset on the top row      : %s px\n", $first === null ? '-' : $first);
+    printf("  rows until the edge is flat: %s px\n", $straightAt === null ? '-' : $straightAt - $top);
+    printf("  -> radius reads as ~%s px\n\n",
+        ($first === null || $straightAt === null) ? '?' : round((($first) + ($straightAt - $top)) / 2, 1));
+
+    foreach ($insets as $y => $inset) {
+        printf("     y %4d  inset %+d\n", $y, $inset);
+
+        if ($inset <= 0) {
+            break;
+        }
+    }
+
+    break;
+}
+}

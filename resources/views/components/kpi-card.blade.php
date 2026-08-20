@@ -112,7 +112,7 @@
     }
 @endphp
 
-<div {{ $attributes->merge(['class' => 'rounded-xl border '.$surface.($isLink ? ' transition hover:shadow-md hover:-translate-y-px' : '')]) }}>
+<div {{ $attributes->merge(['class' => 'rounded-[var(--radius-card)] border '.$surface.($isLink ? ' transition hover:shadow-md hover:-translate-y-px' : '')]) }}>
     @if ($isLink)
         <a href="{{ $href }}" class="block px-[19px] pt-[21px] pb-3">
     @else

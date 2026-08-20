@@ -84,6 +84,17 @@ $map = [
     'settings' => '/settings',
     'settings-advanced' => '/settings/advanced',
     'users' => '/users',
+
+    // NOT converted this session - captured to prove the platform styling
+    // reaches screens nobody edited.
+    'payroll' => '/payroll',
+    'messages' => '/messages',
+    'alumni' => '/alumni',
+    'admissions' => '/admissions',
+    'audit-log' => '/audit-log',
+    'medical' => '/medical',
+    'procurement' => '/procurement/suppliers',
+    'ledger' => '/ledger/chart-of-accounts',
 ];
 
 foreach ($map as $name => $uri) {

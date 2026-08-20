@@ -32,7 +32,7 @@
     Callers must pass it whenever the destination is gated harder than the
     panel. Omit it only when the route is open to anyone signed in.
 --}}
-<section {{ $attributes->merge(['class' => 'flex min-w-0 flex-col rounded-xl border border-shell-divider bg-shell-surface shadow-[0_1px_2px_rgba(16,24,40,0.05)]']) }}>
+<section {{ $attributes->merge(['class' => 'flex min-w-0 flex-col rounded-[var(--radius-card)] border border-shell-divider bg-shell-surface shadow-[0_1px_2px_rgba(16,24,40,0.05)]']) }}>
     @if ($title !== '')
         <h2 class="flex shrink-0 items-center gap-2.5 px-4 pt-[10px] pb-[7px] text-[17px] font-semibold text-charcoal">
             @if ($icon !== null)

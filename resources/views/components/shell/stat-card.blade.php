@@ -41,7 +41,7 @@
     $discClass = $tones[$tone] ?? $tones['green'];
 @endphp
 
-<div {{ $attributes->merge(['class' => 'flex min-w-0 flex-col rounded-xl border border-shell-divider bg-shell-surface px-[19px] pt-[23px] pb-[4px] shadow-[0_1px_2px_rgba(16,24,40,0.05)]']) }}>
+<div {{ $attributes->merge(['class' => 'flex min-w-0 flex-col rounded-[var(--radius-card)] border border-shell-divider bg-shell-surface px-[19px] pt-[23px] pb-[4px] shadow-[0_1px_2px_rgba(16,24,40,0.05)]']) }}>
     <div class="flex min-w-0 items-start gap-3">
         <span class="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full {{ $discClass }}">
             <x-shell.icon :name="$icon" class="h-[25px] w-[25px] text-white"/>

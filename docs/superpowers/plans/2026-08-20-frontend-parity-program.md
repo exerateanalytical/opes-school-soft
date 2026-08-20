@@ -100,6 +100,36 @@ step 3.
 
 ---
 
+## 2b. The styling is PLATFORM-WIDE, not per screen
+
+Three token changes and one base-layer rule carry the reference's look to
+every page under `layouts/app.blade.php`, including screens nobody has
+converted:
+
+| Lever | Was | Now | Reach |
+|---|---|---|---|
+| `--color-border-primary` | `#DCE5DF` (cool) | `#E8E9EB` (measured) | 2,212 border utilities |
+| `--color-sand` | `#F5F7F6` (cool) | `#F8F6F5` (sampled) | 293 background utilities |
+| `--radius-card` | 12px | **8px** (measured 6-8) | cards, panels, fields |
+| `.opes-app .rounded` | 4.25px, hard-coded | `var(--radius-card)` | 2,184 utilities |
+
+`rounded` is the one radius utility Tailwind hard-codes - it compiles to
+`border-radius: .25rem` and reads no theme token - so it needed the unlayered
+`.opes-app` rule rather than an `@theme` entry. Unlayered CSS outranks every
+layered utility regardless of specificity, which is the same mechanism the
+brand variables and the field treatment already rely on.
+
+**Scoped to `.opes-app`**, which is only on the back-office layout. The
+guardian portal and the sign-in screens carry their own approved designs and
+are untouched: the sign-in page diffs at **0.00%** before and after.
+
+Verified on eight screens this programme never edited - Admissions, Alumni,
+Audit Log, Ledger, Medical, Messages, Payroll, Procurement - all of which now
+carry the same cards, discs, radius, borders, buttons and table styling as the
+converted ones.
+
+---
+
 ## 3. What is already built (do not rebuild)
 
 - `resources/css/app.css` — `--color-shell-*` tokens, measured.

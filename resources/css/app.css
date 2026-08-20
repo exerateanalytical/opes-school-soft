@@ -60,7 +60,10 @@
     --color-heritage-red: #CC3D3D;   /* -> Danger (was Cameroon flag red) */
     --color-heritage-yellow: #D9A829;/* -> Heritage Gold (was Cameroon flag yellow) */
     --color-ivory: #FDFEFE;          /* -> Warm White (main background) */
-    --color-sand: #F5F7F6;           /* -> Soft Surface (secondary background) */
+    /* WARM, matching the ground the reference's cards sit on. Sampled between
+       two quick-action tiles at (412,350): #F8F6F5. The old #F5F7F6 is cool,
+       and 293 bg-sand utilities were putting a cool wash next to warm ivory. */
+    --color-sand: #F8F6F5;           /* -> Soft Surface (secondary background) */
     --color-charcoal: #14201A;       /* -> primary text, green-tinted near-black */
 
     /* Full Heritage scale - additive, for new/updated screens. */
@@ -106,7 +109,12 @@
     --color-text-muted: #7A8780;
     --color-text-disabled: #A5AEA9;
 
-    --color-border-primary: #DCE5DF;
+    /* MEASURED off the reference's own card edges (#E8E9EB), not the older
+       cool green-grey #DCE5DF. 2,212 border utilities in the views resolve
+       through this token, so correcting it here re-skins every card, panel,
+       table and field in the product at once - which is the whole reason the
+       token exists rather than a literal per screen. */
+    --color-border-primary: #E8E9EB;
     --color-border-secondary: #E7ECE9;
 
     /* --------------------------------------------------------------------
@@ -253,7 +261,13 @@
        is shared. */
     --radius-chip: 999px;
     --radius-control: 8px;
-    --radius-card: 12px;
+    /* MEASURED, not chosen. Six card corners on the reference read 5.5, 5,
+       4.5, 2.5, 7 and 10px (it is a render, so the corner wobbles); the
+       primary button reads 3-8. The cluster is 6-8, and 8 is the round number
+       inside it - the same value --radius-control already carries. It was
+       12px, and the x-shell components were on rounded-xl, which is 17px at
+       this app's 17px root: three times the reference. */
+    --radius-card: 8px;
     --radius-panel: 16px;
 
     /* Elevation. Three levels, deliberately: e1 is a resting card, e2 a
@@ -378,12 +392,46 @@ html.portal-root {
    specificity only ever needed to be settled among these four.
    --------------------------------------------------------------------------- */
 
+/* ---------------------------------------------------------------------------
+   CARD RADIUS, PLATFORM-WIDE.
+
+   `rounded` is the dominant radius in this codebase - 2,184 occurrences in the
+   views against 260 `rounded-lg` and 178 `rounded-xl` - and it is the one
+   radius utility Tailwind hard-codes: it compiles to `border-radius: .25rem`
+   and reads no theme token, so it cannot be corrected in @theme with the
+   others.
+
+   At the 17px root that is 4.25px, against the 6-8px the reference measures.
+   Every card, panel and button written with plain `rounded` was therefore a
+   little sharper than the design, and no token change could reach them.
+
+   Unlayered on purpose: Tailwind compiles utilities into @layer utilities, and
+   unlayered CSS outranks every layered rule regardless of specificity. This is
+   the same mechanism the brand variables in layouts/app.blade.php rely on, and
+   the same reason the field treatment below is written this way.
+
+   Scoped to `.opes-app`, so the guardian portal and the sign-in screens - which
+   carry their own approved designs - are untouched.
+
+   `rounded-full` and the explicit -sm/-md/-lg/-xl utilities are NOT affected:
+   this rule names only the bare class, so a caller that asked for a specific
+   radius still gets it.
+   --------------------------------------------------------------------------- */
+
+.opes-app .rounded {
+    border-radius: var(--radius-card);
+}
+
 .opes-app
     :is(input, select, textarea):where(
         :not(.rounded-full):not([data-field-raw]):not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']):not([type='range']):not([type='submit']):not([type='button']):not([type='image']):not([type='color'])
     ) {
     border: 1px solid var(--color-border-primary);
-    border-radius: var(--radius-md);
+    /* The SAME radius as the cards and buttons around them. This was
+       --radius-md (10.6px at the 17px root) against an 8px card, which is a
+       difference small enough to look like a mistake rather than a choice
+       when a field sits inside a panel. One radius, one system. */
+    border-radius: var(--radius-card);
     background-color: var(--color-surface-white);
     color: var(--color-charcoal);
     padding-block: 0.5rem;
