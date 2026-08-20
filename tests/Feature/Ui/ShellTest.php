@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Identity\Domain\Role;
+use App\Modules\Identity\Support\Navigation;
 use App\Modules\Identity\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -138,7 +139,24 @@ it('links every unbuilt module to its placeholder and labels it as coming', func
     expect($html)->toContain('href="/library"');
     expect($html)->toContain('href="/timetable"');
     expect($html)->toContain('href="/settings"');
-    expect($html)->toContain(__('opes.placeholder.chip_short'));
+
+    /*
+     * The "soon" chip is asserted only when there IS an unbuilt module.
+     *
+     * Every module in Navigation::items() now carries built => true, so
+     * placeholderKeys() is empty and the chip cannot render however
+     * correct the sidebar is. The flat assertion had therefore been
+     * failing since the last placeholder shipped - describing a state the
+     * product has grown out of, not catching a regression.
+     *
+     * The contract it protects is kept: the moment a module is added with
+     * built => false, this asserts it is labelled as coming.
+     */
+    $unbuilt = Navigation::placeholderKeys();
+
+    if ($unbuilt !== []) {
+        expect($html)->toContain(__('opes.placeholder.chip_short'));
+    }
 });
 
 it('serves the scheduled-module page on every placeholder route', function () {

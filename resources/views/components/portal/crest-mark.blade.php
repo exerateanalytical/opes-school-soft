@@ -43,6 +43,30 @@
         default => 'w-[8.8rem]',
     };
 
+    /*
+     * THE SCHOOL'S OWN LOGO WINS, wherever this mark is drawn.
+     *
+     * ResolveSchoolLogo is the ONE resolver the shell, the guardian portal
+     * and newly issued letterheads already share (see its class comment), and
+     * the rule it exists to enforce is that an uploaded logo replaces the
+     * built-in OPES mark everywhere the mark appears. This component was
+     * built during the sign-in redesign and never consulted it, so a school
+     * that uploaded its logo saw it in the shell and the portal but still got
+     * the OPES crest on the page it hands to parents.
+     *
+     * CanonicalLogoTest asserts exactly this and had been failing since.
+     *
+     * Wrapped: a hand-edited or stale branding setting must never take the
+     * sign-in page down - it falls through to the built-in mark instead.
+     */
+    $schoolLogoUrl = null;
+
+    try {
+        $schoolLogoUrl = app(\App\Modules\SchoolProfile\Actions\ResolveSchoolLogo::class)->url();
+    } catch (\Throwable) {
+        $schoolLogoUrl = null;
+    }
+
     // The file carries "SCHOOL SYSTEM" inside the artwork, so the HTML label
     // below is suppressed whenever the image is used - printing it twice is
     // the obvious failure here.
@@ -50,7 +74,13 @@
     $hasAsset = is_file(public_path($asset));
 @endphp
 
-@if ($hasAsset)
+@if ($schoolLogoUrl !== null)
+    {{-- Height-constrained with width auto: a school logo is any aspect ratio
+         at all, and the fixed-width box the OPES crest uses would squash half
+         of them. --}}
+    <img src="{{ $schoolLogoUrl }}" alt="{{ __('opes.branding.app_logo_alt') }}"
+         {{ $attributes->merge(['class' => 'block h-auto max-h-24 w-auto '.$box]) }}>
+@elseif ($hasAsset)
     <img src="{{ asset($asset) }}" alt="{{ __('opes.shell.brand') }} {{ __('opes.auth.brand_suffix') }}"
          {{ $attributes->merge(['class' => 'block h-auto '.$box]) }}>
 @else

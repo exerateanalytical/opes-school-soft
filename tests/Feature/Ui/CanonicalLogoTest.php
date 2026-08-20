@@ -89,9 +89,25 @@ it('shows the uploaded logo on the sign-in page instead of the built-in mark', f
 });
 
 it('keeps the built-in mark on the sign-in page for a school with no logo', function (): void {
-    $html = get('/login')->assertOk()->getContent();
+    $html = (string) get('/login')->assertOk()->getContent();
 
-    expect($html)->toContain('M12 8.1l1.15 2.35');
+    /*
+     * The MARK, in whichever form it takes - not one specific SVG path.
+     *
+     * This asserted `M12 8.1l1.15 2.35`, the star from the drawn fallback in
+     * guest.blade.php. The sign-in page moved to layouts.auth-wide and
+     * x-portal.crest-mark, which prefers the real artwork
+     * (public/images/opes-crest*.png) and only draws that SVG when the files
+     * are absent. Both are the built-in mark; the test was pinned to the one
+     * the page had stopped using, and had been failing ever since.
+     *
+     * The contract is unchanged and still checked: with no uploaded logo the
+     * page shows the OPES mark, and it must NOT be pointing at a branding
+     * upload.
+     */
+    expect($html)
+        ->toMatch('/opes-crest(-dark)?\.png|M12 8\.1l1\.15 2\.35/')
+        ->not->toContain('branding/app-logo-');
 });
 
 // -------------------------------------------------------------- portal --
