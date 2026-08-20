@@ -344,7 +344,6 @@
     :breadcrumb="['Dashboard', 'Hostel']"
     :paginator="$rows"
     empty-message="No hostel records match these filters yet. Hostels, rooms and allocations appear here as they are set up."
-    rail-title="Occupancy Overview"
 >
     @if ($canManage)
         <x-slot:actions>

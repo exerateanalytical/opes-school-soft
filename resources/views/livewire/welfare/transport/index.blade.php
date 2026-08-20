@@ -498,7 +498,6 @@
     :breadcrumb="['Dashboard', 'Transport']"
     :paginator="$rows"
     empty-message="No transport records match these filters yet. Routes, vehicles and allocations appear here as they are set up."
-    rail-title="Transport Overview"
 >
     <x-slot:actions>
         @if ($canManage)

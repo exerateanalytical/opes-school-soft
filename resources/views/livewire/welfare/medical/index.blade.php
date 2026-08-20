@@ -201,7 +201,6 @@
         :breadcrumb="['Dashboard', 'Welfare', 'Medical']"
         :paginator="$rows"
         empty-message="No medical records match these filters yet. Consultations and referrals appear here as the sick bay records them."
-        rail-title="Medical Overview"
     >
         <x-slot:actions>
             @if ($canManage)

@@ -33,7 +33,6 @@
     :breadcrumb="['Dashboard', 'Activities']"
     :paginator="$rows"
     empty-message="No activities match these filters yet. Clubs, sports teams, events and excursions appear here as they are created."
-    rail-title="Activities Overview"
 >
     <x-slot:actions>
         @if ($canManage)

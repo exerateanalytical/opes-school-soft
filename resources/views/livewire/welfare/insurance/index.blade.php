@@ -323,7 +323,6 @@
     :breadcrumb="['Dashboard', 'Welfare', 'Insurance']"
     :paginator="$rows"
     empty-message="No insurance records match these filters yet. Policies, certificates and claims appear here as they are recorded."
-    rail-title="Coverage Overview"
 >
     <x-slot:actions>
         <button type="button" wire:click="togglePolicyForm"

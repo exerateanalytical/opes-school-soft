@@ -255,7 +255,6 @@
         :breadcrumb="['Dashboard', 'Accounting', 'Expenses']"
         :paginator="$rows"
         empty-message="No expenses match these filters. Petty-cash vouchers appear here as they are recorded."
-        rail-title="Spending Overview"
     >
         <x-slot:actions>
             @if ($canRecord)

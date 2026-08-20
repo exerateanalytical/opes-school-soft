@@ -56,7 +56,6 @@
     :breadcrumb="[__('alumni.breadcrumb_dashboard'), __('alumni.title')]"
     :paginator="$rows"
     :empty-message="__('alumni.empty')"
-    :rail-title="__('alumni.title')"
 >
     <x-slot:actions>
         @can(\App\Modules\Identity\Domain\Permission::AlumniManage->value)

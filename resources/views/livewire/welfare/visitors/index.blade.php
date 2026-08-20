@@ -141,7 +141,6 @@
         :breadcrumb="['Dashboard', 'Welfare', 'Visitors']"
         :paginator="$rows"
         empty-message="No visitors match these filters yet. Check-ins appear here as the gate desk records them."
-        rail-title="Gate Overview"
     >
         <x-slot:actions>
             <button type="button" wire:click="toggleForm"

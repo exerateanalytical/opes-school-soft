@@ -80,7 +80,6 @@
     :breadcrumb="['Dashboard', 'Settings']"
     :paginator="$rows"
     empty-message="No settings match these filters yet."
-    rail-title="Settings by Class"
 >
     {{-- KPI strip: total settings, locked settings, settings still at
          their seeded default value - all dataset-wide numbers. --}}

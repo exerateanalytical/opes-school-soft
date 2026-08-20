@@ -71,7 +71,6 @@
     :breadcrumb="['Dashboard', 'HR', 'Staff']"
     :paginator="$rows"
     empty-message="No staff records match these filters yet. Staff, contracts and leave requests appear here as they are set up."
-    rail-title="Staff Overview"
 >
     <x-slot:actions>
         @if ($tab === 'staff')
