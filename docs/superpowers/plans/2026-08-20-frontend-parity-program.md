@@ -231,6 +231,43 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 
 | # | Screen | Status | Notes |
 |---|---|---|---|
+| 1 | Shell (sidebar / top bar / canvas) | DONE | measured; 258+12px sidebar, ivory canvas, card row at y119 vs reference y118 |
+| 2 | `/dashboard` super admin | DONE | worst row offset 31px, worst height error 20px, 6/6 column tracks |
+| 3 | Triage the 31 `ChatGPT Image *.png` | DONE | see §4b - three conflicting design families; family A is canonical |
+| 3b | Card language across ALL screens (`x-kpi-card`) | DONE | tone paints a 50px solid disc on a white card; repaints all 42 call sites |
+| 3c | Shell applied to all 19 back-office screens | DONE | every one captures 200 |
+| 4 | `/students` vs `student management.png` | DONE | #/Gender/Admission Date columns; level donut + real quick actions in the rail |
+| 5 | `/students/{student}` | TODO | profile screen, not started |
+| 6 | `/classes` vs `Class Management.png` | DONE | 5 KPIs; Class Teacher + Students columns; level donut + utilisation rail |
+| 7 | `/subjects` vs `subject management.png` | DONE | 5 KPIs + by-department rail |
+| 8 | `/academics/settings` | TODO | |
+| 9 | `/timetable` | TODO | renders an honest empty state - no timetable data seeded |
+| 10 | `/attendance` | TODO | renders an honest empty state - no register taken today |
+| 11 | `/examinations` | PARTIAL | Upcoming Exams rail done. Reference models exam EVENTS, this product models SITTINGS - KPI set and table deliberately not forced |
+| 12 | `/results` | TODO | honest empty state - nothing published |
+| 13 | `/finance/dashboard` | TODO | already rich; not compared to `finance dashboard.png` |
+| 14 | `/library` vs `Library.png` | DONE | 6 KPIs in one row; category donut + Recent Book Loans |
+| 15 | `/inventory` vs `Inventory management.png` | DONE | reference's 5 KPIs; stock-status donut + Recent Stock Movements |
+| 16 | `/transport` | PARTIAL | rail already matched; duplicate heading removed. Driver/Vehicle columns queued |
+| 17 | `/hostel` | PARTIAL | duplicate heading removed; not compared in detail |
+| 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels, role donut. Fixed a filtered Total Users count |
+| 18 | `/guardians` | TODO | |
+| 19 | `/staff` | TODO | no dedicated reference; `teacher profile.png` is a profile |
+| 20 | `/reports` | TODO | |
+| 21 | `/settings` | TODO | |
+| 22 | `/admissions/wizard` | TODO | |
+| 23 | Print templates (ID, transcript, certificate, statement) | TODO | different medium - paper sizes, not viewport |
+
+### Test state at the end of 2026-08-20
+
+`tests/Feature/Ui` is **128/128**. It was 117/128 at the start of the session.
+Of the eleven: two were regressions I introduced (dashboard footer links that
+403'd), five were the product having lost its Today's Attendance tile in an
+earlier refactor, one was a real branding bug (the sign-in page ignored an
+uploaded school logo), and three were tests pinned to states the product had
+grown out of. All eleven are closed.
+
+---|---|---|---|
 | 1 | Shell (sidebar / top bar / canvas) | DONE | measured; sidebar 270px, canvas ivory, card row at y118 matches reference to 1px |
 | 2 | `/dashboard` super admin | DONE | 11 panels, real data, permission-gated; open items in §4 |
 | 3 | Triage the 31 `ChatGPT Image *.png` | DONE | see §4b — three conflicting design families; family A is canonical |
