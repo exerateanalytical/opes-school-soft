@@ -989,6 +989,16 @@ return [
     ],
     // Écran Gestion des matières, Phase 1 (frontend images/subject management.png).
     'subjects_screen' => [
+        'kpi_core' => 'Matieres obligatoires',
+        'kpi_core_sub' => 'Affectations obligatoires',
+        'kpi_elective' => 'Matieres optionnelles',
+        'kpi_elective_sub' => 'Affectations optionnelles',
+        'kpi_unallocated' => 'Non affectees',
+        'kpi_unallocated_sub' => 'Sur aucun emploi du temps',
+        'kpi_teachers' => 'Enseignants',
+        'kpi_teachers_sub' => 'Assignes',
+        'rail_by_department' => 'Matieres par departement',
+        'rail_no_departments' => 'Aucune matiere n a de departement.',
         'title' => 'Gestion des matières',
         'breadcrumb_dashboard' => 'Tableau de bord',
         'breadcrumb_subjects' => 'Matières',

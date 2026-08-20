@@ -164,7 +164,12 @@
             @endisset
 
             @if ($sub !== null && $sub !== '')
-                <p class="mt-0.5 truncate text-xs text-charcoal/55">{{ $sub }}</p>
+                {{-- WRAPS, for the same reason the label above it does: the card is
+                     ~190px wide and "Compulsory allocations" truncated to
+                     "Compulsory allocati...", which is the sub-line doing
+                     none of its job. Two lines is the ceiling - a third would
+                     push the card taller than its neighbours. --}}
+                <p class="mt-0.5 line-clamp-2 text-xs leading-tight text-balance text-charcoal/55">{{ $sub }}</p>
             @endif
         </div>
 

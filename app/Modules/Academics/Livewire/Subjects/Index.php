@@ -18,6 +18,7 @@ use App\Modules\Identity\Domain\Permission;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -387,6 +388,79 @@ final class Index extends Component
     /**
      * @return LengthAwarePaginator<int, Subject>
      */
+    /**
+     * The subject KPI strip.
+     *
+     * WHERE THIS DIVERGES FROM THE REFERENCE, AND WHY. The mockup counts
+     * "Core", "Elective" and "Practical" subjects. `subjects` carries no such
+     * attribute - it has code, name, department and is_active, and nothing
+     * else. What the schema DOES record is per-allocation: a subject is
+     * allocated to a level/stream and that allocation is compulsory or
+     * optional (`subject_allocations.is_optional`).
+     *
+     * So core/elective are derived from the allocations, which is the same
+     * distinction the reference is drawing; "practical" has no counterpart at
+     * all and is not invented. In its place the strip carries UNALLOCATED,
+     * which is the operationally useful number the reference does not show: a
+     * subject nobody has put on any timetable.
+     *
+     * @return array{total: int, core: int, elective: int, unallocated: int, teachers: int}
+     */
+    private function subjectStats(): array
+    {
+        $total = (int) DB::table('subjects')->count();
+
+        $allocated = DB::table('subject_allocations')
+            ->where('is_active', true)
+            ->distinct()
+            ->pluck('subject_id');
+
+        return [
+            'total' => $total,
+
+            'core' => (int) DB::table('subject_allocations')
+                ->where('is_active', true)
+                ->where('is_optional', false)
+                ->distinct()
+                ->count('subject_id'),
+
+            'elective' => (int) DB::table('subject_allocations')
+                ->where('is_active', true)
+                ->where('is_optional', true)
+                ->distinct()
+                ->count('subject_id'),
+
+            'unallocated' => max(0, $total - $allocated->count()),
+
+            // Teachers are attached to an ALLOCATION, not to a subject, and
+            // through users rather than staff_members. Counted distinct so a
+            // teacher carrying four allocations is one teacher.
+            'teachers' => (int) DB::table('subject_allocation_teachers')
+                ->distinct()
+                ->count('user_id'),
+        ];
+    }
+
+    /**
+     * Subjects per department, for the rail.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function departmentDistribution(): array
+    {
+        return DB::table('departments as d')
+            ->join('subjects as s', 's.department_id', '=', 'd.id')
+            ->groupBy('d.id', 'd.name')
+            ->orderByDesc(DB::raw('COUNT(s.id)'))
+            ->selectRaw('d.name as label, COUNT(s.id) as value')
+            ->get()
+            ->map(static fn (object $r): array => [
+                'label' => (string) $r->label,
+                'value' => (int) $r->value,
+            ])
+            ->all();
+    }
+
     private function subjects(): LengthAwarePaginator
     {
         return Subject::query()
@@ -414,6 +488,8 @@ final class Index extends Component
             'subjects' => $this->subjects(),
             'departmentNames' => Department::query()->orderBy('name')->pluck('name', 'id'),
             'totalSubjects' => Subject::query()->count(),
+            'subjectStats' => $this->subjectStats(),
+            'departmentDistribution' => $this->departmentDistribution(),
             'canManage' => Gate::allows(Permission::AcademicsManage->value),
             'expandedAllocations' => $this->allocationsForExpandedSubject(),
             'levelOptions' => ClassLevel::query()->orderBy('order_index')->get(),

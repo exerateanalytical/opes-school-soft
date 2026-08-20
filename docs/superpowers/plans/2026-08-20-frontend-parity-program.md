@@ -237,7 +237,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 4 | `/students` vs `student management.png` | DONE | table gained #, Gender, Admission Date; rail rebuilt as a level donut + real quick actions; header wired to admissions.wizard + students.import. Divergences recorded below |
 | 5 | `/students/{student}` | TODO | |
 | 6 | `/classes` vs `Class Management.png` | DONE | 5 KPIs (classes, students, teachers, average, rooms); table gained Class Teacher + Students; rail is a level donut + classroom utilisation. Rooms reads 0 because none are configured - honest, not a gap |
-| 7 | `/subjects` | TODO | |
+| 7 | `/subjects` vs `subject management.png` | DONE | 5 KPIs (total, core, elective, unallocated, teachers) + a by-department rail. Core/elective derive from allocations because `subjects` has no such column; "practical" has no counterpart and is not invented |
 | 8 | `/academics/settings` | TODO | |
 | 9 | `/timetable` | TODO | |
 | 10 | `/attendance` | TODO | |
@@ -270,6 +270,8 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/subjects` | KPI "Practical Subjects" | "Unallocated" | `subjects` records code, name, department and is_active - there is no practical/theory attribute anywhere in the schema. Its place is taken by the count of subjects on no timetable, which the reference does not show and which somebody actually has to act on. |
+| `/subjects` | rail "Subject Categories" | "Subjects by Department" | Same reason: no category column exists. Department is this schema's real grouping. Currently reads "no subject has been given a department", which is true of the demo data. |
 | `/inventory` | KPIs "Movements This Month", "Pending Requisitions" | removed | Both are already tab counts a few pixels below ("Stock Movements 14", "Requisitions 0"). The strip was spending two of seven tiles restating the row under it, and seven tiles wrap. Nothing became unreachable. |
 | `/inventory` | table columns Location, Reserved, Available, Unit Price, Total Value | absent | Real work, queued. `stock_balances` carries all five, so this is wiring rather than a data gap. |
 | `/library` | "Library Reports" / "Export Data" buttons | absent | Export has no route. Reports exists at `/reports/library` and is reachable from the nav; a duplicate header button is queued, not urgent. |

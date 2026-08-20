@@ -115,6 +115,45 @@
                     </svg>
                 </x-slot:icon>
             </x-kpi-card>
+
+            {{-- Core and elective come from the ALLOCATIONS, not from the
+                 subject: `subjects` records code, name, department and
+                 is_active and nothing else, while `subject_allocations`
+                 records whether a subject is compulsory or optional for a
+                 level. That is the same distinction the reference draws.
+
+                 The reference's fifth tile, "Practical Subjects", has no
+                 counterpart in this schema at all and is not invented. Its
+                 place is taken by UNALLOCATED - subjects nobody has put on
+                 any timetable - which the reference does not show and which
+                 is the one number on this strip somebody has to act on. --}}
+            <x-kpi-card :label="__('opes.subjects_screen.kpi_core')" :value="$subjectStats['core']"
+                        :sub="__('opes.subjects_screen.kpi_core_sub')" icon-bg="bg-badge-blue">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5v13z"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+
+            <x-kpi-card :label="__('opes.subjects_screen.kpi_elective')" :value="$subjectStats['elective']"
+                        :sub="__('opes.subjects_screen.kpi_elective_sub')" icon-bg="bg-badge-orange">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3 8-8"/><path stroke-linecap="round" d="M20 12v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1h9"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+
+            <x-kpi-card :label="__('opes.subjects_screen.kpi_unallocated')" :value="$subjectStats['unallocated']"
+                        :sub="__('opes.subjects_screen.kpi_unallocated_sub')" icon-bg="bg-heritage-red">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16h.01"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
+
+            <x-kpi-card :label="__('opes.subjects_screen.kpi_teachers')" :value="$subjectStats['teachers']"
+                        :sub="__('opes.subjects_screen.kpi_teachers_sub')" icon-bg="bg-badge-purple">
+                <x-slot:icon>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
+                </x-slot:icon>
+            </x-kpi-card>
         </x-slot:kpis>
 
         <x-slot:filters>
@@ -357,5 +396,26 @@
                 </article>
             @endforeach
         </x-slot:cards>
-    </x-list-screen>
+    
+        <x-slot:rail>
+            {{-- The reference lists "Subject Categories" with a count each.
+                 `subjects` has no category; its real grouping is the
+                 DEPARTMENT, so that is what the panel counts. Where no
+                 subject has been given a department the panel says so rather
+                 than drawing an empty ring. --}}
+            <x-shell.panel :title="__('opes.subjects_screen.rail_by_department')">
+                @if ($departmentDistribution === [])
+                    <p class="py-3 text-[13px] text-charcoal/55">{{ __('opes.subjects_screen.rail_no_departments') }}</p>
+                @else
+                    <x-shell.donut :slices="$departmentDistribution"
+                                   :centre-value="number_format($subjectStats['total'])"
+                                   :centre-label="__('opes.subjects_screen.kpi_total')"
+                                   stacked
+                                   :size="132"
+                                   :thickness="22"
+                                   class="py-1"/>
+                @endif
+            </x-shell.panel>
+        </x-slot:rail>
+        </x-list-screen>
 </div>

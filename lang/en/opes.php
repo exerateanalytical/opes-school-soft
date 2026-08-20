@@ -1001,6 +1001,16 @@ return [
     ],
     // Subject Management screen, Phase 1 (frontend images/subject management.png).
     'subjects_screen' => [
+        'kpi_core' => 'Core Subjects',
+        'kpi_core_sub' => 'Compulsory allocations',
+        'kpi_elective' => 'Elective Subjects',
+        'kpi_elective_sub' => 'Optional allocations',
+        'kpi_unallocated' => 'Unallocated',
+        'kpi_unallocated_sub' => 'On no timetable',
+        'kpi_teachers' => 'Subject Teachers',
+        'kpi_teachers_sub' => 'Assigned',
+        'rail_by_department' => 'Subjects by Department',
+        'rail_no_departments' => 'No subject has been given a department.',
         'title' => 'Subject Management',
         'breadcrumb_dashboard' => 'Dashboard',
         'breadcrumb_subjects' => 'Subjects',
