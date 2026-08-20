@@ -1174,6 +1174,16 @@ return [
         'rail_today' => 'Today',
         'rail_days_left' => '1 day left|:count days left',
     ],
+    'reports_hub' => [
+        'kpi_students' => 'Total Students',
+        'kpi_students_sub' => 'On the roll',
+        'kpi_staff' => 'Total Staff',
+        'kpi_staff_sub' => 'Active',
+        'kpi_classes' => 'Total Classes',
+        'kpi_classes_sub' => 'All years',
+        'kpi_examinations' => 'Examinations',
+        'kpi_examinations_sub' => 'Scheduled',
+    ],
     'students_screen' => [
         'title' => 'Student Management',
         'breadcrumb_dashboard' => 'Dashboard',

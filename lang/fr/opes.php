@@ -1161,6 +1161,16 @@ return [
         "rail_today" => "Aujourd'hui",
         'rail_days_left' => '1 jour restant|:count jours restants',
     ],
+    'reports_hub' => [
+        'kpi_students' => 'Total eleves',
+        'kpi_students_sub' => 'Inscrits',
+        'kpi_staff' => 'Total personnel',
+        'kpi_staff_sub' => 'Actif',
+        'kpi_classes' => 'Total classes',
+        'kpi_classes_sub' => 'Toutes annees',
+        'kpi_examinations' => 'Examens',
+        'kpi_examinations_sub' => 'Programmes',
+    ],
     'students_screen' => [
         'title' => 'Gestion des élèves',
         'breadcrumb_dashboard' => 'Tableau de bord',

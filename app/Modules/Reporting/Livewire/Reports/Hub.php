@@ -7,6 +7,7 @@ namespace App\Modules\Reporting\Livewire\Reports;
 use App\Modules\Identity\Domain\Permission;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 /**
@@ -102,10 +103,56 @@ final class Hub extends Component
         ], static fn (array $item): bool => \Illuminate\Support\Facades\Route::has($item['route']));
     }
 
+    /**
+     * The headline figures the reference's Reports screen carries.
+     *
+     * Every one is permission-gated and returns null - not zero - for a
+     * reader who may not see it, so a reports viewer without students.view
+     * gets four tiles rather than a lie about a roll of nobody.
+     *
+     * "Pass rate" is DELIBERATELY ABSENT. The reference shows it, and this
+     * product cannot compute it honestly yet: a pass mark is per assessment
+     * framework and no published results exist to average. A figure invented
+     * for a tile on the reports screen would be the worst possible place to
+     * start guessing.
+     *
+     * @return array<string, int|null>
+     */
+    private function headlineFigures(): array
+    {
+        $guard = static function (Permission $permission, callable $read): ?int {
+            if (! Gate::allows($permission->value)) {
+                return null;
+            }
+
+            try {
+                return (int) $read();
+            } catch (\Throwable) {
+                return null;
+            }
+        };
+
+        return [
+            'students' => $guard(Permission::StudentsView, static fn (): int => (int) DB::table('students')
+                ->where('is_archived', false)
+                ->whereNull('left_on')
+                ->count()),
+
+            'staff' => $guard(Permission::StaffView, static fn (): int => (int) DB::table('staff_members')
+                ->where('status', 'active')
+                ->count()),
+
+            'classes' => $guard(Permission::AcademicsView, static fn (): int => (int) DB::table('class_groups')->count()),
+
+            'examinations' => $guard(Permission::AcademicsView, static fn (): int => (int) DB::table('exams')->count()),
+        ];
+    }
+
     public function render(): mixed
     {
         return view('livewire.reporting.reports.hub', [
             'categories' => $this->categories(),
+            'headlineFigures' => $this->headlineFigures(),
         ]);
     }
 }

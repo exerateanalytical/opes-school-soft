@@ -12,6 +12,44 @@
         </p>
     </div>
 
+    {{-- The reference's headline strip. Its fifth tile is a "Pass Rate
+         (Overall)" and is deliberately absent: a pass mark is per assessment
+         framework and nothing has been published to average, so the figure
+         would be invented - on the reports screen of all places.
+
+         Every tile is permission-gated inside the component and returns null
+         rather than 0 for a reader who may not see it, so a reports viewer
+         without students.view gets three tiles rather than a lie about a roll
+         of nobody. --}}
+    @php
+        $headlineTiles = [
+            ['key' => 'students', 'tone' => 'bg-primary', 'icon' => 'students'],
+            ['key' => 'staff', 'tone' => 'bg-badge-blue', 'icon' => 'staff'],
+            ['key' => 'classes', 'tone' => 'bg-badge-orange', 'icon' => 'classes'],
+            ['key' => 'examinations', 'tone' => 'bg-badge-purple', 'icon' => 'examinations'],
+        ];
+
+        $visibleTiles = array_values(array_filter(
+            $headlineTiles,
+            static fn (array $tile): bool => ($headlineFigures[$tile['key']] ?? null) !== null,
+        ));
+    @endphp
+
+    @if ($visibleTiles !== [])
+        <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(185px,1fr))]">
+            @foreach ($visibleTiles as $tile)
+                <x-kpi-card :label="__('opes.reports_hub.kpi_'.$tile['key'])"
+                            :value="number_format($headlineFigures[$tile['key']])"
+                            :sub="__('opes.reports_hub.kpi_'.$tile['key'].'_sub')"
+                            :icon-bg="$tile['tone']">
+                    <x-slot:icon>
+                        <x-opes-nav-icon :nav-key="$tile['icon']" class="h-5 w-5"/>
+                    </x-slot:icon>
+                </x-kpi-card>
+            @endforeach
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @forelse ($categories as $category)
             <a href="{{ route($category['route']) }}" wire:navigate
