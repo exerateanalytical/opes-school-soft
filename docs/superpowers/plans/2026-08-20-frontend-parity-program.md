@@ -248,7 +248,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 13 | `/finance/dashboard` vs `finance dashboard.png` | DONE | already carried the reference's five KPIs, the same tab set and the fee-collection donut. The strip was the last one in the product rendering without discs - x-kpi-card only draws one when given an icon, and this caller passed none |
 | 14 | `/library` vs `Library.png` | DONE | 6 KPIs in one row; category donut + Recent Book Loans |
 | 15 | `/inventory` vs `Inventory management.png` | DONE | reference's 5 KPIs; stock-status donut + Recent Stock Movements |
-| 16 | `/transport` | PARTIAL | rail already matched; duplicate heading removed. Driver/Vehicle columns queued |
+| 16 | `/transport` | DONE (as far as the schema allows) | rail already matched the reference; duplicate heading removed. Driver/Vehicle/Capacity columns are BLOCKED - see below |
 | 17 | `/hostel` | PARTIAL | duplicate heading removed; not compared in detail |
 | 17b | `/users` vs `ChatGPT ... 08_06_34` | DONE | 5 KPIs, Username column, role labels, role donut. Fixed a filtered Total Users count |
 | 18 | `/guardians` | DONE | 5 KPIs (added Linked Students + No Portal Account) and a by-relationship donut. Counts LINKS not people, so one guardian standing for four children reads as four covered pupils |
@@ -310,6 +310,7 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/transport` | per-route Driver, Vehicle, Capacity columns | absent | **Schema gap, not a styling gap.** There is no route-to-vehicle link: `transport_allocations` connects a pupil's enrolment to a route and a stop, and `vehicle_drivers` links a driver to a vehicle - nothing joins a vehicle to a route. Filling these columns needs a migration, not markup, and inventing a join would put a driver's name against a bus that never runs that route. |
 | `/reports` | KPI "Pass Rate (Overall)" | absent | A pass mark is per assessment framework and nothing is published to average. Inventing it on the reports screen would be the worst place to start guessing. |
 | `/reports` | report catalogue with last-generated and per-row export format | hub of category screens | Needs a report registry with run history. Faking it would put fabricated "last generated" dates in front of an auditor. |
 | `/settings` | in-place editing workspace with a left section nav | hub of sub-screens | Each settings area is its own screen with its own permission. Converting to in-place editing is a rewrite of a permission-sensitive area, not a restyle. |
