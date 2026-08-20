@@ -32,3 +32,6 @@ Thumbs.db
 # Rendered authenticated pages produced by compare_capture.php for design
 # parity checks. Never commit: these are fully-rendered signed-in screens.
 /public/__compare
+
+# Puppeteer install for the mobile parity harness - never committed.
+/tools/design-parity/mobile/node_modules

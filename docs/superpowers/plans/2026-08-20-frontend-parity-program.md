@@ -1,0 +1,216 @@
+# Front-end Parity Program — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: use `superpowers:executing-plans`
+> to work this plan screen-by-screen. §0 is the resume protocol; §6 is the
+> single source of truth for what is done. Steps use `- [ ]` for tracking.
+
+**Goal:** Bring every back-office screen to a measured, verified match with its
+reference in `frontend images/`, without deleting or overriding any existing
+module.
+
+**Architecture:** A shared shell (sidebar, top bar, canvas) plus a small set of
+measured primitives (`x-shell.*`) that every screen composes. Screens are
+converted one at a time and each is verified by capturing the REAL page through
+the kernel, screenshotting it headlessly at the reference's own viewport, and
+diffing the measurements — never by eye.
+
+**Tech stack:** Laravel 13 / Livewire 3 / Tailwind 4 (17px root) / Blade
+components / Pest. Measuring is PHP + GD (`tools/design-parity/desktop/`).
+
+---
+
+## 0. Resume protocol
+
+A session picking this up cold does exactly this, in order:
+
+1. Read §6 (Progress ledger). The first row not marked DONE is the next job.
+2. Read §2 (the loop). It is the whole method; do not invent another.
+3. Read `docs/superpowers/specs/2026-08-20-admin-dashboard-measurements.md`
+   for the shell's measured constants — sidebar 258+12, canvas ivory
+   `#FBFAF7`, 16px row gap, the type scale.
+4. Work ONE screen. Update §6. Commit. Repeat.
+
+**Never** mark a row DONE without a side-by-side sheet having been generated
+and looked at. "The markup is right" is not the standard; this program exists
+because measured-correct pages still looked wrong.
+
+---
+
+## 1. Ground rules (non-negotiable)
+
+- **Additive only.** No module, route, permission or nav item is removed. New
+  visual primitives sit ALONGSIDE the old ones (`x-shell.stat-card` next to
+  `x-kpi-card`), and a screen moves over deliberately.
+- **Measure, never estimate.** Every size comes out of the reference with
+  `probe.php`. A number typed from eye is a guess wearing a number's clothing.
+- **Real data or an honest empty state.** Never a fabricated figure to make a
+  panel match a mockup. A card with no data shows an em dash, not a zero.
+- **Permission-gated.** A panel a reader may not see does not render. It never
+  renders as 0.
+- **Two icon registers.** Chrome-on-dark is SOLID (`x-shell.icon` glyph map);
+  chrome-on-white is OUTLINE (`$outlines`). Screen content keeps the existing
+  `x-opes-nav-icon` outline set. Never mix registers inside one control.
+
+---
+
+## 2. The loop (per screen)
+
+```bash
+# 1. Measure the reference. Everything is a CSS pixel; the mockups are 1x.
+php tools/design-parity/desktop/probe.php "<ref>.png" palette
+php tools/design-parity/desktop/probe.php "<ref>.png" hgaps 300 320 0 1023   # row bands
+php tools/design-parity/desktop/probe.php "<ref>.png" vgaps <y0> <y1> 270 1535  # column tracks
+php tools/design-parity/desktop/probe.php "<ref>.png" darkrows <x0> <x1> <y0> <y1>  # type
+php tools/design-parity/desktop/crop.php "frontend images/<ref>.png" X Y W H 4 out.png  # icons
+
+# 2. Build to those numbers.
+
+# 3. Verify. Capture through the kernel (headless Chrome cannot sign in),
+#    then screenshot at the reference's own viewport.
+npm run build
+php artisan view:clear
+php tools/design-parity/desktop/capture.php
+bash tools/design-parity/desktop/shoot.sh <page> /path/out.png
+
+# 4. Cross-compare, and LOOK at it.
+php tools/design-parity/desktop/sheet.php "<ref>.png" /path/out.png /path/sheet.png
+
+# 5. Re-measure the BUILD with the same instrument and diff the numbers.
+php tools/design-parity/desktop/probe.php /path/out.png hgaps 300 320 0 1023
+
+# 6. Clean up - these are authenticated pages.
+rm -rf public/__compare
+```
+
+Add the screen to `$map` in `tools/design-parity/desktop/capture.php` before
+step 3.
+
+### Traps already paid for — do not re-discover these
+
+| Trap | What happens | Fix |
+|---|---|---|
+| Interpolating a value into a Tailwind arbitrary class | Tailwind scans for COMPLETE class names at build; the rule is never generated and the layout falls back silently | Use a static class (`repeat(auto-fit,minmax(185px,1fr))`) |
+| `{{ ... }}` inside a Blade comment | Blade compiles directives before stripping comments — ParseError | Never write braces or `@` inside a Blade comment |
+| Reusing a Chrome `--user-data-dir` | A killed run leaves a lock; every later run hangs forever | `shoot.sh` uses a disposable profile per run |
+| `Request::create('/path')` for capture | Host defaults to `localhost` with no port, `@vite` emits absolute URLs, every asset 404s, and the screenshot looks like a layout bug | Pass the full base URL |
+| Assuming a bar is white | The reference's top region is the same ivory as the canvas, with no divider | Sample the column before painting |
+| Guessing an enum's members | Half the labels render their raw key | `SHOW COLUMNS` first |
+
+---
+
+## 3. What is already built (do not rebuild)
+
+- `resources/css/app.css` — `--color-shell-*` tokens, measured.
+- `resources/views/components/shell/icon.blade.php` — 18 solid group glyphs
+  + outline top-bar set (`arrow_right`, `bell`, `mail`, `calendar`, `clock`,
+  `refresh`, `campus`, `search`, `modules`, chevrons).
+- `resources/views/components/shell/sidebar.blade.php` — 258px field + 12px
+  toghu strip, 18 collapsible groups, identity card, session strip.
+- `resources/views/components/shell/topbar.blade.php` — greeting block, scope
+  selectors, bell/mail, account menu, date/time/refresh.
+- `resources/views/components/shell/panel.blade.php` — titled card + footer link.
+- `resources/views/components/shell/stat-card.blade.php` — 50px disc KPI card.
+- `resources/views/components/shell/toghu-strip.blade.php` — gold ground,
+  dark lattice.
+- `app/Modules/Identity/Support/Navigation.php` — `groups()` + `groupedItems()`.
+- `app/Modules/Operations/Actions/ReadAdminDashboard.php` — the eleven panels.
+- `tools/design-parity/desktop/` — `probe.php`, `crop.php`, `capture.php`,
+  `shoot.sh`, `sheet.php`.
+
+---
+
+## 4. Known open items on the dashboard
+
+- [ ] Money reads `0 FCFA`; the reference reads `FCFA 45,890,000` (symbol
+      first). `Money::format()` is shared with invoices, receipts and
+      statements, so this is a PRODUCT-WIDE currency-format decision, not a
+      dashboard tweak. **Ask before changing.**
+- [ ] The reference's Quick Actions is a 3x3 of nine tiles. Two of its nine —
+      "School Calendar" and "Fee Structures" — have no route in this platform.
+      Exact tile parity needs those screens BUILT; it must not be faked by
+      pointing a tile at an unrelated page.
+- [ ] `CollectHealth::handle()` pages the entire `audit_logs` table (9 x 500
+      on the demo school) and runs TWICE per dashboard render — once for
+      `alerts()`, once for `summary()`. Pre-existing, now on the hot path of
+      every login. Worth a memoised call.
+- [ ] Reference shows unread badges on bell (12) and mail (5). Real counts are
+      0 here, so nothing renders. Correct, but re-check on a school with data.
+
+---
+
+## 5. Screen → route map
+
+Screens with no route are FEATURE work, not styling, and are marked so.
+
+| Reference | Route | Note |
+|---|---|---|
+| `super admin dashbaord.png` | `/dashboard` | done |
+| `dashboard.png` | `/dashboard` | second dashboard variant — compare before acting |
+| `student management.png`, `students lists.png` | `/students` | |
+| `student profile.png`, `student profie 1.png` | `/students/{student}` | |
+| `student profile edit view.png` | `/students/{student}` edit | |
+| `admission wizard.png`, `student admission wizzard.png` | `/admissions/wizard` | |
+| `Class Management.png` | `/classes` | |
+| `subject management.png` | `/subjects` | |
+| `accademic setting.png` | `/academics/settings` | |
+| `school timetable.png`, `timetable.png` | `/timetable` | |
+| `Attendance.png` | `/attendance` | |
+| `examination schedule.png` | `/examinations` | |
+| `Results management.png` | `/results` | |
+| `finance dashboard.png` | `/finance/dashboard` | |
+| `Library.png`, `libray management.png` | `/library` | |
+| `Inventory management.png` | `/inventory` | |
+| `Transport Management.png` | `/transport` | |
+| `Hostel Management.png` | `/hostel` | |
+| `Guardian profile.png` | `/guardians` | |
+| `teacher profile.png` | `/staff` | |
+| `report an analytics.png`, `reports.png` | `/reports` | |
+| `general setting.png` | `/settings` | |
+| `flow wizards.png`, `complete product overview.png` | — | overview art, not a screen |
+| `Student ID V1.png`, `student ID V2.png` | document | print template, not a screen |
+| `Transcript.png`, `statement of results.png`, `certificate of completion.png` | document | print templates |
+| `logo.png`, `desktop icon.png` | asset | not screens |
+| `ChatGPT Image *.png` (32 files) | — | UNTRIAGED: open each, match to a route or mark as art |
+
+---
+
+## 6. Progress ledger
+
+Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
+
+| # | Screen | Status | Notes |
+|---|---|---|---|
+| 1 | Shell (sidebar / top bar / canvas) | DONE | measured; sidebar 270px, canvas ivory, card row at y118 matches reference to 1px |
+| 2 | `/dashboard` super admin | DONE | 11 panels, real data, permission-gated; open items in §4 |
+| 3 | Triage the 32 `ChatGPT Image *.png` | TODO | must happen before the rest can be ordered |
+| 4 | `/students` | TODO | |
+| 5 | `/students/{student}` | TODO | |
+| 6 | `/classes` | TODO | |
+| 7 | `/subjects` | TODO | |
+| 8 | `/academics/settings` | TODO | |
+| 9 | `/timetable` | TODO | |
+| 10 | `/attendance` | TODO | |
+| 11 | `/examinations` | TODO | |
+| 12 | `/results` | TODO | |
+| 13 | `/finance/dashboard` | TODO | |
+| 14 | `/library` | TODO | |
+| 15 | `/inventory` | TODO | |
+| 16 | `/transport` | TODO | |
+| 17 | `/hostel` | TODO | |
+| 18 | `/guardians` | TODO | |
+| 19 | `/staff` | TODO | |
+| 20 | `/reports` | TODO | |
+| 21 | `/settings` | TODO | |
+| 22 | `/admissions/wizard` | TODO | |
+| 23 | Print templates (ID, transcript, certificate, statement) | TODO | different medium — paper sizes, not viewport |
+
+---
+
+## 7. Verification before any row is marked DONE
+
+- [ ] Sheet generated and looked at.
+- [ ] Build re-measured with `probe.php`; row bands and column tracks within
+      2px of the reference, or the difference explained in the ledger note.
+- [ ] `php artisan test tests/Feature/Ui tests/Feature/Shell` green.
+- [ ] `rm -rf public/__compare`.
+- [ ] Committed.

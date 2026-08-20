@@ -112,22 +112,35 @@ it('groups every nav item into a declared section with a real translation', func
     }
 });
 
-it('renders the sidebar grouped under its section headings without error', function (): void {
+it('renders the sidebar grouped under its group headings without error', function (): void {
     p13moneyUserAs(Role::Administrator);
 
     $response = get('/dashboard');
 
     $response->assertOk();
 
-    // Every section an Administrator's permissions surface must have its
-    // heading rendered exactly once, ahead of its own links.
-    $sectionsSeen = [];
-    foreach (Navigation::items() as $item) {
-        $sectionsSeen[$item['section']] = true;
-    }
+    /*
+     * The ASSERTION changed with the sidebar; its INTENT did not.
+     *
+     * This used to check the ten flat `nav_section` headings. The sidebar was
+     * rebuilt to `frontend images/super admin dashbaord.png`, which groups the
+     * same items under eighteen collapsible `nav_group` parents, so the old
+     * headings are genuinely no longer rendered - the test was describing a
+     * design that no longer exists, not catching a regression.
+     *
+     * What it protects is unchanged and still checked here: every part of the
+     * nav an Administrator can reach must appear under a heading that actually
+     * renders. `nav_section` itself is untouched on the items and is still
+     * asserted by the test above, so nothing stopped being verified.
+     */
+    $groups = Navigation::groupedItems(
+        static fn ($permission): bool => auth()->user()?->can($permission->value) ?? false,
+    );
 
-    foreach (array_keys($sectionsSeen) as $sectionKey) {
-        $response->assertSee(__('opes.nav_section.'.$sectionKey));
+    expect($groups)->not->toBe([]);
+
+    foreach ($groups as $group) {
+        $response->assertSee(__($group['label_key']));
     }
 });
 

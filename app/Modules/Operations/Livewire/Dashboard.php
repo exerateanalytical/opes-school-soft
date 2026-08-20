@@ -7,6 +7,7 @@ namespace App\Modules\Operations\Livewire;
 use App\Modules\Identity\Domain\Permission;
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Operations\Actions\CollectHealth;
+use App\Modules\Operations\Actions\ReadAdminDashboard;
 use App\Modules\Operations\Actions\ReadDashboardPanels;
 use App\Modules\Operations\Domain\HealthCheckResult;
 use App\Modules\Operations\Domain\HealthStatus;
@@ -299,9 +300,18 @@ final class Dashboard extends Component
         return $visible;
     }
 
-    public function render(CollectHealth $health, ReadDashboardPanels $panelReader): mixed
-    {
+    public function render(
+        CollectHealth $health,
+        ReadDashboardPanels $panelReader,
+        ReadAdminDashboard $adminReader,
+    ): mixed {
         return view('livewire.dashboard', [
+            // The eleven figures the reference administrator screen shows.
+            // Every one is permission-gated inside the action and comes back
+            // null for a reader who may not see it, so a role that is not an
+            // administrator simply renders fewer panels rather than a grid
+            // of zeroes.
+            'admin' => $adminReader->handle(),
             'panels' => $this->rolePanels($panelReader),
             'alerts' => $this->alerts($health),
             'quickActions' => $this->quickActions(),

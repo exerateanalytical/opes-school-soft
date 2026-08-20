@@ -109,6 +109,32 @@
     --color-border-primary: #DCE5DF;
     --color-border-secondary: #E7ECE9;
 
+    /* --------------------------------------------------------------------
+       ADMIN SHELL, measured from `frontend images/super admin dashbaord.png`
+       with tools/design-parity/desktop/probe.php. Full working in
+       docs/superpowers/specs/2026-08-20-admin-dashboard-measurements.md.
+
+       These sit ALONGSIDE the Heritage tokens above rather than replacing
+       them, for the same reason the guardian-portal set does: the values are
+       close but measurably different (the reference sidebar is #00261C, the
+       existing --color-chrome is #002D17), and repainting the shared token
+       would restyle every screen in the product as a side effect of skinning
+       one. Screens move onto these deliberately, one at a time.
+       -------------------------------------------------------------------- */
+    --color-shell-field: #00261C;      /* sidebar ground */
+    --color-shell-ground: #FBFAF7;     /* page canvas - WARM, not the #F5F7F6 sand */
+    --color-shell-surface: #FEFEFE;    /* card surface */
+    --color-shell-divider: #E8E9EB;    /* hairline inside cards */
+    --color-shell-gold: #F1D28A;       /* active nav pill */
+    --color-shell-gold-deep: #D19C14;  /* gold icon discs, strip */
+    --color-shell-disc: #064512;       /* solid green KPI disc */
+    --color-shell-alert: #EE3A34;      /* alert glyphs and badge counts */
+    /* The toghu strip's ground. Brighter than --color-shell-gold-deep, which
+       is the icon-disc gold: sampled across the strip the reference runs
+       #FCEA89 / #F4DD5A / #FDF27D / #FBE864 / #F7D943, so the band reads as
+       bright yellow-gold, not the deeper ochre the discs use. */
+    --color-shell-strip: #F2DA63;
+
     /* Each semantic colour has TWO roles, and conflating them was a real AA
        failure. `--color-x` is the SURFACE role - solid pills, icon circles,
        chart fills, borders - and stays vivid because that is the product's

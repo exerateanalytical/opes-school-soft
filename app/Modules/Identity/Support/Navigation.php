@@ -257,6 +257,115 @@ final class Navigation
     }
 
     /**
+     * The sidebar's TOP-LEVEL groups, from `frontend images/super admin
+     * dashbaord.png` - eighteen collapsible parents in the order the design
+     * shows them, each naming the item keys that nest under it.
+     *
+     * This is a presentation layer over items(), not a replacement for it.
+     * Every item keeps its own route, its own permission and its own `built`
+     * flag; grouping only decides which parent it appears beneath. That
+     * matters because the sidebar is the product's whole permission surface:
+     * a regrouping that dropped an item would silently remove a module from
+     * every role that holds it, which is exactly the failure the nav contract
+     * exists to prevent. NavigationGroupsTest asserts the two lists agree, so
+     * an item added to items() and forgotten here fails the suite rather than
+     * disappearing from the shell.
+     *
+     * `Dashboard` is deliberately the one group with a single member: the
+     * design renders it as a leaf with no disclosure chevron, and a parent
+     * that opens to reveal one child is a worse control than a link.
+     *
+     * @return array<string, list<string>>  group key => item keys, in order
+     */
+    public static function groups(): array
+    {
+        return [
+            'dashboard' => ['dashboard'],
+            'school_network' => ['setup', 'branding'],
+            'students' => [
+                'admissions', 'students', 'guardians', 'guardian_meetings', 'pta',
+                'import', 'promotion', 'alumni', 'discipline', 'activities',
+            ],
+            'staff' => ['staff'],
+            'academics' => [
+                'academics', 'classes', 'subjects', 'curriculum', 'timetable',
+                'marks', 'homework',
+            ],
+            'examinations' => ['examinations', 'results'],
+            'attendance' => ['attendance'],
+            'finance' => [
+                'finance', 'finance_dashboard', 'accounting_dashboard', 'ledger',
+                'expenses', 'statements', 'books', 'reconciliation', 'budgets',
+                'accounting_review', 'accounting_review_journals', 'procurement',
+                'tax', 'system_documentation',
+            ],
+            'hr' => ['payroll'],
+            'library' => ['library'],
+            'transport' => ['transport'],
+            'boarding' => ['hostel'],
+            'health' => ['medical', 'insurance'],
+            'inventory' => ['inventory', 'assets'],
+            'communications' => ['messages', 'outbox', 'message_templates', 'whatsapp'],
+            'reports' => ['reports', 'unfinished_work'],
+            'security' => ['users', 'audit_log', 'webhooks', 'visitors'],
+            'administration' => [
+                'settings', 'operations', 'backups', 'bulk_prints', 'documents_verify',
+            ],
+        ];
+    }
+
+    /**
+     * items() arranged under groups(), with each item's full definition and
+     * only the items the given permission check admits.
+     *
+     * An item that groups() does not place lands under `administration`
+     * rather than vanishing - the test above is what keeps that fallback from
+     * ever being reached in practice, but the shell must degrade to "visible
+     * in the wrong place" rather than "gone" if it ever is.
+     *
+     * @param  callable(Permission): bool  $allows
+     * @return list<array{key: string, label_key: string, items: list<array<string, mixed>>}>
+     */
+    public static function groupedItems(callable $allows): array
+    {
+        $byKey = [];
+
+        foreach (self::items() as $item) {
+            if ($item['permission'] === null || $allows($item['permission'])) {
+                $byKey[$item['key']] = $item;
+            }
+        }
+
+        $groups = self::groups();
+        $placed = array_merge(...array_values($groups));
+        $orphans = array_values(array_diff(array_keys($byKey), $placed));
+
+        if ($orphans !== []) {
+            $groups['administration'] = array_merge($groups['administration'], $orphans);
+        }
+
+        $out = [];
+
+        foreach ($groups as $groupKey => $itemKeys) {
+            $items = [];
+
+            foreach ($itemKeys as $itemKey) {
+                if (isset($byKey[$itemKey])) {
+                    $items[] = $byKey[$itemKey];
+                }
+            }
+
+            // A group whose every member the holder may not see is absent
+            // entirely - never an empty disclosure that opens onto nothing.
+            if ($items !== []) {
+                $out[] = ['key' => $groupKey, 'label_key' => 'opes.nav_group.'.$groupKey, 'items' => $items];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * The nav keys whose module is not built yet - each serves the shared
      * placeholder page at its own future URL. routes/web.php iterates this so
      * a key added here gets its route by construction, and the

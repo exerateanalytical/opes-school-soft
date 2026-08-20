@@ -145,6 +145,19 @@ final class RoleDashboard
         'go_live_setup' => ['operations.setup', 'setting.view'],
         'settings' => ['settings.index', 'setting.view'],
         'reports' => ['reports.hub', 'reports.view'],
+        // The administrator tiles the reference dashboard names
+        // (`frontend images/super admin dashbaord.png`). Each points at a
+        // route that EXISTS - Dashboard::quickActions() drops any that does
+        // not, so a tile can never 404, and none was invented to fill the
+        // grid. Two of the reference's nine - "Fee Structures" and a
+        // standalone school-calendar screen - have no route in the platform
+        // yet and are deliberately absent rather than pointed at something
+        // adjacent and mislabelled.
+        'add_student' => ['students.index', 'students.manage'],
+        'add_staff' => ['hr.index', 'staff.view'],
+        'academic_year' => ['academics.settings', 'academics.manage'],
+        'bulk_import' => ['students.import', 'students.manage'],
+        'backup_database' => ['operations.backups', 'backup.run'],
     ];
 
     /**
@@ -185,6 +198,11 @@ final class RoleDashboard
         'go_live_setup' => 'setup',
         'settings' => 'settings',
         'reports' => 'reports',
+        'add_student' => 'students',
+        'add_staff' => 'staff',
+        'academic_year' => 'academics',
+        'bulk_import' => 'import',
+        'backup_database' => 'backups',
     ];
 
     /**
@@ -200,7 +218,11 @@ final class RoleDashboard
 
             Role::SuperAdmin, Role::Administrator => [
                 'panels' => ['active_users', 'system_health', 'last_backup', 'go_live_blockers', 'enrolment_count', 'cash_position'],
-                'quick_actions' => ['add_user', 'go_live_setup', 'settings', 'reports'],
+                'quick_actions' => [
+                    'add_student', 'add_staff', 'academic_year', 'new_admission',
+                    'bulk_import', 'backup_database', 'reports', 'add_user',
+                    'go_live_setup', 'settings',
+                ],
             ],
 
             // The Proviseur signs the bulletin and answers for the roll, the
