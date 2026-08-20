@@ -53,24 +53,31 @@
              The crest is the real artwork (public/images/opes-crest-dark.png,
              the dark-ground variant that already exists in this repo), not a
              line drawing of it. --}}
-        <a href="/dashboard" wire:navigate class="flex shrink-0 items-start gap-2 px-2.5 pt-2 pb-1.5">
+        <a href="/dashboard" wire:navigate class="flex shrink-0 items-start gap-[7px] px-2.5 pt-2 pb-1.5">
             @if ($logoUrl !== null)
                 {{-- The school's own uploaded logo replaces the OPES mark.
                      Height-constrained with width auto: a school logo is any
                      aspect ratio at all, and a fixed square box squashes half
                      of them. --}}
                 <img src="{{ $logoUrl }}" alt="{{ __('opes.branding.app_logo_alt') }}"
-                     class="h-[72px] w-auto max-w-[74px] shrink-0 object-contain">
+                     class="h-[68px] w-auto max-w-[68px] shrink-0 object-contain">
             @else
                 <img src="{{ asset('images/opes-crest-dark.png') }}" alt=""
-                     class="h-[72px] w-[74px] shrink-0 object-contain">
+                     class="h-[68px] w-[68px] shrink-0 object-contain">
             @endif
 
             <span class="min-w-0 pt-[18px]">
                 <span class="block truncate text-[36px] font-bold leading-none tracking-[-0.01em] text-white">
                     {{ __('opes.shell.brand') }}
                 </span>
-                <span class="mt-[9px] block truncate text-[11px] font-medium uppercase leading-none tracking-[0.055em] text-white">
+                {{-- 10px, not the 11px the cap height implies. The reference's text
+                     column is a MEASURED 156px wide (ink x 85..240 inside a
+                     258px field) and "SCHOOL MANAGEMENT SYSTEM" does not fit
+                     that box at 11px in this face - it truncated to "SCHOOL
+                     MANAGEMENT S..." on every screen in the product. The box
+                     is the harder measurement of the two, so the type is
+                     sized to it. --}}
+                <span class="mt-[9px] block truncate text-[10px] font-medium uppercase leading-none tracking-[0.01em] text-white">
                     {{ __('opes.shell.brand_system_line') }}
                 </span>
                 <span class="mt-[16px] block truncate text-[12.5px] leading-none text-shell-gold">

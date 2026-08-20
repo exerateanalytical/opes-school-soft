@@ -30,6 +30,14 @@
      is reproducible with the app's own scale. --}}
 <div class="min-w-0 space-y-4">
 
+    {{-- Panels use a COMPACT empty line, not x-empty-state.
+
+         x-empty-state is the full-width screen scaffold - a 56px icon disc
+         inside a dashed box with py-10 - and it is right there. Inside a
+         191px dashboard panel it was taller than the panel itself and added
+         ~95px to the row on its own (layout-diff.php). The message is the
+         part that matters; the scaffolding around it is not. --}}
+
     {{-- ── KPI strip ────────────────────────────────────────────────────── --}}
     @php
         $attendance = $admin['attendance_today'] ?? null;
@@ -80,14 +88,26 @@
                                :footer-url="route('classes.index', absolute: false)"/>
         @endif
 
-        @if ($attendance !== null)
-            {{-- The percentage is the POINT of this card, so it is the note
-                 rather than a link: a head teacher reads "76.4% present"
-                 here and only then decides to open the register. --}}
-            <x-shell.stat-card :label="__('opes.dashboard.attendance_today')"
-                               :value="number_format($attendance['present'])"
+        @if ($canViewAttendance)
+            {{-- ALWAYS rendered for a reader who may see attendance, even
+                 with no register taken yet - that is why the reference's
+                 strip is six cards wide and this one was five.
+
+                 The em dash is the whole point of rendering it anyway: "no
+                 register has been taken today" is an operational fact a head
+                 teacher needs at 9am, and hiding the card states nothing
+                 while showing 0% states something false.
+
+                 The percentage is a note rather than a link because it IS
+                 the headline the card exists for - the count is the
+                 supporting figure. --}}
+            <x-shell.stat-card :label="__('opes.dashboard.tile_attendance')"
+                               :value="$attendance['present'] === null ? null : number_format($attendance['present'])"
                                icon="attendance" tone="gold"
-                               :note="__('opes.dashboard.percent_present', ['percent' => $attendance['percent']])"/>
+                               :note="$todaysAttendanceRate === null
+                                   ? __('opes.dashboard.no_register_today')
+                                   : __('opes.dashboard.rate_present', ['rate' => $todaysAttendanceRate])"
+                               :note-tone="$todaysAttendanceRate === null ? 'text-charcoal/55' : 'text-success'"/>
         @endif
 
         @if ($fees !== null)
@@ -114,13 +134,48 @@
         @if ($quickActions !== [])
             <x-shell.panel :title="__('opes.dashboard.quick_actions')"
                            :footer-label="__('opes.dashboard.view_all_actions')"
-                           :footer-url="route('reports.hub', absolute: false)">
-                <div class="grid grid-cols-3 gap-2.5">
+                           :footer-url="route('reports.hub', absolute: false)"
+                           footer-permission="reports.view">
+                {{-- MEASURED off the reference's own panel: the tile block is
+                     y 306..521 for three rows, so each tile is 69px tall on a
+                     ~7px gutter, and each is 106px wide across the 371px
+                     column. The tiles were 88px tall, which added a fourth
+                     row's worth of height and pushed every row below this
+                     panel down the page.
+
+                     The icon is SOLID, from the chrome register - the
+                     reference's tile glyphs are filled shapes, and the
+                     outline set next door is a different picture at this
+                     size, not a near match. --}}
+                @php
+                    // Quick-action key -> solid glyph. The reference uses ONE
+                    // person+ sign for all three "enrol somebody" routes.
+                    $tileGlyphs = [
+                        'add_student' => 'person_add',
+                        'add_staff' => 'person_add',
+                        'new_admission' => 'person_add',
+                        'add_user' => 'person_add',
+                        'academic_year' => 'academics',
+                        'bulk_import' => 'cloud_up',
+                        'backup_database' => 'shield',
+                        'reports' => 'reports',
+                        'go_live_setup' => 'checklist',
+                    ];
+                @endphp
+
+                {{-- 3px gutter and a WARM border, both sampled across the
+                     reference's own tile boundary at y=350: tile white runs to
+                     x 411, the gutter is #F8F6F5 for 2px, tile two resumes at
+                     414, and the border line reads #F2F1ED. The default
+                     divider (#E8E9EB) is cooler and darker than that, which
+                     is what made the tile grid read as a table. --}}
+                <div class="grid grid-cols-3 gap-[3px]">
                     @foreach ($quickActions as $action)
                         <a href="{{ $action['url'] }}" wire:key="action-{{ $action['key'] }}" wire:navigate
-                           class="group flex flex-col items-center gap-2 rounded-xl border border-shell-divider bg-white px-2 py-3 text-center transition hover:border-primary hover:shadow-sm">
-                            <x-opes-nav-icon :nav-key="$action['icon']" class="h-[26px] w-[26px] text-primary"/>
-                            <span class="text-[12.5px] font-medium leading-tight text-charcoal group-hover:text-primary">
+                           class="group flex h-[69px] flex-col items-center justify-center gap-1 rounded-[10px] border border-[#F2F1ED] bg-white px-1.5 text-center transition hover:border-primary hover:shadow-sm">
+                            <x-shell.icon :name="$tileGlyphs[$action['key']] ?? 'modules'"
+                                          class="h-[26px] w-[26px] text-primary"/>
+                            <span class="w-full truncate text-[11px] leading-none text-charcoal group-hover:text-primary">
                                 {{ $action['label'] }}
                             </span>
                         </a>
@@ -133,22 +188,30 @@
                        :footer-label="__('opes.dashboard.view_all_notifications')"
                        :footer-url="route('communication.messages', absolute: false)">
             @if ($alerts === [])
-                <x-empty-state :message="__('opes.dashboard.no_alerts')"/>
+                <p class="py-3 text-[14px] text-charcoal/55">{{ __('opes.dashboard.no_alerts') }}</p>
             @else
+                {{-- ONE LINE per row, on the reference's measured 38px pitch
+                     (ink bands at y 322, 360, 398, 435, 474) at 15px.
+
+                     The line is the DETAIL, not the label: the reference's
+                     rows read "Term 1 exams will begin on 15 July 2026" -
+                     a sentence a reader can act on - and this panel was
+                     stacking a heading above that sentence, which doubled
+                     every row's height and pushed 56px of the page down.
+                     The label is not lost; it is the row's title, which is
+                     also what a screen reader announces. --}}
                 <ul class="divide-y divide-shell-divider">
                     @foreach ($alerts as $alert)
-                        <li class="flex items-start gap-2.5 py-2.5">
-                            {{-- The dot carries the severity the status pill
-                                 used to: red for a failure, amber for a
-                                 warning. Colour is never the ONLY carrier -
-                                 the pill's own words are still in the title
-                                 attribute for a screen reader. --}}
-                            <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full
+                        <li class="flex h-[38px] items-center gap-2.5" title="{{ $alert->label }}">
+                            {{-- The dot carries severity: red for a failure,
+                                 amber for a warning. Colour is never the ONLY
+                                 carrier - the status word is in the title
+                                 alongside the label. --}}
+                            <span class="h-2 w-2 shrink-0 rounded-full
                                          {{ $alert->status->value === 'fail' ? 'bg-shell-alert' : 'bg-warning' }}"
-                                  title="{{ __('opes.status.'.$alert->status->value) }}"></span>
-                            <span class="min-w-0 flex-1 text-[15px] leading-snug text-charcoal">
-                                {{ $alert->label }}
-                                <span class="block text-[13px] text-charcoal/60">{{ $alert->detail }}</span>
+                                  aria-hidden="true"></span>
+                            <span class="min-w-0 flex-1 truncate text-[15px] leading-none text-charcoal">
+                                {{ $alert->detail !== '' ? $alert->detail : $alert->label }}
                             </span>
                         </li>
                     @endforeach
@@ -158,9 +221,10 @@
 
         <x-shell.panel :title="__('opes.dashboard.upcoming_events')" icon="calendar" icon-tone="text-primary"
                        :footer-label="__('opes.dashboard.view_full_calendar')"
-                       :footer-url="route('academics.settings', absolute: false)">
+                       :footer-url="route('academics.settings', absolute: false)"
+                       footer-permission="academics.manage">
             @if (($admin['upcoming_events'] ?? []) === [])
-                <x-empty-state :message="__('opes.dashboard.no_events')"/>
+                <p class="py-3 text-[14px] text-charcoal/55">{{ __('opes.dashboard.no_events') }}</p>
             @else
                 <ul class="space-y-2.5 py-1">
                     @foreach ($admin['upcoming_events'] as $event)
@@ -195,18 +259,19 @@
             @if ($overview !== null)
                 <x-shell.panel :title="__('opes.dashboard.financial_overview')"
                                :footer-label="__('opes.dashboard.view_full_report')"
-                               :footer-url="route('reports.financial', absolute: false)">
+                               :footer-url="route('reports.financial', absolute: false)"
+                               footer-permission="ledger.view">
                     <div class="flex items-center gap-3 py-1">
                         <span class="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl bg-shell-disc">
                             <x-shell.icon name="finance" class="h-[24px] w-[24px] text-white"/>
                         </span>
-                        <dl class="min-w-0 flex-1 space-y-1.5">
+                        <dl class="min-w-0 flex-1">
                             @foreach ([
                                 ['key' => 'fee_collection', 'value' => $overview['collection'], 'dot' => 'bg-success'],
                                 ['key' => 'expenses', 'value' => $overview['expenses'], 'dot' => 'bg-shell-alert'],
                                 ['key' => 'balance', 'value' => $overview['balance'], 'dot' => 'bg-warning'],
                             ] as $line)
-                                <div class="flex items-center gap-2">
+                                <div class="flex h-[23px] items-center gap-2">
                                     <span class="h-2 w-2 shrink-0 rounded-full {{ $line['dot'] }}" aria-hidden="true"></span>
                                     <dt class="min-w-0 flex-1 truncate text-[14px] text-charcoal/80">
                                         {{ __('opes.dashboard.'.$line['key']) }}
@@ -224,13 +289,14 @@
             @if ($balances !== null)
                 <x-shell.panel :title="__('opes.dashboard.top_fee_balances')"
                                :footer-label="__('opes.dashboard.view_all')"
-                               :footer-url="route('fees.invoices.index', absolute: false)">
+                               :footer-url="route('fees.invoices.index', absolute: false)"
+                               footer-permission="fee.view">
                     @if ($balances === [])
-                        <x-empty-state :message="__('opes.dashboard.no_balances')"/>
+                        <p class="py-3 text-[14px] text-charcoal/55">{{ __('opes.dashboard.no_balances') }}</p>
                     @else
-                        <ol class="space-y-1.5 py-1">
+                        <ol class="py-1">
                             @foreach ($balances as $index => $balance)
-                                <li class="flex items-center gap-2 text-[14px]">
+                                <li class="flex h-[23px] items-center gap-2 text-[14px]">
                                     <span class="w-4 shrink-0 text-charcoal/50">{{ $index + 1 }}.</span>
                                     <span class="min-w-0 flex-1 truncate text-charcoal">{{ $balance['name'] }}</span>
                                     <span class="shrink-0 font-medium text-charcoal">
@@ -246,8 +312,9 @@
             @if ($strength !== null)
                 <x-shell.panel :title="__('opes.dashboard.student_strength')"
                                :footer-label="__('opes.dashboard.view_full_report')"
-                               :footer-url="route('reports.students-guardians', absolute: false)">
-                    <dl class="space-y-1.5 py-1">
+                               :footer-url="route('reports.students-guardians', absolute: false)"
+                               footer-permission="reports.view">
+                    <dl class="py-1">
                         @foreach ([
                             ['key' => 'total_students', 'value' => $strength['total'], 'icon' => 'students'],
                             ['key' => 'male_students', 'value' => $strength['male'], 'icon' => 'school_network'],
@@ -255,7 +322,7 @@
                             ['key' => 'day_students', 'value' => $strength['day'], 'icon' => 'boarding'],
                             ['key' => 'boarding_students', 'value' => $strength['boarding'], 'icon' => 'staff'],
                         ] as $line)
-                            <div class="flex items-center gap-2.5">
+                            <div class="flex h-[23px] items-center gap-2.5">
                                 <x-shell.icon :name="$line['icon']" class="h-[18px] w-[18px] shrink-0 text-primary"/>
                                 <dt class="min-w-0 flex-1 truncate text-[14px] text-charcoal/80">
                                     {{ __('opes.dashboard.'.$line['key']) }}
@@ -281,9 +348,10 @@
         @if ($activities !== null)
             <x-shell.panel :title="__('opes.dashboard.recent_activities')"
                            :footer-label="__('opes.dashboard.view_all_activities')"
-                           :footer-url="route('audit.index', absolute: false)">
+                           :footer-url="route('audit.index', absolute: false)"
+                           footer-permission="audit.view">
                 @if ($activities === [])
-                    <x-empty-state :message="__('opes.dashboard.no_activities')"/>
+                    <p class="py-3 text-[14px] text-charcoal/55">{{ __('opes.dashboard.no_activities') }}</p>
                 @else
                     <ul class="divide-y divide-shell-divider">
                         @foreach ($activities as $activity)
@@ -305,7 +373,7 @@
              its button. --}}
         <x-shell.panel :title="__('opes.dashboard.system_alerts')">
             @if ($alerts === [])
-                <x-empty-state :message="__('opes.dashboard.no_alerts')"/>
+                <p class="py-3 text-[14px] text-charcoal/55">{{ __('opes.dashboard.no_alerts') }}</p>
             @else
                 <ul class="divide-y divide-shell-divider">
                     @foreach ($alerts as $alert)

@@ -75,13 +75,37 @@
     :rail-title="__('opes.students_screen.rail_title')"
 >
     <x-slot:actions>
-        {{-- Creation is a sibling workstream's screen and has no route in
-             routes/web.php, so this is an inert control that says so rather
-             than a link to a 404. --}}
-        <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-              class="cursor-not-allowed rounded border border-border-primary px-3 py-1.5 text-sm font-medium text-charcoal/40">
-            {{ __('opes.students_screen.add_student') }}
-        </span>
+        {{-- These were ONE inert grey control, on the grounds that "creation
+             has no route". It does: adding a student in this product IS the
+             Student Admission Wizard at /admissions/wizard, which is routed,
+             permissioned and built. A dead control beside a working screen
+             reads as a broken build, so it now goes where the work actually
+             happens.
+
+             The reference's third button, "Export Students", is deliberately
+             NOT here: no export route exists, and a button that does nothing
+             is worse than an absent one. It goes in the ledger as feature
+             work, not as a styled placeholder. --}}
+        @can('students.manage')
+            <a href="{{ route('students.import') }}" wire:navigate
+               class="inline-flex items-center gap-2 rounded-lg border border-shell-divider bg-white px-3.5 py-2 text-sm font-medium text-charcoal transition hover:border-primary hover:text-primary">
+                <x-shell.icon name="arrow_right" class="h-4 w-4 -rotate-90"/>
+                {{ __('opes.students_screen.import_students') }}
+            </a>
+        @endcan
+
+        @can('admissions.manage')
+            <a href="{{ route('admissions.wizard') }}" wire:navigate
+               class="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
+                <span aria-hidden="true" class="text-base leading-none">+</span>
+                {{ __('opes.students_screen.add_student') }}
+            </a>
+        @else
+            <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
+                  class="cursor-not-allowed rounded-lg border border-shell-divider px-3.5 py-2 text-sm font-medium text-charcoal/40">
+                {{ __('opes.students_screen.add_student') }}
+            </span>
+        @endcan
     </x-slot:actions>
 
     {{-- KPI row. Every tile below is a REAL dataset-wide count taken from two
@@ -99,7 +123,8 @@
          "Graduated" is therefore all-time, not this-academic-year, and its
          label says "Graduated" rather than the mockup's year-scoped wording. --}}
     <x-slot:kpis>
-        <x-kpi-card :label="__('opes.students_screen.kpi_total')" :value="$totalStudents" icon-bg="bg-primary">
+        <x-kpi-card :label="__('opes.students_screen.kpi_total')" :value="$totalStudents"
+                    :sub="__('opes.students_screen.kpi_total_sub')" icon-bg="bg-primary">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path stroke-linecap="round" d="M2.8 19.5c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2"/><path stroke-linecap="round" d="M15.5 8.3a2.8 2.8 0 110 5.6M20.5 19.5c0-2.6-1.9-4.8-4.4-5.5"/></svg>
             </x-slot:icon>
@@ -112,13 +137,25 @@
             </x-slot:icon>
         </x-kpi-card>
 
-        <x-kpi-card :label="__('opes.students_screen.kpi_male')" :value="$maleCount" icon-bg="bg-badge-blue">
+        {{-- "51.53% of total", as the reference shows - arithmetic on two
+             figures already on this page, not a new claim. Guarded against a
+             zero roll so an empty school shows the count and no percentage
+             rather than a division by zero. --}}
+        <x-kpi-card :label="__('opes.students_screen.kpi_male')" :value="$maleCount"
+                    :sub="$totalStudents > 0
+                        ? __('opes.students_screen.kpi_percent_of_total', ['percent' => number_format($maleCount / $totalStudents * 100, 2)])
+                        : null"
+                    icon-bg="bg-badge-blue">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="14" r="5"/><path stroke-linecap="round" d="M14 10l6-6M15 4h5v5"/></svg>
             </x-slot:icon>
         </x-kpi-card>
 
-        <x-kpi-card :label="__('opes.students_screen.kpi_female')" :value="$femaleCount" icon-bg="bg-badge-purple">
+        <x-kpi-card :label="__('opes.students_screen.kpi_female')" :value="$femaleCount"
+                    :sub="$totalStudents > 0
+                        ? __('opes.students_screen.kpi_percent_of_total', ['percent' => number_format($femaleCount / $totalStudents * 100, 2)])
+                        : null"
+                    icon-bg="bg-badge-purple">
             <x-slot:icon>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path stroke-linecap="round" d="M12 14v7M9 18h6"/></svg>
             </x-slot:icon>

@@ -36,18 +36,50 @@
             default => 'green',
         };
 
-    // Literal class strings so Tailwind's scanner sees every one of them.
-    [$surface, $badge, $sparkStroke] = match ($tone) {
-        'blue' => ['bg-kpi-blue border-kpi-blue-solid/15', 'bg-kpi-blue-solid', 'text-kpi-blue-solid'],
-        'pink' => ['bg-kpi-pink border-kpi-pink-solid/15', 'bg-kpi-pink-solid', 'text-kpi-pink-solid'],
-        'amber' => ['bg-kpi-amber border-kpi-amber-solid/20', 'bg-kpi-amber-solid', 'text-kpi-amber-solid'],
-        'purple' => ['bg-kpi-purple border-kpi-purple-solid/15', 'bg-kpi-purple-solid', 'text-kpi-purple-solid'],
-        default => ['bg-kpi-green border-kpi-green-solid/15', 'bg-kpi-green-solid', 'text-kpi-green-solid'],
+    /*
+     * THE TONE NOW PAINTS THE DISC, NOT THE CARD.
+     *
+     * These cards used to be a low-saturation WASH with a matching badge -
+     * five hues of tinted rectangle across a row. The reference
+     * (`frontend images/super admin dashbaord.png`) draws them differently
+     * and the difference is the whole character of the row: every card is
+     * WHITE on the ivory ground, and the only colour is a 50px solid disc.
+     *
+     * The `tone` API is unchanged, so all 42 call sites keep working and keep
+     * the hue they already chose - what changed is which surface that hue
+     * lands on. Keeping the wash "because it is what we had" would leave
+     * every list screen in the product a different design from the dashboard
+     * they are reached from.
+     *
+     * Literal class strings so Tailwind's scanner sees every one of them.
+     */
+    $surface = 'bg-shell-surface border-shell-divider';
+
+    [$badge, $sparkStroke] = match ($tone) {
+        'blue' => ['bg-kpi-blue-solid', 'text-kpi-blue-solid'],
+        'pink' => ['bg-kpi-pink-solid', 'text-kpi-pink-solid'],
+        'amber' => ['bg-kpi-amber-solid', 'text-kpi-amber-solid'],
+        'purple' => ['bg-kpi-purple-solid', 'text-kpi-purple-solid'],
+        default => ['bg-kpi-green-solid', 'text-kpi-green-solid'],
     };
 
-    // $iconBg still wins when a caller passes it, so screens written against
-    // the old signature keep the exact badge colour they chose.
-    $badge = is_string($iconBg) && $iconBg !== '' ? $iconBg : $badge;
+    /*
+     * $iconBg is now a HUE HINT ONLY - it feeds the tone match above and is
+     * no longer painted literally.
+     *
+     * It used to win outright, so a caller passing `bg-primary` or
+     * `bg-badge-teal` got exactly that class on the badge. That was right
+     * while the tone painted the card's wash and the badge was the caller's
+     * own choice. It is wrong now that the tone paints the DISC: 39 of the 42
+     * callers pass a legacy value that is not in the KPI palette, so honouring
+     * it literally would leave 39 screens' discs in ad-hoc colours while the
+     * dashboard's are canonical - the exact inconsistency this migration
+     * exists to remove.
+     *
+     * No caller loses its chosen HUE: the match arms above map every legacy
+     * value onto the tone that means the same thing, and KpiToneTest covers
+     * every arm.
+     */
 
     $deltaTone = match ($trend) {
         'up' => 'text-kpi-green-solid',
@@ -82,16 +114,16 @@
 
 <div {{ $attributes->merge(['class' => 'rounded-xl border '.$surface.($isLink ? ' transition hover:shadow-md hover:-translate-y-px' : '')]) }}>
     @if ($isLink)
-        <a href="{{ $href }}" class="block px-4 py-3.5">
+        <a href="{{ $href }}" class="block px-[19px] pt-[21px] pb-3">
     @else
-        <div class="px-4 py-3.5">
+        <div class="px-[19px] pt-[21px] pb-3">
     @endif
 
     <div class="flex items-start gap-3">
         @if ($icon !== null)
             {{-- The coloured circle badge from the mockups - varies per card,
                  never used on page chrome (00-core 8). --}}
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ $badge }} text-white shadow-sm">
+            <span class="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full {{ $badge }} text-white">
                 {!! $icon !!}
             </span>
         @endif
@@ -109,7 +141,7 @@
                  across the row. A third line still wraps rather than
                  clipping: a truncated label is the label doing none of its
                  job. --}}
-            <p class="flex min-h-[2.4em] items-start text-xs font-semibold uppercase leading-tight tracking-wide text-balance text-charcoal/55">{{ $label }}</p>
+            <p class="flex min-h-[2.1em] items-start text-[13px] leading-tight text-balance text-charcoal/75">{{ $label }}</p>
 
             {{-- `display` is for a KPI whose headline is not a numeral - a
                  status pill, a rating, a short chip. Without it those tiles get
@@ -121,7 +153,7 @@
             @isset($display)
                 <div class="mt-2">{{ $display }}</div>
             @else
-                <p class="mt-1 text-3xl font-bold leading-tight tracking-tight text-charcoal">
+                <p class="mt-1 text-[26px] font-bold leading-none tracking-tight text-charcoal">
                     @if ($hasValue)
                         {{ $value }}
                     @else

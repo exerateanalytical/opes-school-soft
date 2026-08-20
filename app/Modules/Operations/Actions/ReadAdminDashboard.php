@@ -62,7 +62,15 @@ final readonly class ReadAdminDashboard
 
             'classes_total' => $this->guard(Permission::AcademicsView, fn (): int => (int) DB::table('class_groups')->count()),
 
-            'attendance_today' => $this->guard(Permission::AttendanceView, fn (): ?array => $this->attendanceToday()),
+            // Two different nulls, kept apart on purpose. `can_view_attendance`
+            // false means "this reader may not see attendance at all", and the
+            // card does not render. A null `rate` inside means "nobody has
+            // taken a register today", and the card DOES render, showing an em
+            // dash - because a school where no register has been taken yet and
+            // a school where nobody turned up are different facts, and 0%
+            // states the second one.
+            'can_view_attendance' => Gate::allows(Permission::AttendanceView->value),
+            'attendance_today' => $this->guard(Permission::AttendanceView, fn (): array => $this->attendanceToday()),
 
             'fees_this_month' => $this->guard(Permission::FeeView, fn (): int => (int) DB::table('payments')
                 ->whereNull('bounced_on')
@@ -107,33 +115,42 @@ final readonly class ReadAdminDashboard
     }
 
     /**
-     * Today's attendance as taken, not as expected: present over expected
-     * across every register submitted for the business date.
+     * Today's attendance as TAKEN, not as expected.
      *
-     * @return array{present: int, expected: int, percent: float}|null
+     * Two rules, both from 08-operations and both load-bearing:
+     *
+     *  - TAKEN registers only (submitted or amended). A draft is still open,
+     *    so every slot in it is "not yet taken" rather than "present", and
+     *    counting it would put a full class into the denominator on the
+     *    strength of nobody having marked it yet.
+     *  - LATE COUNTS AS PRESENT. A pupil who arrived late attended.
+     *
+     * @return array{present: int|null, expected: int|null, rate: string|null}
      */
-    private function attendanceToday(): ?array
+    private function attendanceToday(): array
     {
         $row = DB::table('attendance_registers')
             ->whereDate('date', now()->toDateString())
-            ->selectRaw('COALESCE(SUM(present_count), 0) as present, COALESCE(SUM(expected_count), 0) as expected')
+            // submitted AND amended: the enum is open|submitted|amended, and
+            // an amended register has been taken - it was corrected after the
+            // fact, not left open. Filtering to 'submitted' alone would drop
+            // every corrected class out of the day's figure.
+            ->whereIn('status', ['submitted', 'amended'])
+            ->selectRaw('COALESCE(SUM(present_count), 0) as present, COALESCE(SUM(late_count), 0) as late, COALESCE(SUM(expected_count), 0) as expected')
             ->first();
 
         $expected = (int) ($row->expected ?? 0);
 
-        // No register taken yet today is a real state, and it is NOT "0%
-        // present" - that would read as a school-wide absence. The panel
-        // renders an em dash instead.
         if ($expected === 0) {
-            return null;
+            return ['present' => null, 'expected' => null, 'rate' => null];
         }
 
-        $present = (int) ($row->present ?? 0);
+        $present = (int) ($row->present ?? 0) + (int) ($row->late ?? 0);
 
         return [
             'present' => $present,
             'expected' => $expected,
-            'percent' => round($present / $expected * 100, 1),
+            'rate' => number_format($present / $expected * 100, 1).'%',
         ];
     }
 

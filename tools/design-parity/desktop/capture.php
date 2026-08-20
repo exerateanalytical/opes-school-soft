@@ -57,8 +57,32 @@ auth()->login($user);
    asset. */
 $base = rtrim((string) env('APP_URL', 'http://localhost:8940'), '/');
 
+/*
+ * Every screen in the parity programme. A page that 500s or 403s still gets
+ * written out - the file then CONTAINS the error, which is the point: a
+ * silently-missing capture reads as "not started yet" and this is meant to
+ * be the thing that tells you otherwise.
+ */
 $map = [
     'dashboard' => '/dashboard',
+    'students' => '/students',
+    'classes' => '/classes',
+    'subjects' => '/subjects',
+    'academics-settings' => '/academics/settings',
+    'timetable' => '/timetable',
+    'attendance' => '/attendance',
+    'examinations' => '/examinations',
+    'results' => '/results',
+    'finance-dashboard' => '/finance/dashboard',
+    'library' => '/library',
+    'inventory' => '/inventory',
+    'transport' => '/transport',
+    'hostel' => '/hostel',
+    'guardians' => '/guardians',
+    'staff' => '/staff',
+    'reports' => '/reports',
+    'settings' => '/settings',
+    'users' => '/users',
 ];
 
 foreach ($map as $name => $uri) {

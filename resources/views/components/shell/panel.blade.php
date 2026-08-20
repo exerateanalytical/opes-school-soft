@@ -1,9 +1,12 @@
+@use('Illuminate\Support\Facades\Gate')
+
 @props([
     'title' => '',
     'icon' => null,
     'iconTone' => 'text-primary',
     'footerLabel' => null,
     'footerUrl' => null,
+    'footerPermission' => null,
 ])
 
 {{--
@@ -18,10 +21,20 @@
     The footer is a LINK or it is nothing: the reference draws "View all
     notifications ->" on every panel, and rendering that as inert text would
     put a control on screen that does not go anywhere.
+
+    `footer-permission` is what stops it going somewhere the reader is
+    refused. A panel and its footer are gated SEPARATELY and often
+    differently - the Upcoming Events panel is `academics.view` while the
+    calendar it links to is `academics.manage` - so without this a Teacher
+    got a "View full calendar" link that answers 403. That is precisely the
+    failure the nav contract exists to prevent, and ShellTest caught it.
+
+    Callers must pass it whenever the destination is gated harder than the
+    panel. Omit it only when the route is open to anyone signed in.
 --}}
 <section {{ $attributes->merge(['class' => 'flex min-w-0 flex-col rounded-xl border border-shell-divider bg-shell-surface shadow-[0_1px_2px_rgba(16,24,40,0.05)]']) }}>
     @if ($title !== '')
-        <h2 class="flex shrink-0 items-center gap-2.5 px-4 pt-3.5 pb-2 text-[17px] font-semibold text-charcoal">
+        <h2 class="flex shrink-0 items-center gap-2.5 px-4 pt-[10px] pb-[7px] text-[17px] font-semibold text-charcoal">
             @if ($icon !== null)
                 <x-shell.icon :name="$icon" class="h-[19px] w-[19px] {{ $iconTone }}"/>
             @endif
@@ -33,9 +46,10 @@
         {{ $slot }}
     </div>
 
-    @if ($footerLabel !== null && $footerUrl !== null)
+    @if ($footerLabel !== null && $footerUrl !== null
+         && ($footerPermission === null || Gate::allows($footerPermission)))
         <a href="{{ $footerUrl }}" wire:navigate
-           class="flex shrink-0 items-center justify-end gap-1.5 px-4 pb-3 pt-1 text-[13px] font-medium text-charcoal/70 transition hover:text-primary">
+           class="flex shrink-0 items-center justify-end gap-1.5 px-4 pb-[9px] pt-0 text-[13px] font-medium text-charcoal/70 transition hover:text-primary">
             {{ $footerLabel }}
             <x-shell.icon name="arrow_right" class="h-[17px] w-[17px]"/>
         </a>

@@ -305,13 +305,29 @@ final class Dashboard extends Component
         ReadDashboardPanels $panelReader,
         ReadAdminDashboard $adminReader,
     ): mixed {
+        $admin = $adminReader->handle();
+
         return view('livewire.dashboard', [
             // The eleven figures the reference administrator screen shows.
             // Every one is permission-gated inside the action and comes back
             // null for a reader who may not see it, so a role that is not an
             // administrator simply renders fewer panels rather than a grid
             // of zeroes.
-            'admin' => $adminReader->handle(),
+            'admin' => $admin,
+            /*
+             * Exposed as their own view keys as well as inside $admin.
+             *
+             * Phase8WiringTest asserts this screen publishes
+             * `todaysAttendanceRate` and `canViewAttendance` - a contract from
+             * when the dashboard carried a Today's Attendance tile. A later
+             * refactor dropped the tile and the keys with it, and the tests
+             * have been failing ever since, describing behaviour the product
+             * had lost. The tile is back (the reference shows it), so the
+             * contract is honoured again rather than the tests being edited to
+             * match the gap.
+             */
+            'todaysAttendanceRate' => $admin['attendance_today']['rate'] ?? null,
+            'canViewAttendance' => (bool) ($admin['can_view_attendance'] ?? false),
             'panels' => $this->rolePanels($panelReader),
             'alerts' => $this->alerts($health),
             'quickActions' => $this->quickActions(),

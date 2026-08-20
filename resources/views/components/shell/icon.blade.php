@@ -89,6 +89,27 @@
         // administrative groups are distinguishable at 18px without either
         // borrowing another domain's picture.
         'administration' => '<path d="M10.32 2.2a1.7 1.7 0 0 0-1.68 1.44l-.2 1.3a7.6 7.6 0 0 0-1.5.87l-1.23-.47a1.7 1.7 0 0 0-2.08.76l-1.35 2.34a1.7 1.7 0 0 0 .4 2.18l1.03.83a7.7 7.7 0 0 0 0 1.74l-1.03.83a1.7 1.7 0 0 0-.4 2.18l1.35 2.34a1.7 1.7 0 0 0 2.08.76l1.23-.47q.7.53 1.5.87l.2 1.3a1.7 1.7 0 0 0 1.68 1.44h2.7a1.7 1.7 0 0 0 1.68-1.44l.2-1.3a7.6 7.6 0 0 0 1.5-.87l1.23.47a1.7 1.7 0 0 0 2.08-.76l1.35-2.34a1.7 1.7 0 0 0-.4-2.18l-1.03-.83a7.7 7.7 0 0 0 0-1.74l1.03-.83a1.7 1.7 0 0 0 .4-2.18l-1.35-2.34a1.7 1.7 0 0 0-2.08-.76l-1.23.47a7.6 7.6 0 0 0-1.5-.87l-.2-1.3A1.7 1.7 0 0 0 13.02 2.2zM11.67 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 2.05a1.95 1.95 0 1 0 0 3.9 1.95 1.95 0 0 0 0-3.9"/>',
+
+        // Modules: four rounded tiles - the "set of applications" sign. Its
+        // own glyph rather than reusing 'dashboard': the dashboard house and
+        // a module grid are different ideas and the reference draws both.
+        'modules' => '<rect x="3" y="3" width="8.2" height="8.2" rx="2.2"/><rect x="12.8" y="3" width="8.2" height="8.2" rx="2.2"/><rect x="3" y="12.8" width="8.2" height="8.2" rx="2.2"/><rect x="12.8" y="12.8" width="8.2" height="8.2" rx="2.2"/>',
+
+        // ── Quick-action tiles ────────────────────────────────────────────
+        // Solid too, and the reference draws the SAME person+ glyph for "Add
+        // New Student", "Add New Staff" and "New Admission" - three routes,
+        // one sign for "enrol somebody".
+        'person_add' => '<circle cx="10" cy="7.6" r="3.9"/><path d="M10 13.1c-3.9 0-7.1 2.5-7.1 6.05v.85a1 1 0 0 0 1 1h12.2a1 1 0 0 0 1-1v-.85c0-3.55-3.2-6.05-7.1-6.05"/><path d="M18.4 3.6a1 1 0 0 1 1 1v1.9h1.9a1 1 0 1 1 0 2h-1.9v1.9a1 1 0 1 1-2 0V8.5h-1.9a1 1 0 0 1 0-2h1.9V4.6a1 1 0 0 1 1-1"/>',
+
+        // Bulk import: an upload arrow into a cloud.
+        'cloud_up' => '<path d="M12 3.2a6.6 6.6 0 0 0-6.5 5.5A5.15 5.15 0 0 0 6.15 19h3.2v-4.6H7.5a.8.8 0 0 1-.58-1.35l4.5-4.7a.8.8 0 0 1 1.16 0l4.5 4.7A.8.8 0 0 1 16.5 14.4h-1.85V19h3.05a5.35 5.35 0 0 0 .9-10.62A6.6 6.6 0 0 0 12 3.2"/><path d="M10.35 14.4h3.3v5.15a1.2 1.2 0 0 1-1.2 1.2h-.9a1.2 1.2 0 0 1-1.2-1.2z"/>',
+
+        // Backup: the shield, carrying the four-lobed motif the reference
+        // puts inside it rather than a plain tick.
+        'shield' => '<path d="M11.63 2.16a1 1 0 0 1 .74 0l7.4 2.96A1 1 0 0 1 20.4 6.05v5.2c0 4.62-2.94 8.73-7.32 10.23a1.8 1.8 0 0 1-1.16 0C7.54 19.98 4.6 15.87 4.6 11.25v-5.2a1 1 0 0 1 .63-.93zM12 9.05a1.65 1.65 0 0 0-1.6 1.25 1.65 1.65 0 1 0 0 3.2 1.65 1.65 0 1 0 3.2 0 1.65 1.65 0 1 0 0-3.2A1.65 1.65 0 0 0 12 9.05"/>',
+
+        // Go-live readiness: a checklist on a clipboard.
+        'checklist' => '<path d="M9.4 2.4a1 1 0 0 0-1 1v.5H6.2A1.7 1.7 0 0 0 4.5 5.6v14A1.7 1.7 0 0 0 6.2 21.3h11.6a1.7 1.7 0 0 0 1.7-1.7v-14a1.7 1.7 0 0 0-1.7-1.7h-2.2v-.5a1 1 0 0 0-1-1zm-.55 6.72a.9.9 0 0 1 1.28 0l.62.62 2.02-2.02a.9.9 0 1 1 1.28 1.28l-2.66 2.66a.9.9 0 0 1-1.28 0l-1.26-1.26a.9.9 0 0 1 0-1.28m0 5.4a.9.9 0 0 1 1.28 0l.62.62 2.02-2.02a.9.9 0 1 1 1.28 1.28l-2.66 2.66a.9.9 0 0 1-1.28 0l-1.26-1.26a.9.9 0 0 1 0-1.28"/>',
     ];
 
     /*

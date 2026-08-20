@@ -218,10 +218,17 @@ final class RoleDashboard
 
             Role::SuperAdmin, Role::Administrator => [
                 'panels' => ['active_users', 'system_health', 'last_backup', 'go_live_blockers', 'enrolment_count', 'cash_position'],
+                // NINE, and the count is load-bearing: the reference lays
+                // Quick Actions out as a 3x3 and a tenth tile adds a fourth
+                // row, which measured +169px on the panel and pushed every
+                // row below it down the page (layout-diff.php). `settings`
+                // is the one dropped because it is the most reachable of the
+                // ten elsewhere - it is in the sidebar AND in the account
+                // menu - so nothing became harder to get to.
                 'quick_actions' => [
                     'add_student', 'add_staff', 'academic_year', 'new_admission',
                     'bulk_import', 'backup_database', 'reports', 'add_user',
-                    'go_live_setup', 'settings',
+                    'go_live_setup',
                 ],
             ],
 

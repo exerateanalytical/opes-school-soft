@@ -138,6 +138,40 @@ step 3.
 
 ---
 
+## 4b. The reference set contains THREE design languages — read this first
+
+Triaged 2026-08-20 by contact sheet
+(`tools/design-parity/desktop/contact-sheet.php`). The 69 references are not
+one design; they are three, and they contradict each other:
+
+| Family | Files | Chrome |
+|---|---|---|
+| **A — OPES (canonical)** | `super admin dashbaord.png` | 258px dark sidebar + 12px toghu strip, ivory `#FBFAF7` canvas, no top-bar rule, gold active nav pill, 50px solid discs |
+| B — Heritage Academy, light | `ChatGPT Image ... 08_05_58` .. `08_12_38` (14 files) | ~150px dark sidebar, WHITE top bar with search, white canvas, pastel KPI circles, "HERITAGE ACADEMY" wordmark |
+| C — Heritage Academy, dark rail | `ChatGPT Image ... 08_14_53` .. `08_16_32` (5 files) | full-height dark green rail, different again |
+
+They disagree on sidebar width, canvas colour, top-bar treatment, KPI card
+style and even the product name. **No build can match all three**, so
+"pixel-perfect against the reference set" is not a well-formed target until
+one family is chosen.
+
+**Decision (from the user, 2026-08-20): family A is canonical** — *"Make sure
+other follow that stylling."*
+
+So for every remaining screen:
+
+- **CONTENT and LAYOUT** come from that screen's own reference (which panels,
+  which columns, which order, which figures).
+- **CHROME and VISUAL LANGUAGE** come from family A — the shell, the tokens,
+  the `x-shell.*` primitives, the two icon registers.
+
+A screen is DONE when its content matches its own reference and its styling
+matches family A. Where a family-B reference shows a white top bar or a pastel
+KPI circle, that is NOT reproduced; family A's ivory bar and solid disc are.
+Record any such deliberate divergence in the ledger note.
+
+---
+
 ## 5. Screen → route map
 
 Screens with no route are FEATURE work, not styling, and are marked so.
@@ -170,7 +204,22 @@ Screens with no route are FEATURE work, not styling, and are marked so.
 | `Student ID V1.png`, `student ID V2.png` | document | print template, not a screen |
 | `Transcript.png`, `statement of results.png`, `certificate of completion.png` | document | print templates |
 | `logo.png`, `desktop icon.png` | asset | not screens |
-| `ChatGPT Image *.png` (32 files) | — | UNTRIAGED: open each, match to a route or mark as art |
+| `ChatGPT ... 08_04_30 / 08_05_03 / 08_05_45` | — | composite grids of small screens: admission + promotion wizards, fee collection, receipt printing, payroll, discipline, medical, visitors, messaging, backup/restore, audit logs, DB maintenance. Mine for CONTENT of those screens; too small to measure |
+| `ChatGPT ... 08_05_51` | — | product-overview poster, not a screen |
+| `ChatGPT ... 08_05_58 / 08_06_13 / 08_12_24` | `/classes` | Class Management |
+| `ChatGPT ... 08_06_34` | `/users` | User Management |
+| `ChatGPT ... 08_07_05 / 08_15_41` | `/library` | Library Management |
+| `ChatGPT ... 08_07_10` | `/finance/dashboard` | Finance Management |
+| `ChatGPT ... 08_07_25 / 08_12_16` | `/examinations` | |
+| `ChatGPT ... 08_07_31 / 08_12_20` | `/timetable` | |
+| `ChatGPT ... 08_07_37 / 08_08_27` | `/attendance` | |
+| `ChatGPT ... 08_08_50 / 08_15_48` | `/finance/dashboard` | Finance Dashboard |
+| `ChatGPT ... 08_12_38` | `/students/{student}` | Student Profile |
+| `ChatGPT ... 08_14_53 / 08_15_26` | `/settings` | two variants, family C |
+| `ChatGPT ... 08_15_36` | `/inventory` | |
+| `ChatGPT ... 08_16_32` | — | composite overview poster |
+| `ChatGPT ... 08_14_00 / 08_14_05 / 08_14_21 / 08_14_25` | document | transcripts and diplomas — print templates |
+| `ChatGPT ... 08_14_40 / 08_14_44` | document | document-template catalogues (forms, slips, certificates) |
 
 ---
 
@@ -182,8 +231,10 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 |---|---|---|---|
 | 1 | Shell (sidebar / top bar / canvas) | DONE | measured; sidebar 270px, canvas ivory, card row at y118 matches reference to 1px |
 | 2 | `/dashboard` super admin | DONE | 11 panels, real data, permission-gated; open items in §4 |
-| 3 | Triage the 32 `ChatGPT Image *.png` | TODO | must happen before the rest can be ordered |
-| 4 | `/students` | TODO | |
+| 3 | Triage the 31 `ChatGPT Image *.png` | DONE | see §4b — three conflicting design families; family A is canonical |
+| 3b | Card language across ALL screens (`x-kpi-card`) | DONE | tone now paints a 50px solid disc on a WHITE card, not a pastel wash; sentence-case 13px label, 26px numeral. Repaints all 42 call sites from one change. `icon-bg` demoted to a hue hint so no screen keeps an off-palette disc |
+| 3c | Shell applied to all 19 back-office screens | DONE | every one captures 200 with the new sidebar, top bar and ivory canvas; contact sheet verified |
+| 4 | `/students` content vs `student management.png` | TODO | shell + cards done; table, filters and right rail still to measure |
 | 5 | `/students/{student}` | TODO | |
 | 6 | `/classes` | TODO | |
 | 7 | `/subjects` | TODO | |
