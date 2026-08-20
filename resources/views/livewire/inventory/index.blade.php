@@ -804,6 +804,12 @@
 
     {{-- Four KPI cards: total items, below reorder level, movements this
          month, pending requisitions - dataset-wide numbers. --}}
+    {{-- FIVE, matching the reference. "Movements This Month" and "Pending
+         Requisitions" used to sit here too and were removed, not lost: both
+         are already tab counts a few pixels below ("Stock Movements 14",
+         "Requisitions 0"), so the strip was spending two of its seven tiles
+         restating the row under it - and seven tiles wrap onto a second
+         row. --}}
     <x-slot:kpis>
         <x-kpi-card label="Total Items" :value="$kpis['total_items']" icon-bg="bg-primary">
             <x-slot:icon>
@@ -815,14 +821,23 @@
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.86l-8.2 14.2A1.5 1.5 0 003.5 20.3h17a1.5 1.5 0 001.4-2.24l-8.2-14.2a1.5 1.5 0 00-2.6 0z"/></svg>
             </x-slot:icon>
         </x-kpi-card>
-        <x-kpi-card label="Movements This Month" :value="$kpis['movements_this_month']" icon-bg="bg-badge-blue">
+        <x-kpi-card :label="__('opes.inventory_screen.kpi_stock_value')"
+                    :value="\App\Support\Money\Money::of($kpis['stock_value'])->format(false)"
+                    :sub="__('opes.inventory_screen.kpi_stock_value_sub')" icon-bg="bg-badge-teal">
             <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7M17 17l-3-3M17 17l-3 3"/></svg>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18l-1.5 12.5a2 2 0 01-2 1.75H6.5a2 2 0 01-2-1.75z"/><path stroke-linecap="round" d="M8.5 9.5a3.5 3.5 0 007 0"/></svg>
             </x-slot:icon>
         </x-kpi-card>
-        <x-kpi-card label="Pending Requisitions" :value="$kpis['pending_requisitions']" icon-bg="bg-badge-orange">
+        <x-kpi-card :label="__('opes.inventory_screen.kpi_out_of_stock')" :value="$kpis['out_of_stock']"
+                    :sub="__('opes.inventory_screen.kpi_out_of_stock_sub')" icon-bg="bg-badge-purple">
             <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h6M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M8 12h8"/></svg>
+            </x-slot:icon>
+        </x-kpi-card>
+        <x-kpi-card :label="__('opes.inventory_screen.kpi_categories')" :value="$kpis['categories']"
+                    :sub="__('opes.inventory_screen.kpi_categories_sub')" icon-bg="bg-badge-blue">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
             </x-slot:icon>
         </x-kpi-card>
     </x-slot:kpis>
@@ -1055,4 +1070,47 @@
             </article>
         @endforeach
     </x-slot:cards>
+    <x-slot:rail>
+        <div class="space-y-4">
+            {{-- The reference's rail: what the stock is DOING, then what has
+                 moved. Both read the same stock_balances rows the table pages
+                 through, so they cannot disagree with it. --}}
+            <x-shell.panel :title="__('opes.inventory_screen.rail_stock_status')">
+                <x-shell.donut :slices="$stockStatusDistribution"
+                               :centre-value="number_format(collect($stockStatusDistribution)->sum('value'))"
+                               :centre-label="__('opes.inventory_screen.rail_units')"
+                               stacked
+                               :size="132"
+                               :thickness="22"
+                               class="py-1"/>
+            </x-shell.panel>
+
+            <x-shell.panel :title="__('opes.inventory_screen.rail_recent_movements')">
+                @if ($recentMovements === [])
+                    <p class="py-3 text-[13px] text-charcoal/55">{{ __('opes.inventory_screen.rail_no_movements') }}</p>
+                @else
+                    <ul class="divide-y divide-shell-divider">
+                        @foreach ($recentMovements as $movement)
+                            <li class="flex items-center gap-2 py-2">
+                                {{-- Sign, not just a word: a store keeper
+                                     scanning this list is looking for what
+                                     LEFT, and a receipt and an issue read the
+                                     same at a glance without one. --}}
+                                <span class="shrink-0 text-[13px] font-semibold {{ $movement['quantity'] < 0 ? 'text-danger-text' : 'text-success-text' }}">
+                                    {{ $movement['quantity'] > 0 ? '+' : '' }}{{ $movement['quantity'] }}
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-[13px] text-charcoal">{{ $movement['item'] }}</span>
+                                    <span class="block truncate text-[11px] text-charcoal/55">
+                                        {{ $movement['kind'] }} &middot;
+                                        {{ \Illuminate\Support\Carbon::parse($movement['moved_on'])->translatedFormat('d M Y') }}
+                                    </span>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </x-shell.panel>
+        </div>
+    </x-slot:rail>
 </x-list-screen>

@@ -1121,7 +1121,70 @@ final class Index extends Component
             'pending_requisitions' => (int) DB::table('store_requisitions')
                 ->where('status', 'submitted')
                 ->count(),
+
+            // The reference's stock-value and category tiles.
+            'stock_value' => (int) DB::table('stock_balances')->sum('value_on_hand'),
+            'categories' => (int) DB::table('item_categories')->count(),
+
+            // OUT of stock is its own state, not the bottom of "below
+            // reorder": an item at zero cannot be issued at all, while one
+            // under its reorder level still can. The reference gives them
+            // separate tiles for that reason, and below_reorder above
+            // deliberately still counts both.
+            'out_of_stock' => (int) DB::table('items as i')
+                ->leftJoin('stock_balances as sb', 'sb.item_id', '=', 'i.id')
+                ->where('i.is_stock_tracked', true)
+                ->groupBy('i.id')
+                ->havingRaw('COALESCE(SUM(sb.quantity_on_hand), 0) <= 0')
+                ->get(['i.id'])
+                ->count(),
         ];
+    }
+
+    /**
+     * Stock split by state, for the rail donut.
+     *
+     * Counts UNITS, not items: the question the panel answers is "how much of
+     * what we hold is actually issuable", and one item with four hundred
+     * units reserved matters more than four items with one unit each.
+     *
+     * @return list<array{label: string, value: int}>
+     */
+    private function stockStatusDistribution(): array
+    {
+        $row = DB::table('stock_balances')
+            ->selectRaw('COALESCE(SUM(quantity_on_hand), 0) as on_hand, COALESCE(SUM(quantity_reserved), 0) as reserved')
+            ->first();
+
+        $onHand = (int) ($row->on_hand ?? 0);
+        $reserved = (int) ($row->reserved ?? 0);
+
+        return [
+            ['label' => (string) __('opes.inventory_screen.stock_available'), 'value' => max(0, $onHand - $reserved)],
+            ['label' => (string) __('opes.inventory_screen.stock_reserved'), 'value' => $reserved],
+        ];
+    }
+
+    /**
+     * The latest stock movements, for the rail.
+     *
+     * @return list<array{item: string, kind: string, quantity: int, moved_on: string}>
+     */
+    private function recentMovements(): array
+    {
+        return DB::table('stock_movements as sm')
+            ->join('items as i', 'i.id', '=', 'sm.item_id')
+            ->orderByDesc('sm.moved_on')
+            ->orderByDesc('sm.id')
+            ->limit(5)
+            ->get(['i.name as item', 'sm.movement_type as kind', 'sm.quantity as quantity', 'sm.moved_on as moved_on'])
+            ->map(static fn (object $r): array => [
+                'item' => (string) $r->item,
+                'kind' => (string) $r->kind,
+                'quantity' => (int) $r->quantity,
+                'moved_on' => (string) $r->moved_on,
+            ])
+            ->all();
     }
 
     /**
@@ -1249,6 +1312,8 @@ final class Index extends Component
         return view('livewire.inventory.index', [
             'rows' => $this->rows(),
             'kpis' => $this->kpis(),
+            'stockStatusDistribution' => $this->stockStatusDistribution(),
+            'recentMovements' => $this->recentMovements(),
             'tabCounts' => $tabCounts,
             'categoryOptions' => $this->categoryOptions(),
             'locationOptions' => $this->locationOptions(),

@@ -245,7 +245,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 12 | `/results` | TODO | |
 | 13 | `/finance/dashboard` | TODO | |
 | 14 | `/library` vs `Library.png` | DONE | added Active Members + New Titles KPIs (six now fit one row); rail is a copies-by-category donut + Recent Book Loans with overdue colouring. Only one book category exists in the demo, so the donut is one slice - correct, not broken |
-| 15 | `/inventory` | TODO | |
+| 15 | `/inventory` vs `Inventory management.png` | DONE | KPI strip is now the reference's five (Total Items, Below Reorder, Stock Value, Out of Stock, Categories); rail is a stock-status donut + Recent Stock Movements with signed quantities |
 | 16 | `/transport` | TODO | |
 | 17 | `/hostel` | TODO | |
 | 18 | `/guardians` | TODO | |
@@ -270,6 +270,8 @@ is not "fixed" later by someone reading only the image.
 | `/students` | "Export Students" button | absent | No export route. A button that does nothing is worse than an absent one. |
 | `/students` | rail: Print Student List, Transfer Students, Export Student Data | absent | No routes. The five that DO exist are wired. |
 | `/classes` | select-all checkbox, Export Classes, Section/Level/Status/Year filters, status tabs | absent | Same rules: no bulk action, no export route. The extra filters are real feature work and are queued, not faked. |
+| `/inventory` | KPIs "Movements This Month", "Pending Requisitions" | removed | Both are already tab counts a few pixels below ("Stock Movements 14", "Requisitions 0"). The strip was spending two of seven tiles restating the row under it, and seven tiles wrap. Nothing became unreachable. |
+| `/inventory` | table columns Location, Reserved, Available, Unit Price, Total Value | absent | Real work, queued. `stock_balances` carries all five, so this is wiring rather than a data gap. |
 | `/library` | "Library Reports" / "Export Data" buttons | absent | Export has no route. Reports exists at `/reports/library` and is reachable from the nav; a duplicate header button is queued, not urgent. |
 | `/library` | KPI "New Books (This Term)" | "New Titles (This academic year)" | Books carry an acquisition date, not a term. The label states the window it actually measures instead of borrowing a word the figure cannot support. |
 | `/classes` | per-row Room | absent | `rooms` is empty and `class_groups.room_id` is unset on every row; a column of em dashes is noise. |
