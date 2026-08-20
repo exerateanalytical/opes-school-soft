@@ -1167,6 +1167,13 @@ return [
         'rail_recent_movements' => 'Recent Stock Movements',
         'rail_no_movements' => 'No stock has moved yet.',
     ],
+    'examinations_screen' => [
+        'rail_upcoming' => 'Upcoming Exams',
+        'rail_no_upcoming' => 'No exam is scheduled from today onwards.',
+        'rail_untitled' => 'Unnamed exam',
+        'rail_today' => 'Today',
+        'rail_days_left' => '1 day left|:count days left',
+    ],
     'students_screen' => [
         'title' => 'Student Management',
         'breadcrumb_dashboard' => 'Dashboard',

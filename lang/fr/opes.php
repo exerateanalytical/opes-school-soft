@@ -1154,6 +1154,13 @@ return [
         'rail_recent_movements' => 'Mouvements recents',
         'rail_no_movements' => 'Aucun mouvement de stock.',
     ],
+    'examinations_screen' => [
+        'rail_upcoming' => 'Examens a venir',
+        "rail_no_upcoming" => "Aucun examen programme a partir d'aujourd'hui.",
+        'rail_untitled' => 'Examen sans nom',
+        "rail_today" => "Aujourd'hui",
+        'rail_days_left' => '1 jour restant|:count jours restants',
+    ],
     'students_screen' => [
         'title' => 'Gestion des élèves',
         'breadcrumb_dashboard' => 'Tableau de bord',

@@ -205,7 +205,6 @@
     :breadcrumb="['Dashboard', 'Examinations']"
     :paginator="$rows"
     empty-message="No exams match these filters yet. Scheduled sittings, invigilator assignments and seating plans appear here as they are created."
-    rail-title="Examinations Overview"
 >
     <x-slot:actions>
         <button type="button" wire:click="toggleScheduleForm"
@@ -381,4 +380,50 @@
             </article>
         @endforeach
     </x-slot:cards>
+
+    <x-slot:rail>
+        {{-- The reference's "Upcoming Exams" panel: the date, what is being
+             sat, by whom, and how long there is to prepare.
+
+             The days-left chip is the point of the panel, so it carries the
+             urgency as colour as well as words - amber inside a week, green
+             beyond it, and "Today" rather than "0 days left", which is what
+             an exams officer actually needs to see at a glance. --}}
+        <x-shell.panel :title="__('opes.examinations_screen.rail_upcoming')">
+            @if ($upcomingExams === [])
+                <p class="py-3 text-[13px] text-charcoal/55">{{ __('opes.examinations_screen.rail_no_upcoming') }}</p>
+            @else
+                <ul class="space-y-2.5 py-1">
+                    @foreach ($upcomingExams as $exam)
+                        @php
+                            $on = \Illuminate\Support\Carbon::parse($exam['scheduled_on']);
+                            $soon = $exam['days_left'] <= 7;
+                        @endphp
+                        <li class="flex items-center gap-3">
+                            <span class="flex h-[46px] w-[46px] shrink-0 flex-col items-center justify-center rounded-lg bg-surface-green leading-none">
+                                <span class="text-[18px] font-bold text-primary">{{ $on->format('j') }}</span>
+                                <span class="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary/70">
+                                    {{ $on->translatedFormat('M') }}
+                                </span>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-[14px] font-medium text-charcoal">
+                                    {{ $exam['subject'] !== '' ? $exam['subject'] : __('opes.examinations_screen.rail_untitled') }}
+                                </span>
+                                <span class="block truncate text-[12px] text-charcoal/60">{{ $exam['class_group'] }}</span>
+                            </span>
+                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold
+                                         {{ $soon ? 'bg-warning-bg text-warning-text' : 'bg-surface-green text-primary' }}">
+                                @if ($exam['days_left'] === 0)
+                                    {{ __('opes.examinations_screen.rail_today') }}
+                                @else
+                                    {{ trans_choice('opes.examinations_screen.rail_days_left', $exam['days_left'], ['count' => $exam['days_left']]) }}
+                                @endif
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </x-shell.panel>
+    </x-slot:rail>
 </x-list-screen>

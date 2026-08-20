@@ -95,6 +95,8 @@ step 3.
 | `Request::create('/path')` for capture | Host defaults to `localhost` with no port, `@vite` emits absolute URLs, every asset 404s, and the screenshot looks like a layout bug | Pass the full base URL |
 | Assuming a bar is white | The reference's top region is the same ivory as the canvas, with no divider | Sample the column before painting |
 | Guessing an enum's members | Half the labels render their raw key | `SHOW COLUMNS` first |
+| An apostrophe in a French string inside a single-quoted PHP literal | The whole lang file stops parsing and every screen past that line 500s | Double-quote it. `TranslationFilesTest` now lints both files |
+| `php -l ... >/dev/null && echo ok` | A parse error is invisible - the `&&` just does not fire and the "ok" never prints, which reads as quiet success | Never redirect a linter's output |
 
 ---
 
@@ -241,7 +243,7 @@ Status: `DONE` (built + sheet compared), `WIP`, `TODO`, `BLOCKED`.
 | 8 | `/academics/settings` | TODO | |
 | 9 | `/timetable` | TODO | |
 | 10 | `/attendance` | TODO | |
-| 11 | `/examinations` | TODO | |
+| 11 | `/examinations` vs `ChatGPT ... 08_12_16` | PARTIAL | Upcoming Exams rail done (date block, subject, class, days-left chip). The reference models exam EVENTS with terms and date ranges where this product models exam SITTINGS - the KPI set and table are a different shape and are NOT forced to match |
 | 12 | `/results` | TODO | |
 | 13 | `/finance/dashboard` | TODO | |
 | 14 | `/library` vs `Library.png` | DONE | added Active Members + New Titles KPIs (six now fit one row); rail is a copies-by-category donut + Recent Book Loans with overdue colouring. Only one book category exists in the demo, so the donut is one slice - correct, not broken |

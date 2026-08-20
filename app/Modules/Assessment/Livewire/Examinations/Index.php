@@ -381,6 +381,48 @@ final class Index extends Component
      *
      * @return array{total: int, this_week: int, unfilled_invigilators: int, seating_pending: int}
      */
+    /**
+     * The next exams to sit, for the rail.
+     *
+     * "Upcoming" means SCHEDULED FOR TODAY OR LATER and still live - a
+     * cancelled exam on next Tuesday is not something to prepare for, and an
+     * exam that was sat last week is not upcoming however recently it was
+     * entered.
+     *
+     * `days_left` is computed here rather than in Blade so the view has no
+     * date arithmetic in it, and it is a whole number of days from the
+     * business date - an exam scheduled for today reads 0, not "-1" from a
+     * timezone-naive subtraction.
+     *
+     * @return list<array{subject: string, class_group: string, scheduled_on: string, days_left: int}>
+     */
+    private function upcomingExams(): array
+    {
+        $today = Carbon::today();
+
+        return DB::table('exams as ex')
+            ->leftJoin('subject_allocations as sa', 'sa.id', '=', 'ex.subject_allocation_id')
+            ->leftJoin('subjects as su', 'su.id', '=', 'sa.subject_id')
+            ->leftJoin('class_groups as cg', 'cg.id', '=', 'ex.class_group_id')
+            ->whereIn('ex.status', Exam::LIVE_STATUSES)
+            ->whereDate('ex.scheduled_on', '>=', $today->toDateString())
+            ->orderBy('ex.scheduled_on')
+            ->orderBy('ex.starts_at')
+            ->limit(5)
+            ->get([
+                'su.name as subject',
+                'cg.name as class_group',
+                'ex.scheduled_on as scheduled_on',
+            ])
+            ->map(static fn (object $row): array => [
+                'subject' => (string) ($row->subject ?? ''),
+                'class_group' => (string) ($row->class_group ?? ''),
+                'scheduled_on' => (string) $row->scheduled_on,
+                'days_left' => (int) $today->diffInDays(Carbon::parse($row->scheduled_on), false),
+            ])
+            ->all();
+    }
+
     private function kpis(): array
     {
         $weekStart = Carbon::today()->startOfWeek()->toDateString();
@@ -458,6 +500,7 @@ final class Index extends Component
         return view('livewire.assessment.examinations.index', [
             'rows' => $this->rows(),
             'kpis' => $this->kpis(),
+            'upcomingExams' => $this->upcomingExams(),
             'tabCounts' => $tabCounts,
             'statusOptions' => $this->statusOptions(),
             'examOptions' => $this->examOptions(),
