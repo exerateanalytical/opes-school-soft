@@ -43,3 +43,13 @@ Thumbs.db
 
 # Local demo front controller (loads .env.demo before the kernel boots).
 /demo-server-router.php
+
+# Working data pulled out of the running app, and sales prospect lists that
+# happened to be saved next to the mobile screenshots. NOT application source:
+# real Cameroonian school contact details (names, phones, emails), a leads
+# workbook, a payroll register export and a policy summary. Git history is
+# permanent, so business and personal data stays on disk rather than going
+# into a repo the whole organisation can read.
+/mobile/*.csv
+/mobile/*.xlsx
+/mobile/*.pdf
