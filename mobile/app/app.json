@@ -24,7 +24,8 @@
     },
     "plugins": ["expo-router", "expo-secure-store", "expo-localization"],
     "extra": {
-      "apiBaseUrl": "http://10.0.2.2:8000/api/v1"
+      "apiBaseUrl": "http://10.0.2.2:8000/api/v1",
+      "apiWebBaseUrl": "http://localhost:8931/api/v1"
     }
   }
 }

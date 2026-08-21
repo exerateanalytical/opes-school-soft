@@ -36,12 +36,36 @@ export default function LoginWelcomeBack(): React.JSX.Element {
 
     try {
       await signIn(identifier.trim(), password);
+      router.replace('/(tabs)/dashboard' as never);
     } catch (caught) {
       setError(
         caught instanceof ApiError && caught.code === 'offline'
           ? t('common.offline')
           : // One message for every credential failure. See the docblock.
             t('auth.invalidCredentials'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Only meaningful against a locally seeded backend (PortalShowcaseSeeder /
+  // DemoDataSeeder), which is what `__DEV__` is a reasonable proxy for here.
+  // Never wire this into a production build.
+  async function submitDemo(): Promise<void> {
+    setIdentifier('demo.guardian1@opeschool.test');
+    setPassword('password');
+    setBusy(true);
+    setError(null);
+
+    try {
+      await signIn('demo.guardian1@opeschool.test', 'password');
+      router.replace('/(tabs)/dashboard' as never);
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError && caught.code === 'offline'
+          ? t('common.offline')
+          : t('auth.invalidCredentials'),
       );
     } finally {
       setBusy(false);
@@ -102,6 +126,12 @@ export default function LoginWelcomeBack(): React.JSX.Element {
             busy={busy}
             disabled={identifier.trim() === '' || password === ''}
           />
+
+          {__DEV__ ? (
+            <Pressable style={styles.demoButton} onPress={submitDemo} disabled={busy}>
+              <Text style={styles.demoButtonLabel}>Demo Login</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={styles.registerRow}>
@@ -180,6 +210,16 @@ const styles = StyleSheet.create({
   checkGlyph: { color: colors.primary, fontSize: type.body, fontWeight: weight.bold },
   rememberLabel: { fontSize: type.body, color: colors.ink },
   link: { fontSize: type.body, fontWeight: weight.semibold, color: colors.primary },
+  demoButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
+  },
+  demoButtonLabel: { fontSize: type.body, fontWeight: weight.semibold, color: colors.primary },
 
   registerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg },
   registerText: { fontSize: type.body, color: colors.inkMuted },

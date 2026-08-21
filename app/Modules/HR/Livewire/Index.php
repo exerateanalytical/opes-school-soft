@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\HR\Livewire;
 
 use App\Modules\HR\Actions\ApproveLeave;
+use App\Modules\HR\Actions\GrantStaffPortalAccess;
 use App\Modules\HR\Actions\HireStaffMember;
 use App\Modules\HR\Actions\OpenStaffContract;
 use App\Modules\HR\Actions\RequestLeave;
@@ -14,7 +15,11 @@ use App\Modules\HR\Domain\ContractType;
 use App\Modules\HR\Domain\HrPermission;
 use App\Modules\HR\Domain\TerminationReason;
 use App\Modules\HR\Domain\WorkingTime;
+use App\Modules\Identity\Models\User;
+use App\Support\Audit\Actor;
 use App\Support\Storage\StoredImage;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -467,7 +472,7 @@ final class Index extends Component
         $this->portalAccessTemporaryPassword = null;
     }
 
-    public function grantPortalAccess(\App\Modules\HR\Actions\GrantStaffPortalAccess $grant): void
+    public function grantPortalAccess(GrantStaffPortalAccess $grant): void
     {
         Gate::authorize(HrPermission::MANAGE);
 
@@ -494,7 +499,7 @@ final class Index extends Component
             $this->addError('portalAccess', $e->getMessage());
 
             return;
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // The exists() check inside GrantStaffPortalAccess is TOCTOU-racy
             // against the users.email unique constraint: two admins granting
             // the same email concurrently can both pass that check, and the
@@ -601,9 +606,9 @@ final class Index extends Component
         session()->flash('status', __('opes.staff_photo.removed'));
     }
 
-    private function actor(): \App\Support\Audit\Actor
+    private function actor(): Actor
     {
-        /** @var \App\Modules\Identity\Models\User $user */
+        /** @var User $user */
         $user = auth()->user();
 
         return $user->toAuditActor();
@@ -632,11 +637,7 @@ final class Index extends Component
         return DB::table('staff_members as sm')
             ->when($this->status !== '', fn ($q) => $q->where('sm.status', $this->status))
             ->when($this->search !== '', function ($q): void {
-                $q->where(function ($inner): void {
-                    $inner->where('sm.first_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.last_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.staff_no', 'like', '%'.$this->search.'%');
-                });
+                $this->applyNameSearch($q, 'sm.first_name', 'sm.last_name', 'sm.staff_no');
             })
             ->when($this->department !== '', function ($q): void {
                 $q->whereExists(function ($sub): void {
@@ -677,6 +678,34 @@ final class Index extends Component
     }
 
     /**
+     * Applies $this->search across the given columns, splitting on
+     * whitespace so a full-name query like "Jean Ngwa" matches a
+     * first_name/last_name pair (each word must independently match one
+     * of the columns) instead of failing because no single column
+     * contains the whole "first last" string.
+     */
+    private function applyNameSearch(Builder $query, string ...$columns): void
+    {
+        $words = preg_split('/\s+/', trim($this->search), -1, PREG_SPLIT_NO_EMPTY) ?: [$this->search];
+
+        $query->where(function ($outer) use ($words, $columns): void {
+            foreach ($words as $word) {
+                $term = '%'.$word.'%';
+
+                $outer->where(function ($inner) use ($term, $columns): void {
+                    foreach ($columns as $i => $column) {
+                        if ($i === 0) {
+                            $inner->where($column, 'like', $term);
+                        } else {
+                            $inner->orWhere($column, 'like', $term);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
      * Active (and recent) contracts: role, type, department/position,
      * dates.
      *
@@ -692,11 +721,7 @@ final class Index extends Component
             ->when($this->status === 'active', fn ($q) => $q->whereNull('sc.ends_on'))
             ->when($this->status === 'ended', fn ($q) => $q->whereNotNull('sc.ends_on'))
             ->when($this->search !== '', function ($q): void {
-                $q->where(function ($inner): void {
-                    $inner->where('sm.first_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.last_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.staff_no', 'like', '%'.$this->search.'%');
-                });
+                $this->applyNameSearch($q, 'sm.first_name', 'sm.last_name', 'sm.staff_no');
             })
             ->orderByDesc('sc.starts_on')
             ->select([
@@ -722,11 +747,7 @@ final class Index extends Component
             ->when($this->department !== '', fn ($q) => $q->where('sc.department_id', (int) $this->department))
             ->when($this->status !== '', fn ($q) => $q->where('lr.status', $this->status))
             ->when($this->search !== '', function ($q): void {
-                $q->where(function ($inner): void {
-                    $inner->where('sm.first_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.last_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sm.staff_no', 'like', '%'.$this->search.'%');
-                });
+                $this->applyNameSearch($q, 'sm.first_name', 'sm.last_name', 'sm.staff_no');
             })
             ->orderByDesc('lr.starts_on')
             ->select([

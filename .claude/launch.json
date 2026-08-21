@@ -6,6 +6,18 @@
             "runtimeExecutable": "C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe",
             "runtimeArgs": ["artisan", "serve", "--port=8931"],
             "port": 8931
+        },
+        {
+            "name": "opes-demo",
+            "runtimeExecutable": "C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe",
+            "runtimeArgs": ["-S", "127.0.0.1:8940", "-t", "public", "demo-server-router.php"],
+            "port": 8940
+        },
+        {
+            "name": "guardian-mobile",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["--prefix", "mobile/app", "run", "web"],
+            "port": 8081
         }
     ]
 }

@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 import { readToken, clearToken } from '@/storage/secure';
 import { readCache, writeCache } from '@/storage/cache';
@@ -14,9 +15,18 @@ import { readCache, writeCache } from '@/storage/cache';
  * ever cause a wasted request, not a leak.
  */
 
+const extra = Constants.expoConfig?.extra as
+  | { apiBaseUrl?: string; apiWebBaseUrl?: string }
+  | undefined;
+
+// `apiBaseUrl` is written for a native emulator (10.0.2.2 is Android's alias
+// for the host machine's localhost). The web preview runs inside the host's
+// own browser, so 10.0.2.2 doesn't resolve there - it needs the host's
+// address directly, which `apiWebBaseUrl` carries separately.
 const baseUrl: string =
-  (Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined)?.apiBaseUrl ??
-  'http://localhost:8000/api/v1';
+  Platform.OS === 'web'
+    ? (extra?.apiWebBaseUrl ?? 'http://localhost:8931/api/v1')
+    : (extra?.apiBaseUrl ?? 'http://localhost:8000/api/v1');
 
 export type ApiErrorCode =
   | 'unauthenticated'
