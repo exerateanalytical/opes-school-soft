@@ -20,6 +20,7 @@
  */
 
 use App\Modules\Identity\Models\User;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 $root = dirname(__DIR__, 3);
@@ -28,7 +29,7 @@ require $root.'/vendor/autoload.php';
 Dotenv\Dotenv::createImmutable($root, '.env.demo')->load();
 
 $app = require $root.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 $out = $root.'/public/__compare';
@@ -95,6 +96,7 @@ $map = [
     'medical' => '/medical',
     'procurement' => '/procurement/suppliers',
     'ledger' => '/ledger/chart-of-accounts',
+    'operations-backups' => '/operations/backups',
 ];
 
 foreach ($map as $name => $uri) {

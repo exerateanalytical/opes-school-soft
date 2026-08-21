@@ -248,7 +248,7 @@ return [
         'active_modules' => 'Active Modules',
         'percent_present' => ':percent% Present',
         'rate_present' => ':rate Present',
-        'no_register_today' => "No register taken yet today",
+        'no_register_today' => 'No register taken yet today',
         'percent_operational' => ':percent% Operational',
         'view_all_students' => 'View all students',
         'view_all_staff' => 'View all staff',
@@ -689,6 +689,10 @@ return [
             'amber_remedy' => 'Set a second backup target, such as a USB drive rotated weekly. '
                 .'A backup on the same disk as the database is lost with the disk.',
             'ok_detail' => 'A second backup location is configured.',
+            'same_disk_detail' => 'Both backup locations are on the same disk.',
+            'same_disk_remedy' => 'The second target is on the same disk as the first, so one '
+                .'disk failure loses both copies. Point it at separate hardware, such as a USB '
+                .'drive rotated weekly.',
         ],
         'restore_drill' => [
             'label' => 'Restore drill',
@@ -1235,7 +1239,7 @@ return [
         'rail_promotion' => 'Student Promotion',
         'rail_report' => 'Students & Guardians Report',
         'column_gender' => 'Gender',
-        'column_admission_date' => "Admission Date",
+        'column_admission_date' => 'Admission Date',
         'column_class' => 'Class',
         'column_status' => 'Status',
         'column_actions' => 'Actions',
@@ -3713,7 +3717,7 @@ return [
         'unknown_preset' => 'That preset does not exist.',
         'app_logo_alt' => 'School logo',
         'title' => 'Branding',
-        "subtitle" => "The colours, logo and favicon this school's screens are painted with.",
+        'subtitle' => "The colours, logo and favicon this school's screens are painted with.",
         'color_input_label' => 'Pick a brand colour',
         'hex_input_label' => 'Brand colour as hex',
         'reset' => 'Reset to the default green',

@@ -89,6 +89,24 @@ it('reports ok when a second target is configured', function () {
     expect(healthFor('backup.second_target')?->status)->toBe(HealthStatus::Ok);
 });
 
+it('stays amber when the second target is on the same disk as the first', function () {
+    /*
+     * The check used to pass on ANY non-empty string, so it could be cleared
+     * by pointing at a folder beside the first copy - which is the precise
+     * arrangement it exists to warn about. One disk failure still loses both.
+     *
+     * Both paths are derived from storage_path() so they are guaranteed to
+     * share a volume on every OS the suite runs on, rather than leaning on a
+     * hard-coded drive letter that only means something on Windows.
+     */
+    config([
+        'opes.backup.path' => storage_path('opes-backups'),
+        'opes.backup.second_target' => storage_path('opes-backups-copy'),
+    ]);
+
+    expect(healthFor('backup.second_target')?->status)->toBe(HealthStatus::Amber);
+});
+
 it('reports red when no restore drill has ever passed', function () {
     expect(healthFor('drill.recency')?->status)->toBe(HealthStatus::Red);
 });
