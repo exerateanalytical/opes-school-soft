@@ -174,19 +174,40 @@ it('gives meetings and communications real empty states', function () {
         ->assertSee(__('opes.guardians_screen.communications_empty'));
 });
 
-it('renders the three unbuilt tabs as present but inert', function () {
+it('has no inert tabs left, and selecting a live one works', function () {
+    /*
+     * This asserted the opposite: that Payments, Documents and Address were
+     * rendered present-but-disabled, and that selectTab('payments') bounced
+     * back to linked_students.
+     *
+     * All three have been resolved rather than left inert. Payments and
+     * Documents are live tabs reading real data - a guardian's payments are
+     * those of the students they are linked to, and issued documents resolve
+     * through those students' enrolments. Address was deleted, because it
+     * opened onto the two cards already at the top of the page.
+     *
+     * What the test protects is stronger now: not "the inert tabs look right"
+     * but "there are none, and the tab that used to bounce actually selects".
+     */
     actingAs(studentsUiUserAs(Role::Registrar));
 
     $guardian = Guardian::factory()->create();
 
+    expect(Show::DISABLED_TABS)->toBe([]);
+
     $rendered = Livewire::test(Show::class, ['guardian' => $guardian]);
 
-    foreach (Show::DISABLED_TABS as $disabled) {
-        $rendered->assertSee(__('opes.guardians_screen.tab_'.$disabled));
+    foreach (Show::LIVE_TABS as $tab) {
+        $rendered->assertSee(__('opes.guardians_screen.tab_'.$tab));
     }
 
-    $rendered->assertSeeHtml('aria-disabled="true"')
-        ->call('selectTab', 'payments')
+    $rendered->call('selectTab', 'payments')
+        ->assertSet('tab', 'payments')
+        ->call('selectTab', 'documents')
+        ->assertSet('tab', 'documents');
+
+    // An unknown tab still falls back rather than rendering a blank panel.
+    $rendered->call('selectTab', 'not-a-tab')
         ->assertSet('tab', 'linked_students');
 });
 
