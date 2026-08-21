@@ -27,29 +27,6 @@
     $notRecorded = __('opes.guardians_screen.not_recorded');
 @endphp
 
-@push('sidebar-quick-actions')
-    <div class="mx-3 mt-auto rounded-lg border border-heritage-yellow/70 p-3">
-        <h2 class="text-xs font-bold uppercase tracking-wide text-heritage-yellow">
-            {{ __('opes.dashboard.quick_actions') }}
-        </h2>
-        <ul class="mt-2 space-y-1">
-            {{-- 7.6 routes every authorization change through
-                 SetGuardianAuthorization, and 7.7's merge is irreversible and
-                 permissioned. Neither has a screen in Phase 2, so both are
-                 inert rather than linked. --}}
-            @foreach (['Add New Guardian', 'Import Guardians', 'Edit Profile'] as $unbuilt)
-                <li>
-                    <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-                          class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
-                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/30" aria-hidden="true"></span>
-                        {{ $unbuilt }}
-                    </span>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-@endpush
-
 <div class="min-w-0 space-y-4">
 
     <nav aria-label="{{ __('opes.ui.breadcrumb') }}" class="min-w-0">
@@ -302,18 +279,101 @@
                 </button>
             @endforeach
 
-            {{-- Address & Contact duplicates the two cards above; Documents has
-                 no GuardianDocument table in Phase 2; Payments is 04-fees. All
-                 three inert, none faked. --}}
-            @foreach (GuardianShow::DISABLED_TABS as $disabledTab)
-                <span role="tab" aria-disabled="true" aria-selected="false"
-                      title="{{ __('opes.nav.nav_disabled_title') }}"
-                      class="cursor-not-allowed whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm text-charcoal/30">
-                    {{ __('opes.guardians_screen.tab_'.$disabledTab) }}
-                </span>
-            @endforeach
+            {{-- No inert tabs. Payments and Documents are live below; Address
+                 & Contact was removed rather than built, because it opened
+                 onto the two cards already at the top of this page. --}}
         </div>
     </div>
+
+    {{-- ── Payments ───────────────────────────────────────────────────── --}}
+    @if ($tab === 'payments')
+        <section class="space-y-3">
+            @if (! $canViewPayments)
+                {{-- A guardian record is visible to more roles than a family's
+                     money is, so the tab says WHY it is empty rather than
+                     showing an empty table that reads as "nothing paid". --}}
+                <p class="py-3 text-sm text-charcoal/60">{{ __('opes.guardians_screen.payments_not_permitted') }}</p>
+            @elseif ($payments->isEmpty())
+                <p class="py-3 text-sm text-charcoal/60">{{ __('opes.guardians_screen.payments_empty') }}</p>
+            @else
+                <div class="overflow-x-auto rounded border border-border-primary bg-white">
+                    <table class="min-w-full text-left text-[13px]">
+                        <thead>
+                            <tr class="bg-chrome text-white">
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.payment_receipt') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.payment_student') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.payment_date') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.payment_method') }}</th>
+                                <th scope="col" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.payment_amount') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-primary">
+                            @foreach ($payments as $payment)
+                                <tr wire:key="guardian-payment-{{ $payment->id }}">
+                                    <td class="px-3 py-2 font-mono text-xs text-charcoal/80">{{ $payment->receipt_no }}</td>
+                                    <td class="px-3 py-2 text-charcoal">{{ $payment->student_name }}</td>
+                                    <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">
+                                        {{ \Illuminate\Support\Carbon::parse($payment->value_date)->translatedFormat('d M Y') }}
+                                    </td>
+                                    <td class="px-3 py-2 text-charcoal/70">{{ $payment->method }}</td>
+                                    {{-- A bounced payment is struck through and
+                                         called out: the money did not arrive,
+                                         and a receipt row that looks identical
+                                         to a good one is how a desk hands out
+                                         a clearance it should not. --}}
+                                    <td class="whitespace-nowrap px-3 py-2 text-right font-medium {{ $payment->bounced_on === null ? 'text-charcoal' : 'text-danger-text line-through' }}">
+                                        {{ \App\Support\Money\Money::of((int) $payment->amount)->format() }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
+    @endif
+
+    {{-- ── Documents ──────────────────────────────────────────────────── --}}
+    @if ($tab === 'documents')
+        <section class="space-y-3">
+            @if (! $canViewDocuments)
+                <p class="py-3 text-sm text-charcoal/60">{{ __('opes.guardians_screen.documents_not_permitted') }}</p>
+            @elseif ($documents->isEmpty())
+                <p class="py-3 text-sm text-charcoal/60">{{ __('opes.guardians_screen.documents_empty') }}</p>
+            @else
+                <div class="overflow-x-auto rounded border border-border-primary bg-white">
+                    <table class="min-w-full text-left text-[13px]">
+                        <thead>
+                            <tr class="bg-chrome text-white">
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.document_serial') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.document_template') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.document_student') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.document_issued') }}</th>
+                                <th scope="col" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide">{{ __('opes.guardians_screen.document_status') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-primary">
+                            @foreach ($documents as $document)
+                                <tr wire:key="guardian-document-{{ $document->id }}">
+                                    <td class="px-3 py-2 font-mono text-xs text-charcoal/80">
+                                        {{ $document->series_code }}/{{ $document->serial }}
+                                    </td>
+                                    <td class="px-3 py-2 text-charcoal">{{ $document->template_name }}</td>
+                                    <td class="px-3 py-2 text-charcoal/70">{{ $document->student_name }}</td>
+                                    <td class="whitespace-nowrap px-3 py-2 text-charcoal/70">
+                                        {{ \Illuminate\Support\Carbon::parse($document->issued_at)->translatedFormat('d M Y') }}
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <x-status-pill :status="$document->status === 'issued' ? 'ok' : 'amber'" :label="$document->status"/>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
+    @endif
 
     {{-- ── Linked students ────────────────────────────────────────────── --}}
     @if ($tab === 'linked_students')

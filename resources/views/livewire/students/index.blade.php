@@ -35,38 +35,6 @@
     $railTotal = array_sum(array_column($classGroupOptions, 'students'));
 @endphp
 
-{{-- Sidebar quick actions. 11.1 lists seven; only "Add New Student" has a
-     screen in Phase 2 - and even that one belongs to a sibling workstream, so
-     it is rendered inert here rather than linked at a route that may not
-     exist. The other six mirror the shell's convention for unbuilt features:
-     present, aria-disabled, and carrying the standard "arrives later" title. --}}
-@push('sidebar-quick-actions')
-    <div class="mx-3 mt-auto rounded-lg border border-heritage-yellow/70 p-3">
-        <h2 class="text-xs font-bold uppercase tracking-wide text-heritage-yellow">
-            {{ __('opes.dashboard.quick_actions') }}
-        </h2>
-        <ul class="mt-2 space-y-1">
-            @foreach ([
-                __('opes.students_screen.add_student'),
-                'Bulk Import Students',
-                'Generate Student ID Cards',
-                'Print Student List',
-                'Student Promotion',
-                'Transfer Students',
-                'Export Student Data',
-            ] as $unbuilt)
-                <li>
-                    <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-                          class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
-                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/30" aria-hidden="true"></span>
-                        {{ $unbuilt }}
-                    </span>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-@endpush
-
 <x-list-screen
     :title="__('opes.students_screen.title')"
     :breadcrumb="[__('opes.students_screen.breadcrumb_dashboard'), __('opes.students_screen.breadcrumb_students')]"

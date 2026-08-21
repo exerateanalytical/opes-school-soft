@@ -35,3 +35,11 @@ Thumbs.db
 
 # Puppeteer install for the mobile parity harness - never committed.
 /tools/design-parity/mobile/node_modules
+
+# The demo instance's env. Carries an APP_KEY and DB/Redis passwords and
+# has been sitting untracked-but-not-ignored since 2026-08-17: one broad
+# `git add -A` away from being published.
+/.env.demo
+
+# Local demo front controller (loads .env.demo before the kernel boots).
+/demo-server-router.php

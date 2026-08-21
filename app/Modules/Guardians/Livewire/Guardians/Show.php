@@ -77,7 +77,7 @@ final class Show extends Component
     public Guardian $guardian;
 
     /** @var list<string> */
-    public const LIVE_TABS = ['linked_students', 'meetings', 'communications', 'portal'];
+    public const LIVE_TABS = ['linked_students', 'meetings', 'communications', 'payments', 'documents', 'portal'];
 
     /**
      * The plaintext invitation code, present ONLY between issuing and the
@@ -88,7 +88,21 @@ final class Show extends Component
     public ?string $issuedCode = null;
 
     /** @var list<string> */
-    public const DISABLED_TABS = ['address', 'documents', 'payments'];
+    /**
+     * Empty, and the reason each of the three left is worth recording.
+     *
+     * `payments` and `documents` were inert on the grounds that Phase 2 had
+     * nowhere to read them from. Both now do: a guardian's payments are the
+     * payments against the students they are linked to, and issued_documents
+     * carries a polymorphic subject that resolves the same way. They are live
+     * tabs below.
+     *
+     * `address` is GONE rather than built. Its own comment said it duplicated
+     * the two cards already at the top of this page, and a tab that opens onto
+     * what the reader can already see is not a missing feature - it is a tab
+     * that should never have been listed.
+     */
+    public const DISABLED_TABS = [];
 
     #[Url]
     public string $tab = 'linked_students';
@@ -499,6 +513,91 @@ final class Show extends Component
         return $user->toAuditActor();
     }
 
+    /**
+     * The payments this guardian's children have had recorded against them.
+     *
+     * A guardian has no payments of their own in this schema - money is
+     * received against a STUDENT - so "their" payments are the payments for
+     * the students they are currently linked to. Ended links are excluded by
+     * links(), which is the behaviour a reader expects: a guardian who is no
+     * longer answerable for a child should not keep seeing that child's
+     * receipts.
+     *
+     * Gated on fee.view. A guardian record is visible to more roles than a
+     * family's money is.
+     *
+     * @param  list<int>  $studentIds
+     */
+    private function payments(array $studentIds): Collection
+    {
+        if ($studentIds === [] || ! Gate::allows(Permission::FeeView->value)) {
+            return new Collection();
+        }
+
+        return DB::table('payments as p')
+            ->join('students as st', 'st.id', '=', 'p.student_id')
+            ->whereIn('p.student_id', $studentIds)
+            ->orderByDesc('p.value_date')
+            ->orderByDesc('p.id')
+            ->limit(50)
+            ->get([
+                'p.id as id',
+                'p.receipt_no as receipt_no',
+                'p.amount as amount',
+                'p.payment_method as method',
+                'p.value_date as value_date',
+                'p.bounced_on as bounced_on',
+                DB::raw("CONCAT(st.first_name, ' ', st.last_name) as student_name"),
+            ]);
+    }
+
+    /**
+     * Documents issued for this guardian's children.
+     *
+     * issued_documents is polymorphic (subject_type / subject_id), so the
+     * guardian-visible set is the documents whose subject is one of their
+     * linked students. Revoked documents are excluded - a revoked document is
+     * not one a parent should be handed.
+     *
+     * @param  list<int>  $studentIds
+     */
+    private function documents(array $studentIds): Collection
+    {
+        if ($studentIds === [] || ! Gate::allows(Permission::DocumentsPrint->value)) {
+            return new Collection();
+        }
+
+        /*
+         * issued_documents.subject_type is the SUBJECT the template prints
+         * for, and for the only registered template it is 'Enrollment', not
+         * 'Student' (ProcessBulkPrint::subjectTypeFor). A report card belongs
+         * to a pupil's enrolment in a given year, not to the pupil in the
+         * abstract - so reaching a guardian's documents means joining through
+         * enrolments rather than matching student ids directly.
+         *
+         * Revoked documents are excluded: a revoked document is not one a
+         * parent should be handed.
+         */
+        return DB::table('issued_documents as d')
+            ->join('document_templates as t', 't.id', '=', 'd.document_template_id')
+            ->join('enrollments as e', 'e.id', '=', 'd.subject_id')
+            ->join('students as st', 'st.id', '=', 'e.student_id')
+            ->where('d.subject_type', 'Enrollment')
+            ->whereIn('e.student_id', $studentIds)
+            ->whereNull('d.revoked_at')
+            ->orderByDesc('d.issued_at')
+            ->limit(50)
+            ->get([
+                'd.id as id',
+                'd.serial as serial',
+                'd.series_code as series_code',
+                'd.issued_at as issued_at',
+                'd.status as status',
+                't.name as template_name',
+                DB::raw("CONCAT(st.first_name, ' ', st.last_name) as student_name"),
+            ]);
+    }
+
     public function render(): mixed
     {
         $tab = $this->activeTab();
@@ -516,6 +615,10 @@ final class Show extends Component
             'studentRows' => $this->studentRows($studentIds),
             'meetings' => $tab === 'meetings' ? $this->meetings() : new Collection(),
             'communications' => $tab === 'communications' ? $this->communications() : new Collection(),
+            'payments' => $tab === 'payments' ? $this->payments($studentIds) : new Collection(),
+            'documents' => $tab === 'documents' ? $this->documents($studentIds) : new Collection(),
+            'canViewPayments' => Gate::allows(Permission::FeeView->value),
+            'canViewDocuments' => Gate::allows(Permission::DocumentsPrint->value),
             'openInvitation' => $tab === 'portal' ? $this->openInvitation() : null,
             'portalUserEmail' => $tab === 'portal' ? $this->portalUserEmail() : null,
             'canManagePortal' => Gate::allows(Permission::PortalManage->value),

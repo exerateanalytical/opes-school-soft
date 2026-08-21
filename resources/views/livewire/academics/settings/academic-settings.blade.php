@@ -9,21 +9,42 @@
     // Whole weeks, from real dates - the "16 Weeks" figures in the mockup.
     $weeksBetween = fn ($startsOn, $endsOn): int => (int) ceil(($startsOn->diffInDays($endsOn) + 1) / 7);
 
-    // Settings sub-nav (mockup left column). Only "Academic" exists in Phase 1;
-    // the others follow the shell's disabled-item convention rather than
-    // linking to nothing.
+    /*
+     * Settings sub-nav (mockup left column).
+     *
+     * Nine of these ten were marked inert in Phase 1 with the note "only
+     * Academic exists". Seven of them have had real screens for some time and
+     * nobody came back to this list, so the page was greying out links to
+     * modules that were live in the sidebar two panels away.
+     *
+     * `route` names the destination and Route::has() is the guard, so an item
+     * whose screen is later removed goes back to inert on its own rather than
+     * 404ing. `term` and `holidays` have no separate screen because they are
+     * configured by the cards ON this page - they are the current page, not a
+     * link to somewhere else, and are dropped rather than rendered as dead
+     * entries pointing at where the reader already is.
+     */
     $subnav = [
-        ['key' => 'general', 'live' => false],
-        ['key' => 'academic', 'live' => true],
-        ['key' => 'admission', 'live' => false],
-        ['key' => 'examination', 'live' => false],
-        ['key' => 'grading', 'live' => false],
-        ['key' => 'promotion', 'live' => false],
-        ['key' => 'subjects', 'live' => false],
-        ['key' => 'classes', 'live' => false],
-        ['key' => 'term', 'live' => false],
-        ['key' => 'holidays', 'live' => false],
+        ['key' => 'general', 'route' => 'settings.index'],
+        ['key' => 'academic', 'route' => null],
+        ['key' => 'admission', 'route' => 'admissions.index'],
+        ['key' => 'examination', 'route' => 'assessment.examinations.index'],
+        ['key' => 'grading', 'route' => 'assessment.results.index'],
+        ['key' => 'promotion', 'route' => 'students.promotion'],
+        ['key' => 'subjects', 'route' => 'subjects.index'],
+        ['key' => 'classes', 'route' => 'classes.index'],
     ];
+
+    // `live` here means "this IS the page you are on"; everything else is a
+    // link, and anything whose route has vanished falls through to inert.
+    $subnav = array_map(static function (array $item): array {
+        $item['live'] = $item['route'] === null;
+        $item['href'] = $item['route'] !== null && \Illuminate\Support\Facades\Route::has($item['route'])
+            ? route($item['route'], absolute: false)
+            : null;
+
+        return $item;
+    }, $subnav);
 @endphp
 
 <div class="min-w-0 space-y-4">
@@ -66,7 +87,13 @@
             <ul class="flex gap-1 overflow-x-auto rounded border border-border-primary bg-white p-2 xl:flex-col xl:overflow-visible">
                 @foreach ($subnav as $item)
                     <li class="shrink-0 xl:shrink">
-                        @if ($item['live'])
+                        @if (! $item['live'] && $item['href'] !== null)
+                            <a href="{{ $item['href'] }}" wire:navigate
+                               class="flex items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-sm text-charcoal/75 transition hover:bg-sand hover:text-primary">
+                                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-charcoal/25" aria-hidden="true"></span>
+                                {{ __('opes.academics.subnav_'.$item['key']) }}
+                            </a>
+                        @elseif ($item['live'])
                             <span aria-current="page"
                                   class="flex items-center gap-2 whitespace-nowrap rounded bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>

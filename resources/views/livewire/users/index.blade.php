@@ -43,15 +43,23 @@
                     </a>
                 @endcan
             </li>
-            @foreach (['User Permissions', 'Activity Log'] as $unbuilt)
+            {{-- "Activity Log" was inert; /audit-log has existed for some time
+                 and is in the sidebar two panels away, so the box was greying
+                 out a link to a screen the reader can already reach.
+
+                 "User Permissions" is GONE rather than wired: there is no
+                 permissions screen, and permissions are granted through a
+                 user's ROLE on this very page. A menu entry for a screen that
+                 does not exist teaches the reader that the menu lies. --}}
+            @can('audit.view')
                 <li>
-                    <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-                          class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
-                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/30" aria-hidden="true"></span>
-                        {{ $unbuilt }}
-                    </span>
+                    <a href="{{ route('audit.index') }}" wire:navigate
+                       class="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-white/90 hover:bg-chrome-light">
+                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-heritage-yellow" aria-hidden="true"></span>
+                        {{ __('opes.nav.audit_log') }}
+                    </a>
                 </li>
-            @endforeach
+            @endcan
         </ul>
     </div>
 @endpush

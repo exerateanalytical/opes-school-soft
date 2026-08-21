@@ -55,30 +55,6 @@
     ];
 @endphp
 
-{{-- 11.2's five quick actions. None of the five has a screen in Phase 2 -
-     enrolment and editing belong to sibling workstreams and neither has a
-     route in routes/web.php; the report card, ID card and transfer documents
-     are 10-documents. All five render inert with the shell's standard
-     "arrives later" title rather than as links to nothing. --}}
-@push('sidebar-quick-actions')
-    <div class="mx-3 mt-auto rounded-lg border border-heritage-yellow/70 p-3">
-        <h2 class="text-xs font-bold uppercase tracking-wide text-heritage-yellow">
-            {{ __('opes.dashboard.quick_actions') }}
-        </h2>
-        <ul class="mt-2 space-y-1">
-            @foreach (['Enroll Student', 'Edit Profile', 'Print Report Card', 'Generate ID Card', 'Transfer Student'] as $unbuilt)
-                <li>
-                    <span aria-disabled="true" title="{{ __('opes.nav.nav_disabled_title') }}"
-                          class="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-sm text-white/40">
-                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/30" aria-hidden="true"></span>
-                        {{ $unbuilt }}
-                    </span>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-@endpush
-
 <div class="min-w-0 space-y-4">
 
     {{-- ── Breadcrumb ─────────────────────────────────────────────────── --}}
