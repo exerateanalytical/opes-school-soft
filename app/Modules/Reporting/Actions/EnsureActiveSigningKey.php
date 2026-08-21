@@ -8,6 +8,7 @@ use App\Modules\Identity\Actions\WriteAuditEntry;
 use App\Modules\Identity\Domain\AuditAction;
 use App\Modules\Reporting\Models\DocumentSigningKey;
 use App\Support\Audit\Actor;
+use App\Support\Crypto\OpensslConfig;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -23,9 +24,7 @@ use RuntimeException;
  */
 final class EnsureActiveSigningKey
 {
-    public function __construct(private readonly WriteAuditEntry $audit)
-    {
-    }
+    public function __construct(private readonly WriteAuditEntry $audit) {}
 
     public function handle(?Actor $actor = null): DocumentSigningKey
     {
@@ -68,10 +67,10 @@ final class EnsureActiveSigningKey
      */
     public function generate(Actor $actor): DocumentSigningKey
     {
-        $resource = openssl_pkey_new([
+        $resource = openssl_pkey_new(OpensslConfig::options([
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
-        ]);
+        ]));
 
         if ($resource === false) {
             throw new RuntimeException('openssl_pkey_new failed to generate a P-256 keypair.');
@@ -79,7 +78,7 @@ final class EnsureActiveSigningKey
 
         $privatePem = '';
 
-        if (! openssl_pkey_export($resource, $privatePem)) {
+        if (! openssl_pkey_export($resource, $privatePem, null, OpensslConfig::options())) {
             throw new RuntimeException('openssl_pkey_export failed for the new signing key.');
         }
 

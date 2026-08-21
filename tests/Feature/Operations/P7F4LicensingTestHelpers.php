@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Modules\Identity\Models\User;
 use App\Modules\Operations\Licensing\CanonicalJson;
+use App\Support\Crypto\OpensslConfig;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -39,14 +40,14 @@ if (! function_exists('p7f4Keys')) {
         static $pairs = null;
 
         if ($pairs === null) {
-            $file = openssl_pkey_new([
+            $file = openssl_pkey_new(OpensslConfig::options([
                 'private_key_type' => OPENSSL_KEYTYPE_EC,
                 'curve_name' => 'prime256v1',
-            ]);
-            $activation = openssl_pkey_new([
+            ]));
+            $activation = openssl_pkey_new(OpensslConfig::options([
                 'private_key_type' => OPENSSL_KEYTYPE_RSA,
                 'private_key_bits' => 2048,
-            ]);
+            ]));
 
             if ($file === false || $activation === false) {
                 throw new RuntimeException('openssl could not generate the throwaway test key pairs.');

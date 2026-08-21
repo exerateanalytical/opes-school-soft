@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 use App\Modules\Notifications\Actions\GenerateVapidKeys;
 use App\Modules\Notifications\Actions\SendPushNotification;
+use App\Modules\SchoolProfile\Actions\ReadSetting;
 
 /*
- * The pure-math pieces of RFC 8291/8292 Web Push encryption - the ONLY part
- * of that path testable on this machine. Every other step (VAPID key
- * generation, the per-message ECDH ephemeral key, the JWT signature) needs
- * a fresh EC P-256 key, and this PHP build has no openssl.cnf configured -
- * openssl_pkey_new() fails closed for every EC operation. That is a real,
- * pre-existing environment gap (already documented for QR document signing
- * and VAPID key generation), not something these tests can route around.
+ * The pure-math pieces of RFC 8291/8292 Web Push encryption.
+ *
+ * These were once the only testable part of that path: every other step
+ * (VAPID key generation, the per-message ECDH ephemeral key, the JWT
+ * signature) needs a fresh EC P-256 key, and openssl_pkey_new() failed
+ * closed for every EC operation on this PHP build. OpensslConfig now hands
+ * openssl its configuration per call, so EC key generation works and that
+ * limitation is gone - see tests/Unit/Support/OpensslConfigTest.php.
  *
  * HKDF is checked against RFC 5869 §A.1 Test Case 1 - a fixed, published
  * input/output pair with no dependency on any key generation at all - which
@@ -36,7 +38,7 @@ it('implements HKDF correctly against the RFC 5869 test vector', function (): vo
     $method = new ReflectionMethod(SendPushNotification::class, 'hkdf');
     $method->setAccessible(true);
 
-    $instance = new SendPushNotification(app(App\Modules\SchoolProfile\Actions\ReadSetting::class));
+    $instance = new SendPushNotification(app(ReadSetting::class));
     $actual = $method->invoke($instance, $salt, $ikm, $info, 16);
 
     expect(bin2hex($actual))->toBe(bin2hex($expectedFirst16));
@@ -52,7 +54,7 @@ it('round-trips base64url encode/decode including the padding-stripping edge cas
 
         $method = new ReflectionMethod(SendPushNotification::class, 'base64UrlDecode');
         $method->setAccessible(true);
-        $instance = new SendPushNotification(app(App\Modules\SchoolProfile\Actions\ReadSetting::class));
+        $instance = new SendPushNotification(app(ReadSetting::class));
         $decoded = $method->invoke($instance, $encoded);
 
         expect($decoded)->toBe($original);
@@ -62,7 +64,7 @@ it('round-trips base64url encode/decode including the padding-stripping edge cas
 it('encodes DER lengths correctly for both the short-form and long-form boundary', function (): void {
     $method = new ReflectionMethod(SendPushNotification::class, 'derLength');
     $method->setAccessible(true);
-    $instance = new SendPushNotification(app(App\Modules\SchoolProfile\Actions\ReadSetting::class));
+    $instance = new SendPushNotification(app(ReadSetting::class));
 
     // Short form: length fits in one byte, top bit clear.
     expect(bin2hex($method->invoke($instance, 65)))->toBe('41');
@@ -89,7 +91,7 @@ it('round-trips a DER ECDSA signature to raw r||s and back to fixed 32-byte halv
 
     $method = new ReflectionMethod(SendPushNotification::class, 'derEcdsaToRaw');
     $method->setAccessible(true);
-    $instance = new SendPushNotification(app(App\Modules\SchoolProfile\Actions\ReadSetting::class));
+    $instance = new SendPushNotification(app(ReadSetting::class));
 
     $raw = $method->invoke($instance, $der);
 

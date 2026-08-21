@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\Identity\Domain\Role;
 use App\Modules\Identity\Models\User;
 use App\Modules\Reporting\Actions\SignDocumentQrToken;
+use App\Support\Crypto\OpensslConfig;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\DB;
 
@@ -159,15 +160,15 @@ if (! function_exists('p13qrKeypair')) {
      */
     function p13qrKeypair(): array
     {
-        $resource = openssl_pkey_new([
+        $resource = openssl_pkey_new(OpensslConfig::options([
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
-        ]);
+        ]));
 
         assert($resource !== false);
 
         $private = '';
-        openssl_pkey_export($resource, $private);
+        openssl_pkey_export($resource, $private, null, OpensslConfig::options());
 
         $details = openssl_pkey_get_details($resource);
         assert($details !== false);

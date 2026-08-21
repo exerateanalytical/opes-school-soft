@@ -7,8 +7,8 @@ namespace App\Modules\Notifications\Actions;
 use App\Modules\Notifications\Models\Notification;
 use App\Modules\Notifications\Models\PushSubscription;
 use App\Modules\SchoolProfile\Actions\ReadSetting;
+use App\Support\Crypto\OpensslConfig;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -16,15 +16,16 @@ use Illuminate\Support\Facades\Log;
  * from, per RFC 8291 (Message Encryption for Web Push) and RFC 8292
  * (VAPID).
  *
- * NOT VERIFIED END-TO-END ON THIS MACHINE. Both the VAPID JWT signature and
- * the per-message ECDH key exchange need to generate a fresh EC P-256 key,
- * and this PHP build has no `openssl.cnf` configured - the identical
- * environment gap GenerateVapidKeys and the QR-signing path already
- * document. The encryption steps below are implemented directly against
- * the RFC text with section citations so a reviewer can check them against
- * spec; they could not be exercised against a real browser push service
- * from this box. Treat this as reviewed-not-tested until OPENSSL_CONF is
- * set.
+ * NOT VERIFIED AGAINST A LIVE PUSH SERVICE. The encryption steps below are
+ * implemented directly against the RFC text with section citations so a
+ * reviewer can check them against spec, but nothing here has spoken to a
+ * real browser push endpoint.
+ *
+ * The EC key generation no longer depends on how the machine happens to be
+ * configured: OpensslConfig passes an openssl.cnf path to each call, so the
+ * P-256 keys are created on Windows exactly as anywhere else. What is still
+ * untested is the wire conversation, not the cryptography - the primitives
+ * are covered by WebPushCryptoPrimitivesTest.
  *
  * A no-op, not an exception, when VAPID is unconfigured or the recipient
  * has no subscriptions: push is additive to the in-app notification, which
@@ -99,7 +100,7 @@ final class SendPushNotification
                 'last_failed_at' => null,
                 'last_failure_reason' => null,
             ])->save();
-        } catch (GuzzleException|\Throwable $e) {
+        } catch (\Throwable $e) {
             // A dead subscription (410 Gone / 404) is expected churn, not an
             // incident - browsers expire push registrations on their own
             // schedule with no warning to the server. Logged, not thrown:
@@ -154,16 +155,28 @@ final class SendPushNotification
         string $clientP256dhB64,
         string $clientAuthB64,
     ): string {
-        $localKeyResource = openssl_pkey_new([
+        $localKeyResource = openssl_pkey_new(OpensslConfig::options([
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
-        ]);
+        ]));
 
         if ($localKeyResource === false) {
-            throw new \RuntimeException('Cannot generate the ephemeral EC key this record needs (OPENSSL_CONF).');
+            throw new \RuntimeException('Cannot generate the ephemeral EC key this record needs.');
         }
 
         $localDetails = openssl_pkey_get_details($localKeyResource);
+
+        /*
+         * Until EC key generation worked at all, the line below could never
+         * be reached - the throw above always fired first. Now that it can
+         * run, an unusable details array has to be handled: reading
+         * ['ec']['x'] off `false` is a fatal TypeError, and this sits in the
+         * middle of sending a parent a notification.
+         */
+        if ($localDetails === false || ! isset($localDetails['ec']['x'], $localDetails['ec']['y'])) {
+            throw new \RuntimeException('The ephemeral key did not come back as a usable EC keypair.');
+        }
+
         $localPublicRaw = "\x04".$localDetails['ec']['x'].$localDetails['ec']['y'];
 
         $clientPublicRaw = self::base64UrlDecode($clientP256dhB64);

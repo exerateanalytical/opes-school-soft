@@ -8,6 +8,7 @@ use App\Modules\Identity\Domain\Permission;
 use App\Modules\SchoolProfile\Actions\ReadSetting;
 use App\Modules\SchoolProfile\Actions\WriteSetting;
 use App\Support\Audit\Actor;
+use App\Support\Crypto\OpensslConfig;
 use DomainException;
 use Illuminate\Support\Facades\Gate;
 
@@ -16,13 +17,14 @@ use Illuminate\Support\Facades\Gate;
  * keypair, the identity Web Push uses to prove a push originates from this
  * school rather than an arbitrary sender.
  *
- * A P-256 EC key, same as the QR document-signing key (10-documents §17.1)
- * and hitting the exact same environment dependency: `openssl_pkey_new()`
- * needs an `openssl.cnf` to create an EC key at all, and this PHP build on
- * this machine has none configured (OPENSSL_CONF unset). That failure is
- * NOT this Action's bug - it is the same pre-existing gap already
- * documented for QR signing, surfaced here as a DomainException with a
- * clear cause rather than a bare OpenSSL error.
+ * A P-256 EC key, same as the QR document-signing key (10-documents §17.1).
+ * `openssl_pkey_new()` needs an `openssl.cnf` to create an EC key at all,
+ * and Windows PHP does not point at the one it ships; OpensslConfig supplies
+ * the path per call, so this works without anything being set up first.
+ *
+ * The DomainException below is kept for the case where no openssl.cnf can be
+ * found anywhere, so that failure still arrives with a clear cause rather
+ * than as a bare OpenSSL error.
  *
  * Idempotent: refuses to overwrite an existing keypair, because every
  * browser that has already subscribed did so against the OLD public key -
@@ -50,16 +52,17 @@ final class GenerateVapidKeys
             );
         }
 
-        $resource = @openssl_pkey_new([
+        $resource = @openssl_pkey_new(OpensslConfig::options([
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
-        ]);
+        ]));
 
         if ($resource === false) {
             throw new DomainException(
-                'Could not generate an EC key: this PHP build has no openssl.cnf configured '
-                .'(OPENSSL_CONF is unset), the same environment gap already blocking QR document '
-                .'signing. Set OPENSSL_CONF to the shipped openssl.cnf and restart PHP before retrying.'
+                'Could not generate an EC key: no openssl.cnf could be found for this PHP build. '
+                .'OpensslConfig looks for an explicit OPENSSL_CONF setting, then the copy shipped '
+                .'beside the PHP binary under extras/ssl. Point OPENSSL_CONF at a readable '
+                .'openssl.cnf in .env - it is used as a path here, not as a process variable.'
             );
         }
 

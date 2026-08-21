@@ -11,24 +11,25 @@ use App\Modules\Notifications\Actions\UnsubscribeFromPush;
 use App\Modules\Notifications\Domain\NotificationKind;
 use App\Modules\Notifications\Models\Notification;
 use App\Modules\Notifications\Models\PushSubscription;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
 /*
- * The in-app half of the notification engine, which is fully verifiable on
- * this machine. The Web Push send path (SendPushNotification) needs a
- * fresh EC key for every message it sends and cannot be exercised here -
- * this PHP build has no openssl.cnf configured, the same pre-existing gap
- * already documented for QR document signing and VAPID key generation.
- * Notify() calling it is proven not to blow up when push is unconfigured
- * (the realistic state of this demo box) by the first test below.
+ * The in-app half of the notification engine.
+ *
+ * The Web Push SEND path is still not exercised here, but no longer because
+ * of the machine: EC key generation works now that OpensslConfig supplies
+ * openssl's configuration. What it needs is a live push endpoint to talk to.
+ * Notify() calling it is proven not to blow up when push is unconfigured -
+ * the realistic state of this demo box - by the first test below.
  */
 
 function notificationActor(): User
 {
-    (new \Database\Seeders\RolePermissionSeeder())->run();
+    (new RolePermissionSeeder)->run();
 
     $user = User::factory()->create();
     $user->assignRole(Role::SuperAdmin->value);
