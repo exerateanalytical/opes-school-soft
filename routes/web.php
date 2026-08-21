@@ -14,6 +14,7 @@ use App\Modules\Assessment\Http\Controllers\PrintReportCardController;
 use App\Modules\Attendance\Livewire\CoverageReport;
 use App\Modules\Attendance\Livewire\Index;
 use App\Modules\Attendance\Livewire\TakeRegister;
+use App\Modules\Communication\Livewire\WhatsAppSettings;
 use App\Modules\Fees\Http\Controllers\PrintInvoiceController;
 use App\Modules\Fees\Http\Controllers\PrintReceiptController;
 use App\Modules\Fees\Http\Controllers\PrintStatementController;
@@ -652,7 +653,7 @@ Route::middleware('auth')->group(function (): void {
      * /settings/branding beside it, and the component re-checks the same
      * Permission::SettingEdit in mount() and in every write method.
      */
-    Route::get('/settings/whatsapp', \App\Modules\Communication\Livewire\WhatsAppSettings::class)
+    Route::get('/settings/whatsapp', WhatsAppSettings::class)
         ->middleware('can:setting.edit')->name('settings.whatsapp');
 
     /*

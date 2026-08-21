@@ -28,12 +28,17 @@ use Illuminate\Support\Facades\Gate;
  * other write (7.6, and every Action in this directory). No new permission
  * string: a gate no role grants is a control that silently refuses everyone.
  *
- * DELETE-ON-REPLACE, and the one trap in it. Because the filename is a digest
- * of the CONTENT, two guardians who upload the same bytes get the SAME path -
- * so "the path this record used to hold" is not automatically a file only
- * this record used. Deleting it unconditionally would blank the other
- * guardian's photo. The old file is therefore deleted only once no other
- * guardian row still names it, and StoredImage::forget() adds the two guards
+ * DELETE-ON-REPLACE. StoredImage names a file `slug(slot)-digest`, and the
+ * slot passed below is the guardian's own number, so two guardians who upload
+ * identical bytes share a digest but NOT a path - each owns its file.
+ *
+ * (An earlier version of this note claimed they shared a path, and a test was
+ * written to match. They never did. The stillReferenced() check below is kept
+ * as defence in depth, so that narrowing the slot one day cannot silently
+ * turn a photo replacement into someone else's photo disappearing.)
+ *
+ * The old file is deleted only once no other guardian row names it, and
+ * StoredImage::forget() adds the two guards
  * that matter on top: never delete when the new path equals the old (a
  * re-upload of identical bytes resolves to the same file), and never delete
  * anything outside this directory, so a hand-edited column cannot turn a

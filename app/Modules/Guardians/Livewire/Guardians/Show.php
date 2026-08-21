@@ -16,6 +16,7 @@ use App\Modules\Guardians\Models\GuardianMeeting;
 use App\Modules\Guardians\Models\PortalInvitation;
 use App\Modules\Guardians\Models\StudentGuardian;
 use App\Modules\Identity\Domain\Permission;
+use App\Modules\Identity\Models\User;
 use App\Support\Audit\Actor;
 use App\Support\Storage\StoredImage;
 use Illuminate\Support\Collection;
@@ -507,7 +508,7 @@ final class Show extends Component
 
     private function actor(): Actor
     {
-        /** @var \App\Modules\Identity\Models\User $user */
+        /** @var User $user */
         $user = auth()->user();
 
         return $user->toAuditActor();
@@ -531,7 +532,7 @@ final class Show extends Component
     private function payments(array $studentIds): Collection
     {
         if ($studentIds === [] || ! Gate::allows(Permission::FeeView->value)) {
-            return new Collection();
+            return new Collection;
         }
 
         return DB::table('payments as p')
@@ -564,7 +565,7 @@ final class Show extends Component
     private function documents(array $studentIds): Collection
     {
         if ($studentIds === [] || ! Gate::allows(Permission::DocumentsPrint->value)) {
-            return new Collection();
+            return new Collection;
         }
 
         /*
@@ -613,10 +614,10 @@ final class Show extends Component
             // on the page and are capped.
             'links' => $links,
             'studentRows' => $this->studentRows($studentIds),
-            'meetings' => $tab === 'meetings' ? $this->meetings() : new Collection(),
-            'communications' => $tab === 'communications' ? $this->communications() : new Collection(),
-            'payments' => $tab === 'payments' ? $this->payments($studentIds) : new Collection(),
-            'documents' => $tab === 'documents' ? $this->documents($studentIds) : new Collection(),
+            'meetings' => $tab === 'meetings' ? $this->meetings() : new Collection,
+            'communications' => $tab === 'communications' ? $this->communications() : new Collection,
+            'payments' => $tab === 'payments' ? $this->payments($studentIds) : new Collection,
+            'documents' => $tab === 'documents' ? $this->documents($studentIds) : new Collection,
             'canViewPayments' => Gate::allows(Permission::FeeView->value),
             'canViewDocuments' => Gate::allows(Permission::DocumentsPrint->value),
             'openInvitation' => $tab === 'portal' ? $this->openInvitation() : null,

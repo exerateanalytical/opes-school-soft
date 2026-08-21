@@ -103,16 +103,31 @@ it('deletes the photograph a guardian used to hold when it is replaced', functio
         ->and($disk->exists($first))->toBeFalse();
 });
 
-it('keeps a file another guardian still references', function (): void {
+it('leaves another guardian photograph alone when one is replaced', function (): void {
     actingAs(guardianPhotoUser());
 
     $disk = Storage::disk((string) config('filesystems.default'));
     $action = app(SetGuardianPhoto::class);
 
-    // Identical BYTES: the content hash gives both guardians the same path.
-    $bytes = (string) file_get_contents(
-        (string) UploadedFile::fake()->image('shared.jpg', 150, 150)->getRealPath()
-    );
+    /*
+     * Identical BYTES for both guardians - the case where a shared file could
+     * plausibly arise, and so the one worth pinning down.
+     *
+     * This test used to assert that both guardians landed on the SAME path,
+     * following SetGuardianPhoto's docblock. They do not, and cannot:
+     * StoredImage names a file `slug(slot)-digest`, and SetGuardianPhoto
+     * passes the guardian's own number as the slot. Identical bytes therefore
+     * share a digest but not a path. That is the safer arrangement - each
+     * guardian owns its file - and it is what the code has always done.
+     *
+     * The fake is held in a variable rather than called inline: its temp file
+     * lives only as long as the UploadedFile object does, and a temporary
+     * that is never assigned is destroyed as soon as getRealPath() has
+     * returned. POSIX keeps an unlinked file readable while a handle is open,
+     * which is why reading it inline only ever failed on Windows.
+     */
+    $source = UploadedFile::fake()->image('shared.jpg', 150, 150);
+    $bytes = (string) file_get_contents((string) $source->getRealPath());
 
     $shared = function () use ($bytes): UploadedFile {
         $tmp = tempnam(sys_get_temp_dir(), 'gp').'.jpg';
@@ -127,14 +142,23 @@ it('keeps a file another guardian still references', function (): void {
     $action->handle($one, $shared());
     $action->handle($two, $shared());
 
-    $path = (string) $one->fresh()?->photo_path;
+    $onePath = (string) $one->fresh()?->photo_path;
+    $twoPath = (string) $two->fresh()?->photo_path;
 
-    expect((string) $two->fresh()?->photo_path)->toBe($path);
+    expect($twoPath)->not->toBe($onePath)
+        ->and($disk->exists($onePath))->toBeTrue()
+        ->and($disk->exists($twoPath))->toBeTrue();
 
+    // The property that actually protects a parent's record: replacing one
+    // guardian's photograph must not reach the other's row or its file.
     $action->handle($one, UploadedFile::fake()->image('other.jpg', 180, 180));
 
-    expect($disk->exists($path))->toBeTrue()
-        ->and((string) $two->fresh()?->photo_path)->toBe($path);
+    expect((string) $two->fresh()?->photo_path)->toBe($twoPath)
+        ->and($disk->exists($twoPath))->toBeTrue();
+
+    // ...while the file this guardian just replaced is cleaned up, because
+    // nothing else names it.
+    expect($disk->exists($onePath))->toBeFalse();
 });
 
 it('clears the column and deletes the file when the photograph is removed', function (): void {
